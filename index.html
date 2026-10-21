@@ -1035,15 +1035,32 @@ function cnHuman(p){const W=p.W,H=p.H,cur=Array(W*H).fill(0);let steps=0,passes=
   for(let x=0;x<W;x++){const idx=Array.from({length:H},(_,r)=>r*W+x),q=cnLine(p.cc[x],idx.map(i=>cur[i]));if(!q.cnt||q.overflow)return{solved:false,cur,steps,passes,maxWays};maxWays=Math.max(maxWays,q.cnt);q.fix.forEach((v,k)=>{const i=idx[k];if(cur[i]===0&&v!==0){cur[i]=v;steps++;ch++}})}
   if(!ch)break}
  const solved=cur.every((v,i)=>v===(p.sol[i]||-1));return{solved,cur,steps,passes,maxWays}}
-function cnFallback(W,H,K){const sol=Array(W*H).fill(0),bands=[];for(let c=0;c<K;c++){let x=Math.round((c+1)*W/(K+1));while(bands.includes(x)&&x+1<W)x++;bands.push(x);for(let r=0;r<H;r++)sol[r*W+x]=c+1}return sol}
-function genColorNono(R,lv,hard){const base=genNono(R,lv,hard),W=base.W,H=base.H,K=nonoColorCount(lv),mask=base.sol;let best=null,bs=-1;
- for(let t=0;t<180;t++){const ctr=Array.from({length:K},(_,k)=>({x:(k+.35+R()*.3)*W/K,y:(.18+R()*.64)*H,w:.8+R()*.5})),sol=Array(W*H).fill(0),use=Array(K+1).fill(0);
-  for(let i=0;i<sol.length;i++)if(mask[i]){const r=i/W|0,x=i%W;let bc=1,bd=1e9;for(let k=0;k<K;k++){const a=ctr[k],d=((x+.5-a.x)/(W/K*a.w))**2+((r+.5-a.y)/(H*.65))**2+(R()-.5)*.035;if(d<bd){bd=d;bc=k+1}}sol[i]=bc;use[bc]++}
-  if(use.slice(1).some(n=>n<2))continue;const p={N:W,W,H,K,color:1,rc:rowsOf(sol,W,H).map(cnClue),cc:colsOf(sol,W,H).map(cnClue),sol,pic:base.pic||""},rt=cnHuman(p);if(!rt.solved)continue;
-  let trans=0;for(let r=0;r<H;r++)for(let x=1;x<W;x++){const a=sol[r*W+x-1],b=sol[r*W+x];if(a&&b&&a!==b)trans++}
-  const target=(lv===1||lv===4)?3:(lv===2||lv===5)?7:11,sc=100-Math.abs(trans-target)+Math.min(20,rt.passes);if(sc>bs){bs=sc;best=p;best.rate=rt.steps+"/"+rt.passes+" c"+K}if(sc>108)break}
- if(best)return best;
- const sol=cnFallback(W,H,K);return{N:W,W,H,K,color:1,rc:rowsOf(sol,W,H).map(cnClue),cc:colsOf(sol,W,H).map(cnClue),sol,rate:"fallback"}}
+function cnQuality(p,rt,lv){const W=p.W,H=p.H;
+ const sig=a=>JSON.stringify(a),freq=a=>{const m=new Map();a.forEach(x=>m.set(sig(x),(m.get(sig(x))||0)+1));return Math.max(...m.values())/a.length};
+ const ur=new Set(p.rc.map(sig)).size/H,uc=new Set(p.cc.map(sig)).size/W,rep=Math.max(freq(p.rc),freq(p.cc));
+ const forced=new Set();for(let r=0;r<H;r++){const q=cnLine(p.rc[r],Array(W).fill(0));q.fix.forEach((v,x)=>{if(v!==0)forced.add(r*W+x)})}
+ for(let x=0;x<W;x++){const q=cnLine(p.cc[x],Array(H).fill(0));q.fix.forEach((v,r)=>{if(v!==0)forced.add(r*W+x)})}
+ const init=forced.size/(W*H),multi=(p.rc.filter(x=>x.length>1).length+p.cc.filter(x=>x.length>1).length)/(W+H);
+ let trans=0;for(let r=0;r<H;r++)for(let x=0;x<W;x++){const i=r*W+x,a=p.sol[i];if(!a)continue;if(x+1<W){const b=p.sol[i+1];if(b&&a!==b)trans++}if(r+1<H){const b=p.sol[i+W];if(b&&a!==b)trans++}}
+ const easy=lv===1||lv===4,normal=lv===2||lv===5;
+ const ok=easy?(rt.passes>=2&&rep<.82):(normal?(rt.passes>=4&&init<.76&&rep<.62&&ur>.42&&uc>.42):(rt.passes>=5&&init<.66&&rep<.55&&ur>.48&&uc>.48));
+ const score=rt.passes*7+(ur+uc)*18+multi*12+Math.min(18,trans*.35)-init*28-rep*22;
+ return{ok,score,init,rep,ur,uc,multi,trans}}
+function genColorNono(R,lv,hard){const K=nonoColorCount(lv);let best=null,bs=-1,bestAny=null,ba=-1,W=0,H=0;
+ /* Zelfde totale zoekwerk als voorheen, maar verdeeld over drie verschillende basisvormen. */
+ for(let batch=0;batch<3;batch++){const base=genNono(R,lv,hard),mask=base.sol;W=base.W;H=base.H;
+  for(let t=0;t<60;t++){const ctr=Array.from({length:K},(_,k)=>({x:(k+.28+R()*.44)*W/K,y:(.12+R()*.76)*H,w:.65+R()*.9,tilt:(R()-.5)*.32})),sol=Array(W*H).fill(0),use=Array(K+1).fill(0);
+   for(let i=0;i<sol.length;i++)if(mask[i]){const r=i/W|0,x=i%W;let bc=1,bd=1e9;for(let k=0;k<K;k++){const a=ctr[k],xx=x+.5+a.tilt*(r-H/2),d=((xx-a.x)/(W/K*a.w))**2+((r+.5-a.y)/(H*.58))**2+(R()-.5)*.055;if(d<bd){bd=d;bc=k+1}}sol[i]=bc;use[bc]++}
+   if(use.slice(1).some(n=>n<2))continue;
+   const p={N:W,W,H,K,color:1,rc:rowsOf(sol,W,H).map(cnClue),cc:colsOf(sol,W,H).map(cnClue),sol,pic:base.pic||""},rt=cnHuman(p);if(!rt.solved)continue;
+   const q=cnQuality(p,rt,lv),rate=rt.steps+"/"+rt.passes+" c"+K+" q"+q.score.toFixed(0);
+   p.rate=rate;
+   if(q.score>ba){ba=q.score;bestAny=p}
+   if(q.ok&&q.score>bs){bs=q.score;best=p}
+  }}
+ /* Nooit meer de oude verticale-strokenfallback: als de kwaliteitsdrempel niet gehaald wordt,
+    nemen we de beste échte, logisch opgeloste kandidaat uit meerdere basisvormen. */
+ return best||bestAny||genColorNono(R,lv,hard)}
 
 /* ---------- Kakuro ---------- */
 let KW=8;
@@ -1578,7 +1595,7 @@ $("#time").onclick=()=>{TSHOW=!TSHOW;lsSet("pdtime",TSHOW?"1":"0");setT(lastT)};
 const isFree=r=>/^v~/.test(r.type);
 function freeLoc(){try{return JSON.parse(lsGet("pdfree")||"[]")}catch(e){return[]}}
 /* Gemaakte puzzels bewaren (de laatste 16), zodat terugkomen op een puzzel meteen gaat. GV ophogen als een generator verandert. */
-const GV="g13";
+const GV="g14";
 function genCached(type,seed,lv,hard,nv){const vk=type==="nono"&&nv==="color"?"|color":"";const k=GV+(type==="mur"?MGV:type==="plus"?PGV:"")+"|"+type+"|"+seed+"|"+lv+(hard?"|w":"")+vk;let all={};try{all=JSON.parse(lsGet("pdgen")||"{}")}catch(e){all={}}
  if(all[k])try{return JSON.parse(all[k])}catch(e){}
  const p=type==="nono"&&nv==="color"?genColorNono(rng(hash(seed+"|color")),lv,!!hard):GEN[type](rng(hash(seed)),lv,!!hard);try{all[k]=JSON.stringify(p);const ks=Object.keys(all);for(const x of ks.slice(0,Math.max(0,ks.length-16)))delete all[x];lsSet("pdgen",JSON.stringify(all))}catch(e){}
