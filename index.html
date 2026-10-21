@@ -1082,7 +1082,8 @@ function genColorNono(R,lv,hard){const K=nonoColorCount(lv),minScore=(lv===1||lv
   const p={N:fw,W:fw,H:fh,K,color:1,rc:rowsOf(sol,fw,fh).map(cnClue),cc:colsOf(sol,fw,fh).map(cnClue),sol,pic:base.pic||"",rate:"finite-fallback"},rt=cnHuman(p);
   if(rt.solved)return p}
  /* Laatste veiligheidsnet is eindig; de app kan nooit in een generatorlus blijven hangen. */
- const base=genNono(R,lv,hard),fw=base.W,fh=base.H,perm=shuf(Array.from({length:K},(_,i)=>i+1),R),filled=base.sol.reduce((a,v,i)=>(v&&a.push(i),a),[]),sol=Array(fw*fh).fill(0);\n filled.forEach((i,n)=>sol[i]=perm[n%K]);
+ const base=genNono(R,lv,hard),fw=base.W,fh=base.H,perm=shuf(Array.from({length:K},(_,i)=>i+1),R),filled=base.sol.reduce((a,v,i)=>(v&&a.push(i),a),[]),sol=Array(fw*fh).fill(0);
+ filled.forEach((i,n)=>sol[i]=perm[n%K]);
  return{N:fw,W:fw,H:fh,K,color:1,rc:rowsOf(sol,fw,fh).map(cnClue),cc:colsOf(sol,fw,fh).map(cnClue),sol,pic:base.pic||"",rate:"safe-fallback"}}
 
 /* ---------- Kakuro ---------- */
