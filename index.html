@@ -659,6 +659,32 @@ body.tablet #hint.side{position:fixed!important;top:62px!important;right:max(12p
 body.tablet #hint.side button:not(.hx){width:100%;padding:12px;margin-top:10px}
 /* Telefoon */
 body.phone.nieuw #tbHome{padding:4px 10px;font-size:18px;border-radius:999px;box-shadow:none}
+
+/* Subtiele micro-animaties + iOS: geen grijze tap-highlight die bij navigatie blijft hangen. */
+html,body,button,a,input,label,select,summary,[role="button"],.tile,.hrow,.hcard{-webkit-tap-highlight-color:transparent}
+button,a{-webkit-touch-callout:none}
+body.tablet #stage{transition:margin-right .18s cubic-bezier(.2,.75,.25,1)}
+#hint{animation:hintFadeIn .16s ease-out}
+#hint.closing{animation:hintFadeOut .12s ease-in forwards}
+body.tablet #hint.side{animation:hintSideIn .18s cubic-bezier(.2,.75,.25,1)}
+body.tablet #hint.side.closing{animation:hintSideOut .13s ease-in forwards}
+body.tablet #more.open,body.tablet #side.open{animation:panelIn .16s cubic-bezier(.2,.75,.25,1)}
+#fin:not([hidden]){animation:cardUp .18s cubic-bezier(.2,.75,.25,1)}
+#hm:not([hidden]) .hc{animation:cardIn .17s cubic-bezier(.2,.75,.25,1)}
+.tile,.hbtn,.hraad,.hlinks button{transition:transform .1s ease,box-shadow .12s ease,background-color .14s ease}
+.tile:active,.hbtn:active,.hraad:active{transform:scale(.985)}
+#nmode button,#pmode button,#mb,#mz{transition:background-color .14s ease,color .14s ease,box-shadow .14s ease,transform .1s ease}
+@keyframes hintFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes hintFadeOut{from{opacity:1}to{opacity:0}}
+@keyframes hintSideIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
+@keyframes hintSideOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(10px)}}
+@keyframes panelIn{from{opacity:0;transform:translateY(-5px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes cardUp{from{opacity:0;transform:translateX(-50%) translateY(8px) scale(.99)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(6px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){
+ body.tablet #stage{transition:none!important}
+ #hint,#hint.closing,body.tablet #hint.side,body.tablet #hint.side.closing,body.tablet #more.open,body.tablet #side.open,#fin:not([hidden]),#hm:not([hidden]) .hc{animation:none!important}
+}
 </style>
 <script>
 /* ===== STAP 4 van het stappenplan: plak hier jouw Firebase-gegevens ===== */
@@ -1676,7 +1702,7 @@ function nonoAuto(changed){const W=S.p.W,H=S.p.H,rows=new Set(),cols=new Set();c
  rows.forEach(r=>{const idx=[];for(let c=0;c<W;c++)idx.push(r*W+c);fix(idx,S.p.rc[r])});
  cols.forEach(c=>{const idx=[];for(let r=0;r<H;r++)idx.push(r*W+c);fix(idx,S.p.cc[c])})}
 let nonoMode="f";
-function setNonoMode(m){nonoMode=m;ub()}
+function setNonoMode(m){const ch=nonoMode!==m;nonoMode=m;ub();if(ch)setTimeout(flashMode,0)}
 function nonoLine(id){const N=S.p.W,k=+id.slice(1),idx=[];for(let j=0;j<(id[0]==="r"?N:S.p.H);j++)idx.push(id[0]==="r"?k*N+j:j*N+k);
  const emp=idx.filter(i=>S.cur[i]===0);if(!emp.length)return;begin();if(!S.start)S.start=Date.now();emp.forEach(i=>nonoPaint(i,2));commit()}
 /* Nonogram: tik = de gekozen stand (vullen of kruisje), nog eens tikken = leeg. Slepen kleurt in dezelfde stand.
@@ -1890,17 +1916,21 @@ function repaintHint(){if(S.type==="plus")paintPlusHint();else if(S.type==="bin"
 /* Op de iPhone maakt de puzzel even plaats voor de hintkaart (hij wordt tijdelijk kleiner), zodat de kaart nooit iets bedekt. */
 let HINTPAD=0;
 let HINTSIDE=0;
-function hideHint(){S.hint=null;const b=$("#hint");b.style.display="none";b.innerHTML="";if(HINTPAD){HINTPAD=0;if(S.p)render()}if(HINTSIDE){HINTSIDE=0;b.classList.remove("side");document.body.classList.remove("hintside");if(S.p)render()}}
+let hintHideT=0;
+function hideHint(){S.hint=null;const b=$("#hint");clearTimeout(hintHideT);const wasPad=HINTPAD,wasSide=HINTSIDE,visible=!!(b&&b.innerHTML.trim()&&getComputedStyle(b).display!=="none");
+ if(wasSide){HINTSIDE=0;document.body.classList.remove("hintside")}
+ const done=()=>{if(!b)return;b.classList.remove("closing");b.style.display="none";b.innerHTML="";if(wasPad){HINTPAD=0;resetPuzzleFit();if(S.p)render()}if(wasSide){b.classList.remove("side");if(S.p)render()}};
+ if(visible&&!matchMedia("(prefers-reduced-motion: reduce)").matches){b.classList.add("closing");hintHideT=setTimeout(done,135)}else done()}
 function clearHint(){if(!S.hint)return;hideHint();repaintHint()}
 document.addEventListener("pointerdown",e=>{if(S.hint&&!e.target.closest("#hint,#hintb"))clearHint()},true);
 function hintGo(){if(S.done||!S.p||!HINTT.includes(S.type))return;
  const h=S.type==="star"?starHint():S.type==="bin"?binHint():S.type==="nono"?nonoHint():S.type==="plus"?plusHint():S.type==="mur"?murHint():hexHint();if(!h)return;S.hint=h;
  const hk=h.text+"|"+h.cells.join(",");if(S.lastHk!==hk){S.lastHk=hk;S.hints=(S.hints||0)+1;if(h.kind==="fix")S.mist=(S.mist||0)+1}if(!S.start)S.start=Date.now();
- const b=$("#hint");b.innerHTML="";const xb=document.createElement("button");xb.className="hx";xb.textContent="✕";xb.setAttribute("aria-label","Sluiten");xb.onclick=()=>clearHint();const hh=document.createElement("div");hh.className="hht";hh.textContent="💡 Hint";b.append(xb,hh);const t=document.createElement("div");if(h.steps){t.textContent=h.intro;b.append(t);const ol=document.createElement("ol");ol.style.cssText="margin:6px 0 6px;padding-left:22px";h.steps.forEach(x=>{const li=document.createElement("li");li.textContent=x;ol.append(li)});b.append(ol);const o2=document.createElement("div");o2.style.fontWeight="700";o2.textContent=h.outro;b.append(o2)}else{t.textContent=h.text;b.append(t)}
+ const b=$("#hint");clearTimeout(hintHideT);b.classList.remove("closing");b.innerHTML="";const xb=document.createElement("button");xb.className="hx";xb.textContent="✕";xb.setAttribute("aria-label","Sluiten");xb.onclick=()=>clearHint();const hh=document.createElement("div");hh.className="hht";hh.textContent="💡 Hint";b.append(xb,hh);const t=document.createElement("div");if(h.steps){t.textContent=h.intro;b.append(t);const ol=document.createElement("ol");ol.style.cssText="margin:6px 0 6px;padding-left:22px";h.steps.forEach(x=>{const li=document.createElement("li");li.textContent=x;ol.append(li)});b.append(ol);const o2=document.createElement("div");o2.style.fontWeight="700";o2.textContent=h.outro;b.append(o2)}else{t.textContent=h.text;b.append(t)}
  const l=document.createElement("div");l.className="mut";l.textContent=S.type==="hex"?"Rode rand: hier gebeurt de stap. Paarse rand: hier kijk je naar.":"Oranje rand: hier gebeurt de stap. Blauwe rand: hier kijk je naar.";b.append(l);
  const bt=document.createElement("button");bt.textContent=h.btn;bt.style.marginTop="6px";bt.onclick=doStep;b.append(bt);b.style.display="block";
  if(PHONE){const pb=$("#pbot").getBoundingClientRect();Object.assign(b.style,{transform:"none",left:"6px",right:"auto",width:(innerWidth-12)+"px",bottom:"auto",top:"0px"});
-  const H=b.offsetHeight;HINTPAD=H+8;render();b.style.top=Math.round(pb.top-H-6)+"px";return}
+  const H=b.offsetHeight;HINTPAD=H+8;resetPuzzleFit();render();b.style.top=Math.round(pb.top-H-6)+"px";return}
  if(document.body.classList.contains("tablet")){b.classList.add("side");Object.assign(b.style,{transform:"",left:"",top:"",width:"",bottom:"",right:""});if(!HINTSIDE){HINTSIDE=1;document.body.classList.add("hintside");render()}repaintHint();return}
  repaintHint();placeHint()}
 /* Zet de hintkaart op de plek waar hij het minst bedekt van de vakjes waar de hint over gaat
@@ -2051,7 +2081,7 @@ function hexPress(cx,cy,pt0){if(S.type!=="hex"||!S.p)return;const sv=$("#hexsvg"
  let bl=-1,ld=1e9;g.lines.forEach(l=>{const d=Math.min(Math.hypot(l[0]-p.x,l[1]-p.y),Math.hypot(l[3]-p.x,l[4]-p.y)+g.sz*.35);if(d<ld){ld=d;bl=l[2]}});
  if(bl>=0&&ld<g.sz*1.05&&ld<bd){hexClue("l"+bl);return}
  if(bi>=0&&bd<g.sz*1.12){hexTap(bi);return}
- if(!S.done){hexMode=hexMode==="b"?"z":"b";ub()}}
+ if(!S.done)setHexMode(hexMode==="b"?"z":"b")}
 /* Alleen pointer-events: vroeger reageerde ook touchstart, waardoor één tik soms twee keer telde (een lijn aan en meteen weer uit). */
 $("#hexsvg").addEventListener("pointerdown",e=>{e._hx=true;if(e.button>0)return;e.preventDefault();hexPress(e.clientX,e.clientY,e.pointerType)});
 $("#hexsvg").addEventListener("touchstart",e=>e.preventDefault(),{passive:false});
@@ -2063,7 +2093,7 @@ const BGX="#topbar,#more,#home,#archp,#grid,#mgrid,#mclues,#mpal,#macc,#hexsvg,b
 const twoMode=()=>["nono","plus","hex","mur"].includes(S.type)&&S.p&&!S.done;
 function pulseEl(el){if(!el)return;el.classList.remove("modeflash");void el.offsetWidth;el.classList.add("modeflash");setTimeout(()=>el.classList.remove("modeflash"),260)}
 function flashMode(){const el=S.type==="plus"?(plusMode==="x"?$("#pxb"):$("#pob")):S.type==="nono"?(nonoMode==="f"?$("#nf"):$("#nx")):S.type==="hex"?(hexMode==="b"?$("#mb"):$("#mz")):S.type==="mur"?$("#mgrid"):null;pulseEl(el)}
-function toggleTwoMode(){if(!twoMode())return false;if(S.type==="plus")setPlusMode(plusMode==="x"?"o":"x");else if(S.type==="nono")setNonoMode(nonoMode==="f"?"x":"f");else if(S.type==="mur"){S.mxm=!S.mxm;paintMur()}else{hexMode=hexMode==="b"?"z":"b";ub()}flashMode();return true}
+function toggleTwoMode(){if(!twoMode())return false;if(S.type==="plus")setPlusMode(plusMode==="x"?"o":"x");else if(S.type==="nono")setNonoMode(nonoMode==="f"?"x":"f");else if(S.type==="mur"){S.mxm=!S.mxm;paintMur();flashMode()}else setHexMode(hexMode==="b"?"z":"b");return true}
 document.addEventListener("pointerdown",e=>{if(e._closed||e._hx||!twoMode()||e.button>0||(e.target.closest&&e.target.closest(BGX)))return;e.preventDefault();tdAdd("→ wissel");toggleTwoMode()});
 /* Zoals in het Hexcells-veld: iOS niet laten wachten op een mogelijk gebaar (scrollen, dubbeltik-zoom) bij een tik naast het veld.
    Alleen als de pagina niet hoeft te scrollen (anders kun je niet meer scrollen). */
@@ -2080,13 +2110,14 @@ $("header h1").addEventListener("pointerdown",()=>{const n=performance.now();tdT
 ["pointerdown","pointerup","pointercancel","touchstart","touchend","touchcancel","click","dblclick"].forEach(t=>document.addEventListener(t,e=>{if(!TD)return;const tt=e.changedTouches?[...e.changedTouches].map(x=>x.touchType||"?").join(","):"";const tg=e.target||{};tdAdd(t+" "+(e.pointerType||tt)+" "+(tg.id||(typeof tg.className==="string"?tg.className:"")||tg.tagName||""))},true));
 $("#nf").onpointerdown=e=>{e.preventDefault();setNonoMode("f")};$("#nx").onpointerdown=e=>{e.preventDefault();setNonoMode("x")};
 $("#pxb").onpointerdown=e=>{e.preventDefault();setPlusMode("x")};$("#pob").onpointerdown=e=>{e.preventDefault();setPlusMode("o")};
-$("#mb").onpointerdown=e=>{e.preventDefault();hexMode="b";ub()};$("#mz").onpointerdown=e=>{e.preventDefault();hexMode="z";ub()};
+function setHexMode(m){const ch=hexMode!==m;hexMode=m;ub();if(ch)setTimeout(flashMode,0)}
+$("#mb").onpointerdown=e=>{e.preventDefault();setHexMode("b")};$("#mz").onpointerdown=e=>{e.preventDefault();setHexMode("z")};
 
 /* ---- Pluszle ---- */
 /* S.cur per vakje: 0 = open, 1 = omcirkeld (blijft zeker staan), 2 = weggestreept.
    Tik = de gekozen stand (✕ wegstrepen of ○ omcirkelen), nog eens tikken = weer open. Slepen werkt in dezelfde stand. */
 let plusMode="x",pd=null;
-function setPlusMode(m){plusMode=m;ub()}
+function setPlusMode(m){const ch=plusMode!==m;plusMode=m;ub();if(ch)setTimeout(flashMode,0)}
 /* Kleur per vlak: buren krijgen een andere kleur. */
 const PHUE=[54,220,350,150,28,280,190],PNAME=["gele","blauwe","roze","groene","oranje","paarse","turquoise"];
 function plusPal(p){const pal=[],W=p.W,used=PHUE.map(()=>0);p.rg.forEach((g,k)=>{const nb=new Set();g.cells.forEach(i=>{const r=i/W|0,c=i%W;[[r-1,c],[r+1,c],[r,c-1],[r,c+1],[r-1,c-1],[r-1,c+1],[r+1,c-1],[r+1,c+1]].forEach(([y,x])=>{if(y<0||x<0||y>=p.H||x>=W)return;const o=p.reg[y*W+x];if(o>=0&&o!==k&&pal[o]!==undefined)nb.add(pal[o])})});
