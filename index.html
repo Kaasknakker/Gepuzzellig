@@ -1498,7 +1498,7 @@ function load(type,practice,fresh,date){if(!practice)RANDOM=false;if(NIEUW&&HOME
 
 const LANDQ=matchMedia("(orientation:landscape) and (min-aspect-ratio:23/20)");
 const availBot=()=>{const b=$("#pbot");if(b&&!PHONE&&document.body.classList.contains("tablet")&&LANDQ.matches)return innerHeight+(window.scrollY||0)-14-HINTPAD;return b?b.getBoundingClientRect().top+(window.scrollY||0)-(PHONE?8:18)-HINTPAD:innerHeight-14};
-function sizeCs(cols,rows,extraH){const top=$("#grid").getBoundingClientRect().top+(window.scrollY||0);CS=Math.max(24,Math.min(96,Math.floor((availBot()-top-(extraH||0))/rows),Math.floor(($("#stage").clientWidth-6)/cols)));document.documentElement.style.setProperty("--cs",CS+"px")}
+function sizeCs(cols,rows,extraH){const key=cols+"|"+rows+"|"+(extraH||0);if(S&&S._csFit&&S._csFit.key===key){CS=S._csFit.v;document.documentElement.style.setProperty("--cs",CS+"px");return}const top=$("#grid").getBoundingClientRect().top+(window.scrollY||0);CS=Math.max(24,Math.min(96,Math.floor((availBot()-top-(extraH||0))/rows),Math.floor(($("#stage").clientWidth-6)/cols)));if(S)S._csFit={key,v:CS};document.documentElement.style.setProperty("--cs",CS+"px")}
 function popEl(d){d.classList.remove("pop");void d.offsetWidth;d.classList.add("pop")}
 function celebrate(){if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;const cv=document.createElement("canvas");cv.className="cf";cv.width=innerWidth;cv.height=innerHeight;document.body.append(cv);const x=cv.getContext("2d"),cols=["#7a52d6","#f2a000","#12b5a2","#ee5d7a","#2b9be6","#3cb958"],ps=[];
  for(let i=0;i<140;i++){const a=-Math.PI/2+(Math.random()-.5)*1.6,v=9+Math.random()*11;ps.push({x:innerWidth/2,y:innerHeight*.45,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:4+Math.random()*5,c:cols[i%6],rot:Math.random()*6,vr:(Math.random()-.5)*.4})}
@@ -1942,10 +1942,10 @@ function rHex(){if(!S.p||S.type!=="hex"||!S.hx)return;{const hs=$("#hexstat");if
  const LP={},VC={};P.lineShow.forEach(j=>{const l=P.lines[j],k=l.vq+","+l.vr;VC[k]=(VC[k]||0)+1});const shared=j=>VC[P.lines[j].vq+","+P.lines[j].vr]>1;{const used=[];P.lineShow.forEach(j=>{const l=P.lines[j],[x,y]=px(l.vq,l.vr),ang0=l.d===0?-90:l.d===1?30:-30,ang=TR?90-ang0:ang0,sg=l.d!==1?1:-1,rad=ang*Math.PI/180,ux=Math.cos(rad)*sg,uy=Math.sin(rad)*sg;let k=shared(j)?1.2:.5,tp;for(let t=0;t<6;t++){tp=[x-ux*sz*k,y-uy*sz*k];if(!used.some(q=>Math.hypot(q[0]-tp[0],q[1]-tp[1])<sz*.9))break;k+=.45}used.push(tp);LP[j]=tp})}
  const ext=[...pts.map(p=>[p[0],p[1],sz*1.2]),...Object.values(LP).map(p=>[p[0],p[1],sz*.85])];
  const x0=Math.min(...ext.map(p=>p[0]-p[2])),x1=Math.max(...ext.map(p=>p[0]+p[2])),y0=Math.min(...ext.map(p=>p[1]-p[2])),y1=Math.max(...ext.map(p=>p[1]+p[2]));
- const top=w.getBoundingClientRect().top+(window.scrollY||0),asp=(x1-x0)/(y1-y0),fit=Math.min((availBot()-top)/(y1-y0),($("#stage").clientWidth-(PHONE?2:10))/(x1-x0)),h=(y1-y0)*Math.max(.4,Math.min(2.45,fit)),wd=h*asp;
+ const asp=(x1-x0)/(y1-y0);let h,wd;if(S._hexFit){h=S._hexFit.h;wd=S._hexFit.wd}else{const top=w.getBoundingClientRect().top+(window.scrollY||0),fit=Math.min((availBot()-top)/(y1-y0),($("#stage").clientWidth-(PHONE?2:10))/(x1-x0));h=(y1-y0)*Math.max(.4,Math.min(2.45,fit));wd=h*asp;S._hexFit={h,wd}};
  window._hg={sz,cells:pts.slice(0,P.cells.length),lines:P.lineShow.map((j,k)=>shared(j)?[LP[j][0],LP[j][1],j,LP[j][0],LP[j][1]]:[LP[j][0],LP[j][1],j,pts[P.cells.length+k][0],pts[P.cells.length+k][1]])};
  const hp=(x,y,r)=>[0,1,2,3,4,5].map(k=>{const a=Math.PI/3*k+(TR?Math.PI/6:0);return(x+r*Math.cos(a)).toFixed(1)+","+(y+r*Math.sin(a)).toFixed(1)}).join(" ");
- let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x0} ${y0} ${x1-x0} ${y1-y0}" width="${wd}" height="${h}" style="max-width:100%;touch-action:none">`;const H=S.hint;
+ let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x0} ${y0} ${x1-x0} ${y1-y0}" width="${wd}" height="${h}" style="max-width:none;touch-action:none">`;const H=S.hint;
  P.lineShow.forEach(j=>{const l=P.lines[j],[x,y]=px(l.vq,l.vr),far=l.d===2?l.idx[l.idx.length-1]:l.idx[0],[fx,fy]=px(P.cells[far].q,P.cells[far].r);
   s+=`<line x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${fx.toFixed(1)}" y2="${fy.toFixed(1)}" stroke="${K.lnk}" stroke-width="2.5" stroke-linecap="round" opacity=".6" pointer-events="none"/>`});
  let tx="";const zcnt=new Map();Object.keys(cs).forEach(k=>{if(cs[k]===1&&k[0]==="z"){const zc=P.zone[+k.slice(1)];if(zc){zc.pos.forEach(j=>zcnt.set(j,(zcnt.get(j)||0)+1));zcnt.set(+k.slice(1),(zcnt.get(+k.slice(1))||0)+1)}}});
@@ -2296,12 +2296,12 @@ const solCur=p=>{const c=Array(p.N*p.N).fill(-1);p.sol.forEach((cell,s)=>{c[cell
 const murM=p=>({N:p.N,V:p.V,reg:p.reg,obj:p.obj.map(t=>t?{t}:null)});
 const murTok=(p,s,dark)=>s===p.V?`<span class="tok vt">${p.ppl[s][0]}</span>`:`<span class="tok" style="background:hsl(${MHUE[s]},62%,${dark?"50%":"45%"})">${p.ppl[s][0]}</span>`;
 const murBlocked=(p,i)=>!!p.obj[i]&&!MOBJ[p.obj[i]].seat;
-let MURFIX=0;
-function rMur(){MURFIX=0;rMur0();if(!PHONE&&$("#stage").clientWidth>=640){const ov=$("#mur").getBoundingClientRect().bottom-(innerHeight-12);if(ov>2){MURFIX=Math.ceil(ov/S.p.N)+1;rMur0()}}}
+let MURFIX=0,MURMS=0;
+function rMur(){if(S._murMS){MURFIX=0;MURMS=S._murMS;rMur0();return}MURFIX=0;MURMS=0;rMur0();if(!PHONE&&$("#stage").clientWidth>=640){const ov=$("#mur").getBoundingClientRect().bottom-(innerHeight-12);if(ov>2){MURFIX=Math.ceil(ov/S.p.N)+1;MURMS=0;rMur0()}}S._murMS=MURMS}
 function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const dark=isDark();
  const top=m.getBoundingClientRect().top+(window.scrollY||0),sw=$("#stage").clientWidth,wide=sw>=640;
  const pbh=$("#pbot")?$("#pbot").offsetHeight:0,availH=innerHeight-(m.getBoundingClientRect().top)-pbh-HINTPAD;
- const ms=PHONE?Math.max(HINTPAD?20:30,Math.min(Math.floor((sw-8)/N),Math.floor(HINTPAD?(availH-14)/N:availH*.42/N))):Math.max(40,Math.min(100,wide?Math.min(Math.floor((availBot()+14-top-(NIEUW?165:150))/N)-MURFIX,Math.floor((sw-330)/N)):Math.floor((sw-8)/N)));
+ const ms=MURMS|| (PHONE?Math.max(HINTPAD?20:30,Math.min(Math.floor((sw-8)/N),Math.floor(HINTPAD?(availH-14)/N:availH*.42/N))):Math.max(40,Math.min(100,wide?Math.min(Math.floor((availBot()+14-top-(NIEUW?165:150))/N)-MURFIX,Math.floor((sw-330)/N)):Math.floor((sw-8)/N))));MURMS=ms;
  const main=document.createElement("div");main.id="mmain";const g=document.createElement("div");g.id="mgrid";g.style.gridTemplateColumns=`repeat(${N},${ms}px)`;g.style.setProperty("--ms",ms+"px");
  const first=[];p.reg.forEach((k,i)=>{if(first[k]===undefined)first[k]=i});
  const thick="2.5px solid var(--fg)",thin="1px solid color-mix(in srgb,var(--fg) 16%,transparent)",edge=(i,j)=>p.reg[j]!==p.reg[i]?thick:thin;
@@ -2586,7 +2586,9 @@ function dayLabel(){const wk=isWk(dstr());$("#today").textContent=PHONE?(wk?"Dag
    b.onclick=ev=>{ev.stopPropagation();pop.classList.remove("open");load(S.type,false,false,d)};pop.append(b)}
   const r=ab.getBoundingClientRect();pop.style.top=Math.round(r.bottom+6)+"px";pop.style.left=Math.round(Math.max(6,Math.min(innerWidth-236,r.left+r.width/2-115)))+"px";pop.classList.add("open")};
  document.addEventListener("pointerdown",e=>{if(pop.classList.contains("open")&&!e.target.closest("#archp,#arch")){pop.classList.remove("open");e._closed=true}},true)}$("#next").onclick=()=>load(RANDOM?rndType(S.type):S.type,true,true);$("#today").onclick=()=>load(S.type,false);
-addEventListener("resize",()=>{if(S.p)render()});
+let LAYW=innerWidth,LAYH=innerHeight,LAYRT=0;
+function resetPuzzleFit(){if(!S)return;delete S._csFit;delete S._hexFit;delete S._murMS;MURMS=0}
+addEventListener("resize",()=>{clearTimeout(LAYRT);LAYRT=setTimeout(()=>{const w=innerWidth,h=innerHeight,dw=Math.abs(w-LAYW),dh=Math.abs(h-LAYH),turn=(w>h)!==(LAYW>LAYH);if(!turn&&dw<24&&dh<100)return;LAYW=w;LAYH=h;resetPuzzleFit();if(S.p)render()},140)});
 /* ---- Opslaan ---- */
 const PKEY="pdprog4";
 function progAll(){try{return JSON.parse(lsGet(PKEY)||"{}")}catch(e){return{}}}
