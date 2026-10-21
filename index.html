@@ -1019,16 +1019,25 @@ const nonoColorCount=lv=>(lv===1||lv===4)?2:(lv===2||lv===5)?3:4;
 function cnClue(a){const o=[];let c=0,n=0;for(const v of a.concat(0)){if(v&&v===c)n++;else{if(c)o.push({n,c});c=v;n=v?1:0}}return o}
 function cnEq(a,b){return a.length===b.length&&a.every((x,i)=>x.n===b[i].n&&x.c===b[i].c)}
 function cnText(cl){return cl.length?cl.map(x=>NCN[x.c]+" "+x.n).join(", "):"0"}
-function cnLine(cl,cur,limit){limit=limit||80000;const n=cur.length,K=cl.length,pat=Array(n).fill(-1),starts=Array(K).fill(0),mn=Array(K).fill(1e9),mx=Array(K).fill(-1),fix=Array(n).fill(0);let cnt=0,overflow=false;
- const tail=b=>{let z=0;for(let j=b;j<K;j++){z+=cl[j].n;if(j<K-1&&cl[j].c===cl[j+1].c)z++}return z};
- const record=()=>{cnt++;if(cnt>limit){overflow=true;return}for(let j=0;j<K;j++){mn[j]=Math.min(mn[j],starts[j]);mx[j]=Math.max(mx[j],starts[j])}if(cnt===1){for(let i=0;i<n;i++)fix[i]=pat[i]}else for(let i=0;i<n;i++)if(fix[i]!==pat[i])fix[i]=0};
- const rec=(b,p)=>{if(overflow)return;if(b===K){for(let k=p;k<n;k++)if(cur[k]>0)return;record();return}
-  const q=cl[b],gap=b<K-1&&q.c===cl[b+1].c?1:0,rest=tail(b+1);
-  for(let s=p;s+q.n+gap+rest<=n;s++){let ok=true;for(let k=p;k<s;k++)if(cur[k]>0){ok=false;break}if(!ok)break;
-   for(let k=s;k<s+q.n;k++)if(cur[k]===-1||(cur[k]>0&&cur[k]!==q.c)){ok=false;break}if(!ok)continue;
-   if(gap&&s+q.n<n&&cur[s+q.n]>0)continue;starts[b]=s;for(let k=s;k<s+q.n;k++)pat[k]=q.c;rec(b+1,s+q.n+gap);for(let k=s;k<s+q.n;k++)pat[k]=-1;if(overflow)return}
- };
- rec(0,0);return{cnt:overflow?limit+1:cnt,overflow,fix,mn,mx}}
+function cnLine(cl,cur){const n=cur.length,K=cl.length;
+ const len=b=>cl[b].n,gap=b=>b<K-1&&cl[b].c===cl[b+1].c?1:0;
+ const fits=(b,s)=>{if(s+len(b)>n)return false;for(let k=s;k<s+len(b);k++)if(cur[k]===-1||(cur[k]>0&&cur[k]!==cl[b].c))return false;
+  if(gap(b)){if(s+len(b)>=n)return false;if(cur[s+len(b)]>0)return false}return true};
+ const nxt=(b,s)=>s+len(b)+gap(b);
+ /* B[b][p] = aantal geldige manieren om blok b..eind te leggen vanaf positie p. */
+ const B=Array.from({length:K+1},()=>Array(n+2).fill(0));
+ for(let p=n+1;p>=0;p--){let ok=true;for(let k=p;k<n;k++)if(cur[k]>0){ok=false;break}B[K][p]=p<=n&&ok?1:0}
+ for(let b=K-1;b>=0;b--)for(let p=n;p>=0;p--){let t=0;for(let s=p;s<n;s++){if(s>p&&cur[s-1]>0)break;if(fits(b,s)){const q=nxt(b,s);if(q<=n)t+=B[b+1][q]}}B[b][p]=t}
+ /* A + W tellen hoe vaak elk blok op elke startpositie voorkomt in alle oplossingen. */
+ const A=Array.from({length:K+1},()=>Array(n+2).fill(0));A[0][0]=1;
+ const W=Array.from({length:K},()=>Array(n).fill(0));
+ for(let b=0;b<K;b++)for(let p=0;p<=n;p++){const a=A[b][p];if(!a)continue;for(let s=p;s<n;s++){if(s>p&&cur[s-1]>0)break;if(!fits(b,s))continue;const q=nxt(b,s);if(q>n)continue;A[b+1][q]+=a;W[b][s]+=a*B[b+1][q]}}
+ const tot=B[0][0],fix=Array(n).fill(0),mn=Array(K).fill(1e9),mx=Array(K).fill(-1);
+ if(!tot)return{cnt:0,overflow:false,fix,mn,mx};
+ const cov=Array(n).fill(0),col=Array.from({length:n},()=>new Set());
+ for(let b=0;b<K;b++)for(let s=0;s<n;s++)if(W[b][s]){mn[b]=Math.min(mn[b],s);mx[b]=Math.max(mx[b],s);for(let k=s;k<s+len(b);k++){cov[k]+=W[b][s];col[k].add(cl[b].c)}}
+ for(let k=0;k<n;k++){const leeg=cov[k]<tot;if(leeg&&!col[k].size)fix[k]=-1;else if(!leeg&&col[k].size===1)fix[k]=[...col[k]][0]}
+ return{cnt:tot,overflow:false,fix,mn,mx}}
 function cnHuman(p){const W=p.W,H=p.H,cur=Array(W*H).fill(0);let steps=0,passes=0,maxWays=0;
  for(let z=0;z<250;z++){let ch=0;passes++;
   for(let r=0;r<H;r++){const idx=Array.from({length:W},(_,x)=>r*W+x),q=cnLine(p.rc[r],idx.map(i=>cur[i]));if(!q.cnt||q.overflow)return{solved:false,cur,steps,passes,maxWays};maxWays=Math.max(maxWays,q.cnt);q.fix.forEach((v,k)=>{const i=idx[k];if(cur[i]===0&&v!==0){cur[i]=v;steps++;ch++}})}
@@ -1047,9 +1056,12 @@ function cnQuality(p,rt,lv){const W=p.W,H=p.H;
  const score=rt.passes*7+(ur+uc)*18+multi*12+Math.min(18,trans*.35)-init*28-rep*22;
  return{ok,score,init,rep,ur,uc,multi,trans}}
 function genColorNono(R,lv,hard){const K=nonoColorCount(lv);let best=null,bs=-1,bestAny=null,ba=-1,W=0,H=0;
- /* Zelfde totale zoekwerk als voorheen, maar verdeeld over drie verschillende basisvormen. */
- for(let batch=0;batch<3;batch++){const base=genNono(R,lv,hard),mask=base.sol;W=base.W;H=base.H;
-  for(let t=0;t<60;t++){const ctr=Array.from({length:K},(_,k)=>({x:(k+.28+R()*.44)*W/K,y:(.12+R()*.76)*H,w:.65+R()*.9,tilt:(R()-.5)*.32})),sol=Array(W*H).fill(0),use=Array(K+1).fill(0);
+ /* Maximaal 3 zoekrondes; nooit meer onbeperkt recursief opnieuw beginnen. */
+ for(let retry=0;retry<3;retry++)for(let batch=0;batch<3;batch++){const base=genNono(R,lv,hard),mask=base.sol;W=base.W;H=base.H;
+  for(let t=0;t<60;t++){const ctr=Array.from({length:K},(_,k)=>({x:(k+.28+R()*.44)*W/K,y:(.12+R()*.76)*H,w:.65+R()*.9,tilt:(R()-.5)*.32}));
+   /* De ruimtelijke kleurzones blijven mooi verdeeld, maar welke kleur waar ligt wordt gehusseld. */
+   shuf(ctr,R);
+   const sol=Array(W*H).fill(0),use=Array(K+1).fill(0);
    for(let i=0;i<sol.length;i++)if(mask[i]){const r=i/W|0,x=i%W;let bc=1,bd=1e9;for(let k=0;k<K;k++){const a=ctr[k],xx=x+.5+a.tilt*(r-H/2),d=((xx-a.x)/(W/K*a.w))**2+((r+.5-a.y)/(H*.58))**2+(R()-.5)*.055;if(d<bd){bd=d;bc=k+1}}sol[i]=bc;use[bc]++}
    if(use.slice(1).some(n=>n<2))continue;
    const p={N:W,W,H,K,color:1,rc:rowsOf(sol,W,H).map(cnClue),cc:colsOf(sol,W,H).map(cnClue),sol,pic:base.pic||""},rt=cnHuman(p);if(!rt.solved)continue;
@@ -1058,9 +1070,17 @@ function genColorNono(R,lv,hard){const K=nonoColorCount(lv);let best=null,bs=-1,
    if(q.score>ba){ba=q.score;bestAny=p}
    if(q.ok&&q.score>bs){bs=q.score;best=p}
   }}
- /* Nooit meer de oude verticale-strokenfallback: als de kwaliteitsdrempel niet gehaald wordt,
-    nemen we de beste échte, logisch opgeloste kandidaat uit meerdere basisvormen. */
- return best||bestAny||genColorNono(R,lv,hard)}
+ if(best)return best;
+ if(bestAny)return bestAny;
+ /* Zeer zeldzaam vangnet: eindig altijd begrensd. Probeer eenvoudige diagonale kleuringen
+    op een logisch oplosbaar klassiek masker en accepteer alleen als cnHuman hem zelf oplost. */
+ for(let z=0;z<24;z++){const base=genNono(R,lv,hard),W=base.W,H=base.H,perm=shuf(Array.from({length:K},(_,i)=>i+1),R);
+  const sol=base.sol.map((v,i)=>v?perm[(Math.floor((i%W)/(2+z%3))+Math.floor((i/W|0)/(2+(z>>2)%2)))%K]:0);
+  const p={N:W,W,H,K,color:1,rc:rowsOf(sol,W,H).map(cnClue),cc:colsOf(sol,W,H).map(cnClue),sol,pic:base.pic||"",rate:"finite-fallback"},rt=cnHuman(p);
+  if(rt.solved)return p}
+ /* Laatste veiligheidsnet: een eindige, geldige kleurpuzzel in plaats van een hangende app. */
+ const base=genNono(R,lv,hard),W=base.W,H=base.H,perm=shuf(Array.from({length:K},(_,i)=>i+1),R),sol=base.sol.map((v,i)=>v?perm[Math.min(K-1,Math.floor((i%W)*K/W))]:0);
+ return{N:W,W,H,K,color:1,rc:rowsOf(sol,W,H).map(cnClue),cc:colsOf(sol,W,H).map(cnClue),sol,pic:base.pic||"",rate:"safe-fallback"}}
 
 /* ---------- Kakuro ---------- */
 let KW=8;
@@ -1595,7 +1615,7 @@ $("#time").onclick=()=>{TSHOW=!TSHOW;lsSet("pdtime",TSHOW?"1":"0");setT(lastT)};
 const isFree=r=>/^v~/.test(r.type);
 function freeLoc(){try{return JSON.parse(lsGet("pdfree")||"[]")}catch(e){return[]}}
 /* Gemaakte puzzels bewaren (de laatste 16), zodat terugkomen op een puzzel meteen gaat. GV ophogen als een generator verandert. */
-const GV="g14";
+const GV="g15";
 function genCached(type,seed,lv,hard,nv){const vk=type==="nono"&&nv==="color"?"|color":"";const k=GV+(type==="mur"?MGV:type==="plus"?PGV:"")+"|"+type+"|"+seed+"|"+lv+(hard?"|w":"")+vk;let all={};try{all=JSON.parse(lsGet("pdgen")||"{}")}catch(e){all={}}
  if(all[k])try{return JSON.parse(all[k])}catch(e){}
  const p=type==="nono"&&nv==="color"?genColorNono(rng(hash(seed+"|color")),lv,!!hard):GEN[type](rng(hash(seed)),lv,!!hard);try{all[k]=JSON.stringify(p);const ks=Object.keys(all);for(const x of ks.slice(0,Math.max(0,ks.length-16)))delete all[x];lsSet("pdgen",JSON.stringify(all))}catch(e){}
@@ -1999,13 +2019,19 @@ function nonoArr(cl,cur){const n=cur.length,K=cl.length,mn=Array(K).fill(1e9),mx
  return{cnt,mn,mx}}
 const ORD=["eerste","tweede","derde","vierde","vijfde","zesde","zevende","achtste"];
 function colorNonoHint(){const p=S.p,W=p.W,H=p.H,cur=S.cur,sol=p.sol;
- for(let i=0;i<W*H;i++){const v=cur[i];if((v>0&&v!==sol[i])||(v===-1&&sol[i]>0)){const tx=v===-1?"Hier staat een kruisje, maar dit vakje moet "+NCN[sol[i]]+" worden. Wis het en kijk opnieuw.":"Dit vakje is "+NCN[v]+", maar daar hoort "+(sol[i]?NCN[sol[i]]:"geen kleur")+". Wis het en kijk opnieuw.";return{cells:[i],why:[],set:0,kind:"fix",btn:"Wis dit vakje",text:tx}}}
+ for(let i=0;i<W*H;i++){const v=cur[i];if((v>0&&v!==sol[i])||(v===-1&&sol[i]>0)){const tx=v===-1?"Dit kruisje klopt niet. Wis het en kijk opnieuw.":"Dit gekleurde vakje klopt niet. Wis het en kijk opnieuw.";return{cells:[i],why:[],set:0,kind:"fix",btn:"Wis dit vakje",text:tx}}}
  const lines=[];for(let r=0;r<H;r++)lines.push({nm:"rij "+(r+1),cl:p.rc[r],ci:Array.from({length:W},(_,x)=>r*W+x)});for(let x=0;x<W;x++)lines.push({nm:"kolom "+(x+1),cl:p.cc[x],ci:Array.from({length:H},(_,r)=>r*W+x)});
  let best=null;const take=h=>{if(!best||h.pr<best.pr||(h.pr===best.pr&&h.cells.length>best.cells.length))best=h};
  for(const l of lines){const v=l.ci.map(i=>cur[i]);if(!v.includes(0))continue;const A=cnLine(l.cl,v);if(!A.cnt||A.overflow)continue;const groups=new Map();A.fix.forEach((z,k)=>{if(v[k]===0&&z!==0){if(!groups.has(z))groups.set(z,[]);groups.get(z).push(k)}});
-  for(const [set,ks] of groups){const cells=ks.map(k=>l.ci[k]),cl=cnText(l.cl),one=cells.length===1;let text;if(A.cnt===1)text="Kijk naar "+l.nm+" ("+cl+"). Met wat er al staat, passen de gekleurde blokken nog maar op één manier. ";else text="Kijk naar "+l.nm+" ("+cl+"). Er zijn nog "+A.cnt+" geldige manieren om de blokken te plaatsen. In al die manieren ";
-   if(set===-1)text+=(one?"blijft dit vakje leeg. Zet hier dus een kruisje.":"blijven deze vakjes leeg. Zet hier dus kruisjes.");else text+=(one?"is dit vakje altijd ":"zijn deze vakjes altijd ")+NCN[set]+". "+(one?"Kleur het ":"Kleur ze ")+NCN[set]+".";take({pr:A.cnt===1?0:set>0?1:2,set,cells,why:l.ci,text})}}
- if(!best)return null;best.kind="tech";best.btn=best.set===-1?"Zet het kruisje voor me":best.set===0?"Wis het voor me":"Kleur het "+NCN[best.set]+" voor me";return best}
+  for(const [set,ks] of groups){const cells=ks.map(k=>l.ci[k]),cl=cnText(l.cl),one=cells.length===1,k0=ks[0];let text="",pr=A.cnt===1?0:set>0?3:4;
+   /* Leg eerst de twee herkenbaarste menselijke regels uit. */
+   if(set>0){const j=l.cl.findIndex((q,j)=>q.c===set&&A.mx[j]<=k0&&A.mn[j]+q.n-1>=k0);
+    if(j>=0){const q=l.cl[j],ord=l.cl.length>1?(ORD[j]||(j+1)+"e")+" blok":"blok";text="Kijk naar "+l.nm+" ("+cl+"). Het "+ord+" ("+q.n+" "+NCN[set]+") kan beginnen tussen vak "+(A.mn[j]+1)+" en "+(A.mx[j]+1)+". Hoe je het ook schuift, "+(one?"dit vakje blijft":"deze vakjes blijven")+" binnen dat blok. "+(one?"Kleur het ":"Kleur ze ")+NCN[set]+".";pr=1}}
+   else if(set===-1&&l.cl.every((q,j)=>k0<A.mn[j]||k0>A.mx[j]+q.n-1)){text="Kijk naar "+l.nm+" ("+cl+"). Geen enkel gekleurd blok kan "+(one?"dit vakje":"deze vakjes")+" bereiken. "+(one?"Hier komt dus een kruisje.":"Hier komen dus kruisjes.");pr=2}
+   if(!text){if(A.cnt===1)text="Kijk naar "+l.nm+" ("+cl+"). Met wat er al staat, passen de gekleurde blokken nog maar op één manier. ";else text="Kijk naar "+l.nm+" ("+cl+"). Er zijn nog "+A.cnt+" geldige manieren om de blokken te plaatsen. In al die manieren ";
+    if(set===-1)text+=(one?"blijft dit vakje leeg. Zet hier dus een kruisje.":"blijven deze vakjes leeg. Zet hier dus kruisjes.");else text+=(one?"is dit vakje altijd ":"zijn deze vakjes altijd ")+NCN[set]+". "+(one?"Kleur het ":"Kleur ze ")+NCN[set]+"."}
+   take({pr,set,cells,why:l.ci,text})}}
+ if(!best)return null;best.kind="tech";best.btn=best.set===-1?"Zet het kruisje voor me":"Kleur het "+NCN[best.set]+" voor me";return best}
 function nonoHint(){if(S.p.color)return colorNonoHint();const p=S.p,W=p.W,H=p.H,cur=S.cur,sol=p.sol;
  for(let i=0;i<W*H;i++)if((cur[i]===1&&!sol[i])||(cur[i]===2&&sol[i]))return{cells:[i],why:[],set:0,kind:"fix",btn:"Wis dit vakje",text:`Let op: dit vakje klopt niet. ${cur[i]===1?"Het hoort leeg te blijven":"Hier hoort juist een gevuld vakje"}, dus hiermee loopt de puzzel vast. Wis het en kijk opnieuw.`};
  const lines=[];for(let r=0;r<H;r++){const ci=[];for(let c=0;c<W;c++)ci.push(r*W+c);lines.push({nm:"rij "+(r+1),w:"rij",cl:p.rc[r],ci})}
