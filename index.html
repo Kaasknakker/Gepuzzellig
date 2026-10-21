@@ -1487,6 +1487,9 @@ function renderLvl(){const el=$("#lvl");el.innerHTML="";const t=S.type,ls=LVN[t]
 
 let TSHOW=lsGet("pdtime")==="1",lastT="0:00";
 function setT(t){lastT=t;const e=$("#time");e.textContent=TSHOW?t:"⏱ tijd tonen";e.classList.toggle("hid",!TSHOW)}
+const playMs=()=>!S||!S.start?0:Math.max(0,(S.pauseAt||Date.now())-S.start);
+function pausePlay(){if(S&&S.start&&!S.done&&!S.pauseAt)S.pauseAt=Date.now()}
+function resumePlay(){if(!S||!S.start||S.done||!S.pauseAt)return;S.start+=Date.now()-S.pauseAt;S.pauseAt=0;setT(fmt(Math.round(playMs()/1000)))}
 $("#time").onclick=()=>{TSHOW=!TSHOW;lsSet("pdtime",TSHOW?"1":"0");setT(lastT)};
 const isFree=r=>/^v~/.test(r.type);
 function freeLoc(){try{return JSON.parse(lsGet("pdfree")||"[]")}catch(e){return[]}}
@@ -1518,8 +1521,8 @@ function load(type,practice,fresh,date){if(!practice)RANDOM=false;if(NIEUW&&HOME
    if(sv0.cur&&S.cur&&sv0.cur.length===S.cur.length)S.cur=sv0.cur.slice();
    if(sv0.rev&&S.hx)S.hx.rev=new Set(sv0.rev);if(sv0.cs&&S.hx)S.cs=sv0.cs;
    if(type==="m24"&&sv0.r){S.r=sv0.r;setRound()}
-   if(sv0.str&&S.str)S.str=new Set(sv0.str);if(sv0.nt)S.nt=Object.assign({},sv0.nt);S.pen=sv0.pen||0;S.mist=sv0.mist||0;S.hints=sv0.hints||0;S.start=Date.now()-(sv0.el||0);S.resumed=true}catch(e){}}
-  $("#msg").textContent=S.done?(S.arch?"Al klaar in ":"Vandaag al klaar in ")+fmt(S.secs):S.resumed?"Verder waar je was gebleven":(!practice&&type===featOf(S.date))?(PHONE?"⭐ Van de dag":"⭐ Puzzel van de dag"+(S.hard?" (weekend 💪)":"")):S.arch?"Dagpuzzel van "+dnl(S.date)+(S.hard?" 💪":""):S.hard?"Weekendpuzzel: wat pittiger 💪":"";setT(S.resumed?fmt(Math.round((Date.now()-S.start)/1000)+(S.pen||0)):fmt(S.secs));
+   if(sv0.str&&S.str)S.str=new Set(sv0.str);if(sv0.nt)S.nt=Object.assign({},sv0.nt);S.pen=0;S.mist=sv0.mist||0;S.hints=sv0.hints||0;S.start=Date.now()-(sv0.el||0);S.pauseAt=0;S.resumed=true}catch(e){}}
+  $("#msg").textContent=S.done?(S.arch?"Al klaar in ":"Vandaag al klaar in ")+fmt(S.secs):S.resumed?"Verder waar je was gebleven":(!practice&&type===featOf(S.date))?(PHONE?"⭐ Van de dag":"⭐ Puzzel van de dag"+(S.hard?" (weekend 💪)":"")):S.arch?"Dagpuzzel van "+dnl(S.date)+(S.hard?" 💪":""):S.hard?"Weekendpuzzel: wat pittiger 💪":"";setT(S.resumed?fmt(Math.round(playMs()/1000)):fmt(S.secs));
   try{updTabs()}catch(e){}render()},30)}
 
 const LANDQ=matchMedia("(orientation:landscape) and (min-aspect-ratio:23/20)");
@@ -1752,7 +1755,7 @@ function check(){const{type,p,cur}=S;let ok;
  else if(type==="kak"){const{w,runs}=p;ok=cur.every((v,i)=>!w[i]||v>0)&&runs.every(r=>{const ds=r.cells.map(i=>cur[i]);return new Set(ds).size===ds.length&&ds.reduce((a,b)=>a+b,0)===r.sum})}
  if(ok)finish()}
 
-function finish(){S.done=true;if(S.type==="nono"){const g=$("#grid");if(g)g.classList.add("nfin")}progDel(progKey(S.type,S.practice,S.date,S.sf));hideHint();S.secs=Math.max(1,Math.round((Date.now()-(S.start||Date.now()))/1000)+(S.pen||0));if(S.type==="hex")S.p.sol.forEach((v,i)=>S.hx.rev.add(i));
+function finish(){S.secs=Math.max(1,Math.round(playMs()/1000));S.done=true;if(S.type==="nono"){const g=$("#grid");if(g)g.classList.add("nfin")}progDel(progKey(S.type,S.practice,S.date,S.sf));hideHint();if(S.type==="hex")S.p.sol.forEach((v,i)=>S.hx.rev.add(i));
  setT(fmt(S.secs));
  const bdg=badges({mist:S.mist||0,hints:S.hints||0},S.type);$("#msg").textContent=(S.practice?"Opgelost! 🎉":"Klaar! 🎉"+(TSHOW?" "+fmt(S.secs):""))+(bdg?" "+bdg:"");if(S.practice)$("#next").classList.add("pulse");
  if(S.type!=="m24")render();
@@ -1767,7 +1770,7 @@ function finish(){S.done=true;if(S.type==="nono"){const g=$("#grid");if(g)g.clas
  dbSave(row).catch(()=>{$("#msg").textContent+=" (scorebord niet bereikbaar)"});
  setTimeout(()=>{if(S.done&&!S.practice)showFin(S.date,S.type+S.sf)},900)}
 
-setInterval(()=>{if(S.start&&!S.done)setT(fmt(Math.round((Date.now()-S.start)/1000)+(S.pen||0)))},500);
+setInterval(()=>{if(S.start&&!S.done)setT(fmt(Math.round(playMs()/1000)))},500);
 
 /* ---- Hints ---- */
 const RN=["rode","oranje","gele","lichtgroene","zeegroene","lichtblauwe","blauwe","violette","paarse","roze"];
@@ -2627,10 +2630,13 @@ function progKey(t,pr,d,sf){return pr?"p:"+t+sf:"d:"+d+":"+t+sf}
 function progDel(k){const a=progAll();if(k in a){delete a[k];lsSet(PKEY,JSON.stringify(a))}}
 function persist(){if(!S.p||S.done||!S.start||!S.seed)return;const a=progAll(),today=dstr();
  for(const k in a)if(k.startsWith("d:")&&k.split(":")[1]<addDays(today,-8))delete a[k];
- const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:Date.now()-S.start,pen:S.pen||0,mist:S.mist||0,hints:S.hints||0};
+ const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0};
  if(S.hx){e.rev=[...S.hx.rev];e.cs=S.cs||{}}else if(S.type==="m24")e.r=S.r;else if(S.cur)e.cur=S.cur;if(S.str)e.str=[...S.str];if(S.nt&&Object.keys(S.nt).length)e.nt=S.nt;
  a[progKey(S.type,S.practice,S.date,S.sf)]=e;lsSet(PKEY,JSON.stringify(a))}
-setInterval(persist,3000);document.addEventListener("visibilitychange",()=>{if(document.hidden)persist()});addEventListener("pagehide",persist);
+setInterval(persist,3000);
+document.addEventListener("visibilitychange",()=>{if(document.hidden){pausePlay();persist()}else resumePlay()});
+addEventListener("pagehide",()=>{pausePlay();persist()});
+addEventListener("pageshow",()=>resumePlay());
 /* ---- Controleren ---- */
 function wrongCells(){const{type,p,cur}=S,o=[];if(!cur)return o;cur.forEach((v,i)=>{
  if(type==="bin"){if(v>=0&&v!==p.sol[i])o.push(i)}
