@@ -2073,7 +2073,7 @@ function hideHint(){S.hint=null;const b=$("#hint");clearTimeout(hintHideT);const
  if(visible&&!matchMedia("(prefers-reduced-motion: reduce)").matches){b.classList.add("closing");hintHideT=setTimeout(done,135)}else done()}
 function clearHint(){if(!S.hint)return;hideHint();repaintHint()}
 document.addEventListener("pointerdown",e=>{if(S.hint&&!e.target.closest("#hint,#hintb"))clearHint()},true);
-function hintGo(){if(S.done||!S.p||!HINTT.includes(S.type))return;
+function hintGo(){if(S.hint){clearHint();return}if(S.done||!S.p||!HINTT.includes(S.type))return;
  const h=S.type==="star"?starHint():S.type==="bin"?binHint():S.type==="nono"?nonoHint():S.type==="plus"?plusHint():S.type==="mur"?murHint():hexHint();if(!h)return;S.hint=h;
  const hk=h.text+"|"+h.cells.join(",");if(S.lastHk!==hk){S.lastHk=hk;S.hints=(S.hints||0)+1;if(h.kind==="fix")S.mist=(S.mist||0)+1}if(!S.start)S.start=Date.now();
  const b=$("#hint");clearTimeout(hintHideT);b.classList.remove("closing");b.innerHTML="";const xb=document.createElement("button");xb.className="hx";xb.textContent="✕";xb.setAttribute("aria-label","Sluiten");xb.onclick=()=>clearHint();const hh=document.createElement("div");hh.className="hht";hh.textContent="💡 Hint";b.append(xb,hh);const t=document.createElement("div");if(h.steps){t.textContent=h.intro;b.append(t);const ol=document.createElement("ol");ol.style.cssText="margin:6px 0 6px;padding-left:22px";h.steps.forEach(x=>{const li=document.createElement("li");li.textContent=x;ol.append(li)});b.append(ol);const o2=document.createElement("div");o2.style.fontWeight="700";o2.textContent=h.outro;b.append(o2)}else{t.textContent=h.text;b.append(t)}
