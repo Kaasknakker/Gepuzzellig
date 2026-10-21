@@ -526,7 +526,9 @@ body.tablet #lvl button.fixed,body.phone #lvl button.fixed{cursor:default;opacit
 #grid.ncolor .c[class*="nc"]{color:transparent}
 #grid .ncv{display:flex;gap:3px;align-items:center}
 #grid .k .ncv.col{flex-direction:column;justify-content:flex-end}
-#grid .k.r .ncv{flex-direction:row;justify-content:flex-end;flex-wrap:wrap}
+#grid .k.r .ncv{flex-direction:row;justify-content:flex-end;flex-wrap:nowrap;white-space:nowrap}
+body[data-t=nono].tablet #grid{max-width:none}
+body[data-t=nono] #grid .k.r>div{white-space:nowrap}
 #grid .ncl{display:inline-flex!important;align-items:center;justify-content:center;min-width:21px;height:21px;padding:0 5px;border-radius:7px;background:var(--cc);color:#fff!important;font-size:12px;font-weight:900;line-height:1;opacity:1!important}
 #grid .ncl.c1{--cc:var(--nc1)}#grid .ncl.c2{--cc:var(--nc2)}#grid .ncl.c3{--cc:var(--nc3);color:#25210d!important}#grid .ncl.c4{--cc:var(--nc4)}
 #grid .ncl.dn{opacity:.28!important}
