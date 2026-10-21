@@ -175,7 +175,7 @@ svg .shake{animation:shake .35s}
 #mmain{display:flex;flex-direction:column;align-items:center;gap:10px;width:max-content;max-width:100%}
 #mgrid{display:grid;border-radius:6px;box-shadow:0 8px 24px var(--sh);touch-action:none}
 .mc{position:relative;width:var(--ms);height:var(--ms);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.mc .rl{position:absolute;top:2px;left:3px;z-index:3;white-space:nowrap;padding:0 3px;border-radius:4px;background:color-mix(in srgb,var(--card) 70%,transparent);font-size:calc(var(--ms)*.14);font-weight:800;text-transform:uppercase;letter-spacing:.03em;opacity:.55;pointer-events:none}
+.mc .rl{position:absolute;top:2px;left:3px;z-index:3;white-space:nowrap;padding:0 3px;border-radius:4px;background:color-mix(in srgb,var(--card) 70%,transparent);font-size:max(8px,calc(var(--ms)*.14));font-weight:800;text-transform:uppercase;letter-spacing:.03em;opacity:.55;pointer-events:none}
 .mc .ob{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--ms)*.5);pointer-events:none;transition:all .15s}.mc.blk{cursor:not-allowed}.mc.on .ob{inset:auto 2px 0 auto;font-size:calc(var(--ms)*.28)}
 .mc .mx{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:calc(var(--ms)*.42);color:color-mix(in srgb,var(--fg) 38%,transparent);pointer-events:none;font-weight:300}.mc.xx .mx{display:flex}.mc.xm .mx{color:var(--fg);font-weight:700;font-size:calc(var(--ms)*.5)}.tok.xt{background:#6b6f78;font-size:15px}
 #mgrid{outline:3px solid transparent;outline-offset:3px;transition:outline-color .12s}#mgrid.pmode{outline-color:color-mix(in srgb,var(--pc) 55%,transparent)}#mgrid.mxmode{outline-color:#6b6f78}.mc.xx .ob.seat{opacity:.55}
@@ -667,7 +667,7 @@ body.tablet #pbot #nmode button,body.tablet #pbot #pmode button{width:100%;borde
 body.tablet #pbot #nmode button:not(.on),body.tablet #pbot #pmode button:not(.on){background:var(--card);box-shadow:0 3px 0 var(--line)!important}
 body.tablet #pbot #nmode button.on,body.tablet #pbot #pmode button.on{border-color:transparent!important}
 /* Nonogramvariant blijft binnen de smalle liggende iPad-balk. */
-body.tablet #pbot #nvariant{display:flex!important;flex-direction:row!important;width:100%;min-width:0;box-sizing:border-box;padding:3px;gap:2px}
+body.tablet #pbot #nvariant{flex-direction:row!important;width:100%;min-width:0;box-sizing:border-box;padding:3px;gap:2px}
 body.tablet #pbot #nvariant button{width:auto!important;min-width:0!important;flex:1 1 0!important;padding:6px 3px!important;font-size:11px!important;text-align:center!important;justify-content:center!important}
 /* Kleur Nonogram: compacte swatches in plaats van vijf grote verticale knoppen. */
 body.tablet #pbot #nmode.ncolor{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;width:100%;padding:0}
@@ -702,7 +702,7 @@ body.nieuw.home #side.open{display:block;position:fixed;top:20px;right:12px;widt
 /* Hint als paneel rechts */
 body.tablet{--hintw:350px;--hintgap:24px}
 body.tablet.hintside #stage{margin-right:calc(var(--hintw) + var(--hintgap))}
-body.tablet #hint.side{position:fixed!important;top:62px!important;right:max(12px,env(safe-area-inset-right))!important;left:auto!important;bottom:84px!important;width:var(--hintw)!important;max-height:none!important;transform:none!important;overflow:auto;border-radius:20px;border-top:6px solid var(--pc);display:block}
+body.tablet #hint.side{position:fixed!important;top:62px!important;right:max(12px,env(safe-area-inset-right))!important;left:auto!important;bottom:auto!important;width:var(--hintw)!important;max-height:calc(100vh - 146px)!important;transform:none!important;overflow:auto;border-radius:20px;border-top:6px solid var(--pc);display:block}
 body.tablet #hint.side button:not(.hx){width:100%;padding:12px;margin-top:10px}
 /* Telefoon */
 body.phone.nieuw #tbHome{padding:4px 10px;font-size:18px;border-radius:999px;box-shadow:none}
@@ -732,6 +732,14 @@ body.tablet #more.open,body.tablet #side.open{animation:panelIn .16s cubic-bezie
 @media(prefers-reduced-motion:reduce){
  #hint,#hint.closing,body.tablet #hint.side,body.tablet #hint.side.closing,body.tablet #more.open,body.tablet #side.open,#fin:not([hidden]),#hm:not([hidden]) .hc{animation:none!important}
 }
+body.phone #nvariant.locked{display:none!important}
+body.phone #nvariant button{font-size:0!important;min-width:32px!important;padding:6px 4px!important}
+body.phone #nvclassic::after{content:"■";font-size:16px}
+body.phone #nvcolor::after{content:"🎨";font-size:15px}
+body.phone #nmode.ncolor{flex:0 0 auto!important}
+body.phone #nmode.ncolor>button{flex:0 0 32px!important;min-width:32px!important;padding:6px 2px!important}
+body.phone #pbot:has(#nmode.ncolor):has(#nvariant:not(.locked)) #redo{display:none!important}
+
 </style>
 <script>
 /* ===== STAP 4 van het stappenplan: plak hier jouw Firebase-gegevens ===== */
@@ -989,8 +997,7 @@ const NPICS=[
  {n:"een sleutel",a:2,f:(x,y)=>(ncirc(x,y,.2,.5,.2)&&!ncirc(x,y,.2,.5,.09))||nrect(x,y,.36,.42,.98,.58)||nrect(x,y,.74,.58,.82,.82)||nrect(x,y,.88,.58,.96,.74)},
  {n:"een pijl",a:1.5,f:(x,y)=>nrect(x,y,0,.36,.6,.64)||npoly(x,y,[[.52,.02],[1,.5],[.52,.98]])},
  {n:"een tent",a:1.4,f:(x,y)=>npoly(x,y,[[.5,.04],[1,.98],[0,.98]])&&!npoly(x,y,[[.5,.45],[.66,.98],[.34,.98]])}
-];
-/* Een plaatje op het raster zetten; het moet met de gewone regel-logica op te lossen zijn (geen gokken). */
+];/* Een plaatje op het raster zetten; het moet met de gewone regel-logica op te lossen zijn (geen gokken). */
 function nonoPic(R,W,H){const nonoOK=g=>{const rc=rowsOf(g,W,H).map(lc),cc=colsOf(g,W,H).map(lc);let s=Array(W*H).fill(0),ch=1;
   while(ch){ch=0;for(let r=0;r<H;r++)ls(rc[r],s.slice(r*W,r*W+W)).forEach((v,c)=>{if(v!==s[r*W+c]){s[r*W+c]=v;ch=1}});
    const cs=colsOf(s,W,H);for(let c=0;c<W;c++)ls(cc[c],cs[c]).forEach((v,r)=>{if(v!==s[r*W+c]){s[r*W+c]=v;ch=1}})}return!s.includes(0)};
@@ -1057,7 +1064,7 @@ function cnQuality(p,rt,lv){const W=p.W,H=p.H;
  return{ok,score,init,rep,ur,uc,multi,trans}}
 function genColorNono(R,lv,hard){const K=nonoColorCount(lv),minScore=(lv===1||lv===4)?50:(lv===2||lv===5)?70:90;let best=null,bs=-1,W=0,H=0;
  /* Een goede kandidaat is goed genoeg: maximaal 3 basisvormen × 18 kleuringen. */
- for(let batch=0;batch<3;batch++){const base=genNono(R,lv,hard),mask=base.sol;W=base.W;H=base.H;
+ for(let batch=0;batch<3||(!best&&batch<12);batch++){const base=genNono(R,lv,hard),mask=base.sol;W=base.W;H=base.H;
   for(let t=0;t<18;t++){const ctr=Array.from({length:K},(_,k)=>({x:(k+.28+R()*.44)*W/K,y:(.12+R()*.76)*H,w:.65+R()*.9,tilt:(R()-.5)*.32}));shuf(ctr,R);
    const sol=Array(W*H).fill(0),use=Array(K+1).fill(0);
    for(let i=0;i<sol.length;i++)if(mask[i]){const r=i/W|0,x=i%W;let bc=1,bd=1e9;for(let k=0;k<K;k++){const a=ctr[k],xx=x+.5+a.tilt*(r-H/2),d=((xx-a.x)/(W/K*a.w))**2+((r+.5-a.y)/(H*.58))**2+(R()-.5)*.055;if(d<bd){bd=d;bc=k+1}}sol[i]=bc;use[bc]++}
@@ -1075,7 +1082,7 @@ function genColorNono(R,lv,hard){const K=nonoColorCount(lv),minScore=(lv===1||lv
   const p={N:fw,W:fw,H:fh,K,color:1,rc:rowsOf(sol,fw,fh).map(cnClue),cc:colsOf(sol,fw,fh).map(cnClue),sol,pic:base.pic||"",rate:"finite-fallback"},rt=cnHuman(p);
   if(rt.solved)return p}
  /* Laatste veiligheidsnet is eindig; de app kan nooit in een generatorlus blijven hangen. */
- const base=genNono(R,lv,hard),fw=base.W,fh=base.H,fc=1,sol=base.sol.map(v=>v?fc:0);
+ const base=genNono(R,lv,hard),fw=base.W,fh=base.H,perm=shuf(Array.from({length:K},(_,i)=>i+1),R),filled=base.sol.reduce((a,v,i)=>(v&&a.push(i),a),[]),sol=Array(fw*fh).fill(0);\n filled.forEach((i,n)=>sol[i]=perm[n%K]);
  return{N:fw,W:fw,H:fh,K,color:1,rc:rowsOf(sol,fw,fh).map(cnClue),cc:colsOf(sol,fw,fh).map(cnClue),sol,pic:base.pic||"",rate:"safe-fallback"}}
 
 /* ---------- Kakuro ---------- */
@@ -1404,7 +1411,10 @@ function murSolve(M,cl,o){o=o||{};const N=M.N,V=M.V,st=o.st||4,rg=M.reg,R=i=>i/N
   if(D.some(d=>!d.length))return null;if(!ch)break}
  return{D,W,U,ord}}
 const murDone=r=>!!r&&r.D.every(d=>d.length===1);
-function genMur(R,lv,hard){lv=lv||2;const N=MLV[lv]||6,V=N-1,easy=(lv===1||lv===4)&&!hard,tough=(lv===3||lv===6)||hard;
+/* Lukt het (zelden, vooral op Moeilijk) niet om een goede puzzel te vinden, probeer dan nog een ronde, en anders een niveau lager.
+   Zo blijft de app nooit hangen op "Puzzel maken...". Puzzels die het eerste keer al lukte, blijven precies hetzelfde. */
+function genMur(R,lv,hard){lv=lv||2;for(let t=0;t<2;t++){const p=genMur0(R,lv,hard);if(p)return p}return(lv===3||lv===6)?genMur0(R,lv-1,hard):genMur0(R,2,false)}
+function genMur0(R,lv,hard){lv=lv||2;const N=MLV[lv]||6,V=N-1,easy=(lv===1||lv===4)&&!hard,tough=(lv===3||lv===6)||hard;
  let best=null,bs=-1;
  for(let att=0;att<400&&!(best&&att>=(tough?16:6));att++){
   const K=Math.max(4,N-1-(R()<.5?1:0)),reg=murRooms(N,K,R);if(!reg)continue;
@@ -1986,8 +1996,7 @@ function binHint(){const W=S.p.W,H=S.p.H,cur=S.cur,sol=S.p.sol;
  const lines=[];for(let o=0;o<2;o++){const nl=o?W:H,len=o?H:W;for(let x=0;x<nl;x++){const ci=[];for(let k=0;k<len;k++)ci.push(o?k*W+x:x*W+k);lines.push({o,x,ci,len,v:ci.map(i=>cur[i])})}}
  const nm=l=>(l.o?"kolom ":"rij ")+(l.x+1),mk=(l,ks,val,text)=>({cells:ks.map(k=>l.ci[k]),why:l.ci,set:val,kind:"tech",btn:"Vul het voor me in",text});
  for(const l of lines)for(let k=0;k<l.len-1;k++){const a=l.v[k];if(a<0||l.v[k+1]!==a)continue;const t=[];if(k>0&&l.v[k-1]<0)t.push(k-1);if(k+2<l.len&&l.v[k+2]<0)t.push(k+2);
-  if(t.length)return mk(l,t,1-a,`In ${nm(l)} staan twee keer ${sy(a)} naast elkaar. Een derde ${sy(a)} erbij mag niet, dus direct ${l.o?"boven of onder":"links of rechts van"} dit paar komt ${sy(1-a)}.`)}
- for(const l of lines)for(let k=0;k<l.len-2;k++){const a=l.v[k];if(a>=0&&l.v[k+2]===a&&l.v[k+1]<0)return mk(l,[k+1],1-a,`In ${nm(l)} staat twee keer ${sy(a)} met één vakje ertussen. Staat daar ook ${sy(a)}, dan zijn het er drie op een rij. Dat vakje wordt dus ${sy(1-a)}.`)}
+  if(t.length)return mk(l,t,1-a,`In ${nm(l)} staan twee keer ${sy(a)} naast elkaar. Een derde ${sy(a)} erbij mag niet, dus direct ${l.o?"boven of onder":"links of rechts van"} dit paar komt ${sy(1-a)}.`)} for(const l of lines)for(let k=0;k<l.len-2;k++){const a=l.v[k];if(a>=0&&l.v[k+2]===a&&l.v[k+1]<0)return mk(l,[k+1],1-a,`In ${nm(l)} staat twee keer ${sy(a)} met één vakje ertussen. Staat daar ook ${sy(a)}, dan zijn het er drie op een rij. Dat vakje wordt dus ${sy(1-a)}.`)}
  for(const l of lines)for(const a of[0,1]){const c=l.v.filter(x=>x===a).length,e=l.v.map((x,k)=>x<0?k:-1).filter(k=>k>=0);
   if(c===l.len/2&&e.length)return mk(l,e,1-a,`In ${nm(l)} staan al ${l.len/2} keer ${sy(a)}. Meer mogen het er niet zijn, dus alle lege vakjes in deze ${l.o?"kolom":"rij"} worden ${sy(1-a)}.`)}
  for(const l of lines){const h=l.len/2,w=l.o?"kolom":"rij";for(let e=0;e<l.len;e++){if(l.v[e]>=0)continue;for(const a of[0,1]){const c=l.v.filter(x=>x===a).length;if(c+1!==h)continue;const t=l.v.map((x,j)=>j===e?a:x<0?1-a:x);let k3=-1;for(let k=0;k+2<t.length;k++)if(t[k]===t[k+1]&&t[k]===t[k+2]){k3=k;break}
@@ -2209,6 +2218,32 @@ function hexHint(){const P=S.p,rev=S.hx.rev,n=P.n,cons=[];
     const bv=n=>n+" "+pl(n,"blauw vakje","blauwe vakjes"),uv=n=>n?`maar ${n} onbekende ${pl(n,"vakje","vakjes")}`:"geen onbekende vakjes meer";
     if(!f&&minS===nB&&minS>0)return res(oB,`Kijk naar ${nA_} en ${nB_} samen. Ze delen ${Sh.length} onbekende ${pl(Sh.length,"vakje","vakjes")} (paars omrand). ${cap(nA_)} heeft nog ${bv(nA)} nodig en heeft buiten die gedeelde vakjes ${uv(oA.length)}. In de gedeelde vakjes ${minS===1?"zit":"zitten"} dus minstens ${bv(minS)}. ${cap(nB_)} heeft er nog maar ${nB} nodig, en die zitten dus allemaal in de gedeelde vakjes. De andere vakjes van ${nB_} zijn zwart.`,Sh);
     if(f&&maxS===nA&&nB-maxS===oB.length&&oB.length>0)return res(oB,`Kijk naar ${nA_} en ${nB_} samen. Ze delen ${Sh.length} onbekende ${pl(Sh.length,"vakje","vakjes")} (paars omrand). ${cap(nA_)} heeft nog maar ${bv(nA)} nodig, dus in de gedeelde vakjes zitten er hooguit ${nA}. ${cap(nB_)} heeft er nog ${nB} nodig, dus ${oB.length===1?"het andere vakje van "+nB_+" is":"de andere "+oB.length+" vakjes van "+nB_+" zijn"} blauw.`,Sh)}}
+  /* Twee aanwijzingen samen: leg het uit met "stel dat". Neem de ene aanwijzing (X), bekijk alle manieren waarop die nog kan kloppen
+     als dit vakje de andere kleur heeft, en laat zien waarom de andere aanwijzing (Y) dan in elk geval misgaat. */
+  if(keep.length===2&&!keep.some(o=>o.kind==="rest")){let pick=null;
+   const t0=a.slice();t0[i]=1-f;const val=(p,m)=>p<0?0:t0[p]>=0?t0[p]:m.has(p)?m.get(p):-1;
+   const fits=(c,v)=>{let k=0;for(const x of v)k+=x;return k===c.cnt&&(!c.type||hexType2(v,c))};
+   for(const[X,Y]of[[keep[0],keep[1]],[keep[1],keep[0]]]){const ux=X.c.pos.filter(p=>p>=0&&t0[p]<0);if(ux.length>10)continue;
+    const inX=new Set(ux),uy=Y.c.pos.filter(p=>p>=0&&t0[p]<0&&!inX.has(p));if(uy.length>10)continue;let ways=0,ok=true,lo=99,hi=-1;let one1=-1;const why=new Set();
+    for(let m=0;m<1<<ux.length&&ok;m++){const mp=new Map();ux.forEach((p,b)=>mp.set(p,m>>b&1));if(!fits(X.c,X.c.pos.map(p=>val(p,mp))))continue;ways++;one1=m===0?0:m===(1<<ux.length)-1?1:-1;
+     let k=0;for(const p of Y.c.pos){const v=val(p,mp);if(v>0)k++}const u=uy.length;lo=Math.min(lo,k);hi=Math.max(hi,k+u);
+     if(k>Y.c.cnt)why.add("veel");else if(k+u<Y.c.cnt)why.add("weinig");
+     else{let any=false;for(let q=0;q<1<<u&&!any;q++){const m2=new Map(mp);uy.forEach((p,b)=>m2.set(p,q>>b&1));if(fits(Y.c,Y.c.pos.map(p=>val(p,m2))))any=true}if(any)ok=false;else why.add("vorm")}}
+    if(!ok||!ways)continue;const sc=(why.size===1?0:10)+Math.min(ways,9);if(!pick||sc<pick.sc)pick={sc,X,Y,ways,why:[...why],lo,hi,ux,one1}}
+   if(pick){const{X,Y,ways,why:wy,lo,hi,ux,one1}=pick,nX=nmC(X),nY=nmC(Y),one=ways===1;
+    const kx=X.c.pos.filter(p=>p>=0&&t0[p]===1).length,rest=X.c.cnt-kx,fixY=Y.c.pos.every(p=>p<0||t0[p]>=0||ux.includes(p));
+    let tx=`Stel dat dit vakje ${col(1-f)} is.`;
+    if(one&&(one1===0||one1===1))tx+=` Dan moet${ux.length===1?" het laatste onbekende vakje":"en de andere "+ux.length+" onbekende vakjes"} van ${nX} ${col(one1)} zijn, anders klopt ${X.kind==="line"?"die lijn":"dat getal"} niet.`;
+    else if(ways<=4)tx+=` Dan kan ${nX} nog maar op ${one?"één manier":nw(ways)+" manieren"} kloppen.`;
+    else tx+=` Dan moet ${nX} nog ${rest} blauw${rest===1?" vakje":"e vakjes"} kwijt in ${ux.length} onbekende vakjes.`;
+    const C=one?"Maar dan":ways<=4?"Maar in elk van die gevallen":"Maar bij elke manier waarop dat kan";
+    const V=wy.length>1?`klopt ${nY} niet meer (${wy.map(w=>w==="veel"?"te veel blauwe vakjes":w==="weinig"?"te weinig blauwe vakjes":"de blauwe vakjes liggen niet goed").join(" of ")}).`
+     :wy[0]==="veel"?`krijgt ${nY} te veel blauwe vakjes: het moeten er ${Y.c.cnt} zijn, en het worden er ${fixY?"":"minstens "}${lo}.`
+     :wy[0]==="weinig"?`kan ${nY} niet meer aan ${Y.c.cnt} blauwe vakjes komen: het worden er ${fixY?"":"hooguit "}${hi}.`
+     :Y.c.type===1?`kunnen de blauwe vakjes van ${nY} niet meer aan elkaar liggen, terwijl de haakjes in ${clueTxt(Y.c)} dat vragen.`
+     :`liggen de blauwe vakjes van ${nY} juist allemaal aan elkaar, terwijl de streepjes in ${clueTxt(Y.c)} zeggen dat dat niet mag.`;
+    tx+=" "+C+" "+V;
+    return res([i],tx+` Dit vakje kan dus niet ${col(1-f)} zijn: het is ${col(f)}.`,ux)}}
   const names=keep.map(nmC);
   return res([i],`Hier moet je ${keep.length===2?"twee":"drie"} aanwijzingen samen bekijken: ${lst(names)} (paars omrand). Elk los kan nog op meer manieren, maar samen niet: als dit vakje ${col(1-f)} zou zijn, kunnen ze niet allemaal tegelijk kloppen. Probeer het maar: vul in gedachten de vakjes eromheen in. Dit vakje is dus ${col(f)}.`)}
  return null}
@@ -2473,9 +2508,11 @@ function rMur(){if(S._murMS){MURFIX=0;MURMS=S._murMS;rMur0();return}MURFIX=0;MUR
 function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const dark=isDark();
  const top=m.getBoundingClientRect().top+(window.scrollY||0),sw=$("#stage").clientWidth,wide=sw>=640;
  const pbh=$("#pbot")?$("#pbot").offsetHeight:0,availH=innerHeight-(m.getBoundingClientRect().top)-pbh-HINTPAD;
- const ms=MURMS|| (PHONE?Math.max(HINTPAD?20:30,Math.min(Math.floor((sw-8)/N),Math.floor(HINTPAD?(availH-14)/N:availH*.42/N))):Math.max(40,Math.min(100,wide?Math.min(Math.floor((availBot()+14-top-(NIEUW?165:150))/N)-MURFIX,Math.floor((sw-330)/N)):Math.floor((sw-8)/N))));MURMS=ms;
+ const ms=MURMS|| (PHONE?Math.max(HINTPAD?20:30,Math.min(Math.floor((sw-8)/N),Math.floor(HINTPAD?(availH-14)/N:availH*.55/N))):Math.max(40,Math.min(100,wide?Math.min(Math.floor((availBot()+14-top-(NIEUW?165:150))/N)-MURFIX,Math.floor((sw-330)/N)):Math.floor((sw-8)/N))));MURMS=ms;
  const main=document.createElement("div");main.id="mmain";const g=document.createElement("div");g.id="mgrid";g.style.gridTemplateColumns=`repeat(${N},${ms}px)`;g.style.setProperty("--ms",ms+"px");
- const first=[];p.reg.forEach((k,i)=>{if(first[k]===undefined)first[k]=i});
+ const first=[];{/* Naam van de ruimte op een plek waar hij past: het eerste vakje met genoeg ruimte naar rechts (anders het breedste stuk). */
+  const fs=Math.max(8,ms*.14),runOf=i=>{let n=1;while(i%N+n<N&&p.reg[i+n]===p.reg[i])n++;return n},best=[];
+  p.reg.forEach((k,i)=>{const need=Math.ceil((p.rooms[k].length*fs*.75+10)/ms),run=runOf(i),sc=Math.min(run,need);if(best[k]===undefined||sc>best[k]){best[k]=sc;first[k]=i}})}
  const thick="2.5px solid var(--fg)",thin="1px solid color-mix(in srgb,var(--fg) 16%,transparent)",edge=(i,j)=>p.reg[j]!==p.reg[i]?thick:thin;
  for(let i=0;i<N*N;i++){const k=p.reg[i],r=i/N|0,c=i%N,d=document.createElement("div");d.className="mc";d.dataset.i=i;
   d.style.background=`hsl(${HUES[k]},${dark?"30%,30%":"50%,87%"})`;
@@ -2494,7 +2531,7 @@ function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const 
  main.append(lg);m.append(main);
  const cl=document.createElement("div");cl.id="mclues";cl.innerHTML="<h2>Wie was waar?</h2>";const ol=document.createElement("ul");
  p.ppl.forEach((nm,s)=>{const li=document.createElement("li");li.dataset.c=s;const txt=s===p.V?"<b>Het slachtoffer.</b> Was alleen met de moordenaar.":p.cardTxt[s];
-  li.innerHTML=`${murTok(p,s,dark)}<span><b>${nm}</b> ${txt}</span>`;ol.append(li)});cl.append(ol);
+  li.innerHTML=`${murTok(p,s,dark)}<span><b>${nm}:</b> ${txt}</span>`;ol.append(li)});cl.append(ol);
  const acc=document.createElement("div");acc.id="macc";cl.append(acc);m.append(cl);
  g.onpointerdown=e=>{const d=e.target.closest&&e.target.closest("[data-i]");if(!d)return;e.preventDefault();const i=+d.dataset.i;
   const snap={cur:S.cur.slice(),ms:S.ms,h:S.hist.length,r:S.redo.slice()};murTap(i);
@@ -2958,8 +2995,7 @@ else{try{
   save:row=>f.setDoc(f.doc(db,"results",row.date+"_"+row.type+"_"+row.uid),row),
   listenFrom:(from,cb,err)=>f.onSnapshot(f.query(f.collection(db,"results"),f.where("date",">=",from)),s=>cb(s.docs.map(d=>d.data())),err),
   listen:(date,cb,err)=>f.onSnapshot(f.query(f.collection(db,"results"),f.where("date","==",date)),s=>cb(s.docs.map(d=>d.data())),err),
-  setStatus:st=>f.setDoc(f.doc(db,"status",st.group+"_"+st.uid),st),
-  listenStatus:(g,cb,err)=>f.onSnapshot(f.query(f.collection(db,"status"),f.where("group","==",g)),s=>cb(s.docs.map(d=>d.data())),err),
+  setStatus:st=>f.setDoc(f.doc(db,"status",st.group+"_"+st.uid),st),  listenStatus:(g,cb,err)=>f.onSnapshot(f.query(f.collection(db,"status"),f.where("group","==",g)),s=>cb(s.docs.map(d=>d.data())),err),
   /* Extra zekerheid: rechtstreeks bij de server ophalen (alleen de laatste twee dagen, dus weinig gegevens). */
   pollRecent:(from,g)=>Promise.all([f.getDocsFromServer(f.query(f.collection(db,"results"),f.where("date",">=",from))),f.getDocsFromServer(f.query(f.collection(db,"status"),f.where("group","==",g)))]).then(([a,b])=>({rows:a.docs.map(d=>d.data()),stat:b.docs.map(d=>d.data())}))};
  window.dispatchEvent(new Event("pdready"));
