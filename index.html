@@ -594,6 +594,7 @@ body.nieuw.home main,body.nieuw.home #pbot,body.nieuw.home #topbar,body.nieuw.ho
 .hpill{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,#c2255c 14%,var(--card));color:#c2255c;vertical-align:2px}
 .hgo{font-size:28px;color:var(--mut);font-weight:300}
 .hlinks{display:flex;gap:10px;flex-wrap:wrap}.hlinks button{padding:10px 14px;border-radius:14px}
+.hcontinue .hh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}.hcontinue .hh b{font-size:17px}.hcontlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:7px}.hcont{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid color-mix(in srgb,var(--line) 70%,transparent);border-radius:13px;background:color-mix(in srgb,var(--line) 12%,var(--card));box-shadow:none;text-align:left;min-width:0}.hcont:hover{background:color-mix(in srgb,var(--pc) 7%,var(--card));transform:none}.hcont .ctxt{min-width:0;flex:1}.hcont .ctxt b,.hcont .ctxt small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hcont .ctxt small{color:var(--mut);font-size:11px;margin-top:1px}.hcont .pdonut{width:32px;height:32px}
 @media(max-width:640px){#home .hgrid2{grid-template-columns:1fr}#home h2{font-size:22px}}
 /* Scorebord-pagina vanaf Vandaag */
 .sco .stop{display:flex;align-items:center;gap:12px}.sco #sBack{width:44px;height:44px;border-radius:14px;font-size:22px;padding:0;flex:none}
@@ -2905,8 +2906,11 @@ function updTop(){if(!S||!S.p)return;document.querySelectorAll("#pbot .pgrp").fo
  if(ti)ti.innerHTML=tIcon(t)+`<div><b>${TYPES[t]}</b><small>${sub}</small></div>`}
 function showHome(){if(HOMEREADY&&S&&S.p&&!S.done&&S.start){pausePlay();persist(true)}HVIEW="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.add("home");tapMode();renderHome();window.scrollTo(0,0)}
 function myDone(td,t){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))}
+function progressMeta(k,e){let m;if((m=/^d:(\\d{4}-\\d\\d-\\d\\d):([a-z0-9]+)(?:\\.(\\d))?$/.exec(k)))return{k,e,practice:false,date:m[1],type:m[2],lvl:+(m[3]||2),color:false};
+ if((m=/^p:([a-z0-9]+)(?:\\.(\\d))?(c)?$/.exec(k)))return{k,e,practice:true,date:dstr(),type:m[1],lvl:+(m[2]||2),color:!!m[3]};return null}
+function resumeProgress(k){const e=progAll()[k],m=progressMeta(k,e);if(!m)return;if(!m.practice){load(m.type,false,false,m.date);return}RANDOM=false;if(LVN[m.type]){LV[m.type]=m.lvl;lsSet("pdlvl",JSON.stringify(LV))}if(m.type==="nono"){nonoVariant=m.color?"color":"classic";lsSet("pdnvar",nonoVariant)}load(m.type,true,false)}
 /* Gewoon een puzzelsoort openen: is de dagpuzzel van vandaag al klaar, dan meteen een verse vrije puzzel. De knop Dagpuzzel blijft de expliciete weg terug. */
-function openType(t){const go=()=>myDone(dstr(),t)?load(t,true,true):load(t,false);return cloudProgOk()?pullCloudProgress(true).then(go,go):go()}
+function openType(t){const go=()=>myDone(dstr(),t)?load(t,true,true):load(t,false);if(!cloudProgOk()||navigator.onLine===false)return go();return Promise.race([pullCloudProgress(true),new Promise(r=>setTimeout(r,700))]).then(go,go)}
 let HVIEW="",SWK=0;
 function showScore(){HVIEW="score";SWK=0;renderHome();window.scrollTo(0,0)}
 function renderScore(h){const all=allRows(),rows=all.filter(r=>!isFree(r)),today=dstr(),dow=(new Date().getDay()+6)%7,mon0=addDays(today,-dow),TS=Object.keys(TYPES);
@@ -2953,6 +2957,8 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  const rowsT=lastRows.filter(r=>r.date===td&&!isFree(r)&&(r.group||"").toLowerCase()===g);
  const pa=progAll(),busyEntry=t=>{const ks=Object.keys(pa).filter(k=>k.startsWith("d:"+td+":"+t)&&(k===("d:"+td+":"+t)||k.charAt(("d:"+td+":"+t).length)==="."));if(!ks.length)return null;return ks.map(k=>pa[k]).sort((a,b)=>(b.at||0)-(a.at||0))[0]},myBusy=t=>!!busyEntry(t);
  const progRing=(p,t)=>p==null?"":`<span class="pdonut" style="--p:${p};--ring:${TCOL[t]||"var(--pc)"}"><b>${p}%</b></span>`;
+ const active=Object.entries(pa).map(([k,e])=>progressMeta(k,e)).filter(m=>m&&progressRelevant(m.k)&&!progressSolved(m.k,m.e)).sort((a,b)=>(b.e.at||0)-(a.e.at||0));
+ const activeHtml=active.length?`<div class="hcard hcontinue"><div class="hh"><b>Verder puzzelen</b><span class="mut">${active.length} ${active.length===1?"puzzel":"puzzels"} bezig</span></div><div class="hcontlist">${active.map(m=>{const when=m.practice?"Vrij puzzelen":m.date===td?"Vandaag":dnl(m.date),sub=when+(LVN[m.type]?" · "+LVL[m.lvl]:"")+(m.type==="nono"&&m.color?" · kleur":"");return`<button class="hcont" data-pk="${m.k}" title="Ga verder met ${TYPES[m.type]||m.type}">${tIcon(m.type)}<span class="ctxt"><b>${TYPES[m.type]||m.type}</b><small>${sub}</small></span>${progRing(m.e.pc==null?0:m.e.pc,m.type)}</button>`}).join("")}</div></div>`:"";
  const tm=s=>TSHOW&&s?fmt(s):"";
  const st=(who,t)=>{if(who===uid){const k=myDone(td,t);if(k)return{c:"ok",x:tm(store[k])||"klaar",b:XS[k]?badges(XS[k],t):""};const e=busyEntry(t);if(e)return{c:"busy",x:e.pc!=null?"bezig":"bezig",pc:e.pc};return{c:"",x:"nog niet"}}
   const r=rowsT.find(r=>r.uid===who&&String(r.type).split(".")[0]===t);if(r){const mine=myDone(td,t);return{c:"ok",x:mine&&store[mine]?(tm(r.secs)||"klaar"):"klaar",b:badges(r,t)}}
@@ -2965,12 +2971,14 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  h.innerHTML=`<div class="hwrap"><div class="hbrand"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Gepuzzellig</span></div><div class="htop"><div><h2>${groet} ${me}</h2><div class="mut">${datum[0].toUpperCase()+datum.slice(1)}</div></div></div>
  <div class="hgrid2"><div class="hcard feat" style="--tc:${TCOL[ft]}"><div class="mut">⭐ Puzzel van vandaag</div><div class="fr">${tIcon(ft,1)}<div><b>${TYPES[ft]}</b><div class="mut">${LVN[ft]?LVL[dagLv(ft,td)]+" · "+LVS[ft][dagLv(ft,td)]:""}${isWk(td)?" · weekend 💪":""}</div></div><button class="hbtn" id="hBegin">${fk?"Nog een":fb?"Verder"+(fbe&&fbe.pc!=null?" · "+fbe.pc+"%":""):"Beginnen"}</button></div></div>
  <div class="hcard streak"><div class="big">🔥 ${strk}</div><div class="mut">${strk===1?"dag":"dagen"} op rij</div><div class="hst"><b>🧩 ${allH.length}</b><span>deze maand</span><small>${hDay} dag · ${hFree} vrij</small></div></div></div>
+ ${activeHtml}
  <div class="hgrid2">${lijst(uid,"Jij vandaag")}${others.map(o=>lijst(uidOf(o),o+" vandaag")).join("")}</div>
  <h3>Alle puzzels</h3><div class="tiles">${Object.keys(TYPES).map(t=>`<button class="tile" data-t="${t}" style="--tc:${TCOL[t]}">${tIcon(t,1)}<span>${TYPES[t]}</span><small class="tcount">${hPer[t]||0} deze maand</small>${myDone(td,t)?'<i class="tok2">✓</i>':(!myDone(td,t)&&busyEntry(t)&&busyEntry(t).pc!=null?progRing(busyEntry(t).pc,t):"")}${t===ft?'<i class="tst">⭐</i>':""}</button>`).join("")}</div>
  <a class="hcard hraad" href="raadsels.html"><span class="ticon big" style="background:#c2255c">÷</span><div><b>Rekenraadsel van vandaag</b> <span class="hpill">proefversie</span><div class="mut">Eén 3F-rekenraadsel per dag, met kladpapier en rekenmachine. Telt nog niet mee op het scorebord.</div></div><span class="hgo">›</span></a>
  <div class="hlinks"><button id="hScore">📊 Scorebord en weekoverzicht</button><button id="hFree" title="Steeds een willekeurige puzzelsoort">🎲 Vrij puzzelen (willekeurig)</button></div></div>`;
  $("#hBegin").onclick=()=>openType(ft);
  h.querySelectorAll(".tile,.hrow").forEach(b=>b.onclick=()=>openType(b.dataset.t));
+ h.querySelectorAll(".hcont[data-pk]").forEach(b=>b.onclick=()=>{const go=()=>resumeProgress(b.dataset.pk);if(!cloudProgOk()||navigator.onLine===false)go();else Promise.race([pullCloudProgress(true),new Promise(r=>setTimeout(r,700))]).then(go,go)});
  $("#hScore").onclick=showScore;$("#hFree").onclick=()=>{const t=rndType("");load(t,true,true);RANDOM=true}}
 if(NIEUW)nieuwLayout();
 {const td=dstr(),ft=featOf(td),first=lsGet("pdfeat")!==td;lsSet("pdfeat",td);
@@ -3024,7 +3032,7 @@ else{try{
   setStatus:st=>f.setDoc(f.doc(db,"status",st.group+"_"+st.uid),st,{merge:true}),
   listenStatus:(g,cb,err)=>f.onSnapshot(f.query(f.collection(db,"status"),f.where("group","==",g)),s=>cb(s.docs.map(d=>d.data())),err),
   saveProgress:o=>f.setDoc(f.doc(db,"status",o.group+"_"+o.uid),{uid:o.uid,group:o.group,name:o.name,progress:{[o.ck]:o.entry}},{merge:true}),
-  clearProgress:o=>f.setDoc(f.doc(db,"status",o.group+"_"+o.uid),{progress:{[o.ck]:null}},{merge:true}),
+  clearProgress:o=>f.setDoc(f.doc(db,"status",o.group+"_"+o.uid),{progress:{[o.ck]:f.deleteField()}},{merge:true}),
   getProgress:(g,u)=>f.getDocFromServer(f.doc(db,"status",g+"_"+u)).then(d=>d.exists()?(d.data().progress||{}):{}),
   /* Extra zekerheid: rechtstreeks bij de server ophalen (alleen de laatste twee dagen, dus weinig gegevens). */
   pollRecent:(from,g)=>Promise.all([f.getDocsFromServer(f.query(f.collection(db,"results"),f.where("date",">=",from))),f.getDocsFromServer(f.query(f.collection(db,"status"),f.where("group","==",g)))]).then(([a,b])=>({rows:a.docs.map(d=>d.data()),stat:b.docs.map(d=>d.data())}))};
