@@ -507,6 +507,33 @@ body.phone #shortcuts{display:none}
 body.phone #msg:not(:empty){padding:3px 8px;font-size:12px;max-width:92vw}
 @media(max-width:430px){.kgrid{grid-template-columns:1fr}}
 
+/* ===== Kleur Nonogram ===== */
+:root{--nc1:#d9564f;--nc2:#347fcf;--nc3:#e5b72d;--nc4:#3f9968}
+#nvariant{display:none;gap:3px;padding:3px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--line) 20%,var(--card))}
+#nvariant button{box-shadow:none!important;border:0;border-radius:12px;padding:7px 10px;background:transparent;color:var(--fg);font-size:13px;font-weight:800}
+#nvariant button.on{background:var(--card);color:var(--pc);box-shadow:0 1px 4px var(--sh)!important}
+#nmode .ncb{display:none;align-items:center;justify-content:center;gap:6px;min-width:46px}
+#nmode .ncb i{display:block;width:16px;height:16px;border-radius:5px;background:var(--cc);box-shadow:inset 0 0 0 1px rgba(0,0,0,.16)}
+#nc1{--cc:var(--nc1)}#nc2{--cc:var(--nc2)}#nc3{--cc:var(--nc3)}#nc4{--cc:var(--nc4)}
+#nmode .ncb.on{background:color-mix(in srgb,var(--cc) 24%,var(--card));border-color:var(--cc)!important;color:var(--fg);box-shadow:inset 0 0 0 2px var(--cc)!important}
+#grid.ncolor .c{transition:background-color .12s,transform .1s}
+#grid.ncolor .c.nc1{background:var(--nc1)!important}
+#grid.ncolor .c.nc2{background:var(--nc2)!important}
+#grid.ncolor .c.nc3{background:var(--nc3)!important}
+#grid.ncolor .c.nc4{background:var(--nc4)!important}
+#grid.ncolor .c[class*="nc"]{color:transparent}
+#grid .ncv{display:flex;gap:3px;align-items:center}
+#grid .k .ncv.col{flex-direction:column;justify-content:flex-end}
+#grid .k.r .ncv{flex-direction:row;justify-content:flex-end;flex-wrap:wrap}
+#grid .ncl{display:inline-flex!important;align-items:center;justify-content:center;min-width:21px;height:21px;padding:0 5px;border-radius:7px;background:var(--cc);color:#fff!important;font-size:12px;font-weight:900;line-height:1;opacity:1!important}
+#grid .ncl.c1{--cc:var(--nc1)}#grid .ncl.c2{--cc:var(--nc2)}#grid .ncl.c3{--cc:var(--nc3);color:#25210d!important}#grid .ncl.c4{--cc:var(--nc4)}
+#grid .ncl.dn{opacity:.28!important}
+body.phone #nvariant{padding:2px;gap:2px;border-radius:14px}
+body.phone #nvariant button{padding:7px 6px;font-size:11px}
+body.phone #nmode .ncb{min-width:38px;padding:8px 4px}
+body.phone #nmode .ncb span{display:none}
+body.phone #nmode .ncb i{width:20px;height:20px;border-radius:6px}
+@media(max-width:430px){body.phone #nvariant button{font-size:10px;padding:6px 4px}body.phone #nmode .ncb{min-width:34px}}
 /* ===== Verfijningslaag 2: appgevoel + toetsenbord ===== */
 .modeflash{animation:modeflash .22s ease-out}
 @keyframes modeflash{0%{transform:scale(.96)}55%{transform:scale(1.035)}100%{transform:scale(1)}}
@@ -704,7 +731,7 @@ window.FIREBASE_CONFIG={
 <main>
 <aside id="rail" aria-label="Puzzelgereedschap"><div id="time" role="button" tabindex="0" aria-label="Tijd tonen of verbergen">0:00</div><div id="streak">🔥 <b>0</b> dagen reeks</div><div id="msg" role="status" aria-live="polite" aria-atomic="true"></div>
 <div id="tools"><button id="undo" title="Ongedaan maken (Ctrl/Cmd+Z)"><b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></b><span>Ongedaan</span></button><button id="redo" title="Opnieuw (Ctrl/Cmd+Shift+Z)"><b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></b><span>Opnieuw</span></button><button id="reset" title="Puzzel opnieuw beginnen"><b>⟲</b><span>Reset</span></button></div>
-<div id="hexbtns"><div id="hexstat"></div><button id="mb" class="on" title="Blauw (Spatie wisselt)">🔵 Blauw</button><button id="mz" title="Zwart (Spatie wisselt)">⚫ Zwart</button></div><div id="nmode" aria-label="Invulstand"><button id="nf" class="on" title="Vullen (Spatie wisselt)">■ Vullen</button><button id="nx" title="Kruisje (Spatie wisselt)">✕ Kruisje</button></div><div id="pmode" aria-label="Markeerstand"><button id="pxb" class="on" title="Wegstrepen (Spatie wisselt)">✕ Wegstrepen</button><button id="pob" title="Omcirkelen (Spatie wisselt)">○ Omcirkelen</button></div><button id="potb" title="Aantekeningen (A)">✏️ Potlood</button><button id="notewipe" title="Alle potloodnotities wissen">🧹 Wis notities</button><button id="hintb" title="Hint (H)">💡 Hint</button><button id="chk" title="Controleer (C)">✓ Controleer</button><button id="helpb" title="Uitleg over deze puzzel">❓ Uitleg</button></aside>
+<div id="hexbtns"><div id="hexstat"></div><button id="mb" class="on" title="Blauw (Spatie wisselt)">🔵 Blauw</button><button id="mz" title="Zwart (Spatie wisselt)">⚫ Zwart</button></div><div id="nvariant" aria-label="Nonogramvariant"><button id="nvclassic" class="on">Klassiek</button><button id="nvcolor">Kleur</button></div><div id="nmode" aria-label="Invulstand"><button id="nf" class="on" title="Vullen (Spatie wisselt)">■ Vullen</button><button id="nc1" class="ncb" title="Rood"><i></i><span>Rood</span></button><button id="nc2" class="ncb" title="Blauw"><i></i><span>Blauw</span></button><button id="nc3" class="ncb" title="Geel"><i></i><span>Geel</span></button><button id="nc4" class="ncb" title="Groen"><i></i><span>Groen</span></button><button id="nx" title="Kruisje (Spatie wisselt)">✕ Kruisje</button></div><div id="pmode" aria-label="Markeerstand"><button id="pxb" class="on" title="Wegstrepen (Spatie wisselt)">✕ Wegstrepen</button><button id="pob" title="Omcirkelen (Spatie wisselt)">○ Omcirkelen</button></div><button id="potb" title="Aantekeningen (A)">✏️ Potlood</button><button id="notewipe" title="Alle potloodnotities wissen">🧹 Wis notities</button><button id="hintb" title="Hint (H)">💡 Hint</button><button id="chk" title="Controleer (C)">✓ Controleer</button><button id="helpb" title="Uitleg over deze puzzel">❓ Uitleg</button></aside>
 <section id="stage">
 <div id="grid"></div><div id="pad"></div><div id="m24"></div><div id="mur"></div><div id="hexw"><div id="hexsvg"></div></div></section>
 <aside id="rail2"><div id="segrow"><div id="seg"><button id="today">Dagpuzzel</button><button id="prac">Vrij puzzelen</button></div><button id="next">Nog een puzzel ➜</button><div id="lvl"></div></div></aside>
@@ -964,6 +991,39 @@ function genNono(R,lv,hard){const[W,H]={1:[8,5],2:[15,10],3:[20,14],4:[5,8],5:[8
    const cs=colsOf(s,W,H);for(let c=0;c<W;c++)ls(cc[c],cs[c]).forEach((v,r)=>{if(v!==s[r*W+c]){s[r*W+c]=v;ch=1}})}
   if(!s.includes(0))return{N,W,H,rc,cc,sol:g}}
  return{N,W,H,rc:rowsOf(g,W,H).map(lc),cc:colsOf(g,W,H).map(lc),sol:g}}
+
+
+/* ---------- Kleur Nonogram ---------- */
+const NCN=["","rood","blauw","geel","groen"];
+const nonoColorCount=lv=>(lv===1||lv===4)?2:(lv===2||lv===5)?3:4;
+function cnClue(a){const o=[];let c=0,n=0;for(const v of a.concat(0)){if(v&&v===c)n++;else{if(c)o.push({n,c});c=v;n=v?1:0}}return o}
+function cnEq(a,b){return a.length===b.length&&a.every((x,i)=>x.n===b[i].n&&x.c===b[i].c)}
+function cnText(cl){return cl.length?cl.map(x=>NCN[x.c]+" "+x.n).join(", "):"0"}
+function cnLine(cl,cur,limit){limit=limit||80000;const n=cur.length,K=cl.length,pat=Array(n).fill(-1),starts=Array(K).fill(0),mn=Array(K).fill(1e9),mx=Array(K).fill(-1),fix=Array(n).fill(0);let cnt=0,overflow=false;
+ const tail=b=>{let z=0;for(let j=b;j<K;j++){z+=cl[j].n;if(j<K-1&&cl[j].c===cl[j+1].c)z++}return z};
+ const record=()=>{cnt++;if(cnt>limit){overflow=true;return}for(let j=0;j<K;j++){mn[j]=Math.min(mn[j],starts[j]);mx[j]=Math.max(mx[j],starts[j])}if(cnt===1){for(let i=0;i<n;i++)fix[i]=pat[i]}else for(let i=0;i<n;i++)if(fix[i]!==pat[i])fix[i]=0};
+ const rec=(b,p)=>{if(overflow)return;if(b===K){for(let k=p;k<n;k++)if(cur[k]>0)return;record();return}
+  const q=cl[b],gap=b<K-1&&q.c===cl[b+1].c?1:0,rest=tail(b+1);
+  for(let s=p;s+q.n+gap+rest<=n;s++){let ok=true;for(let k=p;k<s;k++)if(cur[k]>0){ok=false;break}if(!ok)break;
+   for(let k=s;k<s+q.n;k++)if(cur[k]===-1||(cur[k]>0&&cur[k]!==q.c)){ok=false;break}if(!ok)continue;
+   if(gap&&s+q.n<n&&cur[s+q.n]>0)continue;starts[b]=s;for(let k=s;k<s+q.n;k++)pat[k]=q.c;rec(b+1,s+q.n+gap);for(let k=s;k<s+q.n;k++)pat[k]=-1;if(overflow)return}
+ };
+ rec(0,0);return{cnt:overflow?limit+1:cnt,overflow,fix,mn,mx}}
+function cnHuman(p){const W=p.W,H=p.H,cur=Array(W*H).fill(0);let steps=0,passes=0,maxWays=0;
+ for(let z=0;z<250;z++){let ch=0;passes++;
+  for(let r=0;r<H;r++){const idx=Array.from({length:W},(_,x)=>r*W+x),q=cnLine(p.rc[r],idx.map(i=>cur[i]));if(!q.cnt||q.overflow)return{solved:false,cur,steps,passes,maxWays};maxWays=Math.max(maxWays,q.cnt);q.fix.forEach((v,k)=>{const i=idx[k];if(cur[i]===0&&v!==0){cur[i]=v;steps++;ch++}})}
+  for(let x=0;x<W;x++){const idx=Array.from({length:H},(_,r)=>r*W+x),q=cnLine(p.cc[x],idx.map(i=>cur[i]));if(!q.cnt||q.overflow)return{solved:false,cur,steps,passes,maxWays};maxWays=Math.max(maxWays,q.cnt);q.fix.forEach((v,k)=>{const i=idx[k];if(cur[i]===0&&v!==0){cur[i]=v;steps++;ch++}})}
+  if(!ch)break}
+ const solved=cur.every((v,i)=>v===(p.sol[i]||-1));return{solved,cur,steps,passes,maxWays}}
+function cnFallback(W,H,K){const sol=Array(W*H).fill(0),bands=[];for(let c=0;c<K;c++){let x=Math.round((c+1)*W/(K+1));while(bands.includes(x)&&x+1<W)x++;bands.push(x);for(let r=0;r<H;r++)sol[r*W+x]=c+1}return sol}
+function genColorNono(R,lv,hard){const base=genNono(R,lv,hard),W=base.W,H=base.H,K=nonoColorCount(lv),mask=base.sol;let best=null,bs=-1;
+ for(let t=0;t<180;t++){const ctr=Array.from({length:K},(_,k)=>({x:(k+.35+R()*.3)*W/K,y:(.18+R()*.64)*H,w:.8+R()*.5})),sol=Array(W*H).fill(0),use=Array(K+1).fill(0);
+  for(let i=0;i<sol.length;i++)if(mask[i]){const r=i/W|0,x=i%W;let bc=1,bd=1e9;for(let k=0;k<K;k++){const a=ctr[k],d=((x+.5-a.x)/(W/K*a.w))**2+((r+.5-a.y)/(H*.65))**2+(R()-.5)*.035;if(d<bd){bd=d;bc=k+1}}sol[i]=bc;use[bc]++}
+  if(use.slice(1).some(n=>n<2))continue;const p={N:W,W,H,K,color:1,rc:rowsOf(sol,W,H).map(cnClue),cc:colsOf(sol,W,H).map(cnClue),sol,pic:base.pic||""},rt=cnHuman(p);if(!rt.solved)continue;
+  let trans=0;for(let r=0;r<H;r++)for(let x=1;x<W;x++){const a=sol[r*W+x-1],b=sol[r*W+x];if(a&&b&&a!==b)trans++}
+  const target=(lv===1||lv===4)?3:(lv===2||lv===5)?7:11,sc=100-Math.abs(trans-target)+Math.min(20,rt.passes);if(sc>bs){bs=sc;best=p;best.rate=rt.steps+"/"+rt.passes+" c"+K}if(sc>108)break}
+ if(best)return best;
+ const sol=cnFallback(W,H,K);return{N:W,W,H,K,color:1,rc:rowsOf(sol,W,H).map(cnClue),cc:colsOf(sol,W,H).map(cnClue),sol,rate:"fallback"}}
 
 /* ---------- Kakuro ---------- */
 let KW=8;
@@ -1433,7 +1493,7 @@ const HELP={
  star:"Zet in elke rij, elke kolom en elk gekleurd gebied precies __K__ __S__. Sterren raken elkaar nooit, ook niet diagonaal. Tik: ✕ (geen ster), dan ★, dan leeg.",
  nono:"De getallen geven de lengtes van de blokken gevulde vakjes in die rij of kolom, in volgorde. Kies links ■ Vullen of ✕ Kruisje, of tik naast het veld (met je vinger of de Pencil) om te wisselen. Tik op een vakje om het te vullen of een kruisje te zetten, nog eens tikken maakt het weer leeg. Slepen werkt in dezelfde stand. Klopt een rij of kolom precies met de getallen, dan worden de lege vakjes daarin vanzelf kruisjes en wordt het getal lichter. Tik op een getal om alle lege vakjes in die rij of kolom kruisjes te maken.",
  kak:"Vul cijfers 1 t/m 9 in. De getallen in de zwarte vakjes zijn de som van het stuk rechts (bovenste getal) of eronder (onderste getal). Binnen één som komt elk cijfer maar één keer voor.",
- hex:"Elk vakje is blauw of zwart. Een zwart vakje met een getal vertelt hoeveel van zijn 6 buren blauw zijn. {3} betekent dat die blauwe buren aan elkaar liggen, -3- dat ze niet allemaal aan elkaar liggen. Een zwart vakje met ? zegt niets. Een blauw vakje met een getal vertelt hoeveel vakjes in het gebied eromheen (tot twee vakjes ver, het vakje zelf telt niet mee) blauw zijn. Sommige blauwe vakjes laten pas een getal zien als je ze gevonden hebt. Tik met Blauw op zo'n getal om de zone te tonen: een lichte zeshoek met een witte rand. Waar zones overlappen wordt het nog lichter. Zwart maakt het getal lichter als je er klaar mee bent. Getallen buiten het veld gelden voor de hele lijn in de richting van de pijl. Kies Blauw en tik op zo'n getal om een lichte lijn door die vakjes te zetten; tik nog een keer om hem weg te halen. Kies Zwart en tik op het getal als je klaar bent met die lijn: de lijn verdwijnt en het getal wordt lichter. Kies Blauw of Zwart en tik op een oranje vakje. Tik naast het veld (met je vinger of de Pencil) om te wisselen tussen Blauw en Zwart. Een fout kost 20 seconden.",
+ hex:"Elk vakje is blauw of zwart. Een zwart vakje met een getal vertelt hoeveel van zijn 6 buren blauw zijn. {3} betekent dat die blauwe buren aan elkaar liggen, -3- dat ze niet allemaal aan elkaar liggen. Een zwart vakje met ? zegt niets. Een blauw vakje met een getal vertelt hoeveel vakjes in het gebied eromheen (tot twee vakjes ver, het vakje zelf telt niet mee) blauw zijn. Sommige blauwe vakjes laten pas een getal zien als je ze gevonden hebt. Tik met Blauw op zo'n getal om de zone te tonen: een lichte zeshoek met een witte rand. Waar zones overlappen wordt het nog lichter. Zwart maakt het getal lichter als je er klaar mee bent. Getallen buiten het veld gelden voor de hele lijn in de richting van de pijl. Kies Blauw en tik op zo'n getal om een lichte lijn door die vakjes te zetten; tik nog een keer om hem weg te halen. Kies Zwart en tik op het getal als je klaar bent met die lijn: de lijn verdwijnt en het getal wordt lichter. Kies Blauw of Zwart en tik op een oranje vakje. Tik naast het veld (met je vinger of de Pencil) om te wisselen tussen Blauw en Zwart.",
  mur:"Er is een moord gepleegd. Zet iedereen op zijn plek, ook het slachtoffer (💀). In elke rij en elke kolom staat precies één persoon. Kies iemand onderaan en tik op een vakje. Weet je zeker dat er ergens niemand kan staan? Kies ✕ Kruisje en tik op dat vakje (nog eens tikken haalt het weg). Naast het bord tikken wisselt ook tussen kruisjes en personen. Foutje? Tik op iemand op het bord: dan is het vakje weer leeg en is die persoon meteen gekozen, zodat je hem ergens anders kunt neerzetten. In de rij en kolom van iemand die staat, komen vanzelf kruisjes. Op stoelen, bedden en banken kun je zitten; op de andere voorwerpen kan niemand staan. Naast betekent recht ernaast in dezelfde ruimte, dus niet schuin en niet door een muur. Alleen betekent: niemand anders in dezelfde ruimte. Tik op een kaartje om het door te strepen. De moordenaar was alleen met het slachtoffer: als iedereen goed staat, wijs je hem aan.",
  plus:"Elk getal blijft staan of moet weg. De getallen die blijven staan tellen per rij op tot de som rechts, en per kolom tot de som onder. Op Moeilijk zijn er ook gekleurde vlakken: daarin tellen ze op tot het kleine getal in de hoek van het vlak. Kies ✕ Wegstrepen of ○ Omcirkelen (dat getal blijft zeker staan), of tik naast het veld (met je vinger of de Pencil) om te wisselen. Tik op een getal, nog eens tikken maakt het weer open. Open betekent: nog niet weggestreept en niet omcirkeld. Slepen werkt in dezelfde stand. Tik op een som om er een schuine streep door te zetten als je klaar bent met die rij of kolom; nog eens tikken haalt hem weg. De app rekent niet mee en vult niets vanzelf in. Je bent klaar als alle sommen kloppen.",
  m24:"Maak met alle vier de getallen precies 24. Tik een getal, een bewerking en een tweede getal. Er zijn 5 rondes en je totaaltijd telt."};
@@ -1459,6 +1519,7 @@ try{store=JSON.parse(localStorage.getItem("pd2")||"{}")}catch(e){}
 const save=()=>{try{localStorage.setItem("pd2",JSON.stringify(store))}catch(e){}};
 let uid="x";
 const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+let nonoVariant=lsGet("pdnvar")==="color"?"color":"classic";
 /* iPhone (of andere kleine telefoon): eigen indeling en eigen puzzelformaten (niveau 4-6, hoger dan breed).
    Testen op de computer kan met ?tel=1 achter de link, uitzetten met ?tel=0. */
 /* De nieuwe indeling (Vandaag-scherm) is nu standaard. Met ?oud=1 krijg je nog de oude indeling. */
@@ -1494,10 +1555,10 @@ $("#time").onclick=()=>{TSHOW=!TSHOW;lsSet("pdtime",TSHOW?"1":"0");setT(lastT)};
 const isFree=r=>/^v~/.test(r.type);
 function freeLoc(){try{return JSON.parse(lsGet("pdfree")||"[]")}catch(e){return[]}}
 /* Gemaakte puzzels bewaren (de laatste 16), zodat terugkomen op een puzzel meteen gaat. GV ophogen als een generator verandert. */
-const GV="g12";
-function genCached(type,seed,lv,hard){const k=GV+(type==="mur"?MGV:type==="plus"?PGV:"")+"|"+type+"|"+seed+"|"+lv+(hard?"|w":"");let all={};try{all=JSON.parse(lsGet("pdgen")||"{}")}catch(e){all={}}
+const GV="g13";
+function genCached(type,seed,lv,hard,nv){const vk=type==="nono"&&nv==="color"?"|color":"";const k=GV+(type==="mur"?MGV:type==="plus"?PGV:"")+"|"+type+"|"+seed+"|"+lv+(hard?"|w":"")+vk;let all={};try{all=JSON.parse(lsGet("pdgen")||"{}")}catch(e){all={}}
  if(all[k])try{return JSON.parse(all[k])}catch(e){}
- const p=GEN[type](rng(hash(seed)),lv,!!hard);try{all[k]=JSON.stringify(p);const ks=Object.keys(all);for(const x of ks.slice(0,Math.max(0,ks.length-16)))delete all[x];lsSet("pdgen",JSON.stringify(all))}catch(e){}
+ const p=type==="nono"&&nv==="color"?genColorNono(rng(hash(seed+"|color")),lv,!!hard):GEN[type](rng(hash(seed)),lv,!!hard);try{all[k]=JSON.stringify(p);const ks=Object.keys(all);for(const x of ks.slice(0,Math.max(0,ks.length-16)))delete all[x];lsSet("pdgen",JSON.stringify(all))}catch(e){}
  return p}
 /* Weekend (zaterdag en zondag): de dagpuzzel is wat pittiger. Het archief: dagpuzzels van de afgelopen week alsnog doen. */
 const isWk=ds=>{const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay();return w===0||w===6};
@@ -2661,7 +2722,7 @@ function phoneLayout(){document.body.classList.add("phone");const hd=$("header")
  const prow=document.createElement("div");prow.id="prow";main.insertBefore(prow,main.firstChild);
  const pbot=document.createElement("div");pbot.id="pbot";document.body.append(pbot);
  prow.append($("#seg"),$("#arch"),$("#lvl"),$("#next"),$("#hexstat"),$("#msg"));
- pbot.append($("#undo"),$("#redo"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✏️";$("#notewipe").innerHTML="🧹";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
+ pbot.append($("#undo"),$("#redo"),$("#nvariant"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✏️";$("#notewipe").innerHTML="🧹";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
  pmp.append($("#helpb"),$("#reset"),$("#time"),$("#streak"),$("#theme"),$("#who"));
  $("#chk").innerHTML="✓<span> Klopt?</span>";$("#hintb").innerHTML="💡<span> Hint</span>";$("#today").textContent="Dag";$("#prac").textContent="Vrij";
  pm.onclick=()=>pmp.classList.toggle("open");pmp.addEventListener("click",e=>{if(e.target.closest("button"))setTimeout(()=>pmp.classList.remove("open"),80)});
@@ -2683,7 +2744,7 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
   $("main").before(tb);$("#tbMid").append($("#msg"),$("#hexstat"),$("#time"));
   const pbot=document.createElement("div");pbot.id="pbot";document.body.append(pbot);
   const g1=document.createElement("div");g1.className="pgrp g1";g1.append($("#undo"),$("#redo"));
-  const g2=document.createElement("div");g2.className="pgrp modes";g2.append($("#nmode"),$("#pmode"),$("#mb"),$("#mz"));
+  const g2=document.createElement("div");g2.className="pgrp modes";g2.append($("#nvariant"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"));
   const g3=document.createElement("div");g3.className="pgrp";g3.append($("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));
   pbot.append(g1,g2,g3);
   const more=document.createElement("div");more.id="more";document.body.append(more);
