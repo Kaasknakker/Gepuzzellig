@@ -222,6 +222,7 @@ svg.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.3;st
 #hintb{padding:16px 10px;font-size:18px;font-weight:800;background:var(--pc);border-color:var(--pc);color:#fff;box-shadow:0 4px 0 color-mix(in srgb,var(--pc) 55%,#000)}
 #hintb:active:not(:disabled){box-shadow:0 2px 0 color-mix(in srgb,var(--pc) 55%,#000)}
 #stage{display:flex;flex-direction:column;align-items:center;min-width:0}
+#playbox{display:flex;flex-direction:column;align-items:center;max-width:100%;transform-origin:center center}
 #seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;gap:4px}
 #seg button{box-shadow:none;background:transparent;border-color:transparent;border-radius:999px;padding:8px 20px}
 #seg button.on{background:var(--pc);color:#fff}
@@ -631,6 +632,7 @@ body.nieuw.home main,body.nieuw.home #pbot,body.nieuw.home #topbar,body.nieuw.ho
 body.tablet header,body.tablet #rail,body.tablet #rail2{display:none!important}
 body.tablet main{display:block;padding:6px 16px 96px;max-width:none}
 body.tablet #stage{width:auto}
+body.tablet #playbox{width:max-content;max-width:none}
 #topbar{display:none}
 body.tablet #topbar{display:flex;align-items:center;gap:12px;padding:8px max(16px,env(safe-area-inset-left)) 6px;position:sticky;top:0;z-index:30;background:var(--bg)}
 #topbar>button{width:44px;height:44px;border-radius:14px;font-size:22px;padding:0;flex:none}
@@ -698,7 +700,7 @@ body.tablet #side{position:fixed;top:58px;right:12px;width:380px;max-height:calc
 #sideX{display:none}body.nieuw #sideX{display:block;float:right;width:36px;height:36px;padding:0;margin:-4px -6px 6px 8px;border-radius:50%;font-size:16px;box-shadow:none}
 body.nieuw.home #side.open{display:block;position:fixed;top:20px;right:12px;width:min(420px,calc(100vw - 24px));max-height:calc(100vh - 40px);overflow:auto;z-index:60}
 /* Hint als paneel rechts */
-body.tablet.hintside #stage{margin-right:370px}
+body.tablet.hintside #stage{margin-right:0}
 body.tablet #hint.side{position:fixed!important;top:62px!important;right:max(12px,env(safe-area-inset-right))!important;left:auto!important;bottom:84px!important;width:350px!important;max-height:none!important;transform:none!important;overflow:auto;border-radius:20px;border-top:6px solid var(--pc);display:block}
 body.tablet #hint.side button:not(.hx){width:100%;padding:12px;margin-top:10px}
 /* Telefoon */
@@ -707,7 +709,7 @@ body.phone.nieuw #tbHome{padding:4px 10px;font-size:18px;border-radius:999px;box
 /* Subtiele micro-animaties + iOS: geen grijze tap-highlight die bij navigatie blijft hangen. */
 html,body,button,a,input,label,select,summary,[role="button"],.tile,.hrow,.hcard{-webkit-tap-highlight-color:transparent}
 button,a{-webkit-touch-callout:none}
-body.tablet #stage{transition:margin-right .18s cubic-bezier(.2,.75,.25,1)}
+body.tablet #playbox{transition:transform .18s cubic-bezier(.2,.75,.25,1);will-change:transform}
 #hint{animation:hintFadeIn .16s ease-out}
 #hint.closing{animation:hintFadeOut .12s ease-in forwards}
 body.tablet #hint.side{animation:hintSideIn .18s cubic-bezier(.2,.75,.25,1)}
@@ -726,7 +728,7 @@ body.tablet #more.open,body.tablet #side.open{animation:panelIn .16s cubic-bezie
 @keyframes cardUp{from{opacity:0;transform:translateX(-50%) translateY(8px) scale(.99)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
 @keyframes cardIn{from{opacity:0;transform:translateY(6px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){
- body.tablet #stage{transition:none!important}
+ body.tablet #playbox{transition:none!important}
  #hint,#hint.closing,body.tablet #hint.side,body.tablet #hint.side.closing,body.tablet #more.open,body.tablet #side.open,#fin:not([hidden]),#hm:not([hidden]) .hc{animation:none!important}
 }
 </style>
@@ -749,8 +751,8 @@ window.FIREBASE_CONFIG={
 <aside id="rail" aria-label="Puzzelgereedschap"><div id="time" role="button" tabindex="0" aria-label="Tijd tonen of verbergen">0:00</div><div id="streak">🔥 <b>0</b> dagen reeks</div><div id="msg" role="status" aria-live="polite" aria-atomic="true"></div>
 <div id="tools"><button id="undo" title="Ongedaan maken (Ctrl/Cmd+Z)"><b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></b><span>Ongedaan</span></button><button id="redo" title="Opnieuw (Ctrl/Cmd+Shift+Z)"><b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></b><span>Opnieuw</span></button><button id="reset" title="Puzzel opnieuw beginnen"><b>⟲</b><span>Reset</span></button></div>
 <div id="hexbtns"><div id="hexstat"></div><button id="mb" class="on" title="Blauw (Spatie wisselt)">🔵 Blauw</button><button id="mz" title="Zwart (Spatie wisselt)">⚫ Zwart</button></div><div id="nvariant" aria-label="Nonogramvariant"><button id="nvclassic" class="on">Klassiek</button><button id="nvcolor" title="Kleur Nonogram · vrij puzzelen">Kleur</button></div><div id="nmode" aria-label="Invulstand"><button id="nf" class="on" title="Vullen (Spatie wisselt)">■ Vullen</button><button id="nc1" class="ncb" title="Rood"><i></i><span>Rood</span></button><button id="nc2" class="ncb" title="Blauw"><i></i><span>Blauw</span></button><button id="nc3" class="ncb" title="Geel"><i></i><span>Geel</span></button><button id="nc4" class="ncb" title="Groen"><i></i><span>Groen</span></button><button id="nx" title="Kruisje (Spatie wisselt)">✕ Kruisje</button></div><div id="pmode" aria-label="Markeerstand"><button id="pxb" class="on" title="Wegstrepen (Spatie wisselt)">✕ Wegstrepen</button><button id="pob" title="Omcirkelen (Spatie wisselt)">○ Omcirkelen</button></div><button id="potb" title="Aantekeningen (A)">✏️ Potlood</button><button id="notewipe" title="Alle potloodnotities wissen">🧹 Wis notities</button><button id="hintb" title="Hint (H)">💡 Hint</button><button id="chk" title="Controleer (C)">✓ Controleer</button><button id="helpb" title="Uitleg over deze puzzel">❓ Uitleg</button></aside>
-<section id="stage">
-<div id="grid"></div><div id="pad"></div><div id="m24"></div><div id="mur"></div><div id="hexw"><div id="hexsvg"></div></div></section>
+<section id="stage"><div id="playbox">
+<div id="grid"></div><div id="pad"></div><div id="m24"></div><div id="mur"></div><div id="hexw"><div id="hexsvg"></div></div></div></section>
 <aside id="rail2"><div id="segrow"><div id="seg"><button id="today">Dagpuzzel</button><button id="prac">Vrij puzzelen</button></div><button id="next">Nog een puzzel ➜</button><div id="lvl"></div></div></aside>
 <div id="hm" hidden role="dialog" aria-modal="true" aria-labelledby="hmt"><div class="hc"><h2 id="hmt"></h2><ul id="hmp"></ul><h3 id="hmth">Zo los je het op <small>(gokken is nooit nodig)</small></h3><ul id="hmtips"></ul><div id="shortcuts"><h3>Handige sneltoetsen</h3><div class="kgrid"><span><kbd>Spatie</kbd> wissel stand</span><span><kbd>A</kbd> aantekeningen</span><span><kbd>H</kbd> hint</span><span><kbd>C</kbd> controle</span><span><kbd>⌘/Ctrl Z</kbd> ongedaan</span><span><kbd>⇧⌘/Ctrl Z</kbd> opnieuw</span><span><kbd>?</kbd> uitleg</span><span><kbd>Esc</kbd> sluiten</span></div></div><button id="hmx">Begrepen</button></div></div>
 <div id="hint" role="note" aria-live="polite"></div><div id="fin" hidden role="dialog" aria-live="polite" aria-label="Puzzel opgelost"></div>
@@ -2015,9 +2017,21 @@ function repaintHint(){if(S.type==="plus")paintPlusHint();else if(S.type==="bin"
 let HINTPAD=0;
 let HINTSIDE=0;
 let hintHideT=0;
+/* iPad: verplaats/schaal alleen de buitenste speelcontainer. De puzzel zelf wordt niet opnieuw gerenderd. */
+function layoutSideHint(on){
+ const pb=$("#playbox");if(!pb||PHONE)return;
+ if(!on){pb.style.transform="";return}
+ pb.style.transform="none";
+ requestAnimationFrame(()=>{if(!HINTSIDE||!S||!S.hint)return;const h=$("#hint"),hr=h.getBoundingClientRect(),pr=pb.getBoundingClientRect();
+  let left=12;if(LANDQ.matches){const bar=$("#pbot");if(bar){const br=bar.getBoundingClientRect();left=Math.max(left,br.right+12)}}
+  const right=Math.max(left+80,hr.left-12),avail=Math.max(80,right-left);
+  const sc=Math.min(1,avail/Math.max(1,pr.width)),cx=(left+right)/2,pcx=pr.left+pr.width/2,dx=cx-pcx;
+  pb.style.transform="translateX("+Math.round(dx)+"px) scale("+sc.toFixed(4)+")";
+ })}
+
 function hideHint(){S.hint=null;const b=$("#hint");clearTimeout(hintHideT);const wasPad=HINTPAD,wasSide=HINTSIDE,visible=!!(b&&b.innerHTML.trim()&&getComputedStyle(b).display!=="none");
- if(wasSide){HINTSIDE=0;document.body.classList.remove("hintside")}
- const done=()=>{if(!b)return;b.classList.remove("closing");b.style.display="none";b.innerHTML="";if(wasPad){HINTPAD=0;resetPuzzleFit();if(S.p)render()}if(wasSide){b.classList.remove("side");if(S.p)render()}};
+ if(wasSide){HINTSIDE=0;document.body.classList.remove("hintside");layoutSideHint(false)}
+ const done=()=>{if(!b)return;b.classList.remove("closing");b.style.display="none";b.innerHTML="";if(wasPad){HINTPAD=0;resetPuzzleFit();if(S.p)render()}if(wasSide)b.classList.remove("side")};
  if(visible&&!matchMedia("(prefers-reduced-motion: reduce)").matches){b.classList.add("closing");hintHideT=setTimeout(done,135)}else done()}
 function clearHint(){if(!S.hint)return;hideHint();repaintHint()}
 document.addEventListener("pointerdown",e=>{if(S.hint&&!e.target.closest("#hint,#hintb"))clearHint()},true);
@@ -2029,7 +2043,7 @@ function hintGo(){if(S.done||!S.p||!HINTT.includes(S.type))return;
  const bt=document.createElement("button");bt.textContent=h.btn;bt.style.marginTop="6px";bt.onclick=doStep;b.append(bt);b.style.display="block";
  if(PHONE){const pb=$("#pbot").getBoundingClientRect();Object.assign(b.style,{transform:"none",left:"6px",right:"auto",width:(innerWidth-12)+"px",bottom:"auto",top:"0px"});
   const H=b.offsetHeight;HINTPAD=H+8;resetPuzzleFit();render();b.style.top=Math.round(pb.top-H-6)+"px";return}
- if(document.body.classList.contains("tablet")){b.classList.add("side");Object.assign(b.style,{transform:"",left:"",top:"",width:"",bottom:"",right:""});if(!HINTSIDE){HINTSIDE=1;document.body.classList.add("hintside");render()}repaintHint();return}
+ if(document.body.classList.contains("tablet")){b.classList.add("side");Object.assign(b.style,{transform:"",left:"",top:"",width:"",bottom:"",right:""});if(!HINTSIDE){HINTSIDE=1;document.body.classList.add("hintside")}layoutSideHint(true);repaintHint();return}
  repaintHint();placeHint()}
 /* Zet de hintkaart op de plek waar hij het minst bedekt van de vakjes waar de hint over gaat
    (het vakje van de stap telt het zwaarst, dan de lichte kruisjes, dan de blauw/paars omrande vakjes).
@@ -2050,7 +2064,7 @@ function placeHint(){const b=$("#hint"),h=S.hint;if(!h||b.style.display==="none"
    cands.push({W,x,y,sc,pref})}}
  cands.sort((p,q)=>p.sc-q.sc||p.pref-q.pref);const c=cands[0];
  Object.assign(b.style,{width:c.W+"px",left:Math.round(c.x)+"px",top:Math.round(c.y)+"px"})}
-addEventListener("resize",()=>{if(S&&S.hint)setTimeout(placeHint,50)});
+addEventListener("resize",()=>{if(S&&S.hint)setTimeout(()=>HINTSIDE?layoutSideHint(true):placeHint(),50)});
 function doStep(){const h=S.hint;if(!h||S.done)return;
  if(S.type==="hex"){h.cells.forEach(i=>S.hx.rev.add(i));if(!S.start)S.start=Date.now();hideHint();hexAfter();return}
  if(S.type==="mur"){if(h.kind==="kill"){hideHint();paintMur();return}begin();const i=h.cells[0];if(h.set>=0){const o=S.cur.indexOf(h.set);if(o>=0)S.cur[o]=-1}S.cur[i]=h.set;commit();if(!S.start)S.start=Date.now();hideHint();if(h.set>=0&&S.ms===h.set)S.ms=murNext(h.set);paintMur();persist();check();return}
