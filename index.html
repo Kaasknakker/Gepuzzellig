@@ -1075,7 +1075,7 @@ function genColorNono(R,lv,hard){const K=nonoColorCount(lv),minScore=(lv===1||lv
   const p={N:fw,W:fw,H:fh,K,color:1,rc:rowsOf(sol,fw,fh).map(cnClue),cc:colsOf(sol,fw,fh).map(cnClue),sol,pic:base.pic||"",rate:"finite-fallback"},rt=cnHuman(p);
   if(rt.solved)return p}
  /* Laatste veiligheidsnet is eindig; de app kan nooit in een generatorlus blijven hangen. */
- const base=genNono(R,lv,hard),fw=base.W,fh=base.H,perm=shuf(Array.from({length:K},(_,i)=>i+1),R),sol=base.sol.map((v,i)=>v?perm[Math.min(K-1,Math.floor((i%fw)*K/fw))]:0);
+ const base=genNono(R,lv,hard),fw=base.W,fh=base.H,fc=1,sol=base.sol.map(v=>v?fc:0);
  return{N:fw,W:fw,H:fh,K,color:1,rc:rowsOf(sol,fw,fh).map(cnClue),cc:colsOf(sol,fw,fh).map(cnClue),sol,pic:base.pic||"",rate:"safe-fallback"}}
 
 /* ---------- Kakuro ---------- */
@@ -1611,7 +1611,7 @@ $("#time").onclick=()=>{TSHOW=!TSHOW;lsSet("pdtime",TSHOW?"1":"0");setT(lastT)};
 const isFree=r=>/^v~/.test(r.type);
 function freeLoc(){try{return JSON.parse(lsGet("pdfree")||"[]")}catch(e){return[]}}
 /* Gemaakte puzzels bewaren (de laatste 16), zodat terugkomen op een puzzel meteen gaat. GV ophogen als een generator verandert. */
-const GV="g15";
+const GV="g16";
 function genCached(type,seed,lv,hard,nv){const vk=type==="nono"&&nv==="color"?"|color":"";const k=GV+(type==="mur"?MGV:type==="plus"?PGV:"")+"|"+type+"|"+seed+"|"+lv+(hard?"|w":"")+vk;let all={};try{all=JSON.parse(lsGet("pdgen")||"{}")}catch(e){all={}}
  if(all[k])try{return JSON.parse(all[k])}catch(e){}
  const p=type==="nono"&&nv==="color"?genColorNono(rng(hash(seed+"|color")),lv,!!hard):GEN[type](rng(hash(seed)),lv,!!hard);try{all[k]=JSON.stringify(p);const ks=Object.keys(all);for(const x of ks.slice(0,Math.max(0,ks.length-16)))delete all[x];lsSet("pdgen",JSON.stringify(all))}catch(e){}
