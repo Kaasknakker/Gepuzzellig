@@ -2821,21 +2821,22 @@ function cloudPushProgress(k,e,force){if(!cloudProgOk()||!e||progressSolved(k,e)
  const entry=Object.assign({},e,{k});window.PD_DB.saveProgress({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",ck:cloudProgKey(k),entry}).catch(()=>{cloudProgLast[k]=0})}
 function cloudClearProgress(k){if(!cloudProgOk()||!window.PD_DB.clearProgress)return;window.PD_DB.clearProgress({uid,group:$("#group").value.trim(),ck:cloudProgKey(k)}).catch(()=>{})}
 function progDel(k){const a=progAll();if(k in a){delete a[k];lsSet(PKEY,JSON.stringify(a))}cloudClearProgress(k)}
-function mergeCloudProgress(mp){if(PHONE||!mp)return false;const a=progAll(),remote={};let ch=false;
- Object.values(mp).forEach(e=>{if(!e||!e.k)return;remote[e.k]=e;const k=e.k;if(!progressRelevant(k)||progressSolved(k,e)){cloudClearProgress(k);return}const l=a[k];if(!l||(e.at||0)>(l.at||0)){const z=Object.assign({},e);delete z.k;a[k]=z;ch=true}});
+function mergeCloudProgress(mp){if(PHONE||!mp)return false;const a=progAll(),remote={};let ch=false,reload=false,curk=S&&S.p?progKey(S.type,S.practice,S.date,S.sf):"";
+ Object.values(mp).forEach(e=>{if(!e||!e.k)return;remote[e.k]=e;const k=e.k;if(!progressRelevant(k)||progressSolved(k,e)){cloudClearProgress(k);return}const l=a[k];if(!l||(e.at||0)>(l.at||0)){const z=Object.assign({},e);delete z.k;a[k]=z;ch=true;if(k===curk&&!document.body.classList.contains("home")&&(e.at||0)>(S._saveAt||0))reload=true}});
  const now=Date.now();for(const[k,e0]of Object.entries(a)){if(!progressRelevant(k)||progressSolved(k,e0))continue;let e=e0;if(!e.at&&!remote[k]){e=Object.assign({},e,{at:now});a[k]=e;ch=true}const r=remote[k];if(!r||(e.at||0)>(r.at||0))cloudPushProgress(k,e,true)}
- if(ch)lsSet(PKEY,JSON.stringify(a));if(document.body.classList.contains("home"))try{renderHome()}catch(e){}return ch}
+ if(ch)lsSet(PKEY,JSON.stringify(a));if(reload&&S&&S.p&&!S.done){const t=S.type,pr=S.practice,d=S.date;S.start=0;load(t,pr,false,d)}else if(document.body.classList.contains("home"))try{renderHome()}catch(e){}return ch}
 function pullCloudProgress(force){if(PHONE||!uid||uid==="x"||!window.PD_DB||!window.PD_DB.getProgress||cloudProgPulling)return Promise.resolve(false);const now=Date.now();if(!force&&now-cloudProgPullAt<15000)return Promise.resolve(false);cloudProgPullAt=now;cloudProgPulling=true;
  return window.PD_DB.getProgress($("#group").value.trim(),uid).then(mergeCloudProgress).catch(()=>false).finally(()=>{cloudProgPulling=false})}
 function persist(forceCloud){if(!S.p||S.done||!S.start||!S.seed)return;const a=progAll(),today=dstr();
  for(const k in a)if(k.startsWith("d:")&&k.split(":")[1]<addDays(today,-8))delete a[k];
- const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,pc:progressPct(),at:Date.now()};
+ const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,pc:progressPct()};
  if(S.hx){e.rev=[...S.hx.rev];e.cs=S.cs||{}}else if(S.type==="m24")e.r=S.r;else if(S.cur)e.cur=S.cur;if(S.str)e.str=[...S.str];if(S.nt&&Object.keys(S.nt).length)e.nt=S.nt;
- const k=progKey(S.type,S.practice,S.date,S.sf);a[k]=e;S._saveAt=e.at;lsSet(PKEY,JSON.stringify(a));cloudPushProgress(k,e,!!forceCloud)}
+ const k=progKey(S.type,S.practice,S.date,S.sf),prev=a[k],plain=x=>{if(!x)return"";const q=Object.assign({},x);delete q.at;return JSON.stringify(q)},changed=!prev||plain(prev)!==plain(e);
+ e.at=changed?Date.now():(prev.at||Date.now());a[k]=e;S._saveAt=e.at;lsSet(PKEY,JSON.stringify(a));if(changed||forceCloud)cloudPushProgress(k,e,!!forceCloud)}
 setInterval(persist,3000);
-document.addEventListener("visibilitychange",()=>{if(document.hidden){pausePlay();persist(true)}else{resumePlay();pullCloudProgress(true)}});
+document.addEventListener("visibilitychange",()=>{if(document.hidden){pausePlay();persist(true)}else pullCloudProgress(true).finally(()=>resumePlay())});
 addEventListener("pagehide",()=>{pausePlay();persist(true)});
-addEventListener("pageshow",()=>{resumePlay();pullCloudProgress(true)});
+addEventListener("pageshow",()=>{pullCloudProgress(true).finally(()=>resumePlay())});
 /* ---- Controleren ---- */
 function wrongCells(){const{type,p,cur}=S,o=[];if(!cur)return o;cur.forEach((v,i)=>{
  if(type==="bin"){if(v>=0&&v!==p.sol[i])o.push(i)}
@@ -2905,7 +2906,7 @@ function updTop(){if(!S||!S.p)return;document.querySelectorAll("#pbot .pgrp").fo
 function showHome(){if(HOMEREADY&&S&&S.p&&!S.done&&S.start){pausePlay();persist(true)}HVIEW="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.add("home");tapMode();renderHome();window.scrollTo(0,0)}
 function myDone(td,t){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))}
 /* Gewoon een puzzelsoort openen: is de dagpuzzel van vandaag al klaar, dan meteen een verse vrije puzzel. De knop Dagpuzzel blijft de expliciete weg terug. */
-function openType(t){return myDone(dstr(),t)?load(t,true,true):load(t,false)}
+function openType(t){const go=()=>myDone(dstr(),t)?load(t,true,true):load(t,false);return cloudProgOk()?pullCloudProgress(true).then(go,go):go()}
 let HVIEW="",SWK=0;
 function showScore(){HVIEW="score";SWK=0;renderHome();window.scrollTo(0,0)}
 function renderScore(h){const all=allRows(),rows=all.filter(r=>!isFree(r)),today=dstr(),dow=(new Date().getDay()+6)%7,mon0=addDays(today,-dow),TS=Object.keys(TYPES);
