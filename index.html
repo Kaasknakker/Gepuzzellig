@@ -50,7 +50,8 @@ nav button .tfeat{font-style:normal;font-size:.8em;margin-left:3px}nav button .t
 body[data-t=bin] .c .nt{inset:auto;left:7%;top:6%;width:28%;height:28%;transform:none;opacity:.52}
 body[data-t=star] .c .nt{transform:none;opacity:.58;font-size:calc(var(--cs)*.34);font-weight:750;line-height:1;color:var(--mut)}
 body[data-t=star] .c .nt.nx::before{content:"×";font-size:calc(var(--cs)*.38);line-height:1;color:var(--mut);font-weight:700}
-body[data-t=star] .c .nt.ns::before{content:"★";font-size:calc(var(--cs)*.34);line-height:1;color:#c97a00;font-weight:700}
+body[data-t=star] .c .nt.ns::before{content:"★";font-size:calc(var(--cs)*.34);line-height:1;color:var(--pc);font-weight:700}
+body[data-t=star] .c.sv{color:var(--pc)}
 .c .nt.dot{transform:none}.c .nt.dot::before{content:"";width:calc(var(--cs)*.2);height:calc(var(--cs)*.2);border-radius:50%;background:var(--mut);opacity:.9}
 .mc .mnt{position:absolute;left:3px;right:3px;bottom:2px;display:flex;flex-wrap:wrap;gap:0 3px;justify-content:center;font-size:calc(var(--ms)*.2);line-height:1.05;pointer-events:none;font-weight:800;opacity:.68}
 .mc .mnt.nxo{top:0;bottom:0;align-items:center;font-size:calc(var(--ms)*.42);font-weight:700}.mc .mnt .mnx{color:var(--mut);font-style:normal;opacity:.6}
@@ -1624,7 +1625,7 @@ function starBadSet(){const N=S.p.N,K=STK,bad=new Set(),rows={},cols={},regs={};
  S.cur.forEach((v,i)=>{if(v!==2)return;const r=i/N|0,c=i%N;(rows[r]=rows[r]||[]).push(i);(cols[c]=cols[c]||[]).push(i);(regs[S.p.reg[i]]=regs[S.p.reg[i]]||[]).push(i);
   for(const j of[i+1,i+N-1,i+N,i+N+1]){if(j<N*N&&S.cur[j]===2&&Math.abs(j%N-c)<=1){bad.add(i);bad.add(j)}}});
  for(const g of[rows,cols,regs])for(const k in g)if(g[k].length>K)g[k].forEach(i=>bad.add(i));return bad}
-function paintAll(){const bad=starBadSet();S.cells.forEach((d,i)=>{if(d){d.textContent=sym(disp(i));d.classList.toggle("sbad",bad.has(i))}});paintNotes()}
+function paintAll(){const bad=starBadSet();S.cells.forEach((d,i)=>{if(d){d.textContent=sym(disp(i));d.classList.toggle("sv",S.cur[i]===2);d.classList.toggle("sbad",bad.has(i))}});paintNotes()}
 function setCell(i,v){S.cur[i]=v;paintAll()}
 function applyDrag(i){if(drag.mode==="add"){if(disp(i)===0)setCell(i,1)}else if(drag.mode==="del"){if(S.cur[i]===1)setCell(i,0)}}
 function noteAdjStar(i){const N=S.p.N,r=i/N|0,c=i%N;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const rr=r+dr,cc=c+dc,j=rr*N+cc;if(rr>=0&&rr<N&&cc>=0&&cc<N&&noteVal(j)===2&&disp(j)===0)return true}return false}
