@@ -2,7 +2,7 @@
    Pagina's: eerst internet proberen (dan heb je altijd de nieuwste versie), anders de bewaarde kopie van die pagina.
    Geeft de site een foutpagina (bijv. als hij even stil staat), dan ook de bewaarde kopie.
    De Firebase-bestanden: de bewaarde kopie (die veranderen niet). De database zelf wordt niet aangeraakt. */
-const C="gepuzzellig-v3";
+const C="gepuzzellig-v4";
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>Promise.all(["./","raadsels.html"].map(u=>c.add(u).catch(()=>{})))).catch(()=>{}));self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 const sleutel=r=>{const u=new URL(r.url);u.search="";u.hash="";if(u.pathname.endsWith("/index.html"))u.pathname=u.pathname.slice(0,-10);return u.href};
