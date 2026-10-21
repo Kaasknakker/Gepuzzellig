@@ -700,7 +700,7 @@ body.tablet #side{position:fixed;top:58px;right:12px;width:380px;max-height:calc
 #sideX{display:none}body.nieuw #sideX{display:block;float:right;width:36px;height:36px;padding:0;margin:-4px -6px 6px 8px;border-radius:50%;font-size:16px;box-shadow:none}
 body.nieuw.home #side.open{display:block;position:fixed;top:20px;right:12px;width:min(420px,calc(100vw - 24px));max-height:calc(100vh - 40px);overflow:auto;z-index:60}
 /* Hint als paneel rechts */
-body.tablet.hintside #stage{margin-right:0}
+body.tablet.hintside #stage{margin-right:370px}
 body.tablet #hint.side{position:fixed!important;top:62px!important;right:max(12px,env(safe-area-inset-right))!important;left:auto!important;bottom:84px!important;width:350px!important;max-height:none!important;transform:none!important;overflow:auto;border-radius:20px;border-top:6px solid var(--pc);display:block}
 body.tablet #hint.side button:not(.hx){width:100%;padding:12px;margin-top:10px}
 /* Telefoon */
@@ -709,7 +709,8 @@ body.phone.nieuw #tbHome{padding:4px 10px;font-size:18px;border-radius:999px;box
 /* Subtiele micro-animaties + iOS: geen grijze tap-highlight die bij navigatie blijft hangen. */
 html,body,button,a,input,label,select,summary,[role="button"],.tile,.hrow,.hcard{-webkit-tap-highlight-color:transparent}
 button,a{-webkit-touch-callout:none}
-body.tablet #playbox{transition:transform .18s cubic-bezier(.2,.75,.25,1);will-change:transform}
+body.tablet #stage{transition:margin-right .18s cubic-bezier(.2,.75,.25,1)}
+body.tablet #playbox{transition:none;will-change:auto}
 #hint{animation:hintFadeIn .16s ease-out}
 #hint.closing{animation:hintFadeOut .12s ease-in forwards}
 body.tablet #hint.side{animation:hintSideIn .18s cubic-bezier(.2,.75,.25,1)}
@@ -728,7 +729,7 @@ body.tablet #more.open,body.tablet #side.open{animation:panelIn .16s cubic-bezie
 @keyframes cardUp{from{opacity:0;transform:translateX(-50%) translateY(8px) scale(.99)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
 @keyframes cardIn{from{opacity:0;transform:translateY(6px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){
- body.tablet #playbox{transition:none!important}
+ body.tablet #stage{transition:none!important}
  #hint,#hint.closing,body.tablet #hint.side,body.tablet #hint.side.closing,body.tablet #more.open,body.tablet #side.open,#fin:not([hidden]),#hm:not([hidden]) .hc{animation:none!important}
 }
 </style>
@@ -1561,11 +1562,7 @@ const dagLv=(t,ds)=>{if(!dagVast(ds))return lvOf(t);const[y,m,d]=ds.split("-").m
 const nonoDayVariant=ds=>{const[y,m,d]=ds.split("-").map(Number),dt=new Date(y,m-1,d),w=dt.getDay();if(w>=1&&w<=5)return(w===2||w===4)?"color":"classic";const wn=Math.floor((Date.UTC(y,m-1,d)-Date.UTC(2026,0,5))/6048e5),even=((wn%2)+2)%2===0;return(w===6?even:!even)?"color":"classic"};
 function renderLvl(){const el=$("#lvl");el.innerHTML="";const t=S.type,ls=LVN[t];if(!ls){el.style.display="none";return}el.style.display="inline-flex";const vast=!S.practice&&dagVast(S.date||dstr()),desc=l=>t==="nono"&&S.nv==="color"?LVS[t][l]+" · "+nonoColorCount(l)+" kleuren":LVS[t][l];
  /* Dagpuzzel: niveau ligt vast. Alleen het niveau van vandaag tonen; geen andere niveaus als keuze. */
- if(vast){
-  const b=document.createElement("button");b.className="on fixed";b.disabled=true;
-  if(PHONE)b.innerHTML="<span>"+LVL[S.lvl]+"</span><small>dagpuzzel</small>"+lvlWho(t,S.lvl);
-  else b.innerHTML=LVL[S.lvl]+"<small>dagpuzzel</small>"+lvlWho(t,S.lvl);
-  b.title="Het niveau van de dagpuzzel ligt vast";el.append(b);return}
+ if(vast){el.style.display="none";return}
  if(PHONE){const cur=document.createElement("button");cur.className="cur";cur.innerHTML=LVL[S.lvl]+" ▾"+lvlWho(t,S.lvl);el.append(cur);
   const pop=document.createElement("div");pop.className="lvp";ls.forEach(l=>{const b=document.createElement("button");b.className=l===S.lvl?"on":"";b.innerHTML="<span>"+LVL[l]+"</span><small>"+desc(l)+"</small>"+lvlWho(t,l);
    b.onclick=e=>{e.stopPropagation();pop.classList.remove("open");if(l===S.lvl)return;LV[t]=l;lsSet("pdlvl",JSON.stringify(LV));load(t,true,false)};pop.append(b)});
@@ -2018,19 +2015,10 @@ let HINTPAD=0;
 let HINTSIDE=0;
 let hintHideT=0;
 /* iPad: verplaats/schaal alleen de buitenste speelcontainer. De puzzel zelf wordt niet opnieuw gerenderd. */
-function layoutSideHint(on){
- const pb=$("#playbox");if(!pb||PHONE)return;
- if(!on){pb.style.transform="";return}
- pb.style.transform="none";
- requestAnimationFrame(()=>{if(!HINTSIDE||!S||!S.hint)return;const h=$("#hint"),hr=h.getBoundingClientRect(),pr=pb.getBoundingClientRect();
-  let left=12;if(LANDQ.matches){const bar=$("#pbot");if(bar){const br=bar.getBoundingClientRect();left=Math.max(left,br.right+12)}}
-  const right=Math.max(left+80,hr.left-12),avail=Math.max(80,right-left);
-  const sc=Math.min(1,avail/Math.max(1,pr.width)),cx=(left+right)/2,pcx=pr.left+pr.width/2,dx=cx-pcx;
-  pb.style.transform="translateX("+Math.round(dx)+"px) scale("+sc.toFixed(4)+")";
- })}
+function layoutSideHint(on){const pb=$("#playbox");if(pb)pb.style.transform=""}
 
 function hideHint(){S.hint=null;const b=$("#hint");clearTimeout(hintHideT);const wasPad=HINTPAD,wasSide=HINTSIDE,visible=!!(b&&b.innerHTML.trim()&&getComputedStyle(b).display!=="none");
- if(wasSide){HINTSIDE=0;document.body.classList.remove("hintside");layoutSideHint(false)}
+ if(wasSide){HINTSIDE=0;document.body.classList.remove("hintside");layoutSideHint(false);resetPuzzleFit();if(S.p)render()}
  const done=()=>{if(!b)return;b.classList.remove("closing");b.style.display="none";b.innerHTML="";if(wasPad){HINTPAD=0;resetPuzzleFit();if(S.p)render()}if(wasSide)b.classList.remove("side")};
  if(visible&&!matchMedia("(prefers-reduced-motion: reduce)").matches){b.classList.add("closing");hintHideT=setTimeout(done,135)}else done()}
 function clearHint(){if(!S.hint)return;hideHint();repaintHint()}
@@ -2043,7 +2031,7 @@ function hintGo(){if(S.done||!S.p||!HINTT.includes(S.type))return;
  const bt=document.createElement("button");bt.textContent=h.btn;bt.style.marginTop="6px";bt.onclick=doStep;b.append(bt);b.style.display="block";
  if(PHONE){const pb=$("#pbot").getBoundingClientRect();Object.assign(b.style,{transform:"none",left:"6px",right:"auto",width:(innerWidth-12)+"px",bottom:"auto",top:"0px"});
   const H=b.offsetHeight;HINTPAD=H+8;resetPuzzleFit();render();b.style.top=Math.round(pb.top-H-6)+"px";return}
- if(document.body.classList.contains("tablet")){b.classList.add("side");Object.assign(b.style,{transform:"",left:"",top:"",width:"",bottom:"",right:""});if(!HINTSIDE){HINTSIDE=1;document.body.classList.add("hintside")}layoutSideHint(true);repaintHint();return}
+ if(document.body.classList.contains("tablet")){b.classList.add("side");Object.assign(b.style,{transform:"",left:"",top:"",width:"",bottom:"",right:""});if(!HINTSIDE){HINTSIDE=1;document.body.classList.add("hintside");resetPuzzleFit();render()}repaintHint();return}
  repaintHint();placeHint()}
 /* Zet de hintkaart op de plek waar hij het minst bedekt van de vakjes waar de hint over gaat
    (het vakje van de stap telt het zwaarst, dan de lichte kruisjes, dan de blauw/paars omrande vakjes).
@@ -2064,7 +2052,7 @@ function placeHint(){const b=$("#hint"),h=S.hint;if(!h||b.style.display==="none"
    cands.push({W,x,y,sc,pref})}}
  cands.sort((p,q)=>p.sc-q.sc||p.pref-q.pref);const c=cands[0];
  Object.assign(b.style,{width:c.W+"px",left:Math.round(c.x)+"px",top:Math.round(c.y)+"px"})}
-addEventListener("resize",()=>{if(S&&S.hint)setTimeout(()=>HINTSIDE?layoutSideHint(true):placeHint(),50)});
+addEventListener("resize",()=>{if(S&&S.hint)setTimeout(()=>{if(HINTSIDE){resetPuzzleFit();render()}else placeHint()},50)});
 function doStep(){const h=S.hint;if(!h||S.done)return;
  if(S.type==="hex"){h.cells.forEach(i=>S.hx.rev.add(i));if(!S.start)S.start=Date.now();hideHint();hexAfter();return}
  if(S.type==="mur"){if(h.kind==="kill"){hideHint();paintMur();return}begin();const i=h.cells[0];if(h.set>=0){const o=S.cur.indexOf(h.set);if(o>=0)S.cur[o]=-1}S.cur[i]=h.set;commit();if(!S.start)S.start=Date.now();hideHint();if(h.set>=0&&S.ms===h.set)S.ms=murNext(h.set);paintMur();persist();check();return}
