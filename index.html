@@ -1079,8 +1079,8 @@ function genColorNono(R,lv,hard){const K=nonoColorCount(lv);let best=null,bs=-1,
   const p={N:W,W,H,K,color:1,rc:rowsOf(sol,W,H).map(cnClue),cc:colsOf(sol,W,H).map(cnClue),sol,pic:base.pic||"",rate:"finite-fallback"},rt=cnHuman(p);
   if(rt.solved)return p}
  /* Laatste veiligheidsnet: een eindige, geldige kleurpuzzel in plaats van een hangende app. */
- const base=genNono(R,lv,hard),W=base.W,H=base.H,perm=shuf(Array.from({length:K},(_,i)=>i+1),R),sol=base.sol.map((v,i)=>v?perm[Math.min(K-1,Math.floor((i%W)*K/W))]:0);
- return{N:W,W,H,K,color:1,rc:rowsOf(sol,W,H).map(cnClue),cc:colsOf(sol,W,H).map(cnClue),sol,pic:base.pic||"",rate:"safe-fallback"}}
+ const base=genNono(R,lv,hard),fw=base.W,fh=base.H,perm=shuf(Array.from({length:K},(_,i)=>i+1),R),sol=base.sol.map((v,i)=>v?perm[Math.min(K-1,Math.floor((i%fw)*K/fw))]:0);
+ return{N:fw,W:fw,H:fh,K,color:1,rc:rowsOf(sol,fw,fh).map(cnClue),cc:colsOf(sol,fw,fh).map(cnClue),sol,pic:base.pic||"",rate:"safe-fallback"}}
 
 /* ---------- Kakuro ---------- */
 let KW=8;
