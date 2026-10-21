@@ -660,6 +660,16 @@ body.tablet #pbot #pmode button{font-size:12.5px;padding:6px 6px;gap:4px}
 body.tablet #pbot #nmode button,body.tablet #pbot #pmode button{width:100%;border:1px solid var(--line)!important;border-radius:13px}
 body.tablet #pbot #nmode button:not(.on),body.tablet #pbot #pmode button:not(.on){background:var(--card);box-shadow:0 3px 0 var(--line)!important}
 body.tablet #pbot #nmode button.on,body.tablet #pbot #pmode button.on{border-color:transparent!important}
+/* Nonogramvariant blijft binnen de smalle liggende iPad-balk. */
+body.tablet #pbot #nvariant{display:flex!important;flex-direction:row!important;width:100%;min-width:0;box-sizing:border-box;padding:3px;gap:2px}
+body.tablet #pbot #nvariant button{width:auto!important;min-width:0!important;flex:1 1 0!important;padding:6px 3px!important;font-size:11px!important;text-align:center!important;justify-content:center!important}
+/* Kleur Nonogram: compacte swatches in plaats van vijf grote verticale knoppen. */
+body.tablet #pbot #nmode.ncolor{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;width:100%;padding:0}
+body.tablet #pbot #nmode.ncolor button{width:100%!important;min-width:0!important;min-height:42px!important;padding:5px!important;justify-content:center!important;text-align:center!important}
+body.tablet #pbot #nmode.ncolor .ncb span{display:none}
+body.tablet #pbot #nmode.ncolor .ncb i{width:22px;height:22px;border-radius:6px}
+body.tablet #pbot #nmode.ncolor #nx{font-size:0}
+body.tablet #pbot #nmode.ncolor #nx::after{content:"✕";font-size:20px}
 body.tablet main{padding-top:10px;padding-bottom:10px}
 }
 body.tablet #pbot .pgrp.leeg{display:none}
