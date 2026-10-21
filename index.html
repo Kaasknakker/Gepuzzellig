@@ -507,6 +507,7 @@ body.phone #shortcuts{display:none}
 body.phone #msg:not(:empty){padding:3px 8px;font-size:12px;max-width:92vw}
 @media(max-width:430px){.kgrid{grid-template-columns:1fr}}
 
+body.tablet #lvl button.fixed,body.phone #lvl button.fixed{cursor:default;opacity:1!important}
 /* ===== Kleur Nonogram ===== */
 :root{--nc1:#d9564f;--nc2:#347fcf;--nc3:#e5b72d;--nc4:#3f9968}
 #nvariant{display:none;gap:3px;padding:3px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--line) 20%,var(--card))}
@@ -1555,12 +1556,17 @@ const dagLv=(t,ds)=>{if(!dagVast(ds))return lvOf(t);const[y,m,d]=ds.split("-").m
 /* Nonogram-dagvariant: ma/wo/vr Klassiek, di/do Kleur. In het weekend wisselen za/zo per week om. */
 const nonoDayVariant=ds=>{const[y,m,d]=ds.split("-").map(Number),dt=new Date(y,m-1,d),w=dt.getDay();if(w>=1&&w<=5)return(w===2||w===4)?"color":"classic";const wn=Math.floor((Date.UTC(y,m-1,d)-Date.UTC(2026,0,5))/6048e5),even=((wn%2)+2)%2===0;return(w===6?even:!even)?"color":"classic"};
 function renderLvl(){const el=$("#lvl");el.innerHTML="";const t=S.type,ls=LVN[t];if(!ls){el.style.display="none";return}el.style.display="inline-flex";const vast=!S.practice&&dagVast(S.date||dstr()),desc=l=>t==="nono"&&S.nv==="color"?LVS[t][l]+" · "+nonoColorCount(l)+" kleuren":LVS[t][l];
+ /* Dagpuzzel: niveau ligt vast. Alleen het niveau van vandaag tonen; geen andere niveaus als keuze. */
+ if(vast){
+  const b=document.createElement("button");b.className="on fixed";b.disabled=true;
+  if(PHONE)b.innerHTML="<span>"+LVL[S.lvl]+"</span><small>dagpuzzel</small>"+lvlWho(t,S.lvl);
+  else b.innerHTML=LVL[S.lvl]+"<small>dagpuzzel</small>"+lvlWho(t,S.lvl);
+  b.title="Het niveau van de dagpuzzel ligt vast";el.append(b);return}
  if(PHONE){const cur=document.createElement("button");cur.className="cur";cur.innerHTML=LVL[S.lvl]+" ▾"+lvlWho(t,S.lvl);el.append(cur);
-  const pop=document.createElement("div");pop.className="lvp";ls.forEach(l=>{const b=document.createElement("button");b.className=l===S.lvl?"on":"";b.innerHTML="<span>"+LVL[l]+"</span><small>"+LVS[t][l]+"</small>"+lvlWho(t,l);
-   if(vast&&l===S.lvl)b.innerHTML+="<small>dagpuzzel</small>";else if(vast)b.innerHTML+="<small>vrij</small>";
-   b.onclick=e=>{e.stopPropagation();pop.classList.remove("open");if(l===S.lvl)return;LV[t]=l;lsSet("pdlvl",JSON.stringify(LV));if(vast)load(t,true,true);else load(t,S.practice,false,S.practice?null:S.date)};pop.append(b)});
+  const pop=document.createElement("div");pop.className="lvp";ls.forEach(l=>{const b=document.createElement("button");b.className=l===S.lvl?"on":"";b.innerHTML="<span>"+LVL[l]+"</span><small>"+desc(l)+"</small>"+lvlWho(t,l);
+   b.onclick=e=>{e.stopPropagation();pop.classList.remove("open");if(l===S.lvl)return;LV[t]=l;lsSet("pdlvl",JSON.stringify(LV));load(t,true,false)};pop.append(b)});
   cur.onclick=e=>{e.stopPropagation();pop.classList.toggle("open")};el.append(pop);return}
- ls.forEach(l=>{const b=document.createElement("button");b.className=l===S.lvl?"on":"";b.innerHTML=LVL[l]+"<small>"+(vast?(l===S.lvl?"dagpuzzel":"vrij"):desc(l))+"</small>"+lvlWho(t,l);if(vast)b.title=l===S.lvl?"De dagpuzzel van vandaag":"Vrij puzzelen op dit niveau";b.onclick=()=>{if(l===S.lvl)return;LV[t]=l;lsSet("pdlvl",JSON.stringify(LV));if(vast)load(t,true,true);else load(t,S.practice,false,S.practice?null:S.date)};el.append(b)})}
+ ls.forEach(l=>{const b=document.createElement("button");b.className=l===S.lvl?"on":"";b.innerHTML=LVL[l]+"<small>"+desc(l)+"</small>"+lvlWho(t,l);b.title="Vrij puzzelen op dit niveau";b.onclick=()=>{if(l===S.lvl)return;LV[t]=l;lsSet("pdlvl",JSON.stringify(LV));load(t,true,false)};el.append(b)})}
 
 let TSHOW=lsGet("pdtime")==="1",lastT="0:00";
 function setT(t){lastT=t;const e=$("#time");e.textContent=TSHOW?t:"⏱ tijd tonen";e.classList.toggle("hid",!TSHOW)}
