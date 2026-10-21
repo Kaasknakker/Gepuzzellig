@@ -1965,7 +1965,7 @@ let hexMode="b";
 const clueTxt=c=>c.type===1?"{"+c.cnt+"}":c.type===2?"-"+c.cnt+"-":String(c.cnt);
 /* "?" = zwart vakje zonder getal. Blauwe vakjes met een getal: open vanaf het begin (zs) of pas zichtbaar als je ze vindt (zh). */
 const hexQ=(P,i)=>{if(!P._qs)P._qs=new Set(P.qs||[]);return P._qs.has(i)},hexZn=(P,i)=>(P.zs||[]).includes(i)||(P.zh||[]).includes(i);
-function hexMsg(){if(!S.done)persist();let n=0;S.p.sol.forEach((v,i)=>{if(v&&!S.hx.rev.has(i))n++});if(!S.done)$("#msg").textContent="";$("#hexstat").innerHTML=PHONE?`<div class="st"><span>NOG</span><b>${n}</b></div><div class="st"><span>FOUT</span><b>${S.mist}</b></div>`:`<div class="st"><span>NOG TE VINDEN</span><b>${n}</b><small aria-hidden="true">&nbsp;</small></div><div class="st"><span>FOUTEN</span><b>${S.mist}</b><small>${S.mist?`+${S.pen} s`:"&nbsp;"}</small></div>`}
+function hexMsg(){if(!S.done)persist();let n=0;S.p.sol.forEach((v,i)=>{if(v&&!S.hx.rev.has(i))n++});if(!S.done)$("#msg").textContent="";$("#hexstat").innerHTML=PHONE?`<div class="st"><span>NOG</span><b>${n}</b></div><div class="st"><span>FOUT</span><b>${S.mist}</b></div>`:`<div class="st"><span>NOG TE VINDEN</span><b>${n}</b></div><div class="st"><span>FOUTEN</span><b>${S.mist}</b></div>`}
 function rHex(){if(!S.p||S.type!=="hex"||!S.hx)return;{const hs=$("#hexstat");if(hs)hs.classList.toggle("hl",!!(S.hint&&S.hint.rest))}const P=S.p,w=$("#hexsvg"),sz=30,sq=Math.sqrt(3),D=isDark(),K={hid:D?"#d6922a":"#f2ae3d",blu:D?"#2f8fdc":"#2f9fe8",blk:D?"#0c0e12":"#35363b",bd:D?"#1a1f29":"#fff",lab:D?"#aeb7c6":"#4a4f5a",arr:D?"#8b94a5":"#7d838f",lnk:D?"#3a4354":"#fff"},cs=S.cs||{};
  const TR=PHONE,px=(q,r)=>{const x=sz*1.5*q,y=sz*sq*(r+q/2);return TR?[y,x]:[x,y]},pts=P.cells.map(c=>px(c.q,c.r));P.lineShow.forEach(j=>{const l=P.lines[j];pts.push(px(l.vq,l.vr))});
  /* Plek van de getallen bij de lijnen eerst uitrekenen, zodat ze altijd binnen beeld vallen (ook als ze opzij moeten voor een ander getal). */
@@ -2024,7 +2024,7 @@ function hexAfter(){pingBusy();if(S.p.sol.every((v,i)=>!v||S.hx.rev.has(i))){fin
 function hexClue(k){if(!S.cs)S.cs={};const c=S.cs[k]||0;if(hexMode==="b"){if(c===1)delete S.cs[k];else S.cs[k]=1}else{if(c===2)delete S.cs[k];else S.cs[k]=2}rHex()}
 function hexTap(i){if(S.done)return;if(S.hx.rev.has(i)){if(hexZn(S.p,i))hexClue("z"+i);return}S.zh=-1;S.hl=-1;if(!S.start)S.start=Date.now();clearHint();
  if(S.p.sol[i]===(hexMode==="b"?1:0)){S.hx.rev.add(i);S.popH=i;hexAfter()}
- else{S.pen+=20;S.mist++;S.flash=i;rHex();setTimeout(()=>{S.flash=-1;if(S.type==="hex"&&!S.done)rHex()},450)}}
+ else{S.mist++;S.flash=i;rHex();setTimeout(()=>{S.flash=-1;if(S.type==="hex"&&!S.done)rHex()},450)}}
 function hexHint(){const P=S.p,rev=S.hx.rev,n=P.n,cons=[];
  rev.forEach(i=>{if(!P.sol[i]&&!hexQ(P,i))cons.push({c:P.ring[i],kind:"ring",id:i})});(P.zs||[]).concat((P.zh||[]).filter(i=>rev.has(i))).forEach(i=>cons.push({c:P.zone[i],kind:"zone",id:i}));const whyOf=o=>o.kind==="rest"?[]:o.kind==="line"?P.lines[o.id].idx:[o.id];P.lineShow.forEach(j=>cons.push({c:P.lines[j].clue,kind:"line",id:j}));
  /* De teller "nog te vinden" is ook een aanwijzing: hoeveel blauwe vakjes er in totaal nog zijn. Altijd als laatste proberen. */
@@ -2394,7 +2394,7 @@ function paintMur(){const p=S.p,N=p.N,dark=isDark();if(!S.mcells||!S.mcells.leng
     b.onpointerdown=e=>{e.preventDefault();murAccuse(s)};acc.querySelector(".mbtns").append(b)});if(PHONE)setTimeout(()=>{try{acc.scrollIntoView({block:"nearest"})}catch(e){}},50)}}
  else{delete acc.dataset.on;acc.innerHTML=""}}
 function murAccuse(s){if(S.done)return;const p=S.p;if(s===p.killer){finish();return}
- S.pen+=20;S.mist++;const m=$("#msg");m.textContent=p.ppl[s]+" was het niet! +20 s";setTimeout(()=>{if(!S.done)m.textContent=""},2500)}
+ S.mist++;const m=$("#msg");m.textContent=p.ppl[s]+" was het niet!";setTimeout(()=>{if(!S.done)m.textContent=""},2500)}
 /* Murdoku-hint: eerst foute plaatsingen, dan met dezelfde oplosser als de generator (eerst de makkelijkste regels)
    de eerste persoon die nog maar op één plek kan staan, met de redenen erbij. */
 function murHint(){const p=S.p,N=p.N,V=p.V,M=murM(p),nm=s=>p.ppl[s],cell=i=>`rij ${(i/N|0)+1}, kolom ${i%N+1}`,LN=["rij","kolom"],room=k=>p.arts[k];
