@@ -1564,15 +1564,15 @@ function genCached(type,seed,lv,hard,nv){const vk=type==="nono"&&nv==="color"?"|
 const isWk=ds=>{const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay();return w===0||w===6};
 /* Willekeurig puzzelen: na elke vrije puzzel komt een andere, willekeurige soort. Stopt zodra je zelf een dagpuzzel kiest. */
 let RANDOM=false;const rndType=not=>{const L=Object.keys(TYPES).filter(t=>t!==not);return L[Math.floor(Math.random()*L.length)]};
-function load(type,practice,fresh,date){if(!practice)RANDOM=false;if(NIEUW&&HOMEREADY){if(document.body.classList.contains("home"))window.scrollTo(0,0);document.body.classList.remove("home")}
- const dd=!practice&&date?date:dstr(),id=++loadId,lvl0=practice?lvOf(type):dagLv(type,dd),sf0=sfx(lvl0);lsSet("pdtab",type);{const fn=$("#fin");if(fn)fn.hidden=true}potlood=false;S={nt:{},type,practice,date:dd,hard:!practice&&isWk(dd)&&!dagVast(dd),arch:dd!==dstr(),start:0,done:false,secs:0,sel:-1,id,hist:[],redo:[],pen:0,mist:0,hints:0,flash:-1,hl:-1,lvl:lvl0,sf:sf0};hideHint();ub();renderLvl();$("#next").classList.remove("pulse");
+function load(type,practice,fresh,date){if(type==="nono"&&!practice)nonoVariant="classic";if(!practice)RANDOM=false;if(NIEUW&&HOMEREADY){if(document.body.classList.contains("home"))window.scrollTo(0,0);document.body.classList.remove("home")}
+ const dd=!practice&&date?date:dstr(),id=++loadId,lvl0=practice?lvOf(type):dagLv(type,dd),sf0=sfx(lvl0);lsSet("pdtab",type);{const fn=$("#fin");if(fn)fn.hidden=true}potlood=false;S={nt:{},type,practice,date:dd,hard:!practice&&isWk(dd)&&!dagVast(dd),arch:dd!==dstr(),start:0,done:false,secs:0,sel:-1,id,hist:[],redo:[],pen:0,mist:0,hints:0,flash:-1,hl:-1,lvl:lvl0,sf:sf0,nv:type==="nono"?nonoVariant:"classic"};hideHint();ub();renderLvl();$("#next").classList.remove("pulse");
  const pk0=progKey(type,practice,S.date,sf0),sv0=fresh?null:progAll()[pk0];if(fresh)progDel(pk0);
  document.body.dataset.t=type;document.querySelectorAll("#tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.t===type);if(PHONE&&b.dataset.t===type)try{b.scrollIntoView({block:"nearest",inline:"nearest"})}catch(e){}});$("#today").classList.toggle("on",!practice);$("#prac").classList.toggle("on",!!practice);dayLabel();{const nb=$("#next");if(nb.closest("#more"))nb.innerHTML='<span class="ic">🎲</span><span>'+(practice?"Volgende puzzel":"Nog een puzzel")+'</span>';else nb.textContent=PHONE?"➜":practice?"Volgende puzzel ➜":"Nog een puzzel ➜"}if(PHONE)$("#next").style.display=practice?"":"none";$("#next").title=practice?"Volgende puzzel":"Nog een puzzel (vrij)";
  $("#help").textContent=helpOf(type);$("#grid").innerHTML="";$("#m24").innerHTML="";$("#mur").innerHTML="";$("#hexsvg").innerHTML="";$("#pad").style.display="none";$("#m24").style.display="none";
  $("#msg").textContent="Puzzel maken...";setT("0:00");$("#grid").classList.remove("nfin");
  setTimeout(()=>{if(id!==loadId)return;
-  const seed=practice?(sv0&&sv0.seed?sv0.seed:"p"+Math.random()):type+S.date+sf0,ck=type+seed;S.seed=seed;
-  const p=cache[ck+(S.hard?"|w":"")]||(cache[ck+(S.hard?"|w":"")]=genCached(type,seed,lvl0,S.hard));S.p=p;if(type==="star")STK=p.K||2;
+  const seed=practice?(sv0&&sv0.seed?sv0.seed:"p"+Math.random()):type+S.date+sf0,ck=type+seed+(type==="nono"?"|"+S.nv:"");S.seed=seed;
+  const p=cache[ck+(S.hard?"|w":"")]||(cache[ck+(S.hard?"|w":"")]=genCached(type,seed,lvl0,S.hard,S.nv));S.p=p;if(type==="star")STK=p.K||2;
   const N=p.N||0;
   if(type==="bin")S.cur=p.giv.slice();else if(type==="kak")S.cur=Array(p.W*p.H).fill(0);else if(type==="m24"){S.r=0;setRound()}else if(type==="hex"){S.hx={rev:new Set([...p.rev0,...(p.zs||[])])};S.cs={}}else if(type==="mur"){S.cur=Array(N*N).fill(-1);S.ms=0;S.mxm=false;S.str=new Set()}else if(type==="plus"){S.cur=Array(p.W*p.H).fill(0);S.str=new Set()}else S.cur=Array(type==="nono"||type==="plus"?p.W*p.H:N*N).fill(0);
   const key=S.date+type+sf0;
@@ -1584,7 +1584,7 @@ function load(type,practice,fresh,date){if(!practice)RANDOM=false;if(NIEUW&&HOME
    if(type==="m24"&&sv0.r){S.r=sv0.r;setRound()}
    if(sv0.str&&S.str)S.str=new Set(sv0.str);if(sv0.nt)S.nt=Object.assign({},sv0.nt);S.pen=0;S.mist=sv0.mist||0;S.hints=sv0.hints||0;S.start=Date.now()-(sv0.el||0);S.pauseAt=0;S.resumed=true}catch(e){}}
   $("#msg").textContent=S.done?(S.arch?"Al klaar in ":"Vandaag al klaar in ")+fmt(S.secs):S.resumed?"Verder waar je was gebleven":(!practice&&type===featOf(S.date))?(PHONE?"⭐ Van de dag":"⭐ Puzzel van de dag"+(S.hard?" (weekend 💪)":"")):S.arch?"Dagpuzzel van "+dnl(S.date)+(S.hard?" 💪":""):S.hard?"Weekendpuzzel: wat pittiger 💪":"";setT(S.resumed?fmt(Math.round(playMs()/1000)):fmt(S.secs));
-  try{updTabs()}catch(e){}render()},30)}
+  try{updTabs()}catch(e){}render();ub()},30)}
 
 const LANDQ=matchMedia("(orientation:landscape) and (min-aspect-ratio:23/20)");
 const availBot=()=>{const b=$("#pbot");if(b&&!PHONE&&document.body.classList.contains("tablet")&&LANDQ.matches)return innerHeight+(window.scrollY||0)-14-HINTPAD;return b?b.getBoundingClientRect().top+(window.scrollY||0)-(PHONE?8:18)-HINTPAD:innerHeight-14};
@@ -1611,23 +1611,23 @@ function render0(){const t=S.type;ub();setTimeout(tapMode,0);if(!S.p)return;
  if(prev){const now=[...document.querySelectorAll("#grid .c")];if(now.length===prev.length)now.forEach((d,i)=>{if(!d.classList.contains("gx")&&d.textContent!==prev[i]&&!d.classList.contains("kb"))popEl(d)})}}
 
 function rGrid(){const{type,p}=S,N=type==="bin"||type==="nono"?p.W:p.N,M=type==="bin"||type==="nono"?p.H:N,g=$("#grid"),nono=type==="nono";S.cells=[];S.rowc=[];S.colc=[];if(type==="star"&&!S.pal)S.pal=colorPerm(p);g.style.touchAction=type==="star"||type==="bin"||nono?"none":"";g.onpointerdown=type==="star"?starDown:type==="bin"?binDown:nono?nonoDown:null;g.onpointermove=type==="star"?starMove:type==="bin"?binMove:nono?nonoMove:null;
- let exW=nono?3:type==="bin"?2:0,exH=exW;
- if(PHONE&&nono){exW=.45+Math.max(...p.rc.map(c=>(c.length?c:[0]).join(" ").length))*.24;exH=.45+Math.max(...p.cc.map(c=>Math.max(1,c.length)))*.42}
+ let exW=nono?(p.color?4:3):type==="bin"?2:0,exH=exW;
+ if(PHONE&&nono){if(p.color){exW=.8+Math.max(...p.rc.map(c=>Math.max(1,c.length)))*.55;exH=.8+Math.max(...p.cc.map(c=>Math.max(1,c.length)))*.52}else{exW=.45+Math.max(...p.rc.map(c=>(c.length?c:[0]).join(" ").length))*.24;exH=.45+Math.max(...p.cc.map(c=>Math.max(1,c.length)))*.42}}
  else if(type==="bin"){exW=PHONE?1.05:1.3;exH=exW}
  sizeCs(N+exW,M+exH);
  g.style.gridTemplateColumns=(nono||type==="bin"?"auto ":"")+`repeat(${N},${CS}px)`;
- if(nono){g.append(document.createElement("div"));p.cc.forEach((c,ci)=>{const d=document.createElement("div");d.className="k";d.dataset.ln="c"+ci;d.innerHTML="<div>"+(c.length?c:[0]).map(v=>"<span>"+v+"</span>").join("\n")+"</div>";g.append(d)})}
+ if(nono){g.append(document.createElement("div"));p.cc.forEach((cl,ci)=>{const d=document.createElement("div");d.className="k";d.dataset.ln="c"+ci;if(p.color)d.innerHTML='<div class="ncv col">'+(cl.length?cl.map(q=>'<span class="ncl c'+q.c+'">'+q.n+"</span>").join(""):'<span class="mut">0</span>')+"</div>";else d.innerHTML="<div>"+(cl.length?cl:[0]).map(v=>"<span>"+v+"</span>").join("\n")+"</div>";g.append(d)})}
  const dark=isDark();
  for(let i=0;i<N*M;i++){
   if(type==="bin"&&i%N===0){const k=mkCnt();S.rowc[i/N|0]=k;g.append(k)}
-  if(nono&&i%N===0){const d=document.createElement("div");d.className="k r";d.dataset.ln="r"+(i/N|0);d.innerHTML="<div>"+(p.rc[i/N|0].length?p.rc[i/N|0]:[0]).map(v=>"<span>"+v+"</span>").join("\u2002")+"</div>";g.append(d)}
+  if(nono&&i%N===0){const d=document.createElement("div");d.className="k r";d.dataset.ln="r"+(i/N|0);const cl=p.rc[i/N|0];if(p.color)d.innerHTML='<div class="ncv">'+(cl.length?cl.map(q=>'<span class="ncl c'+q.c+'">'+q.n+"</span>").join(""):'<span class="mut">0</span>')+"</div>";else d.innerHTML="<div>"+(cl.length?cl:[0]).map(v=>"<span>"+v+"</span>").join("\u2002")+"</div>";g.append(d)}
   const d=document.createElement("div"),v=S.cur[i];d.className="c";
   if(type==="bin"){if(p.giv[i]>=0)d.classList.add("g");binSym(d,v)}
   else if(type==="star"){d.textContent=sym(disp(i));d.style.background=`hsl(${HUES[S.pal[p.reg[i]]]},${dark?"30%,40%":"48%,86%"})`;
    const r=i/N|0,c=i%N,t=(rr,cc)=>rr<0||cc<0||rr>=N||cc>=N||p.reg[rr*N+cc]!==p.reg[i]?"2.5px solid var(--fg)":"1px solid var(--line)";
    d.style.borderTop=t(r-1,c);d.style.borderBottom=t(r+1,c);d.style.borderLeft=t(r,c-1);d.style.borderRight=t(r,c+1);
    if(S.hint){if(S.hint.cells.includes(i))d.classList.add("ht");else if(S.hint.why.includes(i))d.classList.add("hr");if(S.hint.ghost&&S.hint.ghost.includes(i)&&!disp(i)){d.classList.add("gx");d.textContent="✕"}}}
-  else{if(v===1)d.classList.add("f");d.textContent=v===2?"✕":"";d.style.color="var(--mut)";if(nono&&S.hint){if(S.hint.cells.includes(i))d.classList.add("ht");else if(S.hint.why.includes(i))d.classList.add("hr")}}
+  else{if(nono&&p.color){if(v>0)d.classList.add("nc"+v);d.textContent=v===-1?"✕":""}else{if(v===1)d.classList.add("f");d.textContent=v===2?"✕":""}d.style.color="var(--mut)";if(nono&&S.hint){if(S.hint.cells.includes(i))d.classList.add("ht");else if(S.hint.why.includes(i))d.classList.add("hr")}}
   if(type==="star"||type==="bin"||nono){d.dataset.i=i;S.cells[i]=d}else d.onclick=()=>tap(i);g.append(d)}
  if(nono){for(let k=0;k<Math.max(N,M);k++)nonoClue(Math.min(k,M-1)*N+Math.min(k,N-1))}
  if(type==="star")paintAll();
@@ -1742,39 +1742,41 @@ addEventListener("pointerup",starUp);addEventListener("pointercancel",starUp);
 
 let nd=null,lastTap={t:0,i:-1};
 function nonoAt(x,y){if(!S.cells.length)return -1;if(!S.ng)S.ng=gridGeo(S.p.W);return gridHit(S.ng,x,y,S.p.W,S.p.H)}
-function nonoPaint(i,v){S.cur[i]=v;const d=S.cells[i];if(d){d.classList.toggle("f",v===1);d.textContent=v===2?"✕":"";popEl(d)}nonoClue(i)}
+function nonoPaint(i,v){S.cur[i]=v;const d=S.cells[i];if(d){if(S.p.color){d.classList.remove("nc1","nc2","nc3","nc4","f");if(v>0)d.classList.add("nc"+v);d.textContent=v===-1?"✕":""}else{d.classList.toggle("f",v===1);d.textContent=v===2?"✕":""}popEl(d)}nonoClue(i)}
 /* Een rij- of kolomgetal wordt lichter als de gevulde vakjes er precies bij passen. */
 function nonoClue(i){if(S.type!=="nono"||!S.p)return;const W=S.p.W,H=S.p.H,r=i/W|0,c=i%W,g=$("#grid");
  const rv=[],cv=[];for(let k=0;k<W;k++)rv.push(S.cur[r*W+k]);for(let k=0;k<H;k++)cv.push(S.cur[k*W+c]);
  const a=g.querySelector('[data-ln="r'+r+'"]'),b=g.querySelector('[data-ln="c'+c+'"]');
- const upd=(el,v,cl)=>{if(!el)return;el.classList.toggle("ok",lc(v.map(x=>x===1?1:0)).join()===cl.join());const dn=nonoDone(cl,v);el.querySelectorAll("span").forEach((s,k)=>s.classList.toggle("dn",!!dn[k]))};
+ const upd=(el,v,cl)=>{if(!el)return;if(S.p.color){el.classList.toggle("ok",cnEq(cnClue(v.map(x=>x>0?x:0)),cl));const dn=nonoColorDone(cl,v);el.querySelectorAll(".ncl").forEach((s,k)=>s.classList.toggle("dn",!!dn[k]))}else{el.classList.toggle("ok",lc(v.map(x=>x===1?1:0)).join()===cl.join());const dn=nonoDone(cl,v);el.querySelectorAll("span").forEach((s,k)=>s.classList.toggle("dn",!!dn[k]))}};
  upd(a,rv,S.p.rc[r]);upd(b,cv,S.p.cc[c])}
 /* Een los getal wordt lichtgrijs als vaststaat welk blok erbij hoort (het kan nergens anders liggen) en dat blok helemaal gevuld is.
    Bij bijvoorbeeld 1 1 1 1 met één gevuld vakje is niet duidelijk welke 1 het is: dan blijft alles zwart. */
-function nonoDone(cl,v){if(!cl.length)return[];const A=nonoArr(cl,v);if(!A.cnt||A.cnt>200000)return cl.map(()=>false);
- return cl.map((len,k)=>A.mn[k]===A.mx[k]&&v.slice(A.mn[k],A.mn[k]+len).every(x=>x===1))}
+function nonoDone(cl,v){if(!cl.length)return[];const A=nonoArr(cl,v);if(!A.cnt||A.cnt>200000)return cl.map(()=>false);return cl.map((len,k)=>A.mn[k]===A.mx[k]&&v.slice(A.mn[k],A.mn[k]+len).every(x=>x===1))}
+function nonoColorDone(cl,v){if(!cl.length)return[];const A=cnLine(cl,v);if(!A.cnt||A.overflow)return cl.map(()=>false);return cl.map((q,k)=>A.mn[k]===A.mx[k]&&v.slice(A.mn[k],A.mn[k]+q.n).every(x=>x===q.c))}
 function nonoEnter(j){const k=nd.path.indexOf(j);if(k>=0){while(nd.path.length>k+1){const c=nd.path.pop();if(nd.prev.has(c)){nonoPaint(c,nd.prev.get(c));nd.prev.delete(c)}}return}
  nd.path.push(j);const o=S.cur[j];nonoApply(j);if(S.cur[j]!==o)nd.prev.set(j,o)}
 function nonoApply(j){if(nd.mode==="add"){if(S.cur[j]===0)nonoPaint(j,nd.val)}else if(S.cur[j]===nd.val)nonoPaint(j,0)}
 /* Is een rij of kolom precies volgens de getallen gevuld? Dan worden de lege vakjes daarin vanzelf kruisjes. */
 function nonoAuto(changed){const W=S.p.W,H=S.p.H,rows=new Set(),cols=new Set();changed.forEach(i=>{rows.add(i/W|0);cols.add(i%W)});
- const fix=(idx,cl)=>{const v=idx.map(i=>S.cur[i]);if(!v.includes(0))return;if(lc(v.map(x=>x===1?1:0)).join()===cl.join()){idx.forEach(i=>{if(S.cur[i]===0)nonoPaint(i,2)});return}
+ const fix=(idx,cl)=>{const v=idx.map(i=>S.cur[i]);if(!v.includes(0))return;if(S.p.color){if(cnEq(cnClue(v.map(x=>x>0?x:0)),cl))idx.forEach(i=>{if(S.cur[i]===0)nonoPaint(i,-1)});return}if(lc(v.map(x=>x===1?1:0)).join()===cl.join()){idx.forEach(i=>{if(S.cur[i]===0)nonoPaint(i,2)});return}
   /* Een blok dat zeker af is (het getal wordt grijs): meteen kruisjes aan beide kanten. */
   if(!cl.length)return;const A=nonoArr(cl,v);if(!A.cnt||A.cnt>200000)return;
   cl.forEach((len,k)=>{if(A.mn[k]!==A.mx[k])return;const st=A.mn[k];if(!v.slice(st,st+len).every(x=>x===1))return;
    for(const q of[st-1,st+len])if(q>=0&&q<idx.length&&S.cur[idx[q]]===0)nonoPaint(idx[q],2)})};
  rows.forEach(r=>{const idx=[];for(let c=0;c<W;c++)idx.push(r*W+c);fix(idx,S.p.rc[r])});
  cols.forEach(c=>{const idx=[];for(let r=0;r<H;r++)idx.push(r*W+c);fix(idx,S.p.cc[c])})}
-let nonoMode="f";
+let nonoMode="f",nonoColorMode=1;
 function setNonoMode(m){const ch=nonoMode!==m;nonoMode=m;ub();if(ch)setTimeout(flashMode,0)}
+function setNonoColorMode(v){nonoColorMode=v;nonoMode="f";ub();setTimeout(flashMode,0)}
+function setNonoVariant(v){if(v===nonoVariant&&S.type==="nono"&&S.nv===v)return;nonoVariant=v;lsSet("pdnvar",v);nonoMode="f";nonoColorMode=1;load("nono",true,true)}
 function nonoLine(id){const N=S.p.W,k=+id.slice(1),idx=[];for(let j=0;j<(id[0]==="r"?N:S.p.H);j++)idx.push(id[0]==="r"?k*N+j:j*N+k);
- const emp=idx.filter(i=>S.cur[i]===0);if(!emp.length)return;begin();if(!S.start)S.start=Date.now();emp.forEach(i=>nonoPaint(i,2));commit()}
+ const emp=idx.filter(i=>S.cur[i]===0);if(!emp.length)return;begin();if(!S.start)S.start=Date.now();emp.forEach(i=>nonoPaint(i,S.p.color?-1:2));commit()}
 /* Nonogram: tik = de gekozen stand (vullen of kruisje), nog eens tikken = leeg. Slepen kleurt in dezelfde stand.
    Wisselen tussen vullen en kruisje: met de knoppen, of naast het veld tikken met vinger of Pencil (net als bij Hexcells). */
 function nonoDown(e){if(e.button>0||S.type!=="nono"||S.done||e._closed)return;e.preventDefault();if(nd&&nd.pid!==e.pointerId)nonoEnd();
  const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){nonoLine(ck.dataset.ln);return}
  S.ng=gridGeo(S.p.W);const i=nonoAt(e.clientX,e.clientY);if(i<0)return;e._nono=true;
- if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],val=nonoMode==="x"?2:1;
+ if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],val=S.p.color?(nonoMode==="x"?-1:nonoColorMode):(nonoMode==="x"?2:1);
  nd={i0:i,last:i,moved:false,pid:e.pointerId,path:[i],prev:new Map(),old,val,mode:old===val?"del":"add"};
  const nv=old===val?0:val;nonoPaint(i,nv);if(nv!==old)nd.prev.set(i,old)}
 function nonoMove(e){if(!nd||S.type!=="nono"||e.pointerId!==nd.pid)return;const i=nonoAt(e.clientX,e.clientY);if(i<0||i===nd.last)return;const N=S.p.W;nd.moved=true;
@@ -1811,7 +1813,7 @@ function check(){const{type,p,cur}=S;let ok;
   cur.forEach((v,i)=>{if(v!==2)return;const r=i/N|0,c=i%N;rc[r]++;cc[c]++;gc[p.reg[i]]++;
    for(const j of[i+1,i+N,i+N-1,i+N+1]){if(j<N*N&&cur[j]===2&&Math.abs((j%N)-c)<=1&&(j/N|0)-r<=1)adj=true}});
   ok=!adj&&[...rc,...cc,...gc].every(x=>x===(p.K||2))}
- else if(type==="nono"){const u=cur.map(v=>v===1?1:0);ok=JSON.stringify(rowsOf(u,p.W,p.H).map(lc))===JSON.stringify(p.rc)&&JSON.stringify(colsOf(u,p.W,p.H).map(lc))===JSON.stringify(p.cc)}
+ else if(type==="nono"){if(p.color)ok=cur.every((v,i)=>p.sol[i]?v===p.sol[i]:v<=0);else{const u=cur.map(v=>v===1?1:0);ok=JSON.stringify(rowsOf(u,p.W,p.H).map(lc))===JSON.stringify(p.rc)&&JSON.stringify(colsOf(u,p.W,p.H).map(lc))===JSON.stringify(p.cc)}}
  else if(type==="plus"){plusSetup();ok=S.pu.every(u=>u.cells.reduce((a,i)=>a+(cur[i]===1?p.num[i]:0),0)===u.t)}/* klaar zodra alle goede getallen omcirkeld zijn; de rest hoeft niet weggestreept */
  else if(type==="kak"){const{w,runs}=p;ok=cur.every((v,i)=>!w[i]||v>0)&&runs.every(r=>{const ds=r.cells.map(i=>cur[i]);return new Set(ds).size===ds.length&&ds.reduce((a,b)=>a+b,0)===r.sum})}
  if(ok)finish()}
@@ -2172,7 +2174,8 @@ let TD=null,tdTaps=[];const tdLog=[];let tdLast=0;
 function tdAdd(s){if(!TD)return;const n=performance.now();tdLog.unshift(String(Math.round(n-tdLast)).padStart(5)+" ms  "+s);tdLast=n;tdLog.length=Math.min(tdLog.length,16);TD.textContent="Tik-meter (5x op logo = uit)\n"+tdLog.join("\n")}
 $("header h1").addEventListener("pointerdown",()=>{const n=performance.now();tdTaps=tdTaps.filter(t=>n-t<3000);tdTaps.push(n);if(tdTaps.length>=5){tdTaps=[];if(TD){TD.remove();TD=null}else{TD=document.createElement("div");TD.id="tikdbg";document.body.append(TD);tdLog.length=0;tdAdd("aan")}}});
 ["pointerdown","pointerup","pointercancel","touchstart","touchend","touchcancel","click","dblclick"].forEach(t=>document.addEventListener(t,e=>{if(!TD)return;const tt=e.changedTouches?[...e.changedTouches].map(x=>x.touchType||"?").join(","):"";const tg=e.target||{};tdAdd(t+" "+(e.pointerType||tt)+" "+(tg.id||(typeof tg.className==="string"?tg.className:"")||tg.tagName||""))},true));
-$("#nf").onpointerdown=e=>{e.preventDefault();setNonoMode("f")};$("#nx").onpointerdown=e=>{e.preventDefault();setNonoMode("x")};
+$("#nvclassic").onpointerdown=e=>{e.preventDefault();setNonoVariant("classic")};$("#nvcolor").onpointerdown=e=>{e.preventDefault();setNonoVariant("color")};
+$("#nf").onpointerdown=e=>{e.preventDefault();setNonoMode("f")};$("#nx").onpointerdown=e=>{e.preventDefault();setNonoMode("x")};[1,2,3,4].forEach(q=>$("#nc"+q).onpointerdown=e=>{e.preventDefault();setNonoColorMode(q)});
 $("#pxb").onpointerdown=e=>{e.preventDefault();setPlusMode("x")};$("#pob").onpointerdown=e=>{e.preventDefault();setPlusMode("o")};
 function setHexMode(m){const ch=hexMode!==m;hexMode=m;ub();if(ch)setTimeout(flashMode,0)}
 $("#mb").onpointerdown=e=>{e.preventDefault();setHexMode("b")};$("#mz").onpointerdown=e=>{e.preventDefault();setHexMode("z")};
@@ -2290,7 +2293,7 @@ function plusHint(){plusSetup();const p=S.p,cur=S.cur,num=p.num;
 /* ---- Ongedaan maken / opnieuw / reset ---- */
 function ub(){setTimeout(()=>{try{syncA11y()}catch(e){}},0);ub0()}
 function ub0(){const set=(id,v)=>{$(id).disabled=!!v};const off=!S.p||S.done;{const pb=$("#potb"),nw=$("#notewipe"),hasNotes=!!(S.nt&&Object.keys(S.nt).some(k=>S.nt[k]));if(pb){pb.style.display=NOTET.includes(S.type)?"":"none";pb.disabled=off;if(off&&potlood)setPotlood(false);pb.classList.toggle("on",potlood)}if(nw){nw.style.display=NOTET.includes(S.type)&&hasNotes?"":"none";nw.disabled=off}}
- const hx=S.type==="hex";$("#chk").style.display=["bin","star","nono","kak","mur","plus"].includes(S.type)?"":"none";set("#chk",off);$("#hintb").style.display=HINTT.includes(S.type)?"":"none";set("#hintb",off);for(const k of["#undo","#redo","#reset"])$(k).style.display=hx?"none":"";$("#tools").style.display=hx?"none":"";$("#mb").style.display=$("#mz").style.display=hx?"":"none";$("#hexbtns").style.display=hx?"":"none";$("#hexstat").style.display=hx?"":"none";$("#hexbtns").classList.toggle("mz",hexMode==="z");$("#hexstat").classList.toggle("mz",hexMode==="z");$("#nmode").style.display=S.type==="nono"?"":"none";$("#nf").classList.toggle("on",nonoMode==="f");$("#nx").classList.toggle("on",nonoMode==="x");$("#grid").classList.toggle("nx",S.type==="nono"&&nonoMode==="x");$("#grid").classList.toggle("nf",S.type==="nono"&&nonoMode==="f"&&!S.done);$("#pmode").style.display=S.type==="plus"?"":"none";$("#pxb").classList.toggle("on",plusMode==="x");$("#pob").classList.toggle("on",plusMode==="o");$("#grid").classList.toggle("pom",S.type==="plus"&&plusMode==="o"&&!S.done);$("#grid").classList.toggle("pxm",S.type==="plus"&&plusMode==="x"&&!S.done);$("#mb").classList.toggle("on",hexMode==="b");$("#mz").classList.toggle("on",hexMode==="z");$("#hexsvg").classList.toggle("mb",hexMode==="b");$("#hexw").classList.toggle("mz",hexMode==="z");$("#hexsvg").classList.toggle("mz",hexMode==="z");set("#undo",off||!S.hist||!S.hist.length);set("#redo",off||!S.redo||!S.redo.length);set("#reset",off)}
+ const hx=S.type==="hex";$("#chk").style.display=["bin","star","nono","kak","mur","plus"].includes(S.type)?"":"none";set("#chk",off);$("#hintb").style.display=HINTT.includes(S.type)?"":"none";set("#hintb",off);for(const k of["#undo","#redo","#reset"])$(k).style.display=hx?"none":"";$("#tools").style.display=hx?"none":"";$("#mb").style.display=$("#mz").style.display=hx?"":"none";$("#hexbtns").style.display=hx?"":"none";$("#hexstat").style.display=hx?"":"none";$("#hexbtns").classList.toggle("mz",hexMode==="z");$("#hexstat").classList.toggle("mz",hexMode==="z");$("#nvariant").style.display=S.type==="nono"?"flex":"none";$("#nvclassic").classList.toggle("on",S.type==="nono"&&S.nv!=="color");$("#nvcolor").classList.toggle("on",S.type==="nono"&&S.nv==="color");$("#nmode").style.display=S.type==="nono"?"":"none";const ncol=S.type==="nono"&&S.nv==="color";$("#nf").style.display=ncol?"none":"";$("#nf").classList.toggle("on",!ncol&&nonoMode==="f");$("#nx").classList.toggle("on",nonoMode==="x");for(let q=1;q<=4;q++){const b=$("#nc"+q);b.style.display=ncol&&S.p&&q<=S.p.K?"flex":"none";b.classList.toggle("on",ncol&&nonoMode==="f"&&nonoColorMode===q)}$("#grid").classList.toggle("ncolor",ncol);$("#grid").classList.toggle("nx",S.type==="nono"&&nonoMode==="x");$("#grid").classList.toggle("nf",S.type==="nono"&&!ncol&&nonoMode==="f"&&!S.done);$("#pmode").style.display=S.type==="plus"?"":"none";$("#pxb").classList.toggle("on",plusMode==="x");$("#pob").classList.toggle("on",plusMode==="o");$("#grid").classList.toggle("pom",S.type==="plus"&&plusMode==="o"&&!S.done);$("#grid").classList.toggle("pxm",S.type==="plus"&&plusMode==="x"&&!S.done);$("#mb").classList.toggle("on",hexMode==="b");$("#mz").classList.toggle("on",hexMode==="z");$("#hexsvg").classList.toggle("mb",hexMode==="b");$("#hexw").classList.toggle("mz",hexMode==="z");$("#hexsvg").classList.toggle("mz",hexMode==="z");set("#undo",off||!S.hist||!S.hist.length);set("#redo",off||!S.redo||!S.redo.length);set("#reset",off)}
 function begin(){S.gs=S.cur.slice()}
 function commit(){if(S.gs&&S.gs.join()!==S.cur.join()){S.hist.push(S.gs);S.redo=[];pingBusy()}S.gs=null;ub();paintNotes()}
 function initCur(){const p=S.p;return S.type==="bin"?p.giv.slice():Array(S.type==="kak"||S.type==="nono"||S.type==="plus"?p.W*p.H:p.N*p.N).fill(S.type==="mur"?-1:0)}
@@ -2680,14 +2683,14 @@ function dayLabel(){const wk=isWk(dstr());$("#today").textContent=PHONE?(wk?"Dag
    b.innerHTML="<span>"+(k===0?"Vandaag":k===1?"Gisteren":dnl(d))+(isWk(d)?" 💪":"")+(featOf(d)===t?" ⭐":"")+"</span>"+(who?'<span class="lw">'+who+"</span>":"");
    b.onclick=ev=>{ev.stopPropagation();pop.classList.remove("open");load(S.type,false,false,d)};pop.append(b)}
   const r=ab.getBoundingClientRect();pop.style.top=Math.round(r.bottom+6)+"px";pop.style.left=Math.round(Math.max(6,Math.min(innerWidth-236,r.left+r.width/2-115)))+"px";pop.classList.add("open")};
- document.addEventListener("pointerdown",e=>{if(pop.classList.contains("open")&&!e.target.closest("#archp,#arch")){pop.classList.remove("open");e._closed=true}},true)}$("#next").onclick=()=>load(RANDOM?rndType(S.type):S.type,true,true);$("#today").onclick=()=>load(S.type,false);
+ document.addEventListener("pointerdown",e=>{if(pop.classList.contains("open")&&!e.target.closest("#archp,#arch")){pop.classList.remove("open");e._closed=true}},true)}$("#next").onclick=()=>load(RANDOM?rndType(S.type):S.type,true,true);$("#today").onclick=()=>{if(S.type==="nono"){nonoVariant="classic";lsSet("pdnvar","classic")}load(S.type,false)};
 let LAYW=innerWidth,LAYH=innerHeight,LAYRT=0;
 function resetPuzzleFit(){if(!S)return;delete S._csFit;delete S._hexFit;delete S._murMS;MURMS=0}
 addEventListener("resize",()=>{clearTimeout(LAYRT);LAYRT=setTimeout(()=>{const w=innerWidth,h=innerHeight,dw=Math.abs(w-LAYW),dh=Math.abs(h-LAYH),turn=(w>h)!==(LAYW>LAYH);if(!turn&&dw<24&&dh<100)return;LAYW=w;LAYH=h;resetPuzzleFit();if(S.p)render()},140)});
 /* ---- Opslaan ---- */
 const PKEY="pdprog4";
 function progAll(){try{return JSON.parse(lsGet(PKEY)||"{}")}catch(e){return{}}}
-function progKey(t,pr,d,sf){return pr?"p:"+t+sf:"d:"+d+":"+t+sf}
+function progKey(t,pr,d,sf){const nv=t==="nono"&&S&&S.type==="nono"&&S.nv==="color"?"c":"";return pr?"p:"+t+sf+nv:"d:"+d+":"+t+sf}
 function progDel(k){const a=progAll();if(k in a){delete a[k];lsSet(PKEY,JSON.stringify(a))}}
 function persist(){if(!S.p||S.done||!S.start||!S.seed)return;const a=progAll(),today=dstr();
  for(const k in a)if(k.startsWith("d:")&&k.split(":")[1]<addDays(today,-8))delete a[k];
@@ -2702,7 +2705,8 @@ addEventListener("pageshow",()=>resumePlay());
 function wrongCells(){const{type,p,cur}=S,o=[];if(!cur)return o;cur.forEach((v,i)=>{
  if(type==="bin"){if(v>=0&&v!==p.sol[i])o.push(i)}
  else if(type==="star"){if((v===2&&!p.sol[i])||(v===1&&p.sol[i]))o.push(i)}
- else if(type==="nono"||type==="plus"){if((v===1&&!p.sol[i])||(v===2&&p.sol[i]))o.push(i)}
+ else if(type==="nono"){if(p.color){if((v>0&&v!==p.sol[i])||(v===-1&&p.sol[i]>0))o.push(i)}else if((v===1&&!p.sol[i])||(v===2&&p.sol[i]))o.push(i)}
+ else if(type==="plus"){if((v===1&&!p.sol[i])||(v===2&&p.sol[i]))o.push(i)}
  else if(type==="kak"){if(v>0&&v!==p.sol[i])o.push(i)}
  else if(type==="mur"){if(v>=0&&p.sol[v]!==i||v===-2&&p.sol.includes(i))o.push(i)}});return o}
 function doCheck(){if(S.done||!S.p||!["bin","star","nono","kak","mur","plus"].includes(S.type))return;const bad=wrongCells(),m=$("#msg");
