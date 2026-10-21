@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script>try{var t=localStorage.getItem("pdtheme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<title>Rekenraadsel Gepuzzellig</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap">
+<style>
+/* Layout: één kolom met raadselkaarten, zoals een tabblad in Gepuzzellig; kleuren en vormen van de app. */
+:root{--paper:#fffefb;--grid:#e3e6ee;--ink:#1f2430;--blauw:#2f6fed;--rood:#d33b3b;--bg:#f6f4ef;--fg:#1f2430;--card:#fff;--line:#d8d4ca;--mut:#6b7080;--pc:#c2255c;--pcs:#fbe4ec;--ok:#1d8a4b;--oks:#e2f4e8;--bad:#d33b3b;--bads:#fde7e7;--hint:#9a6a00;--hints:#fff3cf;
+ --f:"Nunito",ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,-apple-system,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#1b1e25;--grid:#2a2e38;--ink:#ecebe6;--blauw:#7aa5ff;--rood:#ff7b7b;--bg:#15171c;--fg:#ecebe6;--card:#20232b;--line:#3a3e4a;--mut:#9a9eab;--pc:#f06595;--pcs:#3b1d2a;--ok:#4cc380;--oks:#17321f;--bad:#ff6b6b;--bads:#3a1b1b;--hint:#f2c14e;--hints:#3a2f12;color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#1b1e25;--grid:#2a2e38;--ink:#ecebe6;--blauw:#7aa5ff;--rood:#ff7b7b;--bg:#15171c;--fg:#ecebe6;--card:#20232b;--line:#3a3e4a;--mut:#9a9eab;--pc:#f06595;--pcs:#3b1d2a;--ok:#4cc380;--oks:#17321f;--bad:#ff6b6b;--bads:#3a1b1b;--hint:#f2c14e;--hints:#3a2f12;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font:17px/1.5 var(--f);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 60px;-webkit-tap-highlight-color:transparent}
+.app{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.links,.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (min-width:900px){.app{grid-template-columns:minmax(360px,520px) minmax(0,1fr);align-items:start}.klad{position:sticky;top:max(12px,env(safe-area-inset-top,0px));height:calc(100dvh - 36px)}}
+.klad{display:flex;flex-direction:column;gap:8px;min-width:0;height:72vh;min-height:380px}
+.ktools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ktitel{font-weight:900;margin-right:auto}
+.kb{font:800 14px var(--f);border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:12px;padding:7px 11px;cursor:pointer}
+.kb.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.kcols{display:inline-flex;gap:5px;padding:0 4px}
+.kc{width:26px;height:26px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}
+.kc[data-c=ink]{background:var(--ink)}.kc[data-c=blauw]{background:var(--blauw)}.kc[data-c=rood]{background:var(--rood)}
+.kc.on{box-shadow:0 0 0 2px var(--fg)}
+.papier{position:relative;flex:1;border-radius:18px;border:1px solid var(--line);overflow:hidden;background-color:var(--paper);
+ background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;background-position:-1px -1px}
+.papier canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.papier.gum canvas{cursor:cell}
+.kleeg{position:absolute;left:16px;right:200px;top:14px;margin:0;color:var(--mut);font-size:14px;pointer-events:none}
+.kpag{position:absolute;right:10px;top:10px;display:flex;align-items:center;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px;box-shadow:0 4px 14px rgba(0,0,0,.08);z-index:2}
+.kpag button{font:800 14px var(--f);border:0;background:transparent;color:var(--fg);border-radius:999px;padding:6px 11px;cursor:pointer;min-height:34px}
+.kpag button:disabled{opacity:.3;cursor:default}
+.kpag #kNieuw{background:color-mix(in srgb,var(--fg) 8%,transparent)}
+.kpag span{font:800 13px var(--f);color:var(--mut);min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+.calc{position:absolute;right:10px;bottom:10px;width:236px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px;box-shadow:0 12px 34px rgba(0,0,0,.18);z-index:3}
+.calc[hidden]{display:none}
+.cdisp{background:color-mix(in srgb,var(--fg) 6%,transparent);border-radius:12px;padding:6px 10px;margin-bottom:8px;text-align:right;min-height:52px}
+.cexp{font:700 13px var(--f);color:var(--mut);min-height:18px;word-break:break-all}
+.cres{font:900 24px var(--f);font-variant-numeric:tabular-nums;word-break:break-all;line-height:1.15}
+.cres.err{color:var(--bad);font-size:16px}
+.cres.lang{font-size:18px}
+html,body,button,input,a{touch-action:manipulation}
+.calc{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none}
+.ckeys button.hit,.calc button.hit{transform:translateY(1px);filter:brightness(.9)}
+.ckeys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ckeys button{font:800 17px var(--f);border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:10px;padding:9px 0;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent}
+.ckeys button.op{background:color-mix(in srgb,var(--pc) 10%,var(--card));color:var(--pc)}
+.ckeys button.eq{background:var(--pc);border-color:var(--pc);color:#fff}
+.ckeys button.fn{font-size:15px;color:var(--mut)}
+.ckeys button:active{transform:translateY(1px)}
+#kCalc span{display:none}
+@media (max-width:480px){.kb span{display:none}.kpag button{padding:5px 8px}.kpag #kNieuw{padding:5px 9px}.calc{width:210px}.ckeys button{padding:7px 0;font-size:16px}}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{width:34px;height:34px;display:grid;grid-template-columns:1fr 1fr;gap:3px}.logo i{border-radius:5px}
+h1{font-size:26px;font-weight:900;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.pill{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--pc);background:var(--pcs);padding:3px 10px;border-radius:999px}
+.intro{margin:0;color:var(--mut);max-width:62ch}
+.wrap{display:flex;flex-direction:column;gap:14px}
+.seg{display:inline-flex;gap:3px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px;align-self:flex-start}
+.seg button{border:0;background:transparent;font:800 15px var(--f);color:var(--fg);padding:8px 16px;border-radius:999px;cursor:pointer}
+.seg button.on{background:var(--pc);color:#fff}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{font:800 15px var(--f);border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:14px;padding:10px 16px;cursor:pointer;box-shadow:0 2px 0 var(--line)}
+.btn:active{transform:translateY(1px);box-shadow:none}
+.btn.p{background:var(--pc);border-color:var(--pc);color:#fff;box-shadow:0 2px 0 color-mix(in srgb,var(--pc) 60%,#000)}
+.btn.h{background:var(--hints);border-color:color-mix(in srgb,var(--hint) 40%,var(--line));color:var(--fg)}
+.btn:focus-visible,.seg button:focus-visible,.opt:focus-visible,input:focus-visible,.chip:focus-visible{outline:3px solid color-mix(in srgb,var(--pc) 55%,transparent);outline-offset:2px}
+.btn[disabled]{opacity:.45;cursor:default}
+.mut{color:var(--mut);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 18px color-mix(in srgb,var(--fg) 7%,transparent)}
+.card.ok{border-color:color-mix(in srgb,var(--ok) 55%,var(--line))}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lv{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;padding:3px 10px;border-radius:999px;background:var(--pcs);color:var(--pc)}
+.soort{font-weight:800}
+.badges{margin-left:auto;font-size:15px;font-weight:800;color:var(--mut)}
+.txt{white-space:pre-line;margin:0;max-width:66ch}
+.vraag{font-weight:800;margin:0}
+.ans{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ans input{font:800 20px var(--f);font-variant-numeric:tabular-nums;width:min(220px,100%);padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--fg)}
+.ans .unit{font-weight:800;color:var(--mut)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.opt{font:800 17px var(--f);padding:12px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer;text-align:left}
+.opt.sel{border-color:var(--pc)}.opt.goed{border-color:var(--ok);background:var(--oks)}.opt.fout{border-color:var(--bad);background:var(--bads);opacity:.7}
+.fb{font-weight:800;margin:0;min-height:1.5em}.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.hints{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.hints li{background:var(--hints);border-radius:12px;padding:9px 12px;font-size:16px}
+.hints li b{color:var(--hint)}
+.uitw{background:color-mix(in srgb,var(--ok) 9%,var(--card));border:1px dashed color-mix(in srgb,var(--ok) 45%,var(--line));border-radius:14px;padding:10px 14px}
+.uitw ol{margin:4px 0 0;padding-left:22px}.uitw li{margin:3px 0}
+.tabw{overflow-x:auto}.tabw table{border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:100%}.tabw th,.tabw td{padding:6px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.tabw th{font-size:13px;color:var(--mut);font-weight:800}.tabw td.q{color:var(--pc);font-weight:900}
+.bonnen{display:flex;gap:14px;flex-wrap:wrap}.bon{background:var(--paper);border:1px dashed var(--line);border-radius:6px;padding:10px 14px;min-width:190px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;box-shadow:0 3px 10px color-mix(in srgb,var(--fg) 8%,transparent)}
+.bon .bk{text-align:center;font-weight:800;border-bottom:1px dashed var(--line);padding-bottom:6px;margin-bottom:6px}.bon .bt{display:flex;justify-content:space-between;border-top:1px dashed var(--line);margin-top:6px;padding-top:6px;font-weight:800}
+.svgw{color:var(--fg);background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:6px}.svgw svg{display:block;width:100%;height:auto;max-height:150px}
+.zes{margin:0;font-weight:800;color:var(--pc)}
+.shake{animation:sh .32s}@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:800 14px var(--f);padding:8px 13px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.chip.on{background:var(--pc);border-color:var(--pc);color:#fff}
+.chip small{font-weight:800;font-size:10.5px;margin-left:6px;padding:1px 6px;border-radius:999px;background:var(--pcs);color:var(--pc);opacity:1;vertical-align:1px}
+.chip.on small{background:rgba(255,255,255,.25);color:#fff}
+.chiph{flex-basis:100%;font:800 12px var(--f);text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:10px 0 0}
+.chiph:first-child{margin-top:0}
+.score{display:flex;gap:16px;flex-wrap:wrap;font-weight:800}
+@media (max-width:480px){body{font-size:16px}.card{padding:14px 14px}h1{font-size:22px}}
+</style>
+<style>.terug{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--fg);text-decoration:none;font-size:22px;font-weight:700;box-shadow:0 3px 0 var(--line);flex:none}</style>
+</head><body>
+<div class="app">
+ <div class="links">
+  <header><a class="terug" href="./" aria-label="Terug naar Gepuzzellig">←</a><div class="logo" aria-hidden="true"><i style="background:#7a52d6"></i><i style="background:#e8590c"></i><i style="background:#0f9d8c"></i><i style="background:#c2255c"></i></div><h1>Rekenraadsel</h1><span class="pill">testversie</span></header>
+  <div class="seg" role="tablist"><button id="tDag" class="on" role="tab">Raadsel van vandaag</button><button id="tSoort" role="tab">Alle soorten</button></div>
+  <div id="vDag" class="col">
+   <div class="bar"><span class="mut" id="setnaam"></span></div>
+   <div id="set" class="col"></div>
+  </div>
+  <div id="vSoort" class="col" hidden>
+   <p class="mut" style="margin:0">Kies zelf een onderwerp. Elke tik geeft een nieuwe versie met andere namen en getallen. Het raadsel verschijnt hier bovenaan.</p>
+   <div class="bar"><button class="btn" id="nieuw">🔀 Willekeurig raadsel</button></div>
+   <div id="los" class="col"></div>
+   <div class="chips" id="chips"></div>
+  </div>
+ </div>
+ <section class="klad" aria-label="Kladpapier">
+  <div class="ktools">
+   <b class="ktitel">Kladpapier</b>
+   <button class="kb on" id="kPen" title="Potlood">✏️ <span>Potlood</span></button>
+   <button class="kb" id="kGum" title="Gum">🧽 <span>Gum</span></button>
+   <span class="kcols"><button class="kc on" data-c="ink" aria-label="Zwart"></button><button class="kc" data-c="blauw" aria-label="Blauw"></button><button class="kc" data-c="rood" aria-label="Rood"></button></span>
+   <button class="kb" id="kUndo" title="Laatste streep terug">↶</button>
+   <button class="kb" id="kWis" title="Deze pagina wissen">🗑 <span>Wis</span></button>
+   <button class="kb" id="kCalc" title="Rekenmachine tonen of verbergen" aria-label="Rekenmachine" aria-pressed="false">🧮 <span>Rekenmachine</span></button>
+  </div>
+  <div class="papier" id="papier"><canvas id="kcv"></canvas><p class="kleeg" id="kleeg">Schrijf hier met de Pencil (of je vinger). Tik op 🧽 Gum om te gummen.</p>
+   <div class="kpag" id="kpag"><button id="kPrev" aria-label="Vorige pagina">‹</button><span id="kNr">1 / 1</span><button id="kNext" aria-label="Volgende pagina">›</button><button id="kNieuw" title="Nieuwe pagina">+ pagina</button></div>
+   <div class="calc" id="calc" hidden aria-label="Rekenmachine"><div class="cdisp"><div class="cexp" id="cExp"></div><div class="cres" id="cRes">0</div></div>
+    <div class="ckeys" id="cKeys"></div></div>
+  </div>
+ </section>
+</div>
+<script>
+/* ===== Rekenraadsels: sjablonen met willekeurige getallen, rekenend terug vanaf een mooi antwoord ===== */
+const RR=(seed)=>{let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
+const shuf=(a,R)=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};const rint=(R,a,b)=>a+Math.floor(R()*(b-a+1)),rpick=(R,a)=>a[Math.floor(R()*a.length)];
+const gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a);
+const nl=(x,dec)=>{const neg=x<0;x=Math.abs(x);let s=dec!=null?x.toFixed(dec):String(Math.round(x*1000)/1000);let[i,f]=s.split(".");i=i.replace(/\B(?=(\d{3})+(?!\d))/g,".");return(neg?"-":"")+i+(f?","+f:"")};
+const eur=x=>"€ "+(Number.isInteger(x)?nl(x):nl(x,2));
+const NEUT_M=["Jan","Kees","Willem","Gert","Bas","Ruud","Henk","Joost","Pieter","Marco"],NEUT_V=["Hetty","Femke","Sanne","Lotte","Ineke","Mieke","Anouk","Joke","Marloes","Esther"];
+/* De familie: volwassenen voor de meeste verhalen, kleinkinderen en honden waar het past. */
+const MANNEN=["Aart","Sijmon","Martijn","Jeroen","Thomas","Peter"],VROUWEN=["Lisa","Iris","Iwona","Lieke","Ingrid","Renske"],KLEIN=["Jan","Feliks","Daan","Olaf","Lars","Emma"],HONDEN=["Marsha","Dora"];
+let LASTNM="";const nm=R=>(LASTNM=R()<.5?rpick(R,MANNEN):rpick(R,VROUWEN));const hz=()=>VROUWEN.includes(LASTNM)?"ze":"hij",HZ=()=>VROUWEN.includes(LASTNM)?"Ze":"Hij";
+const tijd=m=>{m=((m%1440)+1440)%1440;return String(m/60|0).padStart(2,"0")+":"+String(m%60).padStart(2,"0")};
+const DAGEN=["maandag","dinsdag","woensdag","donderdag","vrijdag","zaterdag","zondag"];
+
+/* Elk sjabloon: {id, naam, gen(R)} — allemaal op 3F-niveau, er zijn geen niveaus -> {tekst, vraag, ans, soort:"getal"|"tijd"|"keuze", keuzes?, eenheid?, hints:[aanpak, tussenstap], uitwerking:[...]} */
+const RAAD=[
+{id:"erfenis",naam:"Prijs verdelen",gen(R){
+ const TH=[{naam:"Loterijprijs verdelen",intro:T=>`Opa Aart heeft ${eur(T)} gewonnen in de loterij. Hij houdt zelf niets en verdeelt alles als verrassing:`,vast:1,A:"kinderen",a1:"kind",B:"kleinkinderen",b1:"kleinkind",C:"de buurvrouw (die altijd op de hond past)",c1:"De buurvrouw"},
+  {naam:"Pubquizpot verdelen",intro:T=>`Het familieteam wint de grote pubquiz van het dorp: ${eur(T)}. Ze spreken af om het zo te verdelen:`,A:"volwassenen in het team",a1:"volwassene",B:"tieners in het team",b1:"tiener",C:"de quizmaster",c1:"De quizmaster"},
+  {naam:"Opbrengst rommelmarkt",intro:T=>`De rommelmarkt op het dorpsplein heeft ${eur(T)} opgeleverd. Het bestuur verdeelt het geld zo:`,A:"verenigingen",a1:"vereniging",B:"schoolklassen",b1:"schoolklas",C:"het buurthuis",c1:"Het buurthuis"}];
+ for(;;){const th=rpick(R,TH),z=th.vast?6:rint(R,2,6),k=th.vast?6:rint(R,3,8),a=rint(R,2,4),b=rint(R,2,3),delen=1+k*b+z*a*b,u=rpick(R,[50,100,125,200,250,500]),T=u*delen;if(T<2000||T>60000)continue;
+  const elk=w=>(["kind","kleinkind"].includes(w)?"Elk ":"Elke ")+w,v=rint(R,0,2),wie=[elk(th.a1),elk(th.b1),th.c1][v],ans=[a*b*u,b*u,u][v];
+  return{naam:th.naam,tekst:`${th.intro(T)}\n• De ${z} ${th.A} krijgen ieder ${a} keer zoveel als elk van de ${k} ${th.B}.\n• De ${k} ${th.B} krijgen ieder ${b} keer zoveel als ${th.C}.\nVerder krijgt niemand iets.`,
+   vraag:`${wie} krijgt ….. euro.`,eenheid:"euro",ans,
+   hints:[`Geef ${th.c1.toLowerCase()} 1 deel. Hoeveel delen krijgt dan één ${th.b1}, en hoeveel één ${th.a1}?`,`${th.c1} 1 deel, ${th.b1} ${b} delen, ${th.a1} ${a*b} delen. Samen: 1 + ${k}×${b} + ${z}×${a*b} = ${delen} delen.`],
+   uitwerking:[`${th.c1}: 1 deel. Elke ${th.b1}: ${b} delen. Elke ${th.a1}: ${a}×${b} = ${a*b} delen.`,`Totaal: 1 + ${k}×${b} + ${z}×${a*b} = ${delen} delen.`,`1 deel = ${eur(T)} : ${delen} = ${eur(u)}.`,`${wie} krijgt ${[a*b,b,1][v]} × ${eur(u)} = ${eur(ans)}.`]}}}},
+{id:"wissel",naam:"Wisselkoersen",gen(R){
+ const RS=[[5,4],[6,5],[4,5],[3,2],[3,4],[9,10],[11,10]];
+ for(;;){const[p1,q1]=rpick(R,RS),[p2,q2]=rpick(R,RS);const[M1,M2,M3]=rpick(R,[["euro","dollar","pond"],["euro","Zwitserse frank","pond"],["euro","dollar","Zwitserse frank"],["euro","Zweedse kroon","dollar"]]);
+  /* 1 M1 = p1/q1 M2 ; 1 M3 = p2/q2 M1 ; X M2 -> M3: X / (p1/q1) / (p2/q2) */
+  const A=rint(R,12,240),num=A*p1*p2,den=q1*q2;if(num%den)continue;const X=num/den;if(X<10||X>2000||(X*q1)%p1||X%5)continue;if(M2==="Zweedse kroon"&&X<100)continue;
+  const f=(p,q)=>nl(p/q);
+  return{tekst:`We vergelijken drie munten: de ${M1}, de ${M2} en de ${M3}. Op een bepaalde dag zijn dit de koersen:\n1 ${M1} = ${f(p1,q1)} ${M2}\n1 ${M3} = ${f(p2,q2)} ${M1}\nJe hoeft geen rekening te houden met omwisselkosten.`,
+   vraag:`${nl(X)} ${M2} = ….. ${M3}`,eenheid:M3,ans:A,
+   hints:[`Reken eerst om naar ${M1}, en dan pas naar ${M3}.`,`${nl(X)} ${M2} = ${nl(X)} : ${f(p1,q1)} = ${nl(X*q1/p1)} ${M1}.`],
+   uitwerking:[`${nl(X)} ${M2} : ${f(p1,q1)} = ${nl(X*q1/p1)} ${M1}.`,`${nl(X*q1/p1)} ${M1} : ${f(p2,q2)} = ${nl(A)} ${M3}.`]}}}},
+{id:"leeftijd",naam:"Leeftijden in de familie",gen(R){
+ const C=[];for(let k=3;k<=6;k++)for(let d=1;d<=3;d++)for(let m=2;m<k;m++){const t=d*k*(k-1)/2;if(t%(k-m))continue;const o=t/(k-m),y=o-d*(k-1),F=m*o;if(y>=1&&F>=26&&F<=60)C.push({k,d,m,o,F})}
+ const c=rpick(R,C),vader=rpick(R,NEUT_M),opaGap=rint(R,24,34),twee=2*c.F<=100&&R()<.5,G=twee?2*c.F:c.F+opaGap;
+ const tel=["","","twee","drie","vier","vijf","zes"][c.k],keer={2:"twee",3:"drie",4:"vier",5:"vijf"}[c.m];
+ const v=rint(R,0,2),vr=[`Opa is vandaag ….. jaar geworden.`,`${vader} is ….. jaar oud.`,`Het jongste kind is ….. jaar oud.`][v],ans=[G,c.F,c.o-c.d*(c.k-1)][v];
+ return{tekst:`Opa is vandaag jarig. Zijn zoon ${vader} komt met zijn ${tel} kinderen feliciteren.\nDe ${tel} kinderen schelen onderling steeds precies ${c.d} jaar, en bij elkaar opgeteld zijn ze even oud als ${vader}. Bovendien is ${vader} ${keer} keer zo oud als zijn oudste kind, en is opa ${twee?"nu twee keer zo oud als "+vader:opaGap+" jaar ouder dan "+vader}.`,
+  vraag:vr,eenheid:"jaar",ans,
+  hints:[`Noem de leeftijd van het oudste kind x. Schrijf de leeftijden van de andere kinderen uit met x.`,`De kinderen zijn x, ${Array.from({length:c.k-1},(_,i)=>"x − "+(c.d*(i+1))).join(", ")}. Samen: ${c.k}x − ${c.d*c.k*(c.k-1)/2}. Dat is gelijk aan ${c.m}x.`],
+  uitwerking:[`Oudste kind x. Samen zijn de kinderen ${c.k}x − ${c.d*c.k*(c.k-1)/2} jaar.`,`Dat is even oud als ${vader}: ${c.m}x. Dus ${c.k-c.m}x = ${c.d*c.k*(c.k-1)/2}, x = ${c.o}.`,`De kinderen zijn ${Array.from({length:c.k},(_,i)=>c.o-c.d*i).join(", ")} jaar. ${vader} is ${c.m} × ${c.o} = ${c.F}.`,`Opa is ${twee?"2 × "+c.F:c.F+" + "+opaGap} = ${G} jaar.`]}}},
+{id:"kubus",naam:"Bakken met water",gen(R){
+ const P=[["een kwart kubieke meter",2000,"1/4 van een m³"],["een kubieke halve meter",1000,"een kubus met ribbe ½ m: ½×½×½ = 1/8 m³"],["een achtste kubieke meter",1000,"1/8 van een m³"],["een kubieke kwart meter",125,"een kubus met ribbe ¼ m: 1/64 m³"],["een halve kubieke meter",4000,"de helft van een m³"],["250 liter",2000,"250 dm³ = 1/4 m³"],["125 kubieke decimeter",1000,"125 dm³ = 1/8 m³"],["500 liter",4000,"1/2 m³"],["een kubieke decimeter",8,"1 liter"],["375 liter",3000,"3/8 m³"],["625 liter",5000,"5/8 m³"]];
+ for(;;){const pick=[];const idx=[...Array(P.length).keys()];for(let i=0;i<5;i++){const j=idx.splice(rint(R,0,idx.length-1),1)[0];pick.push(P[j])}
+  const L="ABCDE",subs=[];for(let skip=0;skip<5;skip++){let s=0;for(let i=0;i<5;i++)if(i!==skip)s+=pick[i][1];subs.push(s)}
+  const good=subs.map((s,i)=>s===8000?i:-1).filter(i=>i>=0);if(good.length!==1)continue;const g=good[0];
+  const opts=[...Array(5).keys()].map(skip=>[...Array(5).keys()].filter(i=>i!==skip).map(i=>L[i]).join("+"));
+  const sh=[...Array(5).keys()].sort(()=>R()-.5).slice(0,4);if(!sh.includes(g))sh[0]=g;sh.sort((a,b)=>a-b);
+  return{tekst:`${rpick(R,VROUWEN)} heeft vijf kubusvormige bakken met water:\n${pick.map((p,i)=>`In bak ${L[i]} zit ${p[0]}.`).join("\n")}`,
+   vraag:`Met het water uit welke vier bakken kan ze een lege kubus van precies 1 kubieke meter vullen?`,soort:"keuze",keuzes:sh.map(i=>opts[i]),ans:opts[g],
+   hints:[`Let op het verschil tussen "een halve kubieke meter" en "een kubieke halve meter". De tweede is een kubus met ribbe ½ meter.`,`Reken alles om naar achtsten van een m³ (of naar liters: 1 m³ = 1000 liter).`],
+   uitwerking:[...pick.map((p,i)=>`${L[i]}: ${p[0]}`+(/liter|decimeter/.test(p[0])&&!/kubieke decimeter$/.test(p[0])?` = ${p[2]}.`:` = ${p[2]} = ${nl(p[1]/8)} liter.`)),`Samen moet het 1000 liter zijn: ${opts[g]}.`]}}}},
+{id:"tijdrit",naam:"Tijdrit",gen(R){
+ for(;;){const P=a=>rpick(R,a),segs=[["vlak",P([40,45,48,50]),P([6,8,9,10,12])],["klim",P([20,24,30]),P([3,4,5,6,10])],["afdaling",P([60,72,75,80,90]),P([2,3,4,5])],["vals plat",P([36,40,45]),P([4,5,6,8])],["klim",P([20,24,30]),P([2,3,5,6])],["vlak",P([45,48,50,60]),P([2,3,4,5])]];
+  if(segs.some(s=>(s[1]*s[2])%60))continue;const T=segs.reduce((a,s)=>a+s[2],0),L=segs.reduce((a,s)=>a+s[1]*s[2]/60,0);if(!Number.isInteger(L*10))continue;
+  const r=rpick(R,MANNEN),af=segs[2];
+  const km=segs.map(s=>s[1]*s[2]/60),dy=[0,1.4,-2.2,.35,1.1,0],W=380,H=110,tot=km.reduce((x,y)=>x+y,0);let x=10,y=62,pts=[[x,y]];
+  km.forEach((k,i)=>{x+=k/tot*(W-20);y-=dy[i]*14;pts.push([x,y])});
+  const svg=`<svg viewBox="0 0 ${W} ${H}" class="prof" role="img" aria-label="Hoogteprofiel van de tijdrit"><line x1="10" y1="62" x2="${W-10}" y2="62" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="3 3"/><polyline points="${pts.map(q=>q.map(v=>v.toFixed(1)).join(",")).join(" ")}" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>${pts.slice(0,-1).map((q,i)=>`<text x="${((q[0]+pts[i+1][0])/2).toFixed(1)}" y="${(Math.min(q[1],pts[i+1][1])-7).toFixed(1)}" font-size="12" font-weight="700" text-anchor="middle" fill="currentColor">${i+1}</text>`).join("")}</svg>`;
+  return{tekst:`Hierboven zie je het profiel van een tijdrit van ${nl(L)} km, in zes stukken. ${r} wordt derde met een tijd van ${T} minuten. Op de andere stukken reed hij zo:`,svg,
+   tabel:{kop:["Stuk","Soort","Snelheid","Tijd"],rijen:segs.map((q,i)=>[String(i+1),q[0],i===2?"?":q[1]+" km/u",i===2?"?":q[2]+" min"])},
+   vraag:`Op de afdaling was de gemiddelde snelheid van ${r} ….. km/u.`,eenheid:"km/u",ans:af[1],
+   hints:[`Reken per stuk uit hoeveel kilometer ${r} aflegde (snelheid × tijd, met de tijd in uren).`,`Zonder de afdaling: ${nl(L-af[1]*af[2]/60)} km in ${T-af[2]} minuten. De afdaling duurde dus ${af[2]} minuten.`],
+   uitwerking:[...segs.map((s,i)=>i===2?null:`Stuk ${i+1}: ${s[1]} × ${s[2]}/60 = ${nl(s[1]*s[2]/60)} km.`).filter(Boolean),`Afdaling: ${nl(L)} − ${nl(L-af[1]*af[2]/60)} = ${nl(af[1]*af[2]/60)} km in ${T} − ${T-af[2]} = ${af[2]} minuten.`,`Snelheid: ${nl(af[1]*af[2]/60)} : ${af[2]} × 60 = ${af[1]} km/u.`]}}}},
+{id:"treinen",naam:"Tegemoet",gen(R){
+ const TH=[
+  {naam:"Treinen tegemoet",ST:[["Zwolle","Groningen",102],["Zwolle","Leeuwarden",94],["Amersfoort","Deventer",68],["Utrecht","Eindhoven",90],["Leeuwarden","Groningen",54]],v1:[80,90,100,120],v2:[60,72,80,90],A:"een intercity",B:"een sprinter",wat:"De treinen passeren elkaar",x:"(Ga ervan uit dat beide treinen meteen op snelheid zijn en nergens stoppen.)",pad:"langs het spoor"},
+  {naam:"Fietsers tegemoet",ST:[["Harlingen","Franeker",12],["Oosterend","West-Terschelling",18],["Zwolle","Kampen",15],["Sneek","Bolsward",12]],v1:[16,18,20,24],v2:[12,15,16,18],A:"Peter op de fiets",B:"zijn vader, ook op de fiets",wat:"Ze komen elkaar tegen",x:"",pad:"over het fietspad"},
+  {naam:"Wandelaars tegemoet",ST:[["de vuurtoren","het strandpaviljoen",9],["Midsland","de Groede",6],["het veer","de camping",8]],v1:[4,5,6],v2:[3,4,5],A:"een wandelaar",B:"een hardloopster",wat:"Ze komen elkaar tegen",x:"",pad:"over het duinpad"}];
+ for(;;){const th=rpick(R,TH);const[A,B,D]=rpick(R,th.ST);let v1=rpick(R,th.v1),v2=rpick(R,th.v2);if(th.naam==="Wandelaars tegemoet")v2=rpick(R,[8,9,10,12]);
+  const dl=rint(R,0,4)*5,start=rint(R,72,220)*5,num=60*D+v2*dl,den=v1+v2;if(num%den||(v1*dl)%60)continue;const t=num/den;if(t<=dl)continue;
+  return{naam:th.naam,tekst:`De afstand van ${A} naar ${B} is ${th.pad} ${D} km. Om ${tijd(start)} vertrekt ${th.A} uit ${A} richting ${B}, met gemiddeld ${v1} km/u.\n${dl?`${dl} minuten later, om ${tijd(start+dl)},`:"Op hetzelfde moment"} vertrekt ${th.B} uit ${B} de andere kant op, met gemiddeld ${v2} km/u. ${th.x}`.trim(),
+   vraag:`${th.wat} om ….. (vul in als uu:mm).`,soort:"tijd",ans:tijd(start+t),
+   hints:[dl?`Hoe ver is de eerste al als de tweede vertrekt?`:`Samen komen ze elk uur ${v1+v2} km dichter bij elkaar.`,dl?`Na ${dl} minuten is de eerste ${nl(v1*dl/60)} km onderweg. Er is nog ${nl(D-v1*dl/60)} km tussen hen, en die wordt elk uur ${v1+v2} km kleiner.`:`${D} km, en elk uur ${v1+v2} km dichter bij elkaar.`],
+   uitwerking:[dl?`In de eerste ${dl} minuten: ${v1} × ${dl}/60 = ${nl(v1*dl/60)} km. Over: ${nl(D-v1*dl/60)} km.`:`Afstand: ${D} km.`,`Samen ${v1} + ${v2} = ${v1+v2} km/u. Tijd: ${nl(D-v1*dl/60)} : ${v1+v2} × 60 = ${nl(t-dl)} minuten.`,`${tijd(start+dl)} + ${nl(t-dl)} minuten = ${tijd(start+t)}.`]}}}},
+{id:"moeder",naam:"Moeder en dochter",gen(R){
+ for(;;){const D=rint(R,6,25),M=rint(R,25,55),x=M-2*D;if(x<1||x>30)continue;const ks=[];for(let k=3;k<=8;k++){const y=(k*D-M)/(k-1);if(Number.isInteger(y)&&y>0&&D-y>=1)ks.push([k,y])}if(!ks.length)continue;const[k,y]=rpick(R,ks);
+  const mo=rpick(R,NEUT_V),do_=rpick(R,NEUT_V.filter(v=>v!==mo)),v=R()<.5;
+  return{tekst:`Over ${x} jaar is ${mo} precies twee keer zo oud als haar dochter ${do_}. ${y} jaar geleden was ${mo} precies ${k} keer zo oud als ${do_}.`,
+   vraag:`${v?mo:do_} is nu ….. jaar oud.`,eenheid:"jaar",ans:v?M:D,
+   hints:[`Noem de leeftijd van ${do_} nu d. Schrijf beide zinnen als een vergelijking met de leeftijd van ${mo} (m).`,`m + ${x} = 2 × (d + ${x}) en m − ${y} = ${k} × (d − ${y}).`],
+   uitwerking:[`Uit de eerste zin: m = 2d + ${x}.`,`Uit de tweede: m = ${k}d − ${k*y-y}.`,`Dus 2d + ${x} = ${k}d − ${k*y-y}, ${k-2}d = ${x+k*y-y}, d = ${D}.`,`${mo} is 2 × ${D} + ${x} = ${M} jaar.`]}}}},
+{id:"schilderen",naam:"Samen klussen",gen(R){
+ for(;;){const a=rint(R,2,9),b=rint(R,2,12);if(a===b)continue;const solo=rint(R,1,a-1)||0;if(solo<1)continue;
+  const rest=1-solo/a,tog=rest*a*b/(a+b);const totmin=(solo+tog)*60;if(!Number.isInteger(totmin)||totmin%5)continue;const A=rpick(R,MANNEN),B=rpick(R,VROUWEN),klus=rpick(R,["het hek te verven","de schuur te schilderen","de heg te knippen","de zolder op te ruimen"]);
+  return{tekst:`${A} doet er in zijn eentje ${a} uur over om ${klus}. ${B} kan het alleen in ${b} uur. ${A} begint om 9:00 uur alleen. Na ${solo} uur komt ${B} helpen en werken ze samen verder tot de klus af is.`,
+   vraag:`De klus is af om ….. (vul in als uu:mm).`,soort:"tijd",ans:tijd(9*60+totmin),
+   hints:[`Welk deel van de klus heeft ${A} af na ${solo} uur?`,`Na ${solo} uur is ${solo}/${a} af. Samen doen ze per uur 1/${a} + 1/${b} = ${(a+b)/gcd(a+b,a*b)}/${a*b/gcd(a+b,a*b)} van de klus.`],
+   uitwerking:[`Na ${solo} uur is ${solo}/${a} af, er is nog ${a-solo}/${a} over.`,`Samen per uur: 1/${a} + 1/${b} = ${a+b}/${a*b}.`,`Tijd samen: ${a-solo}/${a} : ${a+b}/${a*b} = ${(a-solo)*b}/${a+b} uur = ${nl(tog*60)} minuten.`,`9:00 + ${solo} uur + ${nl(tog*60)} minuten = ${tijd(9*60+totmin)}.`]}}}},
+{id:"inhalen",naam:"Inhalen",gen(R){
+ const TH=[
+  {naam:"Intercity haalt sprinter in",ST:["Zwolle","Amersfoort","Utrecht","Leeuwarden"],langzaam:"een sprinter",snel:"een intercity",vl:[48,54,60,72],vs:[96,100,108,120],extra:"over het spoor ernaast",eh:"Met alle stops meegerekend rijdt",d:[4,6,8,10,12,15]},
+  {naam:"Sneldienst haalt veerboot in",ST:["Harlingen"],langzaam:"de veerboot naar Terschelling",snel:"de sneldienst",vl:[20,24,30],vs:[40,48,60],extra:"van dezelfde kade",eh:"Gemiddeld vaart",d:[10,15,20,30]},
+  {naam:"Fietser haalt wandelaar in",ST:["het veer","de camping","het dorp"],langzaam:"een wandelaar",snel:"een fietser",vl:[4,5,6],vs:[12,15,16,18,20],extra:"over hetzelfde pad",eh:"Gemiddeld loopt",d:[10,12,15,20,30]}];
+ for(;;){const th=rpick(R,TH),A=rpick(R,th.ST),v2=rpick(R,th.vl),v1=rpick(R,th.vs),dl=rpick(R,th.d),start=rint(R,90,220)*5;if(v1<=v2)continue;
+  const t=v1*dl/(v1-v2);if(!Number.isInteger(t)||(v2*dl)%60)continue;const km=v2*t/60;if(!Number.isInteger(km)||km<1)continue;const v=R()<.5;
+  return{naam:th.naam,tekst:`Om ${tijd(start)} vertrekt ${th.langzaam} uit ${A}. ${th.eh.replace("rijdt","rijdt hij").replace("vaart","vaart hij").replace("loopt","loopt hij")} ${v2} km/u. ${dl} minuten later vertrekt ${th.snel} ${th.extra}, dezelfde kant op, met gemiddeld ${v1} km/u.`,
+   vraag:v?`Om ….. (uu:mm) wordt ${th.langzaam} ingehaald.`:`Dat gebeurt op ….. km van ${A}.`.replace("Dat gebeurt",`${th.snel[0].toUpperCase()+th.snel.slice(1)} haalt in`),soort:v?"tijd":"getal",eenheid:v?"":"km",ans:v?tijd(start+t):km,
+   hints:[`Hoeveel voorsprong heeft ${th.langzaam} als ${th.snel} vertrekt?`,`Voorsprong: ${v2} × ${dl}/60 = ${nl(v2*dl/60)} km. Elk uur loopt ${th.snel} ${v1} − ${v2} = ${v1-v2} km in.`],
+   uitwerking:[`Voorsprong na ${dl} minuten: ${nl(v2*dl/60)} km.`,`Inlopen gaat met ${v1-v2} km/u: ${nl(v2*dl/60)} : ${v1-v2} × 60 = ${nl(t-dl)} minuten.`,`Om ${tijd(start+dl)} + ${nl(t-dl)} min = ${tijd(start+t)}, op ${v1} × ${nl(t-dl)}/60 = ${nl(km)} km van ${A}.`]}}}},
+{id:"dienstregeling",naam:"Tegelijk vertrekken",gen(R){
+ const ST=["Zwolle","Amersfoort","Groningen","Leeuwarden","Deventer"];
+ for(;;){const p=rpick(R,[10,12,15,18,20,24,30]),q=rpick(R,[12,15,18,20,24,36,40,45]);if(p===q)continue;const a=rint(R,0,p-1),b=rint(R,0,q-1);let t=-1;for(let x=Math.max(a,b);x<16*60;x++)if((x-a)%p===0&&(x-b)%q===0){t=x;break}if(t<75||t>9*60)continue;
+  const s=rpick(R,ST),[X,Y]=rpick(R,[["Bus 2 → Ziekenhuis","Bus 7 → Centrum"],["Sprinter → Kampen","Sprinter → Emmen"],["Stoptrein → Meppel","Intercity → Utrecht"]]),rij=(o,k)=>Array.from({length:4},(_,i)=>tijd(360+o+i*k));
+  return{tekst:`Op station ${s} hangt dit vertrekbord. Beide lijnen rijden de hele dag in hetzelfde ritme door.`,
+   tabel:{kop:["Lijn","Eerste vertrektijden","…"],rijen:[[X,rij(a,p).join("  "),"…"],[Y,rij(b,q).join("  "),"…"]]},
+   vraag:`Voor het eerst vertrekken ze precies tegelijk om ….. (uu:mm).`,soort:"tijd",ans:tijd(360+t),
+   hints:[`Hoe vaak vertrekt elke lijn? Kijk naar het verschil tussen twee vertrektijden.`,`${X}: elke ${p} minuten, vanaf ${tijd(360+a)}. ${Y}: elke ${q} minuten, vanaf ${tijd(360+b)}. Reken in minuten na 6:00 en zoek het eerste getal in beide rijtjes.`],
+   uitwerking:[`${X} elke ${p} min: ${Array.from({length:Math.min(8,(t-a)/p+1)},(_,i)=>a+i*p).join(", ")}${(t-a)/p+1>8?", …":""} (minuten na 6:00).`,`${Y} elke ${q} min: ${Array.from({length:Math.min(8,(t-b)/q+1)},(_,i)=>b+i*q).join(", ")}${(t-b)/q+1>8?", …":""}.`,`Het eerste gemeenschappelijke getal is ${t}: ${tijd(360+t)}.`]}}}},
+{id:"brug",naam:"Goederentrein over de brug",gen(R){
+ for(;;){const vms=rpick(R,[10,15,20,25]),t1=rint(R,12,40),t2=t1+rint(R,6,40),L=vms*t1,B=vms*(t2-t1);if(!Number.isInteger(L)||!Number.isInteger(B)||L<150||L>740)continue;const kmh=vms*3.6,v=R()<.5;
+  const brug=rpick(R,["de IJsselbrug bij Zwolle","de Hanzelijn-brug over het Drontermeer","de Moerdijkbrug","de brug over het Amsterdam-Rijnkanaal"]);
+  return{tekst:`Een goederentrein rijdt met constante snelheid. Een fotograaf langs het spoor ziet dat het ${t1} seconden duurt vanaf het moment dat de locomotief hem passeert tot de laatste wagon voorbij is.\nDaarna rijdt de trein over ${brug}, die ${nl(B)} meter lang is. Vanaf het moment dat de neus van de locomotief de brug op rijdt tot de laatste wagon eraf is, duurt het ${t2} seconden.`,
+   vraag:v?`De trein is ….. meter lang.`:`De trein rijdt ….. km/u.`,eenheid:v?"meter":"km/u",ans:v?L:kmh,dec:Number.isInteger(kmh)?0:1,
+   hints:[`Over de brug moet de trein zijn eigen lengte plus de brug afleggen. Langs de fotograaf alleen zijn eigen lengte.`,`Het verschil van ${t2} − ${t1} = ${t2-t1} seconden is precies de tijd om ${nl(B)} meter brug af te leggen.`],
+   uitwerking:[`Langs de fotograaf: treinlengte in ${t1} s. Over de brug: treinlengte + ${nl(B)} m in ${t2} s.`,`Dus ${nl(B)} m in ${t2-t1} s: snelheid ${nl(vms)} m/s = ${nl(vms)} × 3,6 = ${nl(kmh)} km/u.`,`Lengte: ${nl(vms)} × ${t1} = ${nl(L)} meter.`]}}}},
+{id:"belichting",naam:"Belichting van een foto",gen(R){
+ const st=n=>n+(n===1?" stop":" stops"),F=["1,4","2","2,8","4","5,6","8","11","16","22"],SH=[8000,4000,2000,1000,500,250,125],ISO=[100,200,400,800,1600,3200,6400];
+ for(;;){const i=rint(R,0,5),j=rint(R,i+1,8),si=rint(R,0,6),ii=rint(R,0,6),ij=rint(R,0,6);const d=(j-i)-(ij-ii);const sj=si+d;if(sj<0||sj>6||d===0||j-i<2||ii===ij)continue;
+  const n=rpick(R,VROUWEN),onderwerp=rpick(R,["de Brandaris","een aankomende veerboot","een intercity op de IJsselbrug","een reiger in de duinen"]);
+  return{tekst:`${n} fotografeert ${onderwerp}. De belichting is precies goed bij diafragma f/${F[i]}, sluitertijd 1/${SH[si]} seconde en ISO ${ISO[ii]}.\nZe wil meer scherptediepte en zet het diafragma op f/${F[j]}. Ook zet ze de ISO op ${ISO[ij]}.\nGoed om te weten: in de reeks f/1,4 – 2 – 2,8 – 4 – 5,6 – 8 – 11 – 16 – 22 laat elke stap naar rechts half zoveel licht door. Een twee keer zo hoge ISO heeft half zoveel licht nodig.`,
+   vraag:`Voor dezelfde belichting moet de sluitertijd 1/….. seconde worden.`,eenheid:"",ans:SH[sj],
+   hints:[`Tel in "stops": elke stop is een halvering of verdubbeling van het licht.`,`Diafragma: ${st(j-i)} minder licht. ISO: ${st(Math.abs(ij-ii))} ${ij>ii?"gevoeliger (scheelt licht)":"minder gevoelig (nog meer licht nodig)"}. Netto moet de sluiter ${st(Math.abs(d))} ${d>0?"langer":"korter"} open.`],
+   uitwerking:[`Diafragma f/${F[i]} → f/${F[j]}: ${st(j-i)} minder licht.`,`ISO ${ISO[ii]} → ${ISO[ij]}: ${ij>ii?`${st(ij-ii)} gevoeliger, dat compenseert ${st(ij-ii)}`:`${st(ii-ij)} minder gevoelig, nog ${st(ii-ij)} extra licht nodig`}.`,`Netto: ${st(Math.abs(d))} ${d>0?"meer":"minder"} licht via de sluiter: 1/${SH[si]} ${d>0?"verdubbelen":"halveren"} ${Math.abs(d)} keer = 1/${SH[sj]} seconde.`]}}}},
+{id:"timelapse",naam:"Timelapse",gen(R){
+ const tS=s=>tijd(Math.floor(s/60))+":"+String(s%60).padStart(2,"0");
+ for(;;){const fps=rpick(R,[24,25,30]),S=rint(R,6,20),k=rpick(R,[2,3,4,5,6,8,10]),foto=S*fps,D=(foto-1)*k;if(D<1200||D>7200||D%60)continue;const t1=rint(R,18*60,20*60)*60;const n=rpick(R,MANNEN);
+  return{tekst:`${n} maakt een timelapse van de zonsondergang bij de Brandaris op Terschelling. Zijn camera maakt om de ${k} seconden een foto. De eerste foto maakt hij om precies ${tS(t1)}, de laatste om precies ${tS(t1+D)}.\nVan alle foto's maakt hij een filmpje met ${fps} beelden per seconde.`,
+   vraag:`Het filmpje duurt ….. seconden.`,eenheid:"seconden",ans:S,
+   hints:[`Hoeveel tijd zit er tussen de eerste en de laatste foto, in seconden? En let op: hoeveel foto's zijn het precies, als zowel het begin als het eind een foto is?`,`Tussen ${tS(t1)} en ${tS(t1+D)} zit ${nl(D)} seconden. Dat zijn ${nl(D)} : ${k} = ${nl(D/k)} tussenpozen, dus ${nl(D/k+1)} foto's.`],
+   uitwerking:[`Tijdsduur: ${nl(D)} seconden.`,`${nl(D)} : ${k} = ${nl(D/k)} tussenpozen, dus ${nl(foto)} foto's (de eerste telt ook mee).`,`${nl(foto)} : ${fps} = ${S} seconden.`]}}}},
+{id:"lpg",naam:"Dacia op LPG",gen(R){
+ for(;;){const b=rpick(R,[5,6,7]),l=rpick(R,[7,8,9]),pb=rpick(R,[190,200,210]),pl=rpick(R,[80,90,100]),extra=rpick(R,[500,600,750,800,1000,1200,1500]);
+  const kb=b*pb,kl=l*pl,diff=kb-kl;if(diff<=150)continue;const kmx=extra*100*100/diff,km=Math.round(kmx);if(km<5000||km>80000)continue;
+  const auto=rpick(R,["Dacia Sandero","Dacia Jogger","Dacia Duster"]),e=c=>"€ "+nl(c/100,2);
+  return{tekst:`Bij de dealer twijfelen ze tussen twee uitvoeringen van een ${auto}. De Bi-Fuel versie rijdt op LPG en is € ${nl(extra)} duurder. Andere kosten laten we buiten beschouwing.`,
+   tabel:{kop:["","Benzine","Bi-Fuel (LPG)"],rijen:[["Verbruik per 100 km",b+" liter",l+" liter"],["Prijs per liter",e(pb),e(pl)],["Aanschaf","","+ € "+nl(extra)]]},
+   vraag:`Na ….. km heb je de meerprijs van de Bi-Fuel versie terugverdiend (rond af op hele km).`,eenheid:"km",ans:km,tol:1,
+   hints:[`Reken voor beide auto's uit wat 100 km aan brandstof kost.`,`Benzine: ${b} × ${e(pb)} = ${e(kb)}. LPG: ${l} × ${e(pl)} = ${e(kl)}. Per 100 km bespaar je dus ${e(diff)}.`],
+   uitwerking:[`Benzine per 100 km: ${e(kb)}. LPG per 100 km: ${e(kl)}.`,`Besparing per 100 km: ${e(diff)}.`,`€ ${nl(extra)} : ${e(diff)} = ${nl(kmx/100)} keer 100 km = ${nl(kmx)} km${kmx===km?"":` ≈ ${nl(km)} km`}.`]}}}},
+{id:"lindor",naam:"Een zak Lindor verdelen",gen(R){
+ for(;;){const a=rpick(R,[2,3,4]),x=rint(R,1,4),b=rpick(R,[2,3]),y=rint(R,1,4),rest=rint(R,3,12);
+  /* terugrekenen: na stap 2 blijft rest over: r1 - (r1/b + y) = rest -> r1 = (rest + y) * b/(b-1) */const r1=(rest+y)*b/(b-1);if(!Number.isInteger(r1)||r1%b)continue;const N=(r1+x)*a/(a-1);if(!Number.isInteger(N)||N%a||N<20||N>80)continue;
+  const kk=shuf(KLEIN.slice(),R),[P,Q]=[kk[0],kk[1]],frac=k=>({2:"de helft",3:"een derde",4:"een kwart"})[k];
+  return{tekst:`Op de verjaardag staat een zak Lindor-bollen op tafel. ${P} pakt ${frac(a)} van de bollen, en daarna nog ${x} extra. Van wat er dan nog over is, pakt ${Q} ${frac(b)}, en nog ${y} extra. Marsha en Dora krijgen er natuurlijk geen. Er blijven ${rest} Lindor-bollen over.`,
+   vraag:`In de zak zaten ….. Lindor-bollen.`,eenheid:"",ans:N,
+   hints:[`Werk terug vanaf het eind: hoeveel lagen er vlak voordat ${Q} ging pakken?`,`${Q} pakte ${frac(b)} en nog ${y}. Dan bleef er ${rest} over. Dus ${rest} + ${y} = ${rest+y} is ${b===2?"de andere helft":`${b-1}/${b} deel`} van wat er lag.`],
+   uitwerking:[`Voordat ${Q} pakte: ${rest} + ${y} = ${rest+y} is ${b-1}/${b} deel, dus er lagen ${r1} bollen.`,`Voordat ${P} pakte: ${r1} + ${x} = ${r1+x} is ${a-1}/${a} deel, dus er zaten ${N} bollen in de zak.`,`Controle: ${P} pakt ${N/a} + ${x} = ${N/a+x}, er blijven ${r1}. ${Q} pakt ${r1/b} + ${y} = ${r1/b+y}, er blijven ${rest}.`]}}}},
+{id:"lekkerbek",naam:"Twee bestellingen",gen(R){
+ const TH=[{naam:"Bij de viskraam",zaak:"Viskraam De Haven",a:["broodje lekkerbek","broodjes lekkerbek"],b:["bakje kibbeling","bakjes kibbeling"],pa:[14,22],pb:[20,32]},
+  {naam:"Bij de snackbar",zaak:"Cafetaria 't Hoekje",a:["patat","patat"],b:["frikandel","frikandellen"],pa:[10,16],pb:[7,11]},
+  {naam:"Bij de bakker",zaak:"Bakkerij Van Dijk",paren:[[["Bossche bol","Bossche bollen"],[9,13]],[["mergpijp","mergpijpen"],[7,10]],[["tompouce","tompoucen"],[7,11]],[["plak passievruchtcake","plakken passievruchtcake"],[5,9]]]}];
+ for(;;){let th=rpick(R,TH);if(th.paren){const ps=shuf(th.paren.slice(),R);th={naam:th.naam,zaak:th.zaak,a:ps[0][0],pa:ps[0][1],b:ps[1][0],pb:ps[1][1]}}const L=rint(R,th.pa[0],th.pa[1])*25,K=rint(R,th.pb[0],th.pb[1])*25,a1=rint(R,1,4),b1=rint(R,1,4),a2=rint(R,1,4),b2=rint(R,1,4);if(a1*b2-a2*b1===0||a1===a2||b1===b2||L===K)continue;const X=a1*L+b1*K,Y=a2*L+b2*K,v=R()<.6;
+  const w=(n,p)=>n+" "+(n===1?p[0]:p[1]),e=c=>"€ "+nl(c/100,2);
+  return{naam:th.naam,tekst:`${rpick(R,MANNEN)} en ${rpick(R,VROUWEN)} halen allebei iets bij ${th.zaak}. Dit zijn hun bonnetjes. Er staan alleen de totalen op.`,
+   bonnen:[{kop:th.zaak,regels:[[w(a1,th.a),""],[w(b1,th.b),""]],totaal:e(X)},{kop:th.zaak,regels:[[w(a2,th.a),""],[w(b2,th.b),""]],totaal:e(Y)}],
+   vraag:v?`Eén ${th.a[0]} kost € …..`:`Eén ${th.b[0]} kost € …..`,eenheid:"euro",ans:(v?L:K)/100,dec:2,
+   hints:[`Zorg dat er op beide bonnen evenveel ${th.a[1]} staan, door een bon in gedachten een paar keer te bestellen.`,`${a2}× de eerste bon en ${a1}× de tweede bon: dan staan er op allebei ${a1*a2} ${th.a[1]}. Het verschil komt dan alleen door de ${th.b[1]}.`],
+   uitwerking:[`${a2}× bon 1: ${a1*a2} ${th.a[1]} + ${b1*a2} ${th.b[1]} = ${e(X*a2)}.`,`${a1}× bon 2: ${a1*a2} ${th.a[1]} + ${b2*a1} ${th.b[1]} = ${e(Y*a1)}.`,`Verschil: ${Math.abs(b1*a2-b2*a1)} ${th.b[1]} = ${e(Math.abs(X*a2-Y*a1))}, dus één ${th.b[0]} kost ${e(K)}.`,`${th.a[0][0].toUpperCase()+th.a[0].slice(1)}: (${e(X)} − ${b1} × ${e(K)}) : ${a1} = ${e(L)}.`]}}}},
+{id:"wind",naam:"Heen en terug",gen(R){
+ const P=[[12,24],[15,30],[10,15],[20,30],[12,18],[14,35],[15,35],[18,30],[16,24],[21,28],[6,12],[4,6]];
+ const TH=[{naam:"Fietsen met wind",wie:()=>nm(R),route:[["West-Terschelling","Oosterend"],["Harlingen","Franeker"],["Zwolle","Kampen"]],tegen:"tegen een stevige westenwind in",mee:"met de wind in de rug",min:10},
+  {naam:"Kanoën op de rivier",wie:()=>nm(R),route:[["de steiger","de molen"],["Zwolle","Hattem"],["het dorp","de sluis"]],tegen:"tegen de stroom in",mee:"met de stroom mee",min:4},
+  {naam:"De berg op en af",wie:()=>nm(R),route:[["het dorp","de top van de pas"],["de camping","het uitzichtpunt"]],tegen:"helemaal bergop",mee:"helemaal bergaf",min:6}];
+ for(;;){const th=rpick(R,TH),[a,b]=rpick(R,P),avg=2*a*b/(a+b);if(!Number.isInteger(avg)||a<th.min/2)continue;const d=rpick(R,[3,4,6,8,9,12,15,18,20,24]);if((d*60)%a||(d*60)%b)continue;const n=th.wie(),route=rpick(R,th.route);
+  return{naam:th.naam,tekst:`${n} gaat van ${route[0]} naar ${route[1]}, ${d} km, ${th.tegen}. Gemiddeld haalt ${hz()} maar ${a} km/u. Over dezelfde weg terug, ${th.mee}, gaat het met gemiddeld ${b} km/u.`,
+   vraag:`De gemiddelde snelheid over de hele tocht heen en terug is ….. km/u.`,eenheid:"km/u",ans:avg,
+   hints:[`Pas op: het is niet zomaar het gemiddelde van ${a} en ${b}. Reken eerst uit hoe lang heen en terug duren.`,`Heen: ${d} km met ${a} km/u duurt ${d*60/a} minuten. Terug: ${d*60/b} minuten.`],
+   uitwerking:[`Heen: ${d*60/a} minuten. Terug: ${d*60/b} minuten.`,`Samen ${2*d} km in ${d*60/a+d*60/b} minuten.`,`${2*d} : ${d*60/a+d*60/b} × 60 = ${avg} km/u. (Niet ${nl((a+b)/2)}: je bent langer onderweg met de lage snelheid.)`]}}}},
+{id:"hond",naam:"Hond tussen twee fietsers",gen(R){
+ for(;;){const v1=rint(R,12,24),v2=rint(R,12,24),vd=rint(R,25,40),D=rint(R,3,20);const t=D/(v1+v2);const dd=vd*t;if(!Number.isInteger(dd)||!Number.isInteger(t*60)||vd<=Math.max(v1,v2)+5)continue;const A=rpick(R,MANNEN),B=rpick(R,VROUWEN),hd=rpick(R,HONDEN);
+  return{tekst:`${A} en ${B} fietsen over de dijk naar elkaar toe. Als ze nog ${D} km van elkaar af zijn, rent hond ${hd} vooruit naar ${B}. Daar aangekomen draait ze meteen om, rent terug naar ${A}, draait weer om, enzovoort, tot ${A} en ${B} elkaar ontmoeten.\n${A} fietst ${v1} km/u, ${B} ${v2} km/u, en ${hd} rent steeds ${vd} km/u.`,
+   vraag:`${hd} rent in totaal ….. km.`,eenheid:"km",ans:dd,dec:Number.isInteger(dd)?0:1,
+   hints:[`Probeer niet alle stukjes heen en weer op te tellen. Hoe lang rent de hond in totaal?`,`De hond rent precies zo lang als het duurt tot de fietsers elkaar ontmoeten: ${D} km met samen ${v1+v2} km/u.`],
+   uitwerking:[`De fietsers komen samen ${v1} + ${v2} = ${v1+v2} km per uur dichter bij elkaar.`,`Ze ontmoeten elkaar na ${D} : ${v1+v2} uur = ${nl(t*60)} minuten.`,`Al die tijd rent de hond ${vd} km/u: ${vd} × ${nl(t*60)}/60 = ${nl(dd)} km.`]}}}},
+{id:"versnelling",naam:"Versnellingen",gen(R){
+ const TW=[[38,19],[42,14],[44,22],[36,18],[42,21],[40,20],[39,13],[44,16],[38,16],[36,14]];
+ for(;;){const[f,r]=rpick(R,TW),o=rpick(R,[200,210,220]),c=rpick(R,[60,70,80,90]),v=f/r*o/100*c*60/1000,ans=Math.round(v);if(v<12||v>32)continue;const n=nm(R);
+  return{tekst:`${n} fietst over het Terschellinger fietspad. Op de fiets ligt de ketting over het voorblad met ${f} tanden en het tandwiel achter met ${r} tanden. De omtrek van het achterwiel is ${o} cm. ${n} trapt ${c} keer per minuut rond.`,
+   vraag:`${n} fietst ….. km/u (rond af op hele km/u).`,eenheid:"km/u",ans,tol:1,
+   hints:[`Hoe vaak draait het achterwiel rond als de trappers één keer rond gaan?`,`Eén keer rondtrappen trekt ${f} tanden ketting door. Het tandwiel achter heeft ${r} tanden, dus het achterwiel draait ${f} : ${r} = ${nl(f/r)} keer rond.`],
+   uitwerking:[`Per trapomwenteling: ${f} : ${r} = ${nl(f/r)} wielomwentelingen = ${nl(f/r*o)} cm.`,`Per minuut: ${c} × ${nl(f/r*o)} cm = ${nl(f/r*o*c/100)} meter.`,`Per uur: ${nl(f/r*o*c/100)} × 60 = ${nl(v*1000)} meter = ${nl(v,1)} km/u ≈ ${ans} km/u.`]}}}},
+{id:"legpuzzel",naam:"Randstukjes",gen(R){
+ for(;;){const a=rint(R,20,50),b=rint(R,12,a-2);const N=a*b,E=2*a+2*b-4;if(N<300||N>2000)continue;const v=R()<.5,foto=rpick(R,["de Brandaris","een Lindt-chocolaterie","een stoomtrein op een brug","de duinen van Terschelling"]);
+  return{tekst:`Een rechthoekige legpuzzel met een foto van ${foto} bestaat uit ${nl(N)} stukjes in een net rooster van rijen en kolommen. ${nl(E)} daarvan zijn randstukjes (met minstens één rechte kant).`,
+   vraag:v?`De lange kant van de puzzel is ….. stukjes lang.`:`De korte kant van de puzzel is ….. stukjes lang.`,eenheid:"stukjes",ans:v?a:b,
+   hints:[`Noem de lange kant a en de korte kant b. Hoeveel randstukjes heeft een puzzel van a bij b? Let op de hoeken.`,`Randstukjes: 2a + 2b − 4 = ${E}, dus a + b = ${(E+4)/2}. En a × b = ${nl(N)}.`],
+   uitwerking:[`Randstukjes: 2a + 2b − 4 (de 4 hoeken tellen anders dubbel). Dus a + b = (${E} + 4) : 2 = ${(E+4)/2}.`,`Zoek twee getallen met som ${(E+4)/2} en product ${nl(N)}: ${a} en ${b}.`,`Controle: ${a} × ${b} = ${nl(N)}, en 2×${a} + 2×${b} − 4 = ${E}.`]}}}},
+{id:"veerboot",naam:"Veerboot en sneldienst",gen(R){
+ for(;;){const[v1,v2]=rpick(R,[[20,40],[20,60],[30,60],[24,60],[20,30],[24,40],[30,40]]),m=v2/v1,X=rint(R,10,60),Y=rint(R,5,50);if(!Number.isInteger(v2))continue;
+  /* D/v1 - D/v2 = (X+Y)/60 */const D=(X+Y)/60/(1/v1-1/v2);if(!Number.isInteger(D)||D<20||D>35)continue;const start=rint(R,90,200)*5;
+  return{tekst:`Om ${tijd(start)} vertrekt de veerboot van Harlingen naar West-Terschelling. Hij vaart gemiddeld ${v1} km/u. De sneldienst vertrekt ${X} minuten later van dezelfde kade en vaart gemiddeld ${nl(m)} keer zo snel. Toch komt de sneldienst ${Y} minuten eerder aan dan de veerboot.`,
+   vraag:`De vaarroute van Harlingen naar West-Terschelling is ….. km lang.`,eenheid:"km",ans:D,dec:Number.isInteger(D)?0:1,
+   hints:[`Hoeveel minuten korter is de vaartijd van de sneldienst dan die van de veerboot?`,`De sneldienst is ${X} + ${Y} = ${X+Y} minuten korter onderweg. Hij doet over elke km ${nl(60/v2)} minuut, de veerboot ${nl(60/v1)} minuut.`],
+   uitwerking:[`Verschil in vaartijd: ${X} + ${Y} = ${X+Y} minuten.`,`Per km: veerboot ${nl(60/v1)} min, sneldienst 60 : ${v2} = ${nl(60/v2)} min. Verschil ${nl(60/v1-60/v2)} min per km.`,`${X+Y} : ${nl(60/v1-60/v2)} = ${nl(D)} km.`]}}}},
+{id:"peper",naam:"123 peper",gen(R){
+ for(;;){const g=rint(R,10,25)*10,x=rint(R,2,5),y=rint(R,x+2,10),sd=rint(R,0,6);let cum=0,day=0;while(cum<g){const wd=(sd+day)%7;cum+=wd>=5?y:x;day++}
+  const W=5*x+2*y,full=Math.floor(g/W);if(full<2)continue;const wie=rpick(R,["Aart","Opa Aart"]);
+  return{tekst:`${wie} is gek op 123 peper en strooit het over werkelijk alles. Een nieuwe strooibus bevat ${g} gram. Op werkdagen gebruikt ${wie.toLowerCase()==="vader"?"hij":"hij"} ${x} gram per dag. In het weekend, als er uitgebreid gekookt wordt, is het ${y} gram per dag.\nOp ${DAGEN[sd]} opent ${wie.toLowerCase()} een nieuwe bus.`.replace("opent vader","opent vader").replace(/opent (vader|opa|oom henk)/,m=>"opent "+wie),
+   vraag:`De bus raakt leeg op dag ….. (de dag van openen is dag 1).`,eenheid:"",ans:day,
+   hints:[`Hoeveel peper gaat er in een hele week doorheen? Dat is altijd hetzelfde, op welke dag je ook begint.`,`Een week: 5 × ${x} + 2 × ${y} = ${W} gram. Na ${full} hele weken (${full*7} dagen) is er ${full*W} gram op en nog ${g-full*W} gram over.`],
+   uitwerking:[`Per week: 5 × ${x} + 2 × ${y} = ${W} gram.`,`${full} hele weken = ${full*7} dagen, samen ${full*W} gram. Er is nog ${g-full*W} gram over, en dag ${full*7+1} is weer een ${DAGEN[sd]}.`,`Daarna dag voor dag: ${(()=>{let c=full*W,o=[];for(let d=full*7;d<day;d++){const wd=(sd+d)%7;c+=wd>=5?y:x;o.push(DAGEN[wd]+" "+Math.min(c,g)+" g")}return o.join(", ")})()}. De bus is leeg op dag ${day}.`]}}}},
+{id:"tegenliggers",naam:"Tegenliggers tellen",gen(R){
+ const ST=[["Zwolle","Groningen"],["Leeuwarden","Groningen"],["Amersfoort","Zwolle"],["Utrecht","Zwolle"],["Zwolle","Enschede"]];
+ for(;;){const f=rpick(R,[10,15,20,30]),T=rint(R,8,30)*5,a=rint(R,0,f-1),b=rint(R,0,f-1),t0=420+a+rint(R,2,20)*f;
+  const dep=[];for(let d=240+b;d<1440;d+=f)dep.push(d);if(dep.some(d=>d===t0-T||d===t0+T))continue;const meet=dep.filter(d=>d>t0-T&&d<t0+T);if(meet.length<4)continue;const[A,B]=rpick(R,ST);
+  const mins=[];for(let m=b;m<60;m+=f)mins.push(m);const ml=mins.length>1?mins.slice(0,-1).join(", ")+" en "+mins[mins.length-1]:mins[0];
+  return{tekst:`Tussen ${A} en ${B} rijden de hele dag treinen in beide richtingen. Een rit duurt precies ${T} minuten, ook in de andere richting.\nUit ${B} vertrekt een trein om ${ml} minuten over elk heel uur.\nJij stapt in ${A} in de trein van ${tijd(t0)} naar ${B}. Onderweg zie je treinen uit ${B} voorbijkomen. Treinen die je alleen op een station ziet staan tellen niet mee.`,
+   vraag:`Onderweg kom je ….. treinen uit ${B} tegen.`,eenheid:"treinen",ans:meet.length,
+   hints:[`Vergeet de treinen niet die al onderweg zijn als jij vertrekt. Welke trein uit ${B} is de eerste die je tegenkomt?`,`Een trein uit ${B} kom je tegen als hij vertrekt na ${tijd(t0-T)} (anders is hij al in ${A} voor jij vertrekt) en voor ${tijd(t0+T)} (dan ben jij in ${B}).`],
+   uitwerking:[`Jij rijdt van ${tijd(t0)} tot ${tijd(t0+T)}.`,`Je ziet elke trein uit ${B} die vertrekt na ${tijd(t0-T)} en vóór ${tijd(t0+T)}.`,`Dat zijn de treinen van ${meet.map(tijd).join(", ")}: ${meet.length} treinen.`]}}}},
+{id:"overgang",naam:"Spoorwegovergang",gen(R){
+ for(;;){const v1=rpick(R,[20,25,30,35,40]),k1=rint(R,4,16),L1=v1*k1,a=rint(R,15,40),b=rint(R,4,12),twee=R()<.65;if(L1<80||L1>500)continue;
+  let tot=a+k1+b,txt2="",v2=0,k2=0,L2=0,c=0;
+  if(twee){v2=rpick(R,[20,25,30,35]);k2=rint(R,3,10);L2=v2*k2;c=rint(R,10,k1+b+a-2);if(L2<60||c-a>k1+b||c<=0)continue;tot=Math.max(k1+b,c+k2+b)+a;if(c+k2+b<=k1+b)continue;
+   txt2=`\n${c} seconden nadat de intercity de overgang bereikt, komt uit de andere richting een sprinter van ${L2} meter aan, met ${nl(v2*3.6)} km/u. Omdat die al aankomt voordat de bomen open zouden gaan, blijven ze dicht.`}
+  return{tekst:`Bij een spoorwegovergang gaan de bomen ${a} seconden voordat een trein de overgang bereikt dicht. Ze gaan pas ${b} seconden nadat de laatste wagon de overgang voorbij is weer open.\nEen intercity van ${L1} meter lang rijdt met ${nl(v1*3.6)} km/u over de overgang.${txt2}`,
+   vraag:`De bomen zijn in totaal ….. seconden dicht.`,eenheid:"seconden",ans:tot,
+   hints:[`Reken de snelheid om naar meter per seconde (deel door 3,6). Hoe lang duurt het voordat de hele trein de overgang voorbij is?`,`${nl(v1*3.6)} km/u = ${v1} m/s. De intercity is na ${L1} : ${v1} = ${k1} seconden helemaal voorbij.${twee?` De sprinter: ${nl(v2*3.6)} km/u = ${v2} m/s, ${L2} : ${v2} = ${k2} seconden.`:""}`],
+   uitwerking:twee?[`Neem t = 0 als de intercity de overgang bereikt. Dicht vanaf t = −${a}.`,`Intercity voorbij op t = ${k1}. Sprinter bereikt de overgang op t = ${c} en is voorbij op t = ${c} + ${k2} = ${c+k2}.`,`Laatste trein voorbij op t = ${Math.max(k1,c+k2)}, bomen open op t = ${Math.max(k1,c+k2)+b}.`,`Dicht van −${a} tot ${Math.max(k1,c+k2)+b}: ${tot} seconden.`]:[`${nl(v1*3.6)} km/u = ${v1} m/s.`,`De trein is na ${L1} : ${v1} = ${k1} seconden voorbij.`,`${a} + ${k1} + ${b} = ${tot} seconden.`]}}}},
+{id:"treinstellen",naam:"Treinstellen koppelen",gen(R){
+ for(;;){const s=rint(R,17,26)*10,g=rint(R,30,44)*10,x0=rint(R,1,4),y0=rint(R,1,4),N=x0*s+y0*g;if(g<=s+60)continue;
+  const sol=[];for(let y=0;y*g<=N;y++){const r=N-y*g;if(r%s===0)sol.push([r/s,y])}const mn=Math.min(...sol.map(q=>q[0]+q[1])),best=sol.filter(q=>q[0]+q[1]===mn);if(best.length!==1)continue;
+  const gy=Math.floor(N/g);if((N-gy*g)%s===0)continue;const[bx,by]=best[0];if(!bx||!by)continue;
+  return{tekst:`Voor een drukke zaterdag moet een trein precies ${nl(N)} zitplaatsen hebben, niet meer en niet minder. Er zijn korte treinstellen met ${s} zitplaatsen en lange treinstellen met ${g} zitplaatsen. Je kunt er zoveel aan elkaar koppelen als je wilt.`,
+   vraag:`Er zijn minimaal ….. treinstellen nodig.`,eenheid:"treinstellen",ans:mn,
+   hints:[`Zoveel mogelijk lange treinstellen lukt niet precies. Probeer het systematisch: 0, 1, 2, … lange treinstellen, en kijk of de rest precies te vullen is met korte.`,`Bij ${by} lange treinstellen blijft er ${nl(N-by*g)} over. Is dat een veelvoud van ${s}?`],
+   uitwerking:[...sol.slice(0,4).map(([x,y])=>`${y} lang (${nl(y*g)}) + ${x} kort (${nl(x*s)}) = ${nl(N)}: ${x+y} treinstellen.`),`Minimaal: ${by} lange en ${bx} korte = ${mn} treinstellen.`]}}}},
+{id:"megapixels",naam:"Foto afdrukken",gen(R){
+ for(;;){const[a,b]=rpick(R,[[3,2],[4,3]]),k=rint(R,8,26)*100,mp=a*b*k*k/1e6;if(!Number.isInteger(mp*10)||mp<12||mp>65)continue;const dpi=rpick(R,[200,240,300]),cm=a*k/dpi*2.54,ans=Math.round(cm);
+  return{tekst:`De camera van ${nm(R)} maakt foto's van precies ${nl(mp)} megapixel (miljoen pixels), in de verhouding ${a}:${b}. ${HZ()} wil een foto van de Brandaris afdrukken met ${dpi} pixels per inch. Een inch is 2,54 cm.`,
+   vraag:`De lange kant van de afdruk wordt ….. cm (rond af op hele cm).`,eenheid:"cm",ans,tol:1,
+   hints:[`Noem de foto ${a}x bij ${b}x pixels. Hoeveel pixels zijn dat samen? Dat moet ${nl(mp*1e6)} zijn.`,`${a*b}x² = ${nl(mp*1e6)}, dus x² = ${nl(k*k)} en x = ${nl(k)}. De lange kant is ${nl(a*k)} pixels.`],
+   uitwerking:[`${a}x × ${b}x = ${a*b}x² = ${nl(mp*1e6)} → x = ${nl(k)}.`,`Afmetingen: ${nl(a*k)} × ${nl(b*k)} pixels.`,`${nl(a*k)} : ${dpi} = ${nl(a*k/dpi,2)} inch × 2,54 = ${nl(cm,1)} cm ≈ ${ans} cm.`]}}}},
+{id:"panorama",naam:"Panoramafoto",gen(R){
+ for(;;){const n=rint(R,3,8),W=rpick(R,[4000,5000,6000]),p=rpick(R,[20,25,30,40]),tot=W+(n-1)*W*(100-p)/100;if(!Number.isInteger(tot))continue;
+  return{tekst:`${nm(R)} maakt een panoramafoto van het Noordzeestrand. ${HZ()} maakt ${n} foto's naast elkaar, elk ${nl(W)} pixels breed. Elke foto overlapt ${p}% met de foto ernaast, zodat het programma ze aan elkaar kan plakken.`,
+   vraag:`Het panorama wordt ….. pixels breed.`,eenheid:"pixels",ans:tot,
+   hints:[`Hoeveel overlappen zijn er bij ${n} foto's naast elkaar?`,`Er zijn ${n-1} overlappen van ${p}% × ${nl(W)} = ${nl(W*p/100)} pixels.`],
+   uitwerking:[`${n} foto's: ${n} × ${nl(W)} = ${nl(n*W)} pixels.`,`${n-1} overlappen van ${nl(W*p/100)} pixels = ${nl((n-1)*W*p/100)} pixels die dubbel zijn.`,`${nl(n*W)} − ${nl((n-1)*W*p/100)} = ${nl(tot)} pixels.`]}}}},
+{id:"palindroom",naam:"De kilometerteller",gen(R){
+ const pal=x=>{const s=String(x);return s===s.split("").reverse().join("")};
+ for(;;){const P=+(()=>{const a=rint(R,1,9),b=rint(R,0,9),c=rint(R,0,9);return""+a+b+c+b+a})();let Q=P+1;while(!pal(Q))Q++;const d=Q-P,m=rpick(R,[30,45,60,75,80,90,100,120,150]),v=d*60/m;if(!Number.isInteger(v)||v<30||v>130)continue;
+  const auto=rpick(R,["Dacia Sandero","Dacia Duster","Dacia Jogger"]),dur=m%60?(m>60?`${Math.floor(m/60)} uur en ${m%60} minuten`:`${m} minuten`):`${m/60} uur`;
+  return{tekst:`Op de kilometerteller van de ${auto} staat ${nl(P)}. Dat getal lees je van voor naar achter en van achter naar voor hetzelfde. Na precies ${dur} rijden ziet ${nm(R)} dat er wéér zo'n getal op de teller staat: het eerstvolgende.`,
+   vraag:`De gemiddelde snelheid was ….. km/u.`,eenheid:"km/u",ans:v,
+   hints:[`Wat is het eerstvolgende getal na ${nl(P)} dat van achter naar voor hetzelfde is? De eerste twee cijfers en de laatste twee horen bij elkaar.`,`Dat is ${nl(Q)}. Er is dus ${d} km gereden.`],
+   uitwerking:[`Het eerstvolgende palindroom na ${nl(P)} is ${nl(Q)}.`,`Gereden: ${nl(Q)} − ${nl(P)} = ${d} km in ${m} minuten.`,`${d} : ${m} × 60 = ${v} km/u.`]}}}},
+{id:"banden",naam:"Banden rouleren",gen(R){
+ for(;;){const n=rpick(R,[5,5,6]),D=rint(R,15,60)*1000,per=D*4/n;if(!Number.isInteger(per))continue;
+  return{tekst:`${nm(R)} rijdt in ${n===5?"een Dacia met een volwaardig reservewiel":"een Dacia en heeft naast de vier banden ook nog een reservewiel en een extra losse band"}. Om de banden even zwaar te laten slijten, wisselt ${hz()} ze regelmatig, zodat alle ${n} banden precies evenveel kilometers op de weg hebben gemaakt. In totaal heeft de auto ${nl(D)} km gereden.`,
+   vraag:`Elke band heeft ….. km gereden.`,eenheid:"km",ans:per,
+   hints:[`Hoeveel "bandkilometers" zijn er in totaal gemaakt? Op elk moment rijden er 4 banden over de weg.`,`4 × ${nl(D)} = ${nl(4*D)} bandkilometers, eerlijk verdeeld over ${n} banden.`],
+   uitwerking:[`Er rijden steeds 4 banden: 4 × ${nl(D)} = ${nl(4*D)} bandkilometers.`,`${nl(4*D)} : ${n} = ${nl(per)} km per band.`]}}}},
+{id:"reep",naam:"Reep breken",gen(R){
+ const a=rint(R,3,8),b=rint(R,4,10),twee=R()<.5,c=rint(R,3,6),d=rint(R,3,8),ans=twee?a*b-1+c*d-1:a*b-1;
+ return{tekst:`${nm(R)} breekt een reep chocolade van ${a} bij ${b} blokjes${twee?` en daarna nog een kleinere reep van ${c} bij ${d} blokjes`:""} in losse blokjes. Bij elke keer breken pak je één stuk en breek je het langs een rechte lijn in twee stukken. Stukken op elkaar leggen mag niet.`,
+  vraag:`${twee?"Voor allebei de repen samen":"Je moet"} ….. keer breken${twee?" (minstens)":", minstens"}.`.replace("Je moet ….. keer breken, minstens.","Je moet minstens ….. keer breken."),eenheid:"keer",ans,
+  hints:[`Hoeveel stukken heb je na elke keer breken erbij?`,`Elke breuk maakt van 1 stuk 2 stukken: het aantal stukken gaat steeds met precies 1 omhoog. Je begint met 1 stuk${twee?" per reep":""}.`],
+  uitwerking:[`Elke breuk geeft precies één stuk extra, hoe je ook breekt.`,twee?`Reep 1: van 1 naar ${a*b} stukken = ${a*b-1} keer. Reep 2: van 1 naar ${c*d} = ${c*d-1} keer.`:`Van 1 stuk naar ${a*b} blokjes = ${a*b-1} keer breken.`,`Samen: ${ans} keer.`]}}},
+{id:"cacao",naam:"Cacao mengen",gen(R){
+ for(;;){const[c1,c2]=rpick(R,[[70,85],[70,90],[78,90],[85,99],[70,99],[78,99]]),t=rint(R,c1+2,c2-2),M=rint(R,3,15)*50,x=M*(c2-t)/(c2-c1);if(!Number.isInteger(x)||x%5||x<=0||x>=M)continue;const v=R()<.5;
+  return{tekst:`${nm(R)} smelt twee soorten pure Lindt chocolade samen voor een taart: een soort met ${c1}% cacao en een soort met ${c2}% cacao. Samen moet het ${nl(M)} gram worden, met precies ${t}% cacao.`,
+   vraag:`Er gaat ….. gram van de ${v?c1:c2}% chocolade in.`,eenheid:"gram",ans:v?x:M-x,
+   hints:[`Hoeveel gram cacao moet er in totaal in de ${nl(M)} gram zitten?`,`${t}% van ${nl(M)} = ${nl(M*t/100)} gram cacao. Als alles ${c1}% was, zou het ${nl(M*c1/100)} gram zijn. Elke gram die je ruilt voor ${c2}% levert ${nl((c2-c1)/100)} gram cacao extra op.`],
+   uitwerking:[`Nodig: ${t}% van ${nl(M)} = ${nl(M*t/100)} g cacao.`,`Alles ${c1}%: ${nl(M*c1/100)} g. Tekort: ${nl(M*(t-c1)/100)} g.`,`Per gram ${c2}% in plaats van ${c1}%: ${nl((c2-c1)/100)} g extra. ${nl(M*(t-c1)/100)} : ${nl((c2-c1)/100)} = ${nl(M-x)} g van de ${c2}%.`,`Van de ${c1}%: ${nl(M)} − ${nl(M-x)} = ${nl(x)} g.`]}}}},
+{id:"aanbieding",naam:"Welke aanbieding?",gen(R){
+ for(;;){const N=rint(R,5,8),p=[rint(R,25,35)*10-1,rint(R,25,35)*10-1,rint(R,25,35)*10-1];
+  const c3v2=Math.floor(N/3)*2*p[0]+(N%3)*p[0],c2h=Math.floor(N/2)*1.5*p[1]+(N%2)*p[1],c25=N*p[2]*.75;const cs=[c3v2,c2h,c25];if(cs.some(c=>!Number.isInteger(c)))continue;const s=cs.slice().sort((a,b)=>a-b);if(s[1]-s[0]<10)continue;const mn=s[0];
+  return{tekst:`${nm(R)} wil ${N} repen Lindt kopen en ziet in drie winkels deze aanbiedingen. De aanbiedingen gelden zo vaak als je wilt, maar alleen voor hele groepjes.`,
+   tabel:{kop:["Winkel","Prijs per reep","Aanbieding"],rijen:[["A","€ "+nl(p[0]/100,2),"3 halen, 2 betalen"],["B","€ "+nl(p[1]/100,2),"2e halve prijs"],["C","€ "+nl(p[2]/100,2),"25% korting"]]},
+   vraag:`Bij de voordeligste winkel betaal je voor ${N} repen € …..`,eenheid:"euro",ans:mn/100,dec:2,
+   hints:[`Bij ${N} repen passen niet alle repen in een groepje. Reken per winkel uit voor hoeveel repen je de volle prijs betaalt.`,`A: ${Math.floor(N/3)} groepjes van 3 en ${N%3} los. B: ${Math.floor(N/2)} paren en ${N%2} los.`],
+   uitwerking:[`A: ${Math.floor(N/3)*2+N%3} repen betalen × € ${nl(p[0]/100,2)} = € ${nl(c3v2/100,2)}.`,`B: ${nl(Math.floor(N/2)*1.5+N%2)} repen × € ${nl(p[1]/100,2)} = € ${nl(c2h/100,2)}.`,`C: ${N} × € ${nl(p[2]/100,2)} × 0,75 = € ${nl(c25/100,2)}.`,`Het voordeligst: € ${nl(mn/100,2)}.`]}}}},
+{id:"pan",naam:"Lekkerbekken bakken",gen(R){
+ for(;;){const k=rint(R,2,4),n=rint(R,k+1,3*k),t=rint(R,3,6),ans=Math.ceil(2*n/k)*t,naief=Math.ceil(n/k)*2*t;if(naief<=ans)continue;
+  return{tekst:`In de koekenpan van de viskraam passen precies ${k} lekkerbekken tegelijk. Elke lekkerbek moet aan beide kanten ${t} minuten bakken. Omdraaien en wisselen kost geen tijd. Er moeten ${n} lekkerbekken gebakken worden.`,
+   vraag:`Het lukt in minimaal ….. minuten.`,eenheid:"minuten",ans,
+   hints:[`Een lekkerbek hoeft niet meteen te worden omgedraaid. Je mag hem ook even uit de pan halen en later zijn tweede kant bakken.`,`Er moeten ${n} × 2 = ${2*n} kanten gebakken worden, en per ${t} minuten passen er ${k} kanten in de pan.`],
+   uitwerking:[`Totaal ${2*n} kanten om te bakken, ${k} tegelijk.`,`${2*n} : ${k} = ${nl(2*n/k)}, dus ${Math.ceil(2*n/k)} rondes van ${t} minuten = ${ans} minuten.`,`Dat lukt door slim te wisselen: zorg dat de pan bij elke ronde vol is. (Gewoon per ${k} bakken kost ${naief} minuten.)`]}}}},
+{id:"vuurtorens",naam:"Vuurtorens",gen(R){
+ for(;;){const a=rpick(R,[40,50,60,80,100,120,150]),b=rpick(R,[60,70,90,100,120,150,200]);if(a===b)continue;const c=rint(R,1,Math.floor(b/10)-1)*10;let t=-1;for(let x=c;x<=6000;x+=b)if(x%a===0){t=x;break}if(t<200)continue;
+  const s=x=>nl(x/10);
+  return{tekst:`Stel: de Brandaris op Terschelling flitst precies elke ${s(a)} seconden, en de vuurtoren van Vlieland precies elke ${s(b)} seconden. Om 21:00:00 precies flitst de Brandaris. De vuurtoren van Vlieland flitst voor het eerst ${s(c)} seconden later.`,
+   vraag:`….. seconden na 21:00:00 flitsen ze voor het eerst tegelijk.`,eenheid:"seconden",ans:t/10,dec:t%10?1:0,
+   hints:[`Schrijf van allebei de tijden uit waarop ze flitsen.`,`Brandaris: 0, ${s(a)}, ${s(2*a)}, ${s(3*a)}, … Vlieland: ${s(c)}, ${s(c+b)}, ${s(c+2*b)}, ${s(c+3*b)}, …`],
+   uitwerking:[`Brandaris op veelvouden van ${s(a)}. Vlieland op ${s(c)} + veelvouden van ${s(b)}.`,`Vlieland: ${Array.from({length:Math.min(10,(t-c)/b+1)},(_,i)=>s(c+i*b)).join(", ")}${(t-c)/b+1>10?", …":""}.`,`De eerste die ook een veelvoud van ${s(a)} is: ${s(t)} seconden.`]}}}},
+{id:"fietsverhuur",naam:"Fietsen huren",gen(R){
+ for(;;){const x=rpick(R,[10,12,14,15]),z=rpick(R,[5,6,7,8]),y=rint(R,4,12)*5,m=rint(R,2,4);if(z>=x)continue;const be=y/(x-z);if(Number.isInteger(be))continue;const n=Math.floor(be)+1;if(n<3||n>12)continue;
+  return{tekst:`Op Terschelling huurt ${["een gezin","een groepje vrienden","de familie"][rint(R,0,2)]} ${m} fietsen. Verhuurder A vraagt € ${nl(x,x%1?2:0)} per fiets per dag. Verhuurder B vraagt per fiets eenmalig € ${y} en daarnaast € ${nl(z,z%1?2:0)} per fiets per dag.`,
+   vraag:`Vanaf ….. dagen is verhuurder B goedkoper.`,eenheid:"dagen",ans:n,
+   hints:[`Het aantal fietsen maakt voor de vergelijking niet uit. Waarom?`,`Per fiets per dag is B € ${nl(x-z,2)} goedkoper, maar B begint met € ${y} extra.`],
+   uitwerking:[`Per fiets: A kost ${nl(x,2)} × d, B kost ${y} + ${nl(z,2)} × d.`,`B is per dag € ${nl(x-z,2)} goedkoper. De € ${y} is terugverdiend na ${y} : ${nl(x-z,2)} = ${nl(be,2)} dagen.`,`Vanaf ${n} dagen is B goedkoper. (Het aantal fietsen telt bij allebei even zwaar.)`]}}}},
+{id:"fietsslot",naam:"Fietsslot kraken",gen(R){
+ const fb=(g,s)=>{let b=0,c=0;for(let i=0;i<3;i++){if(g[i]===s[i])b++;else if(s.includes(g[i]))c++}return[b,c]};
+ const all=[];for(let a=0;a<10;a++)for(let b=0;b<10;b++)for(let c=0;c<10;c++)if(a!==b&&b!==c&&a!==c)all.push(""+a+b+c);
+ const T={"0,0":"geen enkel cijfer goed","1,0":"één cijfer goed en op de goede plek","0,1":"één cijfer goed, maar op de verkeerde plek","0,2":"twee cijfers goed, maar allebei op de verkeerde plek","1,1":"twee cijfers goed: één op de goede plek en één op de verkeerde plek","2,0":"twee cijfers goed en op de goede plek","0,3":"alle drie de cijfers goed, maar allemaal op de verkeerde plek"};
+ for(;;){const sec=all[rint(R,0,all.length-1)],G=[];let cand=all.slice();
+  for(let k=0;k<12&&cand.length>1;k++){const g=all[rint(R,0,all.length-1)],f=fb(g,sec);if(g===sec||f[0]===2&&R()<.7||f[1]===3||(f[0]+f[1]===0&&G.some(x=>x.f[0]+x.f[1]===0)))continue;const nc=cand.filter(x=>fb(g,x).join()===f.join());if(nc.length===cand.length)continue;G.push({g,f});cand=nc}
+  if(cand.length!==1)continue;
+  for(const x of G.slice()){const t=G.filter(y=>y!==x);const c=all.filter(s=>t.every(y=>fb(y.g,s).join()===y.f.join()));if(c.length===1)G.splice(G.indexOf(x),1)}
+  if(G.length<4||G.length>6)continue;const n=nm(R),sp=sec.split("");
+  return{tekst:`${n} is de code van het fietsslot vergeten. Het is een code van 3 verschillende cijfers. ${HZ()} weet nog een paar pogingen, en wat daaraan klopte:\n${G.map(x=>`• ${x.g}: ${T[x.f.join()]}.`).join("\n")}`,
+   vraag:`De code is …..`,soort:"code",ans:sec,
+   hints:[G.some(x=>x.f[0]+x.f[1]===0)?`Begin bij de poging waarin geen enkel cijfer goed is: die cijfers kun je overal wegstrepen.`:`Zoek cijfers die in meerdere pogingen voorkomen. Wat zegt elke poging over dat cijfer?`,`Het eerste cijfer van de code is een ${sp[0]}.`],
+   uitwerking:[...G.map(x=>{const ok=x.g.split("").map((d,i)=>sec[i]===d?`${d} goed op de goede plek`:sec.includes(d)?`${d} goed maar verkeerde plek`:null).filter(Boolean);return`${x.g}: ${ok.length?ok.join(", "):"geen van de cijfers zit erin"}.`}),`Alleen ${sec} past bij alle pogingen.`]}}}},
+{id:"toernooi",naam:"Puzzeltoernooi",gen(R){
+ for(;;){const m=rint(R,3,12),n=4*m,door=rpick(R,[1,2]),troost=R()<.5,ko=m*door,ans=m*6+ko-1+(troost?1:0);if(ko<3)continue;
+  return{tekst:`Op een puzzeltoernooi doen ${n} spelers mee. Eerst worden ze verdeeld in poules van 4. In elke poule speelt iedereen één keer tegen iedereen. ${door===1?"Alleen de winnaar":"De nummers 1 en 2"} van elke poule ${door===1?"gaat":"gaan"} door naar de knock-outfase: wie verliest, ligt eruit, tot er één winnaar over is.${troost?" Er wordt ook nog een wedstrijd om de derde plaats gespeeld.":""} Als het aantal spelers in een ronde niet uitkomt, krijgt iemand een vrije ronde.`,
+   vraag:`Er worden in totaal ….. wedstrijden gespeeld.`,eenheid:"wedstrijden",ans,
+   hints:[`Hoeveel wedstrijden zijn er in één poule van 4?`,`Een poule heeft 6 wedstrijden. Voor de knock-out: in elke wedstrijd valt precies één speler af. Hoeveel spelers moeten er afvallen tot er één over is?`],
+   uitwerking:[`Poules: ${m} poules × 6 wedstrijden = ${m*6}.`,`Knock-out met ${ko} spelers: ${ko} − 1 = ${ko-1} wedstrijden (elke wedstrijd valt er één af).`,`${troost?"Plus 1 troostfinale. ":""}Totaal: ${ans} wedstrijden.`]}}}},
+{id:"pepermix",naam:"123 peper bijmengen",gen(R){
+ for(;;){const M=rint(R,2,12)*50,a=rint(R,2,8)*5,c=a+rint(R,1,5)*5,puur=R()<.5,b=puur?100:rint(R,c/5+1,19)*5,x=M*(c-a)/(b-c);if(!Number.isInteger(x)||x%5||c>80)continue;const wie=rpick(R,["Aart","Opa Aart"]);
+  return{tekst:`${wie} vindt zijn zelfgemaakte strooimix te slap. In de pot zit ${M} gram mix met ${a}% 123 peper (de rest is zout en kruiden). Hij wil een mix met precies ${c}% 123 peper. Daarom doet hij er ${puur?"pure 123 peper":`een andere mix met ${b}% 123 peper`} bij.`,
+   vraag:`Hij moet er ….. gram ${puur?"123 peper":"van die mix"} bij doen.`,eenheid:"gram",ans:x,
+   hints:[`De hoeveelheid zout en kruiden ${puur?"blijft gelijk":"verandert ook"}. Hoeveel gram 123 peper zit er nu in?`,puur?`Nu zit er ${nl(M*a/100)} g peper en ${nl(M*(100-a)/100)} g zout en kruiden in. Die ${nl(M*(100-a)/100)} gram moet straks ${100-c}% van de nieuwe mix zijn.`:`Noem de hoeveelheid die erbij moet x. Dan: ${a}% van ${M} + ${b}% van x = ${c}% van (${M} + x).`],
+   uitwerking:puur?[`Zout en kruiden: ${100-a}% van ${M} = ${nl(M*(100-a)/100)} g. Dat blijft gelijk.`,`Dat moet ${100-c}% van de nieuwe mix zijn: ${nl(M*(100-a)/100)} : ${nl((100-c)/100)} = ${nl(M+x)} g.`,`Erbij: ${nl(M+x)} − ${M} = ${nl(x)} g pure 123 peper.`]:[`${a}% × ${M} + ${b}% × x = ${c}% × (${M} + x).`,`${nl(a*M/100)} + ${nl(b/100)}x = ${nl(c*M/100)} + ${nl(c/100)}x → ${nl((b-c)/100)}x = ${nl((c-a)*M/100)}.`,`x = ${nl(x)} gram.`]}}}},
+];
+/* ===== Altijd 6: af en toe een speciale dag. Het antwoord van de som is 6; de vraag is wat er dan op de lege plek moet. ===== */
+const ZES=[
+{id:"zes_kerst",naam:"Kerstdiner",gen(R){
+ const ALLEN=["Sijmon","Lisa","Martijn","Iris","Jeroen","Iwona","Thomas","Lieke","Peter","Ingrid","Renske","Jan","Feliks","Daan","Olaf","Lars","Emma"];
+ for(;;){const af=shuf(ALLEN.slice(),R).slice(0,rint(R,0,3)),P=1+ALLEN.length-af.length,x=rpick(R,[250,300,400,450,500,600,750,800,900,1000]),g=6*x/P;if(!Number.isInteger(g)||g<100||g>300||g%5)continue;
+  const lijst=a=>a.length>1?a.slice(0,-1).join(", ")+" en "+a[a.length-1]:a[0];
+  return{tekst:`Kerst bij Aart, en Aart kookt. Aan tafel komen zijn 6 kinderen met hun partners en alle kleinkinderen.${af.length?` Alleen ${lijst(af)} ${af.length>1?"kunnen":"kan"} er dit jaar niet bij zijn.`:" Iedereen is er dit jaar bij."} Aart rekent voor iedereen evenveel gram vlees, ook voor zichzelf. Het vlees zit in pakken van ${x} gram.\nAart koopt precies 6 pakken. Er blijft niets over en niemand komt tekort.`,
+   vraag:`Aart rekent ….. gram vlees per persoon.`,eenheid:"gram",ans:g,
+   hints:[`Tel eerst hoeveel mensen er aan tafel zitten: Aart, 6 kinderen, 5 partners en 6 kleinkinderen, min wie er niet bij is.`,`Er zitten ${P} mensen aan tafel, en er is 6 × ${x} = ${nl(6*x)} gram vlees.`],
+   uitwerking:[`Aan tafel: 1 + 6 + 5 + 6${af.length?` − ${af.length}`:""} = ${P} personen.`,`Vlees: 6 pakken × ${x} g = ${nl(6*x)} g.`,`${nl(6*x)} : ${P} = ${g} gram per persoon. Altijd 6 pakken, natuurlijk.`]}}}},
+{id:"zes_trein",naam:"Precies 6 km",gen(R){
+ for(;;){const v2=rpick(R,[48,54,60,72]),dl=rpick(R,[2,3,4]),ts=6*60/v2;if(!Number.isInteger(ts))continue;const tm=ts-dl;if(tm<=1)continue;const v1=6*60/tm;if(!Number.isInteger(v1)||v1<v2+20||v1>200)continue;const A=rpick(R,["Zwolle","Amersfoort","Groningen","Leeuwarden"]);
+  return{tekst:`Een sprinter vertrekt uit ${A} en rijdt gemiddeld ${v2} km/u. ${dl} minuten later vertrekt over het spoor ernaast een intercity, dezelfde kant op. De intercity haalt de sprinter in op precies 6 km van het station.`,
+   vraag:`De intercity rijdt gemiddeld ….. km/u.`,eenheid:"km/u",ans:v1,
+   hints:[`Hoe lang doet de sprinter over die 6 km?`,`De sprinter doet 6 km in 6 : ${v2} × 60 = ${ts} minuten. De intercity is ${dl} minuten later vertrokken, dus hij doet die 6 km in ${tm} minuten.`],
+   uitwerking:[`Sprinter: 6 km in ${ts} minuten.`,`Intercity: 6 km in ${ts} − ${dl} = ${tm} minuten.`,`6 : ${tm} × 60 = ${v1} km/u. Het was natuurlijk precies 6 km.`]}}}},
+{id:"zes_lindor",naam:"Er blijven er 6 over",gen(R){
+ for(;;){const a=rpick(R,[2,3,4]),b=rpick(R,[2,3]),y=rint(R,1,4),rest=6,r1=(rest+y)*b/(b-1);if(!Number.isInteger(r1)||r1%b)continue;const x=rint(R,1,5),N=(x+r1)*a/(a-1);if(!Number.isInteger(N)||N%a||N>90)continue;
+  const frac=k=>({2:"de helft",3:"een derde",4:"een kwart"})[k],kk=shuf(KLEIN.slice(),R),P=kk[0],Q=kk[1];
+  return{tekst:`Op tafel staat een zak met ${N} Lindor-bollen. ${P} pakt ${frac(a)} van de bollen en daarna nog een paar extra. Van wat er dan over is, pakt ${Q} ${frac(b)} en nog ${y} extra. Er blijven er precies 6 over.`,
+   vraag:`${P} pakte ….. bollen extra.`,eenheid:"bollen",ans:x,
+   hints:[`Werk terug vanaf de 6 die overblijven: hoeveel lagen er voordat ${Q} pakte?`,`6 + ${y} = ${6+y} is ${b===2?"de andere helft":`${b-1}/${b} deel`} van wat er lag. Er lagen dus ${r1} bollen toen ${Q} begon.`],
+   uitwerking:[`Voordat ${Q} pakte: (6 + ${y}) is ${b-1}/${b} deel → ${r1} bollen.`,`${P} pakte ${frac(a)} van ${N} = ${N/a}, en dan bleven er ${r1} over.`,`${N} − ${N/a} − ${r1} = ${x} bollen extra. En wat bleef er over? Juist: 6.`]}}}}];
+/* Antwoord van de speler vergelijken. */
+function raadCheck(q,inp){inp=String(inp||"").trim();if(!inp)return null;
+ if(q.soort==="keuze")return inp===q.ans;
+ if(q.soort==="code")return inp.replace(/\D/g,"")===q.ans;
+ if(q.soort==="tijd"){const m=inp.replace(/[.\s]/g,":").match(/^(\d{1,2}):?(\d{2})$/);if(!m)return false;return tijd(+m[1]*60+ +m[2])===q.ans}
+ let s=inp.replace(/\s|€/g,"");if(s.includes(","))s=s.replace(/\./g,"").replace(",",".");else if(/\.\d{3}$/.test(s))s=s.replace(/\./g,"");
+ const v=parseFloat(s);return Number.isFinite(v)&&Math.abs(v-q.ans)<(q.tol||1e-6)+1e-9}
+function raadMaak(t,seed){const q=t.gen(RR(seed));q.soort=q.soort||"getal";q.id=t.id;q.naam=q.naam||t.naam;return q}
+/* ===== Extra soorten, geïnspireerd op de lievelingsraadsels van Aart (eigen tekst en getallen) ===== */
+const lijstNL=a=>a.length>1?a.slice(0,-1).join(", ")+" en "+a[a.length-1]:a[0];
+const pr=x=>nl(Math.round(x*100)/100);
+const RAAD2=[
+{id:"bekers",naam:"Twee keer wegen",vanaf:"2026-10-22",gen(R){
+ const TH=[{d:"thermoskannen",e:"thermoskan",i:"koffie"},{d:"potten",e:"pot",i:"pindakaas"},{d:"bussen",e:"bus",i:"123 peper"},{d:"vazen",e:"vaas",i:"water"},{d:"weckpotten",e:"weckpot",i:"appelmoes"}];
+ for(let g=0;g<200;g++){const th=rpick(R,TH),dn=rpick(R,[2,3,4]),e=rint(R,6,40)*10,c=rint(R,4,30)*10*dn,W1=2*e+c/dn,W2=e+c;if(c<=e)continue;
+  const fr={2:"de helft",3:"een derde",4:"een kwart"}[dn],n=nm(R),v=R()<.6;
+  return{tekst:`${n} heeft twee precies dezelfde ${th.d}. De ene is voor ${fr} gevuld met ${th.i}, de andere is leeg. Samen wegen ze ${W1} gram.\nDaarna weegt ${hz()} één helemaal volle ${th.e}: ${W2} gram.`,
+   vraag:v?`Een lege ${th.e} weegt ….. gram.`:`Een volle ${th.e} bevat ….. gram ${th.i}.`,eenheid:"gram",ans:v?e:c,
+   hints:[`Schrijf beide wegingen op met "${th.e}" en "vulling": 2 × ${th.e} + ${fr} vulling = ${W1}, en ${th.e} + vulling = ${W2}.`,`Neem de eerste weging ${dn} keer: dan heb je ${2*dn} × ${th.e} + een hele vulling = ${dn*W1}. Vergelijk dat met de tweede weging.`],
+   uitwerking:[`Weging 1: 2 × ${th.e} + ${fr} vulling = ${W1} g. Weging 2: ${th.e} + vulling = ${W2} g.`,`Weging 1 × ${dn}: ${2*dn} × ${th.e} + vulling = ${dn*W1} g.`,`Verschil met weging 2: ${2*dn-1} × ${th.e} = ${dn*W1} − ${W2} = ${dn*W1-W2} g, dus een lege ${th.e} weegt ${e} g.`,`De vulling weegt ${W2} − ${e} = ${c} g.`]}}}},
+{id:"verdelen",naam:"Eerlijk verdelen",vanaf:"2026-10-22",gen(R){
+ const TH=[["een doos Lindt-bonbons","bonbons"],["een grote zak snoep","snoepjes"],["een stapel ansichtkaarten van treinen","kaarten"],["een bak met legpuzzelstukjes","stukjes"],["een zak pepernoten","pepernoten"]];
+ for(let g=0;g<200;g++){const n=rint(R,3,6),Y=rint(R,2,9),Z=rint(R,4,30),p=(n-1)*Z,T=n*p,X=n*Y;if(p<=Y+2||T>600||T<40)continue;const th=rpick(R,TH);
+  return{tekst:`Opa Aart verdeelt ${th[0]} eerlijk onder de kleinkinderen die op bezoek zijn. Iedereen krijgt evenveel en er blijft niets over.\nWaren er ${X} ${th[1]} minder geweest, dan had ieder kleinkind er ${Y} minder gekregen.\nWas er één kleinkind minder geweest, dan had ieder kleinkind er ${Z} meer gekregen.`,
+   vraag:`In het begin waren er ….. ${th[1]}.`,eenheid:th[1],ans:T,
+   hints:[`Met ${X} minder krijgt ieder er ${Y} minder. Hoeveel kleinkinderen zijn er dan?`,`Er zijn ${X} : ${Y} = ${n} kleinkinderen. Als er één niet komt, wordt zijn deel verdeeld over de andere ${n-1}.`],
+   uitwerking:[`${X} minder betekent ${Y} minder per kind: ${X} : ${Y} = ${n} kleinkinderen.`,`Is er één kind minder, dan krijgen de andere ${n-1} er elk ${Z} bij. Samen ${n-1} × ${Z} = ${p}: precies het deel van het kind dat er niet is.`,`Ieder kreeg dus ${p}. In totaal ${n} × ${p} = ${T} ${th[1]}.`]}}}},
+{id:"verstoppen",naam:"Verstopte brokjes",vanaf:"2026-10-22",gen(R){
+ const P=[[2,3],[3,2],[2,4],[4,2],[4,5],[5,4],[2,5],[5,2],[4,6],[2,6],[3,6],[4,3],[3,4]].filter(([k,m])=>Number.isInteger(100*Math.max(k,m)/Math.min(k,m)));
+ const[k,m]=rpick(R,P),[A,B]=shuf(HONDEN.slice(),R),mr=m>k,pct=Math.round(100*Math.max(k,m)/Math.min(k,m))-100,kw={2:"twee",3:"drie",4:"vier",5:"vijf",6:"zes"};
+ return{tekst:`De honden ${A} en ${B} verstoppen brokjes in de tuin.\n${A} heeft ${kw[k]} keer zo veel verstopplekken als ${B}.\n${B} legt in elke verstopplek ${kw[m]} keer zo veel brokjes als ${A}.`,
+  vraag:`De hond met de meeste brokjes heeft er ….. procent meer dan de ander.`,eenheid:"procent",ans:pct,
+  hints:[`Bedenk zelf kleine getallen: geef ${B} 1 verstopplek en ${A} 1 brokje per plek.`,`Dan heeft ${A} ${k} plekken met 1 brokje = ${k}, en ${B} 1 plek met ${m} brokjes = ${m}.`],
+  uitwerking:[`Stel ${B} heeft 1 plek, ${A} heeft er ${k}. ${A} legt 1 brokje per plek, ${B} legt er ${m}.`,`${A}: ${k} × 1 = ${k} brokjes. ${B}: 1 × ${m} = ${m} brokjes.`,`${mr?B:A} heeft er ${Math.max(k,m)}, ${mr?A:B} ${Math.min(k,m)}. Het verschil is ${Math.abs(k-m)}, dat is ${pct}% van ${Math.min(k,m)}.`]}}},
+{id:"huisnummers",naam:"Even en oneven huisnummers",vanaf:"2026-10-22",gen(R){
+ const n=rint(R,25,90),str=rpick(R,["de Stationsweg","de Spoorstraat","de Molenweg","de Dijkstraat","de Lindtlaan"]),v=rint(R,0,2);
+ const vr=[`Het verschil tussen de som van de even en de som van de oneven huisnummers is …..`,`De even huisnummers zijn samen …..`,`De oneven huisnummers zijn samen …..`][v],ans=[n,n*(n+1),n*n][v];
+ return{tekst:`In ${str} staan ${2*n} huizen, aan beide kanten evenveel. De ene kant heeft de oneven nummers 1, 3, 5, … t/m ${2*n-1}, de andere kant de even nummers 2, 4, 6, … t/m ${2*n}.`,vraag:vr,eenheid:"",ans,
+  hints:v===0?[`Zet elk oneven nummer naast het even nummer dat erop volgt: 1 en 2, 3 en 4, …`,`Elk paar scheelt precies 1. Hoeveel paren zijn er?`]:[`Koppel het kleinste en het grootste nummer, het op één na kleinste en het op één na grootste, enzovoort.`,v===1?`2 + ${2*n} = ${2*n+2}, 4 + ${2*n-2} = ${2*n+2}, … Er zijn ${n} even nummers.`:`1 + ${2*n-1} = ${2*n}, 3 + ${2*n-3} = ${2*n}, … Er zijn ${n} oneven nummers.`],
+  uitwerking:v===0?[`Paren: (1, 2), (3, 4), … (${2*n-1}, ${2*n}). Dat zijn ${n} paren.`,`In elk paar is het even nummer 1 groter.`,`Het verschil is ${n} × 1 = ${n}.`]:v===1?[`Er zijn ${n} even nummers, gemiddeld (2 + ${2*n}) : 2 = ${n+1}.`,`Samen: ${n} × ${n+1} = ${nl(n*(n+1))}.`]:[`Er zijn ${n} oneven nummers, gemiddeld (1 + ${2*n-1}) : 2 = ${n}.`,`Samen: ${n} × ${n} = ${nl(n*n)}.`]}}},
+{id:"verjaardag",naam:"Verjaardagen optellen",vanaf:"2026-10-22",gen(R){
+ const ML=[31,28,31,30,31,30,31,31,30,31,30,31],MN=["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+ for(let g=0;g<200;g++){const N=rint(R,14,42),ds=[];for(let m=1;m<=12;m++){const d=N-m;if(d>=1&&d<=ML[m-1])ds.push([d,m])}if(ds.length<2||ds.length>=12)continue;
+  const ex=rpick(R,[[16,3],[4,7],[22,5],[9,10]]);
+  return{tekst:`Op een verjaardag doen de kleinkinderen een spelletje. Iedereen telt het nummer van de maand waarin hij jarig is (1 t/m 12) op bij de dag (1 t/m 31). Wie op ${ex[0]} ${MN[ex[1]-1]} jarig is, komt zo op ${ex[0]} + ${ex[1]} = ${ex[0]+ex[1]}.\nEen groepje kinderen is allemaal op een andere datum jarig, maar ze komen toevallig allemaal op ${N} uit. Niemand is op 29 februari jarig.`,
+   vraag:`Dat groepje bestaat uit hooguit ….. kinderen.`,eenheid:"kinderen",ans:ds.length,
+   hints:[`Ga de maanden een voor een af: welke dag hoort er bij elke maand om op ${N} te komen?`,`Bij maand m hoort dag ${N} − m. Bestaat die dag in die maand?`],
+   uitwerking:[...ds.map(([d,m])=>`${d} ${MN[m-1]}: ${d} + ${m} = ${N}`),`In de andere maanden is ${N} − m kleiner dan 1 of groter dan het aantal dagen van die maand.`,`Het groepje is hooguit ${ds.length} kinderen groot.`]}}}},
+{id:"cijfersprong",naam:"Cijfers die steeds verspringen",vanaf:"2026-10-22",gen(R){
+ for(let g=0;g<200;g++){const k=rint(R,2,4),a=rint(R,1,7),b=a+rint(R,2,3);if(b>9)continue;const lo=a*100,hi=b*100,L=[];
+  for(let x=lo+1;x<hi;x++){const s=String(x);if(Math.abs(s[1]-s[0])===k&&Math.abs(s[2]-s[1])===k)L.push(x)}if(L.length<4||L.length>14)continue;
+  const ex=[];for(let x=100;x<1000&&ex.length<3;x++){if(x>lo&&x<hi)continue;const s=String(x);if(Math.abs(s[1]-s[0])===k&&Math.abs(s[2]-s[1])===k&&(ex.length<2||s[0]===s[2]))ex.push(x)}
+  return{tekst:`Bij de getallen ${ex.join(", ")} verschilt elk cijfer precies ${k} van het cijfer ervoor. Bij ${ex[0]}: ${String(ex[0])[0]} en ${String(ex[0])[1]} schelen ${k}, en ${String(ex[0])[1]} en ${String(ex[0])[2]} ook. Het mag omhoog of omlaag.`,
+   vraag:`Tussen ${lo} en ${hi} zitten ….. hele getallen met die eigenschap.`,eenheid:"",ans:L.length,
+   hints:[`Het eerste cijfer ligt vast. Welke middelste cijfers kunnen daarna komen (${k} hoger of ${k} lager)?`,`Vergeet niet dat je ook terug kunt springen, zoals bij ${ex[2]||ex[0]}. En een 0 als middelste cijfer mag ook.`],
+   uitwerking:[`Begin met het eerste cijfer, spring ${k} omhoog of omlaag, en daarna nog een keer.`,`De getallen zijn: ${L.join(", ")}.`,`Dat zijn er ${L.length}.`]}}}},
+{id:"kubusdozen",naam:"Kubusvormige dozen",vanaf:"2026-10-22",gen(R){
+ for(let g=0;g<300;g++){const k=rint(R,2,6),m=rint(R,2,12),N=m*k*k*k;if(N>1500||N<40)continue;let c=0;for(let j=2;j*j*j<=N;j++)if(N%(j*j*j)===0)c++;if(c!==1)continue;
+  const th=rpick(R,[["Lindor-bollen","bollen"],["pingpongballetjes","balletjes"],["dobbelstenen","dobbelstenen"],["kerstballen","ballen"]]);
+  return{tekst:`${nm(R)} pakt ${N} ${th[0]} in. Ze gaan in kubusvormige dozen: in de lengte, de breedte en de hoogte passen evenveel ${th[1]}, netjes naast en boven elkaar. In elke doos zit meer dan één laag.\nAlle dozen zijn even groot en als alle ${N} ${th[1]} zijn ingepakt, zijn alle dozen precies vol.`,
+   vraag:`Er worden ….. dozen gevuld.`,eenheid:"dozen",ans:m,
+   hints:[`In zo'n doos passen 2 × 2 × 2 = 8, of 3 × 3 × 3 = 27, of 4 × 4 × 4 = 64 … ${th[1]}.`,`Probeer welke van 8, 27, 64, 125, 216 precies in ${N} past (zonder rest).`],
+   uitwerking:[`Een kubusdoos bevat een derde macht: 8, 27, 64, 125, 216, …`,`Alleen ${k*k*k} = ${k} × ${k} × ${k} past precies in ${N}: ${N} : ${k*k*k} = ${m}.`,`Er worden ${m} dozen gevuld.`]}}}},
+{id:"voegen",naam:"Tegels met voegen",vanaf:"2026-10-22",gen(R){
+ for(let g=0;g<300;g++){const[ra,rb]=rpick(R,[[2,1],[3,2],[3,1],[4,3]]),q=rint(R,2,7),a=ra*q,b=rb*q,T=a*b;if(T<60||T>400)continue;const s=rpick(R,[20,25,30,40,50]),j=1;
+  const L=(a*s+(a+1)*j)/100,B=(b*s+(b+1)*j)/100,opp=Math.round(L*B*100)/100,f=x=>nl(x,2)+" m²";
+  const o=[opp,Math.round(a*s*b*s/100)/100,Math.round((a*s+(a-1)*j)*(b*s+(b-1)*j)/100)/100,Math.round((a*s+a*j)*(b*s+b*j)/100)/100];if(new Set(o.map(f)).size<4)continue;
+  const keuzes=shuf(o.map(f),R),wie=nm(R);
+  return{tekst:`${wie} legt in een rechthoekige kamer ${T} vierkante tegels van ${s} bij ${s} cm. ${rb===1?`In de lengte liggen ${ra===2?"twee":"drie"} keer zo veel tegels als in de breedte.`:`Het aantal tegels in de lengte en in de breedte verhoudt zich als ${ra} : ${rb}.`}\nRond elke tegel zit een voeg van ${j} cm breed, ook langs de muren.`,
+   vraag:`Hoe groot is de vloer (afgerond op twee cijfers achter de komma)?`,soort:"keuze",keuzes,ans:f(opp),
+   hints:[`Zoek eerst uit hoeveel tegels er in de lengte en in de breedte liggen: samen ${T}, verhouding ${ra} : ${rb}.`,`Het zijn ${a} bij ${b} tegels. Let op: bij ${a} tegels op een rij heb je ${a+1} voegen (ook langs de muren).`],
+   uitwerking:[`${a} × ${b} = ${T} tegels, in de verhouding ${ra} : ${rb}.`,`Lengte: ${a} × ${s} cm + ${a+1} × ${j} cm = ${a*s+(a+1)*j} cm. Breedte: ${b} × ${s} + ${b+1} × ${j} = ${b*s+(b+1)*j} cm.`,`Oppervlakte: ${nl(L)} × ${nl(B)} = ${nl(L*B,4)} m², afgerond ${f(opp)}.`]}}}},
+{id:"procentvan",naam:"Procent meer dan …",vanaf:"2026-10-22",gen(R){
+ const O=[];for(let B=10;B<=60;B++)for(let q=5;q<=90;q++){const C=B*(100+q)/100;if(!Number.isInteger(C))continue;for(const p of[10,20,25,40,50,60,75,80]){const a=C*100/(100+p);if(Number.isInteger(a)&&a>=10&&a!==B&&q!==p)O.push([a,p,q,C,B])}}
+ const[a,p,q,C,B]=rpick(R,O),[A,Bn,Cn]=shuf([...MANNEN,...VROUWEN],R);
+ return{tekst:`${A}, ${Bn} en ${Cn} maken elk een fietstocht. ${A} fietst ${a} km.\n${Cn} fietst ${p}% meer dan ${A}.\n${Cn} fietst ${q}% meer dan ${Bn}.\nLet op: bij "x% meer dan …" is degene na "dan" altijd de 100%.`,
+  vraag:`${Bn} fietst ….. km.`,eenheid:"km",ans:B,
+  hints:[`Reken eerst uit hoe ver ${Cn} fietst.`,`${Cn} fietst ${p}% meer dan ${a} km, dat is ${nl(C)} km. Die ${nl(C)} km is ${100+q}% van de afstand van ${Bn}.`],
+  uitwerking:[`${Cn}: ${a} + ${p}% van ${a} = ${nl(C)} km.`,`${nl(C)} km is ${100+q}% van ${Bn}. 1% is ${nl(C)} : ${100+q}.`,`100% = ${nl(C)} : ${100+q} × 100 = ${B} km.`]}}},
+{id:"terugrekenen",naam:"Wat kostte het eerst?",vanaf:"2026-10-22",gen(R){
+ for(let g=0;g<300;g++){const TH=[["een nieuwe cameralens",40,300],["een nieuwe fiets",80,300],["een jaarabonnement voor de trein",300,900],["een kerstpakket",5,16],["een grote doos Lindt",3,8],["een puzzelboek",3,6]],T0=rpick(R,TH),th=T0[0],up=R()<.6,p=up?rpick(R,[4,5,6,8,10,12,15,20,25]):rpick(R,[10,15,20,25,30,35,40]),O=rint(R,T0[1],T0[2])*5,N=O*(up?100+p:100-p)/100;
+  if(!Number.isInteger(N*100))continue;
+  return{tekst:up?`De prijs van ${th} gaat met ${p}% omhoog. Na de verhoging kost het ${eur(N)}.`:`In de uitverkoop krijg je ${p}% korting op ${th}. Met korting betaal je ${eur(N)}.`,
+   vraag:`Voor de ${up?"prijsverhoging":"korting"} kostte het € …..`,eenheid:"euro",ans:O,
+   hints:[`De oude prijs is 100%. Hoeveel procent is de nieuwe prijs?`,`${eur(N)} is ${up?100+p:100-p}% van de oude prijs. Reken uit wat 1% is.`],
+   uitwerking:[`Nieuwe prijs = ${up?100+p:100-p}% van de oude prijs = ${eur(N)}.`,`1% = ${eur(N)} : ${up?100+p:100-p} = ${eur(O/100)}.`,`100% = ${eur(O)}. (Let op: ${p}% van ${eur(N)} ${up?"eraf":"erbij"} doen geeft een ander, fout antwoord.)`]}}}},
+{id:"steen",naam:"Steen in een bak water",vanaf:"2026-10-22",gen(R){
+ for(let g=0;g<300;g++){const L=rint(R,6,12)*5,B=rint(R,4,8)*5,H=rint(R,3,5)*10,h=rint(R,8,H/10*6),dh=rint(R,4,25)/10,V=L*B*dh/1000,rho=rpick(R,[2.5,2.6,2.8,3]),kg=Math.round(V*rho*10)/10;
+  if(Math.abs(V*rho*10-Math.round(V*rho*10))>1e-9||h+dh>=H||kg<1)continue;const wie=rpick(R,KLEIN);
+  return{tekst:`${wie} heeft een aquariumbak van ${nl(L/10)} dm lang, ${B} cm breed en ${nl(H/10)} dm hoog. Er staat ${h} cm water in.\n${wie} legt er een mooie steen in die helemaal onder water verdwijnt. Het water stijgt tot ${nl(h+dh)} cm.\nEén kubieke decimeter van deze steen weegt ${nl(rho)} kg.`,
+   vraag:`De steen weegt ….. kg.`,eenheid:"kg",ans:kg,dec:1,tol:.051,
+   hints:[`Het water stijgt evenveel als het volume van de steen. Hoeveel cm stijgt het water?`,`Het water stijgt ${nl(dh)} cm. Reken alles om naar cm: ${L} × ${B} × ${nl(dh)} cm³.`],
+   uitwerking:[`Stijging: ${nl(h+dh)} − ${h} = ${nl(dh)} cm.`,`Volume steen: ${L} × ${B} × ${nl(dh)} = ${nl(V*1000)} cm³ = ${nl(V)} dm³.`,`Gewicht: ${nl(V)} × ${nl(rho)} = ${nl(kg)} kg.`]}}}},
+{id:"dobbel",naam:"Een rare dobbelsteen",vanaf:"2026-10-22",gen(R){
+ for(let g=0;g<300;g++){const F=shuf([-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7].slice(),R).slice(0,6);const neg=F.filter(x=>x<0).length;if(neg<2||neg>3)continue;
+  let c=0;for(const a of F)for(const b of F)if(a+b<0)c++;const pc=100*c/36;if(Math.abs(pc-Math.round(pc))>.45&&Math.abs(pc-Math.round(pc))<.55)continue;if(c<6||c>24)continue;
+  const fs=F.slice().sort((x,y)=>x-y);
+  return{tekst:`${nm(R)} heeft een aparte dobbelsteen. Op de zes kanten staan niet 1 t/m 6, maar de getallen ${lijstNL(F.map(x=>x<0?"−"+(-x):String(x)))}.\n${HZ()} gooit twee keer en telt de twee getallen op.`,
+   vraag:`De kans dat de uitkomst negatief is, is ….. procent (rond af op een heel getal).`,eenheid:"procent",ans:Math.round(pc),tol:.5,
+   hints:[`Maak een tabel van 6 bij 6: de eerste worp langs de bovenkant, de tweede langs de zijkant. Zet in elk vakje de som.`,`Er zijn 36 mogelijkheden. Tel de vakjes met een negatieve som (0 is niet negatief).`],
+   uitwerking:[`Zet ${fs.map(x=>x<0?"−"+(-x):x).join(", ")} langs beide kanten van een tabel en vul de sommen in.`,`${c} van de 36 sommen zijn negatief.`,`${c} : 36 = ${nl(pc/100,4)}, dat is afgerond ${Math.round(pc)}%.`]}}}},
+{id:"machten",naam:"Elk getal kunnen maken",vanaf:"2026-10-22",gen(R){
+ const k=rint(R,6,8),lo=2**(k-2)+1+(2**(k-1)-1),hi=2**k-1,T=rint(R,Math.ceil(lo/5),Math.floor(hi/5))*5,last=T-(2**(k-1)-1),tw={6:"Zes",7:"Zeven",8:"Acht"};
+ const rij=Array.from({length:k-1},(_,i)=>2**i);
+ return{tekst:`${tw[k]} verschillende getallen zijn samen precies ${T}. Door één van die getallen te nemen, of een paar ervan op te tellen, kun je elk getal van 1 t/m ${T} maken.\nDe kleinste drie zijn 1, 2 en 4. Daarmee maak je al 1 t/m 7: 3 = 1 + 2, 5 = 1 + 4, 6 = 2 + 4 en 7 = 1 + 2 + 4.\nElk volgend getal (behalve het laatste) is steeds zo groot als kan, zonder dat er een getal is dat je niet kunt maken.`,
+  vraag:`Het grootste van de ${tw[k].toLowerCase()} getallen is …..`,eenheid:"",ans:last,
+  hints:[`Met 1, 2 en 4 kom je tot 7. Welk getal heb je dan nodig om ook 8 te kunnen maken, en tot hoever kom je dan?`,`Steeds verdubbelen: 1, 2, 4, 8, 16, … Hoeveel zijn de eerste ${k-1} samen?`],
+  uitwerking:[`Steeds het dubbele: ${rij.join(", ")}. Daarmee maak je alles van 1 t/m ${2**(k-1)-1}.`,`Het laatste getal is dan ${T} − ${2**(k-1)-1} = ${last}. Met ${last} erbij kom je tot en met ${T}, want ${last} is niet groter dan ${2**(k-1)}.`,`Het grootste getal is ${last}.`]}}},
+{id:"poten",naam:"Poten tellen",vanaf:"2026-10-22",gen(R){
+ for(let g=0;g<300;g++){const m=rint(R,2,9),v=rint(R,2,9),s=rint(R,1,5),P=6*(m+v)+8*s,k=rint(R,3,15),e=rint(R,0,6),rest=P-2*(k+e);if(rest<=0||rest%4)continue;const x=rest/4;if(x<2||x>15)continue;const wie=nm(R);
+  return{tekst:`Muggen en vliegen hebben 6 poten, spinnen 8. In een potje van ${rpick(R,KLEIN)} zitten ${m} muggen, ${v} vliegen en ${s} ${s===1?"spin":"spinnen"}.\nIn de tuin van ${wie} lopen ${k} kippen, ${e?e+" eenden en ":""}een aantal konijnen.\nIn het potje zitten precies evenveel poten als er in de tuin rondlopen.`,
+   vraag:`In de tuin lopen ….. konijnen.`,eenheid:"konijnen",ans:x,
+   hints:[`Tel eerst de poten in het potje.`,`In het potje: ${m+v} × 6 + ${s} × 8 = ${P} poten. Kippen${e?" en eenden":""} hebben 2 poten, konijnen 4.`],
+   uitwerking:[`Potje: ${m+v} × 6 + ${s} × 8 = ${P} poten.`,`Kippen${e?" en eenden":""}: ${k+e} × 2 = ${2*(k+e)} poten.`,`Voor de konijnen blijven ${P} − ${2*(k+e)} = ${rest} poten over: ${rest} : 4 = ${x} konijnen.`]}}}},
+{id:"klokwijzers",naam:"De wijzers van de klok",vanaf:"2026-10-22",gen(R){
+ for(let g=0;g<300;g++){const d=rint(R,5,45),S=[];for(let X=0;X<12;X++)for(const M of[0,12,24,36,48]){const ht=5*X+M/12;if(((M-ht)%60+60)%60===d)S.push([X,M])}if(S.length!==1||S[0][1]===0)continue;
+  const[X,M]=S[0],H=X+rint(R,1,3),min=H*60-(X*60+M),hs=h=>((h+11)%12)+1;
+  return{tekst:`De klok in de kamer heeft wijzers en 60 minutenstreepjes. Om 2:00 staat de kleine wijzer op het streepje van 10 minuten en de grote wijzer op 0.\nOp een moment staat de kleine wijzer precies op een minutenstreepje, en de grote wijzer staat precies ${d} streepjes verder (met de klok mee).`,
+   vraag:`Het duurt dan nog ….. minuten tot het voor het eerst ${hs(H)}:00 uur is.`,eenheid:"minuten",ans:min,
+   hints:[`De kleine wijzer schuift elke 12 minuten één streepje op. Op welke minuten staat hij dus precies op een streepje?`,`Dat is op :00, :12, :24, :36 en :48. Reken voor elk uur uit hoeveel streepjes de grote wijzer voorloopt.`],
+   uitwerking:[`De kleine wijzer staat op een streepje om X:00, X:12, X:24, X:36 en X:48.`,`Om ${hs(X)}:${String(M).padStart(2,"0")} staat de kleine wijzer op streepje ${5*(X%12)+M/12} en de grote op ${M}: dat scheelt precies ${d}. Bij geen ander tijdstip klopt het.`,`Van ${hs(X)}:${String(M).padStart(2,"0")} tot ${hs(H)}:00 is ${min} minuten.`]}}}},
+{id:"dagdelen",naam:"Ochtenden en middagen",vanaf:"2026-10-22",gen(R){
+ for(let g=0;g<300;g++){const B=rint(R,3,12),A=rint(R,1,8),C=rint(R,1,8),D=A+C,N=A+B+C+D,Mo=A+B,Mi=B+C;if(N<14||N>35)continue;const wie=nm(R);
+  return{tekst:`${wie} werkt als invalkracht. In een periode van ${N} dagen werkte ${hz()} ${Mo} ochtenden en ${Mi} middagen.\nHet aantal dagen waarop ${hz()} helemaal vrij was, is gelijk aan het aantal dagen waarop ${hz()} alleen een ochtend of alleen een middag werkte.`,
+   vraag:`Op ….. dagen werkte ${wie} zowel 's ochtends als 's middags.`,eenheid:"dagen",ans:B,
+   hints:[`Er zijn vier soorten dagen: alleen ochtend (A), hele dag (B), alleen middag (C) en vrij (D). Schrijf op wat je weet.`,`A + B = ${Mo}, B + C = ${Mi}, D = A + C en A + B + C + D = ${N}.`],
+   uitwerking:[`A = ${Mo} − B en C = ${Mi} − B, dus D = A + C = ${Mo+Mi} − 2B.`,`A + B + C + D = (${Mo} − B) + B + (${Mi} − B) + (${Mo+Mi} − 2B) = ${2*(Mo+Mi)} − 3B = ${N}.`,`3B = ${2*(Mo+Mi)-N}, dus B = ${B} dagen.`]}}}},
+{id:"spelling",naam:"Familiequiz: spelling",vanaf:"2026-10-22",gen(R){
+ const W=[["gezellig","gezelig","gezzellig","gezzelig","met dubbel z","met één l"],["puzzelen","puzelen","puzzellen","puzellen","met één z","met dubbel l"]];
+ for(let g=0;g<300;g++){const w=rpick(R,W),p1=rint(R,15,55),p2=rint(R,8,40),p3=rint(R,3,Math.min(p1,p2)-2),ok=100-p1-p2+p3;if(ok<10||ok>70)continue;const n=rint(R,4,12)*10;
+  const fa=w[4],fb=w[5];
+  return{tekst:`Bij een grote familiequiz moesten ${n} mensen de goede spelling kiezen uit: ${w.slice(0,4).map(x=>"'"+x+"'").join(", ")}. Goed is '${w[0]}'.\n${p1}% koos een spelling ${fa}. ${p2}% koos een spelling ${fb}. ${p3}% koos '${w[3]}' en maakte dus allebei de fouten.\nAlle percentages zijn van alle deelnemers.`,
+   vraag:`De goede spelling werd gekozen door ….. procent van de deelnemers.`,eenheid:"procent",ans:ok,
+   hints:[`Tel de mensen die minstens één fout maakten. Pas op: de ${p3}% met allebei de fouten zit in allebei de groepen.`,`${p1}% + ${p2}% = ${p1+p2}%, maar daarin is ${p3}% dubbel geteld.`],
+   uitwerking:[`Minstens één fout: ${p1}% + ${p2}% − ${p3}% = ${p1+p2-p3}%.`,`Goed: 100% − ${p1+p2-p3}% = ${ok}%.`]}}}},
+{id:"ribben",naam:"Ribben tellen",vanaf:"2026-10-22",gen(R){
+ const S=[["Een voetbal","12 zwarte vijfhoeken en 20 witte zeshoeken",[[12,5],[20,6]]],["Een dobbelsteen met twintig kanten","20 driehoeken",[[20,3]]],["Een dobbelsteen met twaalf kanten","12 vijfhoeken",[[12,5]]],["Een afgeknotte kubus","8 driehoeken en 6 achthoeken",[[8,3],[6,8]]],["Een kubus met afgeschaafde hoeken","8 driehoeken en 6 vierkanten",[[8,3],[6,4]]],["Een afgeknotte piramide met een vierkante voet","4 trapezia en 2 vierkanten",[[4,4],[2,4]]],["Een prisma met zeshoekige voet","2 zeshoeken en 6 rechthoeken",[[2,6],[6,4]]]];
+ const[s,f,F]=rpick(R,S),zij=F.reduce((a,[n,k])=>a+n*k,0),E=zij/2,V=E-F.reduce((a,[n])=>a+n,0)+2,v=R()<.7;
+ return{tekst:`${s} is opgebouwd uit ${f}. Bij elke ribbe komen precies twee vlakken samen.${v?"":` En er geldt altijd: hoekpunten + vlakken = ribben + 2.`}`,
+  vraag:v?`Het figuur heeft ….. ribben.`:`Het figuur heeft ….. hoekpunten.`,eenheid:"",ans:v?E:V,
+  hints:[`Tel eerst alle zijden van alle vlakken bij elkaar op.`,`Samen ${zij} zijden. Elke ribbe is van twee vlakken, dus telt dubbel.`],
+  uitwerking:[`Zijden: ${F.map(([n,k])=>n+" × "+k).join(" + ")} = ${zij}.`,`Ribben: ${zij} : 2 = ${E}.`,...(v?[]:[`Hoekpunten: ${E} + 2 − ${F.reduce((a,[n])=>a+n,0)} = ${V}.`])]}}},
+{id:"cijferplaatjes",naam:"Cijferplaatjes",vanaf:"2026-10-22",gen(R){
+ const N=rpick(R,[1500,2026,1999,1200,999,3000,1100,2500,1850]),mx=Array(10).fill(0);for(let x=1;x<=N;x++){const s=String(x).padStart(4,"0"),c=Array(10).fill(0);for(const ch of s)c[ch]++;for(let d=0;d<10;d++)mx[d]=Math.max(mx[d],c[d])}
+ const tot=mx.reduce((a,b)=>a+b,0),wie=nm(R);
+ return{tekst:`${wie} houdt in de schuur bij hoeveel treinfoto's ${hz()} al heeft gemaakt. Dat doet ${hz()} met losse cijferplaatjes op een bord, altijd vier cijfers naast elkaar: 0001, 0002, … Op elk plaatje staat één cijfer, en een plaatje kun je niet omdraaien.\nDe plaatjes worden bewaard en steeds opnieuw gebruikt.`,
+  vraag:`Om alle getallen van 0001 t/m ${String(N).padStart(4,"0")} te kunnen laten zien, zijn minimaal ….. plaatjes nodig.`,eenheid:"plaatjes",ans:tot,
+  hints:[`Bekijk elk cijfer apart: hoe vaak kan het hooguit tegelijk op het bord staan?`,`Een 7 kan bijvoorbeeld drie keer voorkomen in 0777. Kan het ook vier keer, binnen ${String(N).padStart(4,"0")}?`],
+  uitwerking:[...[4,3,2,1].filter(c=>mx.includes(c)).map(c=>{const ds=[0,1,2,3,4,5,6,7,8,9].filter(d=>mx[d]===c);return`Van ${ds.length===1?"de "+ds[0]:"de cijfers "+lijstNL(ds.map(String))} heb je er ${c} nodig${ds.length>1?" (elk)":""}.`}),`Samen: ${mx.join(" + ")} = ${tot} plaatjes.`]}}},
+{id:"picknick",naam:"Fietsen met picknick",vanaf:"2026-10-22",gen(R){
+ for(let g=0;g<300;g++){const v1=rint(R,14,22),v2=rint(R,10,v1-1),k=rpick(R,[2,3,1.5]),t=rint(R,3,12)/4,D=v1*t+v2*k*t;if(!Number.isInteger(D)||D<30||D>110)continue;const tot=Math.round((1+k)*t*60);if(Math.abs((1+k)*t*60-tot)>1e-9)continue;
+  const kw=k===2?"twee keer zo lang":k===3?"drie keer zo lang":"anderhalf keer zo lang";
+  return{tekst:`De familie maakt een lange fietstocht van ${D} km. Rond het middaguur houden ze een uur picknick.\nVóór de picknick fietsen ze gemiddeld ${v1} km/u, daarna gemiddeld ${v2} km/u. Het fietsen na de picknick duurt ${kw} als het fietsen ervóór.`,
+   vraag:`Ze hebben in totaal ….. minuten gefietst (de picknick telt niet mee).`,eenheid:"minuten",ans:tot,
+   hints:[`Noem de tijd vóór de picknick t uur. Hoe lang fietsen ze daarna, en hoeveel km leggen ze in elk deel af?`,`Vóór: ${v1} × t km. Na: ${v2} × ${nl(k)}t = ${nl(v2*k)} × t km. Samen ${D} km.`],
+   uitwerking:[`${v1}t + ${nl(v2*k)}t = ${nl(v1+v2*k)}t = ${D} km.`,`t = ${D} : ${nl(v1+v2*k)} = ${nl(t)} uur.`,`In totaal ${nl(1+k)} × ${nl(t)} = ${nl((1+k)*t)} uur = ${tot} minuten.`]}}}},
+{id:"sleuven",naam:"De lekkende buis",vanaf:"2026-10-22",gen(R){
+ for(let g=0;g<300;g++){const[fa,fb]=rpick(R,[[3,4],[2,3],[4,5],[1,2]]),p=rpick(R,[20,25,40,50,60,75]),W=rint(R,2,30),top=W*100/p,tot=top*fb/(fb-fa);if(!Number.isInteger(top)||!Number.isInteger(tot)||tot>400)continue;
+  const fr=fa+"/"+fb,waar=fb===2?"halverwege de hoogte":"op "+fr+" van de hoogte";
+  return{tekst:`In een rechte buis met een dichte bodem zitten ${waar} een paar smalle sleuven. De buis wordt in een rustig tempo met water gevuld.\nZodra het water bij de sleuven komt, loopt er een deel van het water door de sleuven weg. Op het moment dat de buis tot de rand vol is, is er ${W} liter weggelopen. Dat is ${p}% van de inhoud van het stuk buis boven de sleuven.`,
+   vraag:`Er is in totaal ….. liter water in de buis gedaan.`,eenheid:"liter",ans:tot+W,
+   hints:[`Reken eerst uit hoeveel liter er in het stuk boven de sleuven past.`,`${W} liter is ${p}%, dus het stuk boven de sleuven is ${top} liter. Dat stuk is ${fb-fa}/${fb} van de buis.`],
+   uitwerking:[`Boven de sleuven: ${W} : ${p} × 100 = ${top} liter.`,`Dat is ${fb-fa}/${fb} van de buis, dus de hele buis is ${tot} liter.`,`Erin gedaan: ${tot} + ${W} (weggelopen) = ${tot+W} liter.`]}}}}
+];
+const ZES2=[
+{id:"zes_breuk",naam:"Breuken die 6 maken",gen(R){
+ for(let g=0;g<500;g++){const q=rint(R,2,9),s=rint(R,2,9),p=rint(R,q+1,q*7);if(gcd(p,q)!==1||p%q===0)continue;const rr=6*q*s/p;if(!Number.isInteger(rr)||gcd(rr,s)!==1||rr%s===0||rr<=s)continue;
+  const w1=Math.floor(p/q),t1=p%q,w2=Math.floor(rr/s),t2=rr%s,blank=rint(R,0,1);
+  return{tekst:`Een breukensom met gemengde getallen:\n${w1} ${t1}/${q} × ${blank?w2+" …":"… "+t2}/${s} = 6`,
+   vraag:`Op de lege plek hoort …..`,eenheid:"",ans:blank?t2:w2,
+   hints:[`Maak van ${w1} ${t1}/${q} eerst een gewone breuk.`,`${w1} ${t1}/${q} = ${p}/${q}. Wat moet je met ${p}/${q} vermenigvuldigen om 6 te krijgen?`],
+   uitwerking:[`${w1} ${t1}/${q} = ${p}/${q}.`,`6 : ${p}/${q} = 6 × ${q}/${p} = ${rr}/${s} = ${w2} ${t2}/${s}.`,`Op de lege plek hoort ${blank?t2:w2}. En de uitkomst: altijd 6.`]}}}},
+{id:"zes_shirts",naam:"Rode en blauwe shirts",gen(R){
+ for(let g=0;g<500;g++){const r=rint(R,18,40),b=rint(R,r+4,60),m=rint(R,r+1,b-2),n=6*(m-r)/(b-m);if(!Number.isInteger(n)||n<4||n>24)continue;
+  return{tekst:`Bij de familiedag doen ze een spel in twee teams. Precies 6 mensen dragen een rood shirt, gemiddeld ${r} jaar oud. De mensen in blauwe shirts zijn gemiddeld ${b} jaar.\nAlle spelers samen zijn gemiddeld ${m} jaar oud.`,
+   vraag:`Er zijn ….. mensen met een blauw shirt.`,eenheid:"mensen",ans:n,
+   hints:[`De 6 rode spelers zijn samen 6 × ${r} jaar oud. Ze zitten elk ${m-r} jaar onder het gemiddelde.`,`Samen zitten de rode spelers ${6*(m-r)} jaar onder het gemiddelde. Dat moeten de blauwe spelers goedmaken: elk ${b-m} jaar erboven.`],
+   uitwerking:[`Rood: 6 spelers, elk ${m-r} jaar onder ${m}. Samen ${6*(m-r)} jaar te weinig.`,`Blauw: elke speler ${b-m} jaar boven ${m}.`,`${6*(m-r)} : ${b-m} = ${n} blauwe shirts. Rood: altijd 6.`]}}}},
+{id:"zes_volgers",naam:"Steeds verdubbelen",gen(R){
+ const s=rpick(R,[3,5,7,9,11,12,15]),f=rpick(R,[2,2,2,3]),w=6,now=s*f**w,wie=rpick(R,["Peter","Daan","Emma","Iris","Lars"]);
+ return{tekst:`${wie} begon een account met treinfoto's. Precies 6 weken geleden had het ${s} volgers. Sindsdien is het aantal volgers elke week ${f===2?"verdubbeld":"verdrievoudigd"}.`,
+  vraag:`Nu heeft het account ….. volgers.`,eenheid:"volgers",ans:now,
+  hints:[`Schrijf week voor week op: ${s}, ${s*f}, ${s*f*f}, …`,`Na 6 weken heb je ${s} × ${Array(w).fill(f).join(" × ")}.`],
+  uitwerking:[Array.from({length:w+1},(_,i)=>`${i} wk: ${nl(s*f**i)}`).join(", ")+".",`Nu: ${nl(now)} volgers. Hoeveel weken was het ook alweer? Juist, 6.`]}}},
+{id:"zes_fiets",naam:"Wachten voor het stoplicht",gen(R){
+ for(let g=0;g<300;g++){const D=rint(R,6,16),v=rpick(R,[15,16,18,20,24,25,30]),rt=D/v*60;if(!Number.isInteger(rt))continue;const T=rt+6,ask=rint(R,0,1),wie=rpick(R,MANNEN.concat(VROUWEN));
+  return{tekst:`${wie} fietst naar het werk, ${D} km. Onderweg staat ${VROUWEN.includes(wie)?"ze":"hij"} een paar keer stil voor een stoplicht, samen precies 6 minuten.\nDe hele rit duurt ${T} minuten.`,
+   vraag:`Tijdens het fietsen (zonder het stilstaan) is de gemiddelde snelheid ….. km/u.`,eenheid:"km/u",ans:v,
+   hints:[`Hoeveel minuten wordt er echt gefietst?`,`${T} − 6 = ${rt} minuten fietsen voor ${D} km.`],
+   uitwerking:[`Fietsen: ${T} − 6 = ${rt} minuten.`,`${D} km in ${rt} minuten = ${D} : ${rt} × 60 = ${v} km/u.`,`Stilstaan: altijd 6 minuten.`]}}}},
+{id:"zes_haakjes",naam:"Haakjes en 6",gen(R){
+ for(let g=0;g<300;g++){const c=rpick(R,[0.2,0.25,0.4,0.5,0.6,0.75,1.2,1.5]),k=rpick(R,[2,3,4,5,6,8,10]),b=rint(R,2,20)*5,a=b+6*k/c;if(!Number.isInteger(a)||a>400)continue;const blank=rint(R,0,1);
+  return{tekst:`Een som met haakjes:\n(${blank?"…":a} × ${nl(c)} − ${blank?b:"…"} × ${nl(c)}) : ${k} = 6`,vraag:`Op de lege plek hoort …..`,eenheid:"",ans:blank?a:b,
+   hints:[`Werk van buiten naar binnen: wat moet er tussen de haakjes uitkomen?`,`Tussen de haakjes moet 6 × ${k} = ${6*k} uitkomen. En ${blank?"…":a} × ${nl(c)} − ${blank?b:"…"} × ${nl(c)} = (${blank?"…":a} − ${blank?b:"…"}) × ${nl(c)}.`],
+   uitwerking:[`Tussen de haakjes: 6 × ${k} = ${6*k}.`,`(${a} − ${b}) × ${nl(c)} = ${6*k}, dus ${a} − ${b} = ${6*k} : ${nl(c)} = ${a-b}.`,`Op de lege plek hoort ${blank?a:b}. De uitkomst? Altijd 6.`]}}}},
+{id:"zes_vrij",naam:"Zes vrije dagen",gen(R){
+ for(let g=0;g<300;g++){const B=rint(R,3,12),A=rint(R,2,8),C=rint(R,0,8),N=A+B+C+6,Mo=A+B,Mi=B+C;if(N<14||N>30)continue;const wie=nm(R),ask=rint(R,0,1);
+  return{tekst:`${wie} werkt als invalkracht. In een periode van ${N} dagen werkte ${hz()} ${Mo} ochtenden en ${Mi} middagen. Op precies 6 dagen was ${hz()} helemaal vrij.`,
+   vraag:ask?`Op ….. dagen werkte ${wie} zowel 's ochtends als 's middags.`:`Op ….. dagen werkte ${wie} alleen 's ochtends.`,eenheid:"dagen",ans:ask?B:A,
+   hints:[`Op hoeveel dagen werkte ${wie} wél (minstens een dagdeel)?`,`${N} − 6 = ${N-6} werkdagen. Samen ${Mo+Mi} dagdelen. Op een hele dag werk je 2 dagdelen.`],
+   uitwerking:[`Werkdagen: ${N} − 6 = ${N-6}. Dagdelen: ${Mo} + ${Mi} = ${Mo+Mi}.`,`Elke werkdag telt één dagdeel, een hele dag één extra: ${Mo+Mi} − ${N-6} = ${B} hele dagen.`,ask?`Zowel ochtend als middag: ${B} dagen. Vrij: altijd 6.`:`Alleen 's ochtends: ${Mo} − ${B} = ${A} dagen. Vrij: altijd 6.`]}}}},
+{id:"zes_jaartal",naam:"Bijzondere jaartallen",gen(R){
+ const P=[["de som van de eerste drie cijfers gelijk is aan het vierde cijfer","2 + 0 + 1 = 3 bij 2013",y=>{const s=String(y);return+s[0]+ +s[1]+ +s[2]===+s[3]}],["de vier cijfers samen 10 zijn","2 + 0 + 2 + 6 = 10 bij 2026",y=>String(y).split("").reduce((a,b)=>a+ +b,0)===10],["de laatste twee cijfers samen een kwadraat vormen","09 = 3 × 3 bij 2009",y=>[1,4,9,16,25,36,49,64,81].includes(y%100)]];
+ const[o,vb,f]=rpick(R,P),L=[];for(let y=2001;y<=2100;y++)if(f(y))L.push(y);const i=L.length-7,s=L[i],rest=L.slice(i+1),ask=rint(R,0,1);
+ return{tekst:`Kijk naar de jaartallen waarin ${o} (zoals ${vb}). In deze eeuw (2001 t/m 2100) komt dat na ${s} nog precies 6 keer voor.`,
+  vraag:ask?`Het laatste jaartal van die 6 is …..`:`Het eerste jaartal na ${s} met die eigenschap is …..`,soort:"code",ans:String(ask?rest[5]:rest[0]),
+  hints:[`De eerste twee cijfers zijn in deze eeuw bijna altijd 2 en 0. Wat betekent dat voor de laatste twee cijfers?`,`Schrijf de jaartallen na ${s} een voor een op die voldoen.`],
+  uitwerking:[`Na ${s}: ${rest.join(", ")}.`,`Dat zijn er inderdaad 6. ${ask?"De laatste is "+rest[5]:"De eerste is "+rest[0]}.`]}}},
+{id:"zes_punten",naam:"Punten bij de quiz",gen(R){
+ for(let g=0;g<300;g++){const ask=rint(R,0,1),N=rpick(R,[8,10,12]),S=rpick(R,ask?[0,5,10,20]:[5,10,15,20]),pl=rint(R,1,3),mi=rint(R,1,3),T=S+6*pl-(N-6)*mi;if(T<0)continue;const wie=rpick(R,KLEIN);
+  const pt=n=>n===1?"1 punt":n+" punten";
+  return{tekst:`Bij een quiz krijgt iedereen ${N} vragen.${ask?` Iedereen begint met ${pt(S)}.`:""} Voor een goed antwoord krijg je ${pt(pl)} erbij${ask?"":`, voor een fout antwoord ${mi===1?"gaat":"gaan"} er ${pt(mi)} af`}.${ask?" Voor een fout antwoord gaan er een paar punten af.":""}\n${wie} had er precies 6 goed en eindigde met ${pt(T)}.`,
+   vraag:ask?`Voor een fout antwoord gaan er ….. punten af.`:`Iedereen begint met ….. punten.`,eenheid:"punten",ans:ask?mi:S,
+   hints:[`Hoeveel vragen had ${wie} fout?`,ask?`${N} − 6 = ${N-6} fout. Begin ${S}, goed: 6 × ${pl} = ${6*pl} erbij. Hoeveel ging er dan af?`:`${N} − 6 = ${N-6} fout. Goed: 6 × ${pl} = ${6*pl} punten erbij. Fout: ${N-6} × ${mi} = ${(N-6)*mi} punten eraf.`],
+   uitwerking:ask?[`Fout: ${N} − 6 = ${N-6} vragen.`,`${S} + ${6*pl} = ${S+6*pl}. Eindstand ${T}, dus ${S+6*pl-T} punten eraf voor ${N-6} foute vragen.`,`${S+6*pl-T} : ${N-6} = ${mi} punten per fout. Goed had ${wie} er: altijd 6.`]:[`Goed: 6 → +${6*pl}. Fout: ${N-6} → −${(N-6)*mi}.`,`Begin + ${6*pl} − ${(N-6)*mi} = ${T}, dus begin = ${S} punten.`,`En hoeveel had ${wie} goed? Altijd 6.`]}}}},
+{id:"zes_omkeer",naam:"Omkeerdata",gen(R){
+ const L=["1001","2002","3003","0110","1111","2112"].map(x=>[x,+x.slice(2)*100+ +x.slice(0,2)]).sort((a,b)=>a[1]-b[1]).map(x=>x[0]),ask=rint(R,0,2),MN=["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+ const nm2=x=>`${+x.slice(0,2)} ${MN[+x.slice(2)-1]}`;
+ return{tekst:`Otto schrijft een datum altijd als vier cijfers: dag en maand, elk met twee cijfers. 30 maart wordt 30-03. Dat leest van achter naar voren hetzelfde, net als de naam OTTO. Zo'n datum noemt hij een omkeerdatum.\nIn een jaar zijn er precies 6 omkeerdata.`,
+  vraag:[`De eerste omkeerdatum van het jaar is ….. (vul vier cijfers in, zoals 3003)`,`De laatste omkeerdatum van het jaar is ….. (vier cijfers)`,`De eerste omkeerdatum na 1 juni is ….. (vier cijfers)`][ask],soort:"code",ans:[L[0],L[5],L[3]][ask],
+  hints:[`Begin bij de maand: 01 t/m 12. Bij maand 03 hoort dag 30. Welke dag hoort bij de andere maanden?`,`Maand 01 → dag 10, maand 02 → dag 20, … maand 04 → dag 40 bestaat niet!`],
+  uitwerking:[`Mogelijk: 10-01, 20-02, 30-03, 01-10, 11-11, 21-12. Dag 40, 50, … bestaat niet.`,`In volgorde van het jaar: ${L.map(nm2).join(", ")}.`,`Het antwoord is ${[L[0],L[5],L[3]][ask]}. Hoeveel waren het er? Altijd 6.`]}}}
+];
+RAAD.push(...RAAD2);ZES.push(...ZES2);
+/* ===== Lichtere raadsels (2F), naar de favorieten van Aart. Niet als raadsel van de dag, wel onder "Alle soorten". ===== */
+const RAAD3=[
+{id:"denkgetal",naam:"Een getal in gedachten",lvl:"2F",gen(R){
+ const K=[[2,8,2],[2,12,3],[2,16,4],[2,20,5],[3,18,2],[3,27,3],[3,36,4],[3,45,5]],[k,m,d]=rpick(R,K),a=rint(R,5,25),p=rint(R,2,20),q=(k-1)*a+p,wie=rpick(R,KLEIN);
+ return{tekst:`${wie} neemt een getal in gedachten en gebruikt alle bewerkingen die ${wie==="Emma"?"ze":"hij"} kent.\nEerst het kwadraat van het getal. Dat keer ${m}. Dan delen door ${d}. Daarvan de wortel. Daar ${p} bij optellen. En dan ${q} eraf halen.\nWat er uitkomt, is precies het getal waarmee ${wie} begon.`,
+  vraag:`Het getal was …..`,eenheid:"",ans:a,
+  hints:[`Keer ${m} en daarna delen door ${d} is samen hetzelfde als keer ${m/d}.`,`De wortel van (getal × getal × ${k*k}) is ${k} × het getal. Dan + ${p} − ${q}, dus ${q-p} eraf.`],
+  uitwerking:[`× ${m} : ${d} = × ${k*k}. De wortel uit getal² × ${k*k} is ${k} × getal.`,`${k} × getal + ${p} − ${q} = ${k} × getal − ${q-p}. Dat moet weer het getal zijn.`,`${k-1} × getal = ${q-p}, dus het getal is ${a}. Controle: ${a}² = ${a*a}, × ${m} = ${a*a*m}, : ${d} = ${a*a*k*k}, wortel = ${k*a}, + ${p} = ${k*a+p}, − ${q} = ${a}.`]}}},
+{id:"kaartenhuis",naam:"Kaartenhuis",lvl:"2F",gen(R){
+ const v=R()<.5,sp=rpick(R,[1,2,3]),N=52*sp,c=n=>3*n*(n+1)/2;let L=0;while(c(L+1)<=N)L++;const n=rint(R,4,9);
+ return{tekst:`${nm(R)} bouwt een kaartenhuis. Een driehoekje is twee kaarten schuin tegen elkaar, met een liggende kaart eronder als vloer: 3 kaarten. De bovenste laag heeft 1 driehoekje, de laag daaronder 2, dan 3, enzovoort. Een laag met 2 driehoekjes kost dus 6 kaarten.`,
+  vraag:v?`Met ${sp===1?"één spel van 52 kaarten":sp+" spellen van 52 kaarten"} kun je zo maximaal ….. lagen bouwen.`:`Voor een kaartenhuis van ${n} lagen heb je ….. kaarten nodig.`,eenheid:v?"lagen":"kaarten",ans:v?L:c(n),
+  hints:[`Een laag met k driehoekjes kost 3 × k kaarten.`,v?`Tel op: 3, 3 + 6 = 9, 9 + 9 = 18, 18 + 12 = 30, … Hoe ver kom je met ${N} kaarten?`:`Samen: 3 × (1 + 2 + … + ${n}).`],
+  uitwerking:v?[`Lagen: 3, 6, 9, 12, … kaarten. Opgeteld: ${Array.from({length:L+1},(_,i)=>c(i+1)).join(", ")}.`,`Met ${N} kaarten lukt ${L} lagen (${c(L)} kaarten). Voor ${L+1} lagen heb je er ${c(L+1)} nodig.`]:[`1 + 2 + … + ${n} = ${n*(n+1)/2} driehoekjes.`,`3 × ${n*(n+1)/2} = ${c(n)} kaarten.`]}}},
+{id:"dobbelvlak",naam:"Dobbelstenen op tafel",lvl:"2F",gen(R){
+ const n=rint(R,3,8),N=n*n,t=4*15+4*(n-2)*11+(n-2)*(n-2)*6;
+ return{tekst:`${nm(R)} legt ${N} dobbelstenen als een vierkant van ${n} bij ${n} op tafel, één laag dik. Op een dobbelsteen zijn de overliggende kanten samen altijd 7 (1 en 6, 2 en 5, 3 en 4).\nAls je rond de tafel loopt, zie je de bovenkanten en de buitenste zijkanten. ${HZ()} legt alle stenen zo dat je zo veel mogelijk ogen ziet.`,
+  vraag:`Je ziet dan in totaal ….. ogen.`,eenheid:"ogen",ans:t,
+  hints:[`Er zijn drie soorten stenen: op een hoek, langs de rand en in het midden. Van hoeveel kanten zie je elk?`,`Hoek: boven + 2 zijkanten. Rand: boven + 1 zijkant. Midden: alleen boven. De 6, 5 en 4 grenzen aan elkaar.`],
+  uitwerking:[`4 hoekstenen: 6 + 5 + 4 = 15 ogen, samen 60.`,`${4*(n-2)} randstenen: 6 + 5 = 11 ogen, samen ${44*(n-2)}.`,`${(n-2)*(n-2)} middenstenen: 6 ogen, samen ${6*(n-2)*(n-2)}.`,`Totaal: ${t} ogen.`]}}},
+{id:"leesboek",naam:"Een boek uitlezen",lvl:"2F",gen(R){
+ const P=[[[1,8],[1,4]],[[1,6],[1,3]],[[1,5],[1,4]],[[1,10],[2,5]],[[1,3],[1,4]],[[1,6],[1,4]],[[3,10],[1,5]],[[1,8],[3,8]]];
+ for(let g=0;g<200;g++){const[[a,b],[c,d]]=rpick(R,P),L=b*d/gcd(b,d),T=L*rint(R,1,40),di=T*a/b,wo=T*c/d,ma=T-di-wo;if(T<150||T>640||ma<=0)continue;const wie=nm(R);
+  return{tekst:`${wie} leest een dik boek. Op maandag leest ${hz()} de eerste ${ma} bladzijden. Op dinsdag leest ${hz()} ${a}/${b} deel van het boek. Op woensdag leest ${hz()} de rest, en dat is precies ${c}/${d} deel van het boek.`,
+   vraag:`Het boek heeft ….. bladzijden.`,eenheid:"bladzijden",ans:T,
+   hints:[`Welk deel van het boek las ${wie} op dinsdag en woensdag samen?`,`${a}/${b} + ${c}/${d} = ${(a*L/b+c*L/d)}/${L}. Maandag was dus ${L-(a*L/b+c*L/d)}/${L} deel, en dat waren ${ma} bladzijden.`],
+   uitwerking:[`Dinsdag + woensdag: ${a}/${b} + ${c}/${d} = ${a*L/b+c*L/d}/${L} deel.`,`Maandag: ${L-(a*L/b+c*L/d)}/${L} deel = ${ma} bladzijden, dus 1/${L} deel = ${ma/(L-(a*L/b+c*L/d))}.`,`Het hele boek: ${L} × ${ma/(L-(a*L/b+c*L/d))} = ${T} bladzijden.`]}}}},
+{id:"prijs",naam:"Een prijs gewonnen",lvl:"2F",gen(R){
+ const v=R()<.6,wie=nm(R);
+ if(v){const k=rint(R,2,5),P=rint(R,3,40)*25,D=(k-1)*P;
+  return{tekst:`${wie} wint een geldprijs bij de loterij. Als de prijs ${k} keer zo groot was geweest, had ${hz()} ${eur(D)} méér gewonnen.`,vraag:`${wie} won € …..`,eenheid:"euro",ans:P,
+   hints:[`Als de prijs ${k} keer zo groot wordt, hoeveel keer de prijs komt er dan bij?`,`Er komt ${k-1} keer de prijs bij, en dat is ${eur(D)}.`],uitwerking:[`${k} keer zo groot = ${k-1} keer de prijs erbij.`,`${k-1} × prijs = ${eur(D)}, dus de prijs is ${eur(P)}.`]}}
+ const[f,t]=rpick(R,[["een kwart",4],["een vijfde",5],["een derde",3],["de helft",2]]),P=rint(R,4,40)*t*5,D=P/t;
+ return{tekst:`${wie} wint een geldprijs bij de loterij. Als de prijs ${f} kleiner was geweest, had ${hz()} ${eur(D)} minder gekregen.`,vraag:`${wie} won € …..`,eenheid:"euro",ans:P,
+  hints:[`${cap0(f)} van de prijs is ${eur(D)}.`,`De hele prijs is ${t} keer zo veel.`],uitwerking:[`${cap0(f)} van de prijs = ${eur(D)}.`,`De prijs = ${t} × ${eur(D)} = ${eur(P)}.`]}}},
+{id:"doorgeven",naam:"Doorgeven",lvl:"2F",gen(R){
+ const TH=[["knikkers","knikkers"],["Lindor-bollen","bollen"],["stickers","stickers"],["ansichtkaarten","kaarten"]];
+ for(let g=0;g<300;g++){const N=rint(R,6,40),[a,b]=rpick(R,[[1,2],[1,3],[2,3],[1,4],[3,4],[1,5],[2,5],[3,5]]),[c,d]=rpick(R,[[1,2],[1,3],[1,4],[1,5],[2,5],[3,4]]);if(N*a%b)continue;const B=N+N*a/b;if(B*c%d)continue;const C=N+B*c/d;
+  const[A,Bn,Cn]=shuf(KLEIN.slice(),R),th=rpick(R,TH),v=R()<.6;
+  return{tekst:`${A}, ${Bn} en ${Cn} hebben ieder ${N} ${th[0]}.\n${A} geeft ${a}/${b} deel van ${A==="Emma"?"haar":"zijn"} ${th[1]} aan ${Bn}. Daarna geeft ${Bn} ${c}/${d} deel van ${Bn==="Emma"?"haar":"zijn"} ${th[1]} aan ${Cn}.`,
+   vraag:v?`${Cn} heeft nu ….. ${th[1]}.`:`${Bn} heeft nu ….. ${th[1]}.`,eenheid:th[1],ans:v?C:B-B*c/d,
+   hints:[`Hoeveel geeft ${A} weg? ${a}/${b} van ${N}.`,`${A} geeft ${N*a/b} weg, dan heeft ${Bn} er ${B}. Daarvan geeft ${Bn} ${c}/${d} deel weg.`],
+   uitwerking:[`${A} geeft ${a}/${b} × ${N} = ${N*a/b}. ${Bn} heeft dan ${N} + ${N*a/b} = ${B}.`,`${Bn} geeft ${c}/${d} × ${B} = ${B*c/d} aan ${Cn}.`,v?`${Cn}: ${N} + ${B*c/d} = ${C}.`:`${Bn} houdt ${B} − ${B*c/d} = ${B-B*c/d} over.`]}}}},
+{id:"taart",naam:"Taart verkopen",lvl:"2F",gen(R){
+ for(let g=0;g<200;g++){const th=rpick(R,["een passievruchtcake","een grote tompoucetaart","een slagroomtaart","een appeltaart"]),P=rint(R,12,30),n=rint(R,8,16),w=rpick(R,[0.5,0.75,1,1.25,1.5,2]),Rv=P+n*w;if(Math.abs(Rv*100-Math.round(Rv*100))>1e-6)continue;const wie=nm(R);
+  return{tekst:`${wie} koopt bij de bakker ${th} voor ${eur(P)} en snijdt die in gelijke stukken voor de verkoop bij de voetbalclub. Op elk stuk verdient ${hz()} ${eur(w)}.\nAls alle stukken verkocht zijn, heeft ${hz()} in totaal ${eur(Rv)} ontvangen.`,
+   vraag:`De taart was in ….. stukken gesneden.`,eenheid:"stukken",ans:n,
+   hints:[`Hoeveel winst heeft ${wie} in totaal gemaakt?`,`Winst: ${eur(Rv)} − ${eur(P)} = ${eur(n*w)}. Op elk stuk ${eur(w)}.`],
+   uitwerking:[`Totale winst: ${eur(Rv)} − ${eur(P)} = ${eur(n*w)}.`,`${eur(n*w)} : ${eur(w)} = ${n} stukken.`]}}}},
+{id:"touw",naam:"Touw knippen",lvl:"2F",gen(R){
+ for(let g=0;g<200;g++){const L=rpick(R,[100,120,150,200,250,300]),k=rint(R,4,6),d=rint(R,1,9)*2*(L>=200?5:1),lo=(L-d)/2;if(!Number.isInteger(lo)||(L+d)/2/(k-1)>=lo-3)continue;const wie=nm(R);
+  return{tekst:`${wie} knipt een touw van ${L>=100&&L%100===0?L/100+" meter":nl(L/100)+" meter"} in ${k} stukken die niet allemaal even lang zijn. Het langste stuk is ${d} cm korter dan de andere ${k-1} stukken samen.`,
+   vraag:`Het langste stuk is ….. cm.`,eenheid:"cm",ans:lo,
+   hints:[`Noem het langste stuk L en de rest samen S. Wat weet je van L + S en van S − L?`,`L + S = ${L} cm en S − L = ${d} cm.`],
+   uitwerking:[`Samen ${L} cm. De rest is ${d} cm langer dan het langste stuk.`,`Haal die ${d} cm eraf: ${L} − ${d} = ${L-d}. Dat is twee keer het langste stuk.`,`Het langste stuk is ${L-d} : 2 = ${lo} cm (de rest samen ${(L+d)/2} cm).`]}}}},
+{id:"plaatjesrij",naam:"Steeds één meer",lvl:"2F",gen(R){
+ const n=rint(R,5,10),s=rint(R,3,20),T=n*s+n*(n-1)/2,v=R()<.6;
+ return{tekst:`${n} kleinkinderen hebben samen ${T} voetbalplaatjes. Ze verdelen ze zo dat iedereen een ander aantal heeft, en de aantallen vormen een rij met steeds één verschil (zoals 3, 4, 5, 6, …).`,
+  vraag:v?`Wie de meeste krijgt, krijgt er …..`:`Wie de minste krijgt, krijgt er …..`,eenheid:"plaatjes",ans:v?s+n-1:s,
+  hints:[`Wat is het gemiddelde per kind?`,`${T} : ${n} = ${nl(T/n)}. Dat gemiddelde ligt precies in het midden van de rij.`],
+  uitwerking:[`Gemiddeld ${nl(T/n)} per kind, het midden van de rij.`,`De rij: ${Array.from({length:n},(_,i)=>s+i).join(" + ")} = ${T}.`,v?`De meeste: ${s+n-1}.`:`De minste: ${s}.`]}}},
+{id:"bingo",naam:"Bingoballen pakken",lvl:"2F",gen(R){
+ for(let g=0;g<100;g++){const N=rint(R,30,99),[lo,hi]=rpick(R,[[1,1],[1,1],[2,1],[1,2],[3,1]]);const L=[];for(let i=1;i<=N;i++)L.push(i);let t=0;while(L.length>1){for(let j=0;j<lo&&L.length>1;j++)L.shift();for(let j=0;j<hi&&L.length>1;j++)L.pop()}
+  if(lo===1&&hi===1&&N%2===0)continue;const last=L[0],[A,B]=shuf(KLEIN.slice(),R);
+  const pk=(n,w)=>n===1?`het ${w} nummer`:`de ${n===2?"twee":"drie"} ${w==="laagste"?"laagste":"hoogste"} nummers`;
+  return{tekst:`${A} en ${B} vinden een zak met ${N} bingoballen, genummerd 1 t/m ${N}. Ze leggen ze op volgorde.\nDan pakken ze steeds om de beurt: ${A} pakt ${pk(lo,"laagste")}, ${B} pakt ${pk(hi,"hoogste")}, dan weer ${A}, enzovoort. Is er nog maar één bal over, dan stoppen ze.`,
+   vraag:`De bal die overblijft heeft nummer …..`,eenheid:"",ans:last,
+   hints:[`Per ronde verdwijnen er ${lo+hi} ballen: ${lo} van onderen en ${hi} van boven.`,`Hoeveel ballen worden er gepakt voordat er één over is, en hoeveel daarvan komen van onderen?`],
+   uitwerking:[`Er worden ${N-1} ballen gepakt. Per ronde ${lo} van onderen en ${hi} van boven.`,`Van onderen verdwijnen 1 t/m ${last-1}, van boven ${last+1} t/m ${N}.`,`Over blijft nummer ${last}.`]}}}},
+{id:"fruitkist",naam:"Trakteren",lvl:"2F",gen(R){
+ for(let g=0;g<300;g++){const k=rint(R,2,3),ap=rint(R,3,12),mn=k*ap,m=rint(R,2,12),a=rint(R,1,8),T=ap+mn+m+a;if(T>60)continue;const[A,B]=shuf(KLEIN.slice(),R);
+  return{tekst:`${A} en ${B} gaan trakteren met een kistje fruit: mandarijnen en appels, samen ${T} stuks. Onderweg delen ze al ${m} mandarijnen en ${a} ${a===1?"appel":"appels"} uit. Als ze aankomen, zitten er ${k===2?"twee":"drie"} keer zoveel mandarijnen als appels in het kistje.`,
+   vraag:`Toen ze van huis vertrokken, zaten er ….. mandarijnen in het kistje.`,eenheid:"mandarijnen",ans:mn+m,
+   hints:[`Hoeveel stuks fruit zitten er nog in het kistje als ze aankomen?`,`${T} − ${m+a} = ${T-m-a} stuks. Verdeel die in ${k+1} gelijke delen: ${k} delen mandarijnen, 1 deel appels. Lees de vraag goed!`],
+   uitwerking:[`Bij aankomst: ${T} − ${m} − ${a} = ${T-m-a} stuks.`,`${k} : 1 → ${mn} mandarijnen en ${ap} appels.`,`Bij vertrek: ${mn} + ${m} = ${mn+m} mandarijnen. (Niet ${mn}: dat is bij aankomst!)`]}}}},
+{id:"kubusjes",naam:"Kubusjes stapelen",lvl:"2F",gen(R){
+ let N,k;do{N=rint(R,30,700);k=1;while((k+1)**3<=N)k++}while(N===k**3);const v=R()<.6,wie=nm(R);
+ return{tekst:`${wie} heeft ${N} kleine blokjes van 1 bij 1 bij 1 cm. Daarmee bouwt ${hz()} een zo groot mogelijke massieve kubus.`,
+  vraag:v?`De buitenkant van die kubus (alle zes vlakken samen) is ….. cm².`:`Er blijven ….. blokjes over.`,eenheid:v?"cm²":"blokjes",ans:v?6*k*k:N-k**3,
+  hints:[`Probeer 3 × 3 × 3 = 27, 4 × 4 × 4 = 64, 5 × 5 × 5 = 125, … Hoe groot kan het met ${N} blokjes?`,`De grootste kubus is ${k} × ${k} × ${k} = ${k**3} blokjes. ${k+1} × ${k+1} × ${k+1} = ${(k+1)**3} is te veel.`],
+  uitwerking:[`Grootste kubus: ${k} × ${k} × ${k} = ${k**3} blokjes.`,v?`Zes vlakken van ${k} × ${k} = ${k*k} cm²: 6 × ${k*k} = ${6*k*k} cm².`:`Over: ${N} − ${k**3} = ${N-k**3} blokjes.`]}}},
+{id:"veelvouden",naam:"Gemeenschappelijke veelvouden",lvl:"2F",gen(R){
+ const lcm=(a,b)=>a/gcd(a,b)*b;
+ for(let g=0;g<500;g++){const pr=[2,3,5,7,11],ps=shuf(pr.slice(),R).slice(0,3),f=()=>ps[rint(R,0,2)]*ps[rint(R,0,2)]*(R()<.4?ps[rint(R,0,2)]:1),x=f(),y=f(),z=f();if(new Set([x,y,z]).size<3||Math.max(x,y,z)>300||Math.min(x,y,z)<6)continue;
+  const L=lcm(lcm(x,y),z);if(L<200||L>3000)continue;const A=rpick(R,[1000,500,2000,100]),B=A+rpick(R,[4000,5000,7000,9000]);const M=[];for(let m=L;m<=B;m+=L)if(m>A&&m<B)M.push(m);if(M.length<2||M.length>9)continue;
+  return{tekst:`Kijk naar de hele getallen tussen ${nl(A)} en ${nl(B)} die tegelijk een veelvoud zijn van ${x}, van ${y} én van ${z}.`,
+   vraag:`Dat zijn er …..`,eenheid:"",ans:M.length,
+   hints:[`Ontbind ${x}, ${y} en ${z} in priemfactoren. Zoek het kleinste getal dat door alle drie deelbaar is (het KGV).`,`Het KGV is ${L}. Welke veelvouden van ${L} liggen tussen ${nl(A)} en ${nl(B)}? Vergeet er niet één!`],
+   uitwerking:[`KGV van ${x}, ${y} en ${z} is ${L}.`,`Veelvouden van ${L} tussen ${nl(A)} en ${nl(B)}: ${M.map(x=>nl(x)).join(", ")}.`,`Dat zijn er ${M.length}.`]}}}},
+{id:"knikkersrest",naam:"Knikkers over",lvl:"2F",gen(R){
+ for(let g=0;g<500;g++){const F=rint(R,8,16),M=rint(R,30,90),r=rint(R,2,9);const G=[];for(let q=r+1;q<F;q++)if((M-r)%q===0)G.push(q);if(G.length!==1)continue;const q=G[0],wie=rpick(R,VROUWEN);
+  return{tekst:`${wie} heeft vrienden en vriendinnen, samen ${F}. Ze heeft ${M} knikkers en verdeelt er zo veel mogelijk eerlijk onder alleen haar vriendinnen: die krijgen allemaal evenveel.\nZe houdt er ${r} over, en dat is te weinig om elke vriendin er nog één te geven.`,
+   vraag:`${wie} heeft ….. vrienden (jongens).`,eenheid:"vrienden",ans:F-q,
+   hints:[`Hoeveel knikkers zijn er verdeeld? Het aantal vriendinnen moet daar precies in passen.`,`Er zijn ${M-r} knikkers verdeeld. Er zijn méér dan ${r} vriendinnen, anders kon er nog een rondje bij.`],
+   uitwerking:[`Verdeeld: ${M} − ${r} = ${M-r} knikkers.`,`Het aantal vriendinnen deelt ${M-r}, is groter dan ${r} en kleiner dan ${F}: alleen ${q} kan (ieder ${(M-r)/q}).`,`Vrienden: ${F} − ${q} = ${F-q}.`]}}}},
+{id:"rij",naam:"In de rij",lvl:"2F",gen(R){
+ const a=rint(R,8,40),b=rint(R,8,40),v=R()<.6,wie=rpick(R,KLEIN);
+ return{tekst:v?`De kinderen van de sportclub staan in een lange rij. ${wie} staat als ${a}e van voren en als ${b}e van achteren.`:`De kinderen van de sportclub staan in een lange rij en krijgen een nummer: 1, 2, 3, … ${wie} staat precies in het midden en krijgt nummer ${a}.`,
+  vraag:`In de rij staan ….. kinderen.`,eenheid:"kinderen",ans:v?a+b-1:2*a-1,
+  hints:[v?`Hoeveel kinderen staan er vóór ${wie}, en hoeveel erachter?`:`Hoeveel kinderen staan er vóór ${wie}? En erachter?`,v?`Vóór: ${a-1}, achter: ${b-1}. Tel ${wie} zelf niet dubbel.`:`Vóór: ${a-1}, achter ook ${a-1}.`],
+  uitwerking:v?[`Vóór ${wie}: ${a-1}. Achter: ${b-1}.`,`${a-1} + 1 + ${b-1} = ${a+b-1} kinderen.`]:[`Vóór ${wie}: ${a-1}, erachter ook ${a-1}.`,`${a-1} + 1 + ${a-1} = ${2*a-1} kinderen.`]}}}
+];
+const cap0=t=>t[0].toUpperCase()+t.slice(1);
+const ZES3=[
+{id:"zes_cijfers",naam:"Twee cijfers",lvl:"2F",gen(R){
+ const[a,b]=rpick(R,[[1,7],[2,8],[3,9]]),v=rint(R,0,1);
+ return{tekst:`Twee cijfers schelen precies 6. Als je ze met elkaar vermenigvuldigt, krijg je ${a*b}.`,vraag:v?`Samen opgeteld zijn de twee cijfers …..`:`Het grootste van de twee cijfers is …..`,eenheid:"",ans:v?a+b:b,
+  hints:[`Welke paren cijfers schelen 6? Begin bij 0 en 6.`,`0 en 6, 1 en 7, 2 en 8, 3 en 9. Welk paar geeft ${a*b}?`],
+  uitwerking:[`Paren met verschil 6: 0 en 6, 1 en 7, 2 en 8, 3 en 9.`,`${a} × ${b} = ${a*b}. ${v?`Samen ${a+b}.`:`Het grootste is ${b}.`} Het verschil? Altijd 6.`]}}},
+{id:"zes_penalty",naam:"Penalty's",lvl:"2F",gen(R){
+ for(let g=0;g<300;g++){const L=rpick(R,[10,12,15,20,24,25,30]),p=600/L,n1=rint(R,10,40);if(p*n1%100)continue;const k1=p*n1/100,wie=rpick(R,KLEIN),v=R()<.5;
+  return{tekst:`${wie} oefent penalty's. Na ${n1} pogingen heeft ${wie} een bepaald percentage raak. Van de volgende ${L} pogingen zijn er precies 6 raak. Daarna is het percentage nog precies hetzelfde.`,
+   vraag:v?`${wie} scoort ….. procent van de penalty's.`:`Van de eerste ${n1} pogingen waren er ….. raak.`,eenheid:v?"procent":"",ans:v?p:k1,
+   hints:[`Als het percentage hetzelfde blijft, hadden de laatste ${L} pogingen ook dat percentage.`,`6 van de ${L} is ${p}%.`],
+   uitwerking:[`De laatste ${L}: 6 raak = 6 : ${L} = ${p}%.`,v?`Het percentage is ${p}%.`:`Van de eerste ${n1}: ${p}% van ${n1} = ${k1} raak.`,`En de laatste ${L}? Altijd 6.`]}}}},
+{id:"zes_lossen",naam:"De vrachtwagen lossen",lvl:"2F",gen(R){
+ for(let g=0;g<300;g++){const[a,b]=rpick(R,[[1,3],[1,4],[1,2],[2,5]]),q=rpick(R,[20,25,40,50,60]),f=rpick(R,[75,80,90,100]),load=6/((1-a/b)*(1-q/100)),C=load*100/f;if(Math.abs(load*2-Math.round(load*2))>1e-9||Math.abs(C*2-Math.round(C*2))>1e-9||C>40)continue;const v=R()<.5;
+  return{tekst:`Een vrachtwagen kan ${nl(C)} ton vervoeren en vertrekt met ${f===100?"een volle lading":f+"% van wat hij kan vervoeren"}. Bij de eerste stop gaat ${a}/${b} deel van de lading eraf. Bij de tweede stop ${q}% van wat er dan nog in zit. Bij de derde stop gaat de rest eraf: precies 6 ton.`,
+   vraag:v?`Bij vertrek zat er ….. ton in de vrachtwagen.`:`Bij de tweede stop ging er ….. ton af.`,eenheid:"ton",ans:v?load:load*(1-a/b)*q/100,dec:1,tol:.01,
+   hints:[`Werk terug vanaf de 6 ton bij de derde stop.`,`6 ton is ${100-q}% van wat er na de eerste stop nog in zat.`],
+   uitwerking:[`Na stop 1: 6 : ${nl((100-q)/100)} = ${nl(6/(1-q/100))} ton (stop 2 haalt er ${nl(6/(1-q/100)*q/100)} af).`,`Bij vertrek: ${nl(6/(1-q/100))} is ${b-a}/${b} deel, dus ${nl(load)} ton. Controle: ${f}% van ${nl(C)} = ${nl(load)}.`,`De laatste stop: altijd 6 ton.`]}}}}
+];
+RAAD.push(...RAAD3);ZES.push(...ZES3);
+const $=s=>document.querySelector(s);
+const hashS=s=>{let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+const vandaag=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+function kaart(q,onDone){const c=document.createElement("div");c.className="card";const st={mist:0,hints:0,done:false};
+ const top=document.createElement("div");top.className="top";top.innerHTML=`${q.kop?`<span class="lv">${q.kop}</span>`:""}<span class="soort">${q.naam}</span><span class="badges"></span>`;c.append(top);
+ if(q.intro){const pi=document.createElement("p");pi.className="zes";pi.textContent=q.intro;c.append(pi)}
+ if(q.svg){const sv=document.createElement("div");sv.className="svgw";sv.innerHTML=q.svg;c.append(sv)}
+ const p=document.createElement("p");p.className="txt";p.textContent=q.tekst;c.append(p);
+ if(q.tabel){const w=document.createElement("div");w.className="tabw";const tb=document.createElement("table");const th=document.createElement("tr");q.tabel.kop.forEach(x=>{const e=document.createElement("th");e.textContent=x;th.append(e)});tb.append(th);
+  q.tabel.rijen.forEach(r=>{const tr=document.createElement("tr");r.forEach(x=>{const e=document.createElement("td");e.textContent=x;if(x==="?")e.className="q";tr.append(e)});tb.append(tr)});w.append(tb);c.append(w)}
+ if(q.bonnen){const w=document.createElement("div");w.className="bonnen";q.bonnen.forEach(bn=>{const d=document.createElement("div");d.className="bon";const h=document.createElement("div");h.className="bk";h.textContent=bn.kop;d.append(h);
+   bn.regels.forEach(rg=>{const r=document.createElement("div");r.className="br";r.textContent=rg[0];d.append(r)});const t=document.createElement("div");t.className="bt";t.innerHTML="<span>TOTAAL</span><b></b>";t.querySelector("b").textContent=bn.totaal;d.append(t);w.append(d)});c.append(w)}
+ const v=document.createElement("p");v.className="vraag";v.textContent=q.vraag;c.append(v);
+ const fb=document.createElement("p");fb.className="fb";const hl=document.createElement("ul");hl.className="hints";
+ let inp=null,keuze=null;const ans=document.createElement("div");
+ if(q.soort==="keuze"){ans.className="opts";q.keuzes.forEach(k=>{const b=document.createElement("button");b.className="opt";b.textContent=k;b.onclick=()=>{if(st.done)return;keuze=k;ans.querySelectorAll(".opt").forEach(o=>o.classList.toggle("sel",o===b));controleer()};ans.append(b)})}
+ else{ans.className="ans";inp=document.createElement("input");inp.id="in-"+q.id+"-"+Math.random().toString(36).slice(2,7);inp.autocomplete="off";inp.inputMode=q.soort==="tijd"?"numeric":"decimal";inp.placeholder=q.soort==="tijd"?"uu:mm":"antwoord";inp.setAttribute("aria-label","Antwoord");
+  inp.onkeydown=e=>{if(e.key==="Enter")controleer()};ans.append(inp);if(q.eenheid){const u=document.createElement("span");u.className="unit";u.textContent=q.eenheid;ans.append(u)}}
+ c.append(ans);
+ const bar=document.createElement("div");bar.className="bar";
+ const bc=document.createElement("button");bc.className="btn p";bc.textContent="Controleer";bc.onclick=()=>controleer();if(q.soort!=="keuze")bar.append(bc);
+ const bh=document.createElement("button");bh.className="btn h";bh.textContent="💡 Hint";bh.onclick=()=>hint();bar.append(bh);
+ const bu=document.createElement("button");bu.className="btn";bu.textContent="Toon uitwerking";bu.hidden=true;bu.onclick=()=>uitwerking(true);bar.append(bu);
+ c.append(bar,fb,hl);const uw=document.createElement("div");uw.className="uitw";uw.hidden=true;uw.innerHTML="<b>Uitwerking</b>";const ol=document.createElement("ol");q.uitwerking.forEach(x=>{const li=document.createElement("li");li.textContent=x;ol.append(li)});uw.append(ol);c.append(uw);
+ const badges=()=>{top.querySelector(".badges").textContent=st.done?[st.mist===0?"🎯":"",st.hints===0?"💡":""].filter(Boolean).join(" ")||"✓":""};
+ function controleer(){if(st.done)return;const val=q.soort==="keuze"?keuze:inp.value;const r=raadCheck(q,val);if(r===null){fb.className="fb";fb.textContent="Vul eerst een antwoord in.";return}
+  if(r){st.done=true;c.classList.add("ok");fb.className="fb ok";fb.textContent="Goed! "+(st.mist===0&&st.hints===0?"In één keer en zonder hint. 🎯💡":st.mist===0?"In één keer goed. 🎯":"")+(String(q.ans)==="6"?" Natuurlijk. Altijd 6. 😌":"");if(inp)inp.disabled=true;bc.disabled=true;bh.disabled=true;bu.hidden=false;bu.textContent="Bekijk de uitwerking";
+   if(q.soort==="keuze")ans.querySelectorAll(".opt").forEach(o=>{if(o.textContent===q.ans)o.classList.add("goed")});badges();onDone&&onDone(st)}
+  else{st.mist++;fb.className="fb bad";fb.textContent=q.soort==="tijd"&&!/^\s*\d{1,2}[:.]?\d{2}\s*$/.test(val)?"Schrijf de tijd als uu:mm, bijvoorbeeld 13:45.":"Nog niet goed. Probeer het nog eens"+(st.hints<2?", of neem een hint.":".");
+   if(q.soort==="keuze")ans.querySelectorAll(".opt.sel").forEach(o=>{o.classList.add("fout");o.classList.remove("sel")});c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake")}}
+ function hint(){if(st.done)return;if(st.hints<q.hints.length){const li=document.createElement("li");li.innerHTML=`<b>Hint ${st.hints+1}.</b> `;li.append(document.createTextNode(q.hints[st.hints]));hl.append(li);st.hints++}
+  if(st.hints>=q.hints.length){bh.disabled=true;bu.hidden=false}}
+ function uitwerking(geef){uw.hidden=false;bu.hidden=true;if(geef&&!st.done){st.done=true;st.mist=Math.max(st.mist,1);st.hints++;fb.className="fb";fb.textContent=`Het antwoord is ${q.soort==="getal"?String(q.ans).replace(".",",")+(q.eenheid?" "+q.eenheid:""):q.ans}.`;if(inp)inp.disabled=true;bc.disabled=true;bh.disabled=true;badges();onDone&&onDone(st)}}
+ return c}
+let setSeed=vandaag();
+/* Eén 3F-raadsel per dag. Alleen de sterke soorten doen mee. Niet dezelfde soort binnen 10 dagen, en niet twee dagen achter elkaar uit dezelfde familie. */
+const FAM={treinen:"beweging",inhalen:"beweging",tegenliggers:"beweging",hond:"beweging",veerboot:"beweging",wind:"beweging",tijdrit:"beweging",overgang:"beweging",brug:"beweging",
+ dienstregeling:"tijd",timelapse:"tijd",peper:"tijd",erfenis:"verhouding",lindor:"verhouding",cacao:"verhouding",pepermix:"verhouding",schilderen:"verhouding",lekkerbek:"verhouding",
+ lpg:"geld",aanbieding:"geld",wissel:"geld",kubus:"anders",leeftijd:"anders",belichting:"anders",versnelling:"anders",treinstellen:"anders",palindroom:"anders",pan:"anders",
+ /* nieuw (uit de lijst van Aart), vanaf 22 oktober 2026 */
+ bekers:"logica",verdelen:"logica",poten:"logica",dagdelen:"logica",verstoppen:"procent",procentvan:"procent",terugrekenen:"procent",spelling:"procent",
+ huisnummers:"getallen",verjaardag:"getallen",cijfersprong:"getallen",machten:"getallen",cijferplaatjes:"getallen",dobbel:"getallen",
+ kubusdozen:"ruimte",voegen:"ruimte",steen:"ruimte",ribben:"ruimte",sleuven:"ruimte",klokwijzers:"tijd",picknick:"beweging"};
+const DAGPOOL=RAAD.filter(t=>FAM[t.id]);
+const dstr2=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+function dagReeks(tot){const out=[];const d=new Date(2026,9,1);for(;;){const ds=dstr2(d),R=RR(hashS("dagsoort|"+ds)),last=out.slice(-10).map(x=>x.t.id),fam=out.length?FAM[out[out.length-1].t.id]:"";
+  const c=DAGPOOL.filter(t=>(!t.vanaf||t.vanaf<=ds)&&!last.includes(t.id)&&FAM[t.id]!==fam);const t=c[Math.floor(R()*c.length)];out.push({ds,t});if(ds>=tot)break;d.setDate(d.getDate()+1)}return out}
+/* Af en toe (ongeveer eens per 2,5 week) is het een Altijd 6-dag. */
+/* Altijd 6: eerst elke 17 dagen, vanaf 22 oktober 2026 elke 12 dagen (eerste keer za 24 oktober). Schaars houden: het is een familiegrapje. */
+const isZesDag=ds=>{const[y,m,d]=ds.split("-").map(Number),n=Math.round((Date.UTC(y,m-1,d)-Date.UTC(2026,9,1))/864e5);return n<21?n%17===6:(n-21)%12===2};
+function zesRaadsel(ds){const R=RR(hashS("zes|"+ds)),t=ZES[Math.floor(R()*ZES.length)],q=raadMaak(t,hashS("zesq|"+ds));q.kop="⭐ Altijd 6";q.intro="Vandaag weten jullie het antwoord van de som al: 6. De vraag is alleen: wat hoort er dan op de lege plek?";return q}
+function dagRaadsel(ds){if(isZesDag(ds))return zesRaadsel(ds);const r=dagReeks(ds);const t=r[r.length-1].t;return raadMaak(t,hashS("dag|"+ds))}
+function toonSet(){const box=$("#set");box.innerHTML="";const echt=setSeed===vandaag();let q;
+ if(echt){q=dagRaadsel(setSeed);q.kop=q.kop||"Rekenraadsel van vandaag";}else{const R=RR(hashS(setSeed));q=raadMaak(DAGPOOL[Math.floor(R()*DAGPOOL.length)],hashS(setSeed+"q"));q.kop="Nog een raadsel"}
+ const dt=new Date().toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"});$("#setnaam").textContent=echt?dt[0].toUpperCase()+dt.slice(1):"Vrij raadsel";box.append(kaart(q));Klad.open("dag|"+setSeed)}
+$("#nieuw").onclick=()=>{const box=$("#los");box.innerHTML="";document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));const sd=Math.floor(Math.random()*1e9);losKey="los|w"+sd;const q=raadMaak(DAGPOOL[Math.floor(Math.random()*DAGPOOL.length)],sd);q.kop="Willekeurig";box.append(kaart(q));Klad.open(losKey)};
+let losKey="los";const tab=w=>{$("#tDag").classList.toggle("on",w==="d");$("#tSoort").classList.toggle("on",w==="s");$("#vDag").hidden=w!=="d";$("#vSoort").hidden=w!=="s";Klad.open(w==="d"?"dag|"+setSeed:losKey)};
+$("#tDag").onclick=()=>tab("d");$("#tSoort").onclick=()=>tab("s");
+/* Soorten per groep, nieuwe soorten met een labeltje. */
+{const GR=[["beweging","Onderweg"],["tijd","Tijd en klokken"],["verhouding","Verhoudingen"],["procent","Procenten"],["geld","Geld"],["getallen","Getallen"],["ruimte","Ruimte en inhoud"],["logica","Puzzelen met getallen"],["anders","Allerlei"],["licht","Lichtere raadsels (2F, favorieten van Aart)"],["extra","Extra (niet als raadsel van de dag)"],["zes","⭐ Altijd 6"]];
+ const alle=[...RAAD.map(t=>Object.assign({},t,{g:FAM[t.id]||(t.lvl==="2F"?"licht":"extra")})),...ZES.map(z=>Object.assign({},z,{zes:1,g:"zes"}))];
+ GR.forEach(([g,kop])=>{const L=alle.filter(t=>t.g===g).sort((a,b)=>a.naam.localeCompare(b.naam));if(!L.length)return;const h=document.createElement("div");h.className="chiph";h.textContent=kop;$("#chips").append(h);
+  L.forEach(t=>{const b=document.createElement("button");b.className="chip";b.textContent=t.naam;if(t.vanaf||t.lvl||(t.zes&&ZES.indexOf(ZES.find(z=>z.id===t.id))>=3)){const sm=document.createElement("small");sm.textContent="nieuw";b.append(sm)}
+   b.onclick=()=>{document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));const box=$("#los");box.innerHTML="";const sd=Math.floor(Math.random()*1e9);losKey="los|"+t.id+sd;const q=t.zes?Object.assign(raadMaak(ZES.find(z=>z.id===t.id),sd),{kop:"⭐ Altijd 6",intro:"Het antwoord van de som is 6. Wat hoort er dan op de lege plek?"}):raadMaak(RAAD.find(x=>x.id===t.id),sd);if(!t.zes)q.kop=FAM[t.id]?"":"extra";box.append(kaart(q));Klad.open(losKey);try{box.scrollIntoView({behavior:"smooth",block:"start"})}catch(e){}};$("#chips").append(b)})})}
+/* ---- Kladpapier: tekenen met Pencil of vinger, gummen, per raadsel bewaard ---- */
+const Klad=(()=>{const cv=$("#kcv"),pap=$("#papier"),ctx=cv.getContext("2d");let key="",pages=[[]],pi=0,strokes=pages[0],cur=null,tool="pen",col="ink",penSeen=false,W=0,H=0;const all={};
+ const css=n=>getComputedStyle(document.documentElement).getPropertyValue("--"+n).trim()||"#000";
+ /* Per raadsel meerdere pagina's kladpapier; oude opslag (één lijst strepen) wordt pagina 1. */
+ const opslaan=()=>{all[key]={pages,pi};try{localStorage.setItem("klad|"+key,JSON.stringify(pages.length===1&&!pi?pages[0]:{v:2,pages,pi}))}catch(e){}};
+ function maat(){const r=pap.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=r.height;cv.width=Math.round(W*d);cv.height=Math.round(H*d);ctx.setTransform(d,0,0,d,0,0);teken()}
+ function lijn(s,from){ctx.save();ctx.globalCompositeOperation=s.t==="gum"?"destination-out":"source-over";ctx.strokeStyle=s.t==="gum"?"#000":css(s.c);ctx.lineCap=ctx.lineJoin="round";
+  const P=s.p;for(let i=Math.max(1,from);i<P.length;i++){const a=P[i-1],b=P[i];ctx.lineWidth=s.t==="gum"?26:1.2+2.4*(b[2]||.5);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()}
+  if(P.length===1&&s.t!=="gum"){ctx.fillStyle=css(s.c);ctx.beginPath();ctx.arc(P[0][0],P[0][1],1.6,0,7);ctx.fill()}ctx.restore()}
+ function pagbalk(){$("#kNr").textContent=(pi+1)+" / "+pages.length;$("#kPrev").disabled=pi===0;$("#kNext").disabled=pi>=pages.length-1;
+  const leeg=!strokes.length&&pages.length>1;$("#kWis").innerHTML=leeg?"🗑 <span>Pagina weg</span>":"🗑 <span>Wis</span>";$("#kWis").title=leeg?"Deze lege pagina weghalen":"Deze pagina wissen"}
+ function teken(){ctx.clearRect(0,0,W,H);strokes.forEach(s=>lijn(s,1));$("#kleeg").hidden=strokes.length>0||pi>0;pagbalk()}
+ const naar=n=>{if(cur)return;pi=Math.max(0,Math.min(pages.length-1,n));strokes=pages[pi];wisT=0;teken();opslaan()};
+ const pt=e=>{const r=cv.getBoundingClientRect();return[Math.round((e.clientX-r.left)*10)/10,Math.round((e.clientY-r.top)*10)/10,e.pointerType==="pen"?(e.pressure||.5):.5]};
+ cv.addEventListener("pointerdown",e=>{if(e.pointerType==="pen")penSeen=true;else if(penSeen&&e.pointerType==="touch")return;/* hand op het scherm negeren zolang je met de Pencil schrijft */
+  e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(x){}cur={t:tool,c:col,p:[pt(e)],id:e.pointerId};strokes.push(cur);lijn(cur,1);$("#kleeg").hidden=true});
+ cv.addEventListener("pointermove",e=>{if(!cur||e.pointerId!==cur.id)return;const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];const n=cur.p.length;evs.forEach(x=>cur.p.push(pt(x)));lijn(cur,n)});
+ const klaar=e=>{if(!cur||e.pointerId!==cur.id)return;cur=null;opslaan();pagbalk()};cv.addEventListener("pointerup",klaar);cv.addEventListener("pointercancel",klaar);
+ cv.addEventListener("touchstart",e=>e.preventDefault(),{passive:false});
+ const zet=t=>{tool=t;$("#kPen").classList.toggle("on",t==="pen");$("#kGum").classList.toggle("on",t==="gum");pap.classList.toggle("gum",t==="gum")};
+ $("#kPen").onclick=()=>zet("pen");$("#kGum").onclick=()=>zet(tool==="gum"?"pen":"gum");
+ document.querySelectorAll(".kc").forEach(b=>b.onclick=()=>{col=b.dataset.c;document.querySelectorAll(".kc").forEach(x=>x.classList.toggle("on",x===b));zet("pen")});
+ $("#kUndo").onclick=()=>{strokes.pop();teken();opslaan()};
+ let wisT=0;$("#kWis").onclick=()=>{const b=$("#kWis");
+  if(!strokes.length&&pages.length>1){pages.splice(pi,1);naar(Math.min(pi,pages.length-1));return}
+  if(Date.now()-wisT<2500){strokes.length=0;teken();opslaan();wisT=0;return}wisT=Date.now();b.innerHTML="Zeker? Tik nog eens";setTimeout(()=>{if(wisT&&Date.now()-wisT>=2400){wisT=0;pagbalk()}},2500)};
+ $("#kPrev").onclick=()=>naar(pi-1);$("#kNext").onclick=()=>naar(pi+1);
+ $("#kNieuw").onclick=()=>{if(cur)return;pages.splice(pi+1,0,[]);naar(pi+1)};
+ new ResizeObserver(maat).observe(pap);matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",teken);
+ return{open(k){if(key)opslaan();key=k;const o=all[k]||(()=>{try{const v=JSON.parse(localStorage.getItem("klad|"+k)||"[]");return Array.isArray(v)?{pages:[v],pi:0}:{pages:v.pages&&v.pages.length?v.pages:[[]],pi:v.pi||0}}catch(e){return{pages:[[]],pi:0}}})();
+  pages=o.pages;pi=Math.min(o.pi||0,pages.length-1);strokes=pages[pi];wisT=0;teken()}}})();
+/* ---- Rekenmachine (optioneel): eigen kleine rekenaar, met komma, haakjes, wortel en kwadraat. ---- */
+const Reken=(()=>{const K=[["C","fn"],["(","fn"],[")","fn"],["÷","op"],["7"],["8"],["9"],["×","op"],["4"],["5"],["6"],["−","op"],["1"],["2"],["3"],["+","op"],["0"],[","],["√","op"],["=","eq"]];
+ const box=$("#calc"),ex=$("#cExp"),rs=$("#cRes");let s="",laatst=null,laatstSom="";
+ const fmt=v=>{if(!isFinite(v))return"fout";let r=Math.round(v*1e9)/1e9;let t=String(r);if(/e/.test(t))t=r.toPrecision(10);return t.replace(".",",")};
+ function reken(str){let i=0;const t=str.replace(/\s/g,"");
+  const peek=()=>t[i],eat=c=>{if(t[i]===c){i++;return true}return false};
+  function getal(){const m=/^\d+(,\d*)?|^,\d+/.exec(t.slice(i));if(!m)throw 0;i+=m[0].length;return parseFloat(m[0].replace(",","."))}
+  function prim(){let v;if(eat("(")){v=som();eat(")")}else if(eat("√"))v=Math.sqrt(fac());else if(eat("−"))v=-fac();else v=getal();while(eat("²"))v=v*v;return v}
+  function fac(){return prim()}
+  function term(){let v=fac();for(;;){if(eat("×"))v*=fac();else if(eat("÷"))v/=fac();else if(peek()==="("||peek()==="√")v*=fac();else return v}}
+  function som(){let v=term();for(;;){if(eat("+"))v+=term();else if(eat("−"))v-=term();else return v}}
+  const v=som();if(i<t.length)throw 0;return v}
+ /* Eerst de hele som intikken; pas bij = wordt er gerekend. */
+ function toon(){rs.classList.remove("err");if(s){ex.textContent="";rs.textContent=s;rs.classList.toggle("lang",s.length>11)}else{ex.textContent=laatst!=null?laatstSom+" =":"";rs.textContent=laatst!=null?fmt(laatst):"0";rs.classList.toggle("lang",rs.textContent.length>11)}}
+ function druk(k){if(k==="C"){s="";laatst=null}else if(k==="⌫")s=s.slice(0,-1);
+  else if(k==="="){if(!s)return;try{const v=reken(s);if(!isFinite(v))throw 0;laatst=v;laatstSom=s;s=""}catch(e){ex.textContent=s;rs.textContent="Dat kan ik niet uitrekenen";rs.classList.add("err");rs.classList.remove("lang");return}}
+  else{if(!s&&laatst!=null&&/[+−×÷²]/.test(k))s=fmt(laatst);s+=k}
+  toon()}
+ /* Rekenmachinetoetsen: direct op Pencil/vinger reageren.
+    Op iPad kan een snelle Pencil-reeks incidenteel een pointerdown missen. Daarom:
+    - pointerdown voert meteen uit;
+    - pointerup vangt een ontbrekende pointerdown op;
+    - touchstart van een echte stylus is een extra iOS-vangnet;
+    - een Pencil-tik in het kleine kiertje tussen toetsen telt voor de dichtstbijzijnde toets. */
+ const kb=$("#cKeys"),top=document.createElement("div");top.className="ctop";top.style.cssText="display:flex;gap:6px;margin-bottom:6px";
+ const mk=(k,c,t)=>{const b=document.createElement("button");b.textContent=k==="²"?"x²":k;b.dataset.rk=k;if(c)b.className=c;if(t)b.title=t;return b};
+ K.forEach(([k,c])=>kb.append(mk(k,c)));
+ [["⌫","Wis laatste"],["²","Kwadraat"]].forEach(([k,t])=>{const b=mk(k,"fn",t);b.style.flex="1";top.append(b)});
+ kb.before(top);top.querySelectorAll("button").forEach(b=>{b.style.cssText+=";font:800 15px var(--f);border:1px solid var(--line);background:var(--card);color:var(--mut);border-radius:10px;padding:6px 0;cursor:pointer"});
+ const flash=b=>{b.classList.add("hit");clearTimeout(b._hitT);b._hitT=setTimeout(()=>b.classList.remove("hit"),90)};
+ const keyPoint=(x,y,pen)=>{const el=document.elementFromPoint(x,y),hit=el&&el.closest&&el.closest("#calc button[data-rk]");if(hit)return hit;if(!pen)return null;
+  /* Pencil is veel preciezer dan een vinger en kan daardoor exact in een grid-gap landen. Alleen binnen de toetsenstroken 7 px 'hit slop' geven. */
+  const groups=[top,kb];if(!groups.some(g=>{const r=g.getBoundingClientRect();return x>=r.left-7&&x<=r.right+7&&y>=r.top-7&&y<=r.bottom+7}))return null;
+  let best=null,bd=1e9;box.querySelectorAll("button[data-rk]").forEach(b=>{const r=b.getBoundingClientRect(),dx=x<r.left?r.left-x:x>r.right?x-r.right:0,dy=y<r.top?r.top-y:y>r.bottom?y-r.bottom:0,d=dx*dx+dy*dy;if(d<bd){bd=d;best=b}});return bd<=64?best:null};
+ let lastPress={k:"",t:-1e9},lastPointer=-1e9;const fire=(b,src)=>{if(!b)return false;const now=performance.now(),k=b.dataset.rk;
+  /* pointerdown + stylus-touchstart van dezelfde fysieke tik niet dubbel tellen. */
+  if(k===lastPress.k&&now-lastPress.t<45)return true;lastPress={k,t:now};druk(k);flash(b);if(src!=="click")lastPointer=now;return true};
+ const active=new Set();
+ box.addEventListener("pointerdown",e=>{if(e.button>0)return;const b=keyPoint(e.clientX,e.clientY,e.pointerType==="pen");if(!b)return;e.preventDefault();active.add(e.pointerId);fire(b,"down")},true);
+ box.addEventListener("pointerup",e=>{const had=active.delete(e.pointerId);if(had)return;const b=keyPoint(e.clientX,e.clientY,e.pointerType==="pen");if(!b)return;e.preventDefault();fire(b,"up")},true);
+ box.addEventListener("pointercancel",e=>active.delete(e.pointerId),true);
+ box.addEventListener("touchstart",e=>{const t=[...e.changedTouches].find(t=>t.touchType==="stylus");if(!t)return;const b=keyPoint(t.clientX,t.clientY,true);if(!b)return;e.preventDefault();fire(b,"stylus")},{passive:false,capture:true});
+ /* Click blijft alleen als toegankelijkheids-/browserfallback. Pointerbediening is al direct afgehandeld. */
+ box.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("button[data-rk]");if(!b)return;if(e.detail===0||performance.now()-lastPointer>500){e.preventDefault();fire(b,"click")}},true);
+ addEventListener("keydown",e=>{if(box.hidden||/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;const m={"/":"÷","*":"×","-":"−","+":"+",".":",",",":",","Enter":"=","=":"=","Backspace":"⌫","Escape":"C","(":"(",")":")"};const k=/^\d$/.test(e.key)?e.key:m[e.key];if(k){e.preventDefault();druk(k)}});
+ const zet=on=>{box.hidden=!on;$("#kCalc").classList.toggle("on",on);$("#kCalc").setAttribute("aria-pressed",on);try{localStorage.setItem("calcAan",on?"1":"0")}catch(e){}};
+ $("#kCalc").onclick=()=>zet(box.hidden);let aan=false;try{aan=localStorage.getItem("calcAan")==="1"}catch(e){}zet(aan);toon();
+ return{reken}})();
+toonSet();
+
+document.addEventListener("dblclick",e=>e.preventDefault(),{capture:true});
+</script></body></html>
