@@ -728,13 +728,13 @@ body.tablet.nieuw:not(.home):not(.newpick){height:100dvh;overflow:hidden}body.ta
 
 /* Compactere Home op tablet/desktop: dezelfde informatie, minder lege hoogte. */
 @media(min-width:761px){
- #home .hwrap{padding-top:10px;padding-bottom:28px;gap:9px}
- .hbrand{font-size:18px;margin-bottom:-6px;gap:8px}
- #home h2{font-size:24px;line-height:1.05}
+ #home .hwrap{max-width:1040px;padding-top:10px;padding-bottom:28px;gap:9px}
+ .hbrand{font-size:19px;margin-bottom:-5px;gap:8px}
+ #home h2{font-size:25px;line-height:1.05}
  .htop{gap:10px}
  .hsection{gap:7px;padding:2px 0 8px}
  .hsection+.hsection{padding-top:12px}
- .hsecthead h3{font-size:18px!important}
+ .hsecthead h3{font-size:19px!important}
  .hsecthead>div>.mut{margin-top:0;font-size:11px}
  .hstreak{padding:4px 9px;font-size:12px}
  .hdlist{padding:2px 12px}
@@ -743,9 +743,9 @@ body.tablet.nieuw:not(.home):not(.newpick){height:100dvh;overflow:hidden}body.ta
    grid-template-columns:18px 30px minmax(0,1fr) 76px minmax(138px,auto);
    column-gap:9px;
    align-items:center;
-   padding:7px 3px
+   padding:8px 3px
  }
- .dayitem.featured .hdrow{padding-top:8px;padding-bottom:8px}
+ .dayitem.featured .hdrow{padding-top:9px;padding-bottom:9px}
  .hdrow .dot{justify-self:center}
  .hdrow .ticon{justify-self:center}
  .daypeer{width:76px;justify-content:center}
@@ -762,10 +762,10 @@ body.tablet.nieuw:not(.home):not(.newpick){height:100dvh;overflow:hidden}body.ta
  .hraad .hgo{font-size:22px}
  .hpill{font-size:9px;padding:2px 6px}
  .hfree .hsecthead{margin-bottom:-1px}
- .freegrid{gap:8px}
- .freegrid .tile{min-height:92px;padding:10px 7px 8px;gap:5px;border-radius:16px}
- .freegrid .ticon.big{width:38px;height:38px;border-radius:11px;font-size:18px}
- .freegrid .tile>span:not(.ticon){font-size:13px}
+ .freegrid{grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+ .freegrid .tile{min-height:98px;padding:11px 7px 9px;gap:5px;border-radius:16px}
+ .freegrid .ticon.big{width:42px;height:42px;border-radius:12px;font-size:19px}
+ .freegrid .tile>span:not(.ticon){font-size:13.5px}
  .freegrid .tile .tcount{font-size:10px}
  .hshuffle{padding:6px 10px;font-size:12px}
  .htogether{padding-top:10px!important}
@@ -773,6 +773,7 @@ body.tablet.nieuw:not(.home):not(.newpick){height:100dvh;overflow:hidden}body.ta
  .hhomeviews .hvicon{width:30px;height:30px;border-radius:9px}
 }
 @media(min-width:761px) and (max-width:900px){
+ .freegrid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}
  .dayitem .hdrow{grid-template-columns:18px 30px minmax(0,1fr) 68px minmax(126px,auto);column-gap:7px}
  .daypeer{width:68px}
  .dstate{min-width:126px}
