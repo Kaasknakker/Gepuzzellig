@@ -3451,7 +3451,7 @@ addEventListener("keydown",e=>{if(e.key==="Escape"){if(document.body.classList.c
 
 /* Sneltoetsen: handig op desktop en op een iPad met toetsenbord. */
 function closeOverlays(){clearHint();const f=$("#fin");if(f)f.hidden=true;const sd=$("#side");if(sd)sd.classList.remove("open");const ap=$("#archp");if(ap)ap.classList.remove("open");const pm=$("#pmp");if(pm)pm.classList.remove("open");$("#hm").hidden=true;$("#cm").hidden=true}
-function overlayOpen(){const f=$("#fin"),h=$("#hint");return document.body.classList.contains("newpick")||!$("#hm").hidden||!$("#cm").hidden||(f&&!f.hidden)||(h&&getComputedStyle(h).display!=="none")||$("#side").classList.contains("open")||($("#archp")&&$("#archp").classList.contains("open"))||($("#pmp")&&$("#pmp").classList.contains("open")))}
+function overlayOpen(){const f=$("#fin"),h=$("#hint");return document.body.classList.contains("newpick")||!$("#hm").hidden||!$("#cm").hidden||(f&&!f.hidden)||(h&&getComputedStyle(h).display!=="none")||$("#side").classList.contains("open")||($("#archp")&&$("#archp").classList.contains("open"))||($("#pmp")&&$("#pmp").classList.contains("open"))}
 addEventListener("keydown",e=>{const a=document.activeElement,tag=(a&&a.tagName)||"",typing=/INPUT|TEXTAREA|SELECT/.test(tag)||(a&&a.isContentEditable);if(typing)return;if(document.body.classList.contains("newpick")){if(e.key==="Escape"){e.preventDefault();showHome()}return}const k=e.key.toLowerCase();
  if((e.ctrlKey||e.metaKey)&&k==="z"){e.preventDefault();e.shiftKey?redo():undo();return}
  if(e.ctrlKey||e.metaKey||e.altKey)return;
