@@ -937,7 +937,10 @@ body.phone:not(.home):not(.newpick) #prow{
  min-height:58px;
  padding:14px 6px 7px;
 }
-body.phone:not(.home):not(.newpick) #prow>:not(#tbHome):not(#pm){display:none!important}
+body.phone:not(.home):not(.newpick) #prow>:not(#tbHome):not(#pm):not(#hexstat){display:none!important}
+/* Hexcells: de teller "nog te vinden" is een echte aanwijzing, dus die blijft ook op de iPhone in beeld. */
+body.phone:not(.home):not(.newpick)[data-t=hex] #prow #hexstat{display:flex!important;order:5;margin:0 8px 0 auto}
+body.phone:not(.home):not(.newpick)[data-t=hex] #prow #pm{order:9;margin-left:0}
 body.phone #prow #tbHome,
 body.phone #prow #pm{
  position:static;
@@ -1321,8 +1324,10 @@ function genColorNono(R,lv,hard){const K=nonoColorCount(lv),minScore=(lv===1||lv
   if(rt.solved)return p}
  /* Laatste veiligheidsnet is eindig; de app kan nooit in een generatorlus blijven hangen. */
  const base=genNono(R,lv,hard),fw=base.W,fh=base.H,perm=shuf(Array.from({length:K},(_,i)=>i+1),R),filled=base.sol.reduce((a,v,i)=>(v&&a.push(i),a),[]),sol=Array(fw*fh).fill(0);
- filled.forEach((i,n)=>sol[i]=perm[n%K]);
- return{N:fw,W:fw,H:fh,K,color:1,rc:rowsOf(sol,fw,fh).map(cnClue),cc:colsOf(sol,fw,fh).map(cnClue),sol,pic:base.pic||"",rate:"safe-fallback"}}
+ /* Kleuren in banden (boven/onder of links/rechts); alleen als hij logisch oplosbaar blijft. Anders één kleur: die is altijd oplosbaar. */
+ const mk=f=>{const s2=Array(fw*fh).fill(0);filled.forEach(i=>s2[i]=f(i));return{N:fw,W:fw,H:fh,K,color:1,rc:rowsOf(s2,fw,fh).map(cnClue),cc:colsOf(s2,fw,fh).map(cnClue),sol:s2,pic:base.pic||"",rate:"safe-fallback"}};
+ for(const f of[i=>perm[Math.min(K-1,Math.floor((i/fw|0)*K/fh))],i=>perm[Math.min(K-1,Math.floor((i%fw)*K/fw))]]){const q=mk(f);if(cnHuman(q).solved)return q}
+ return mk(()=>perm[0])}
 
 /* ---------- Kakuro ---------- */
 let KW=8;
@@ -1805,8 +1810,8 @@ const ALLTYPES={bin:"Binair",star:"Star Battle",nono:"Nonogram",kak:"Kakuro",hex
 const ACTIVE=["bin","star","nono","hex","plus","mur"];
 const TYPES=Object.fromEntries(ACTIVE.map(t=>[t,ALLTYPES[t]]));
 const HELP={
- bin:"Vul de vakjes met ✕ en ○. Nooit drie dezelfde naast elkaar, in elke rij en kolom evenveel ✕ als ○, en geen twee rijen of twee kolommen gelijk. Tik of linksklik voor ✕; dubbeltik, dubbelklik of rechtermuisklik voor ○. Nogmaals dezelfde actie maakt het vakje weer leeg. Sleep over een paar rijen (omlaag) of kolommen (opzij) om te zien of ze al gelijk zijn: lijnen waarvan de ingevulde ✕ en ○ overal gelijk zijn (lege vakjes tellen niet mee, minstens de helft van de lijn bij beide ingevuld) worden groen samen met de lijn waar je op dat moment overheen sleept. Laat je los terwijl ze groen zijn, dan blijven ze staan.",
- star:"Zet in elke rij, elke kolom en elk gekleurd gebied precies __K__ __S__. Sterren raken elkaar nooit, ook niet diagonaal. Tik: ✕ (geen ster), dan ★, dan leeg.",
+ bin:"Vul de vakjes met ✕ en ○. Nooit drie dezelfde naast elkaar, in elke rij en kolom evenveel ✕ als ○, en geen twee rijen of twee kolommen gelijk. Tik of linksklik voor ✕; dubbeltik, dubbelklik of rechtermuisklik voor ○. Nog een tik op een ✕ maakt het vakje weer leeg. Sleep over een paar rijen (omlaag) of kolommen (opzij) om te zien of ze al gelijk zijn: lijnen waarvan de ingevulde ✕ en ○ overal gelijk zijn (lege vakjes tellen niet mee, minstens de helft van de lijn bij beide ingevuld) worden groen samen met de lijn waar je op dat moment overheen sleept. Laat je los terwijl ze groen zijn, dan blijven ze staan.",
+ star:"Zet in elke rij, elke kolom en elk gekleurd gebied precies __K__ __S__. Sterren raken elkaar nooit, ook niet diagonaal. Tik of linksklik voor ✕ (geen ster); dubbeltik, dubbelklik of rechtermuisklik voor ★. Nog een tik op een ✕ maakt het vakje weer leeg.",
  nono:"De getallen geven de lengtes van de blokken gevulde vakjes in die rij of kolom, in volgorde. Kies links ■ Vullen of ✕ Kruisje, of tik naast het veld (met je vinger of de Pencil) om te wisselen. Tik op een vakje om het te vullen of een kruisje te zetten, nog eens tikken maakt het weer leeg. Slepen werkt in dezelfde stand. Klopt een rij of kolom precies met de getallen, dan worden de lege vakjes daarin vanzelf kruisjes en wordt het getal lichter. Tik op een getal om alle lege vakjes in die rij of kolom kruisjes te maken.",
  kak:"Vul cijfers 1 t/m 9 in. De getallen in de zwarte vakjes zijn de som van het stuk rechts (bovenste getal) of eronder (onderste getal). Binnen één som komt elk cijfer maar één keer voor.",
  hex:"Elk vakje is blauw of zwart. Een zwart vakje met een getal vertelt hoeveel van zijn 6 buren blauw zijn. {3} betekent dat die blauwe buren aan elkaar liggen, -3- dat ze niet allemaal aan elkaar liggen. Een zwart vakje met ? zegt niets. Een blauw vakje met een getal vertelt hoeveel vakjes in het gebied eromheen (tot twee vakjes ver, het vakje zelf telt niet mee) blauw zijn. Sommige blauwe vakjes laten pas een getal zien als je ze gevonden hebt. Tik met Blauw op zo'n getal om de zone te tonen: een lichte zeshoek met een witte rand. Waar zones overlappen wordt het nog lichter. Zwart maakt het getal lichter als je er klaar mee bent. Getallen buiten het veld gelden voor de hele lijn in de richting van de pijl. Kies Blauw en tik op zo'n getal om een lichte lijn door die vakjes te zetten; tik nog een keer om hem weg te halen. Kies Zwart en tik op het getal als je klaar bent met die lijn: de lijn verdwijnt en het getal wordt lichter. Kies Blauw of Zwart en tik op een oranje vakje. Tik naast het veld (met je vinger of de Pencil) om te wisselen tussen Blauw en Zwart.",
@@ -1823,7 +1828,7 @@ const TIPS={
  plus:["Begin met getallen die te groot zijn: moet een rij nog maar 6 maken, dan kan een 8 daarin nooit blijven staan.","Andersom: zijn alle andere getallen samen te weinig zonder een bepaald getal, dan moet dat getal blijven. Omcirkel het.","Omcirkelen helpt: zo weet je in de kruisende rij of kolom ook al een stukje van de som.","Lukt dat niet, bekijk dan alle manieren om de som te maken. Zit een getal in geen enkele manier, dan moet het weg. Zit het in elke manier, dan blijft het.","Op Moeilijk heb je de gekleurde vlakken echt nodig. Zit je vast in de rijen en kolommen, kijk dan naar een vlak."],
  m24:["Zoek eerst naar 3×8, 4×6, 2×12 of 25−1.","Breuken mogen tussendoor: 8 ÷ 3 kan handig zijn als je daarna weer vermenigvuldigt."]};
 const tipsOf=t=>t==="nono"&&S&&S.nv==="color"?["Begin met lange gekleurde blokken: overlap werkt net als bij een gewone Nonogram.","Let extra op de kleurgrens: rood naast blauw mag direct, rood naast rood niet.","Als een gekleurd blok volledig vastligt, kun je vaak meteen bepalen welke vakjes ernaast leeg moeten blijven.","Kom je vast te zitten, kijk naar een rij of kolom waarin al één of meer kleuren staan. Die beperken de mogelijke plaatsen sterk."]:(TIPS[t]||[]).map(x=>x.startsWith("__2X2__")?x.slice(7):x).concat(t==="star"&&(STLV[lvOf("star")]||[0,2])[1]>1?["Vakjes die elkaar allemaal raken (bijvoorbeeld een blokje van 2×2) kunnen samen maar één ster hebben."]:[]);
-const NOTEH={bin:" Met ✏️ Potlood werkt een tik hetzelfde als normaal: ✕, ○, leeg, maar kleiner en lichter. Slepen blijft de rij/kolomvergelijking. Aantekeningen tellen niet mee.",star:" Met ✏️ Potlood werkt het bord hetzelfde als normaal: ✕, ★, leeg. Sleep om snel kleine kruisjes te zetten of weg te halen; rond een potloodster verschijnen automatisch lichte kruisjes. Aantekeningen tellen niet mee.",mur:" Met ✏️ Potlood maak je kandidaat-aantekeningen: kies iemand onderaan en tik op een vakje, dan komt daar de kleine letter van die persoon. Je kunt meerdere kandidaten in één vakje bewaren. Aantekeningen tellen niet mee."};
+const NOTEH={bin:" Met ✏️ Potlood werkt het hetzelfde als normaal (tik ✕, dubbeltik ○), maar kleiner en lichter. Slepen blijft de rij/kolomvergelijking. Aantekeningen tellen niet mee.",star:" Met ✏️ Potlood werkt het bord hetzelfde als normaal (tik ✕, dubbeltik ★), maar kleiner en lichter. Sleep om snel kleine kruisjes te zetten of weg te halen; rond een potloodster verschijnen automatisch lichte kruisjes. Aantekeningen tellen niet mee.",mur:" Met ✏️ Potlood maak je kandidaat-aantekeningen: kies iemand onderaan en tik op een vakje, dan komt daar de kleine letter van die persoon. Je kunt meerdere kandidaten in één vakje bewaren. Aantekeningen tellen niet mee."};
 const helpOf=t=>{let s=t==="nono"&&S&&S.nv==="color"?"De gekleurde getallen geven de blokken in die rij of kolom, in volgorde. Blokken van dezelfde kleur moeten minstens één leeg vakje tussen zich hebben; blokken van verschillende kleuren mogen direct tegen elkaar liggen. Kies onderaan een kleur of ✕ Kruisje. Tik of sleep om die stand toe te passen; nogmaals met dezelfde stand maakt het vakje weer leeg. Tik op een aanwijzing om de overige open vakjes in die rij of kolom als leeg te markeren.":HELP[t]+(NOTEH[t]?NOTEH[t]+" Snel: houd een vakje even ingedrukt om meteen een aantekening te zetten, zonder te wisselen.":"");if(t==="star"){const k=(STLV[lvOf("star")]||[0,2])[1];s=s.replace("__K__",k).replace("__S__",k>1?"sterren":"ster")}return s};
 const isDark=()=>{const t=document.documentElement.dataset.theme;return t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches};
 const dstr=()=>new Date().toLocaleDateString("sv");
@@ -1867,7 +1872,7 @@ $("#time").onclick=()=>{TSHOW=!TSHOW;lsSet("pdtime",TSHOW?"1":"0");setT(lastT)};
 const isFree=r=>/^v~/.test(r.type);
 function freeLoc(){try{return JSON.parse(lsGet("pdfree")||"[]")}catch(e){return[]}}
 /* Gemaakte puzzels bewaren (de laatste 16), zodat terugkomen op een puzzel meteen gaat. GV ophogen als een generator verandert. */
-const GV="g16";
+const GV="g17";
 function genCached(type,seed,lv,hard,nv){const vk=type==="nono"&&nv==="color"?"|color":"";const k=GV+(type==="mur"?MGV:type==="plus"?PGV:"")+"|"+type+"|"+seed+"|"+lv+(hard?"|w":"")+vk;let all={};try{all=JSON.parse(lsGet("pdgen")||"{}")}catch(e){all={}}
  if(all[k])try{return JSON.parse(all[k])}catch(e){}
  const p=type==="nono"&&nv==="color"?genColorNono(rng(hash(seed+"|color")),lv,!!hard):GEN[type](rng(hash(seed)),lv,!!hard);try{all[k]=JSON.stringify(p);const ks=Object.keys(all);for(const x of ks.slice(0,Math.max(0,ks.length-16)))delete all[x];lsSet("pdgen",JSON.stringify(all))}catch(e){}
