@@ -2180,8 +2180,8 @@ function hexSync(a,b){if(a.nodeType!==b.nodeType||a.nodeName!==b.nodeName){a.rep
  if(a.childNodes.length!==b.childNodes.length){a.replaceChildren(...[...b.childNodes].map(n=>n.cloneNode(true)));return}
  for(let i=0;i<a.childNodes.length;i++)hexSync(a.childNodes[i],b.childNodes[i])}
 function hexAfter(){pingBusy();if(S.p.sol.every((v,i)=>!v||S.hx.rev.has(i))){finish();return}rHex()}
-function hexClue(k){if(!S.cs)S.cs={};const c=S.cs[k]||0;if(hexMode==="b"){if(c===1)delete S.cs[k];else S.cs[k]=1}else{if(c===2)delete S.cs[k];else S.cs[k]=2}rHex()}
-function hexTap(i,forcedMode){if(S.done)return;if(S.hx.rev.has(i)){if(hexZn(S.p,i))hexClue("z"+i);return}S.zh=-1;S.hl=-1;if(!S.start)S.start=Date.now();clearHint();const mode=forcedMode||hexMode;
+function hexClue(k,forcedMode){if(!S.cs)S.cs={};const c=S.cs[k]||0,mode=forcedMode||hexMode;if(mode==="b"){if(c===1)delete S.cs[k];else S.cs[k]=1}else{if(c===2)delete S.cs[k];else S.cs[k]=2}rHex()}
+function hexTap(i,forcedMode){if(S.done)return;if(S.hx.rev.has(i)){if(hexZn(S.p,i))hexClue("z"+i,forcedMode);return}S.zh=-1;S.hl=-1;if(!S.start)S.start=Date.now();clearHint();const mode=forcedMode||hexMode;
  if(S.p.sol[i]===(mode==="b"?1:0)){S.hx.rev.add(i);S.popH=i;hexAfter()}
  else{S.mist++;S.flash=i;rHex();setTimeout(()=>{S.flash=-1;if(S.type==="hex"&&!S.done)rHex()},450)}}
 function hexHint(){const P=S.p,rev=S.hx.rev,n=P.n,cons=[];
@@ -2264,7 +2264,7 @@ function hexPress(cx,cy,pt0,forcedMode,mouseButton){if(S.type!=="hex"||!S.p)retu
  /* Een lijn kies je met zijn getal. Twee lijnen kunnen bij hetzelfde punt beginnen (bijvoorbeeld recht omhoog en schuin);
     hun getallen staan wel op verschillende plekken, dus het dichtstbijzijnde getal beslist. */
  let bl=-1,ld=1e9;g.lines.forEach(l=>{const d=Math.min(Math.hypot(l[0]-p.x,l[1]-p.y),Math.hypot(l[3]-p.x,l[4]-p.y)+g.sz*.35);if(d<ld){ld=d;bl=l[2]}});
- if(bl>=0&&ld<g.sz*1.05&&ld<bd){if(mouseButton==="r")return;hexClue("l"+bl);return}
+ if(bl>=0&&ld<g.sz*1.05&&ld<bd){hexClue("l"+bl,forcedMode);return}
  if(bi>=0&&bd<g.sz*1.12){hexTap(bi,forcedMode);return}
  if(mouseButton==null&&!S.done)setHexMode(hexMode==="b"?"z":"b")}
 /* Alleen pointer-events: vroeger reageerde ook touchstart, waardoor één tik soms twee keer telde (een lijn aan en meteen weer uit). */
