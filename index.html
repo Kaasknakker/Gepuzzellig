@@ -1778,7 +1778,7 @@ $("#mur").addEventListener("touchstart",e=>{const t=e.target;if(!t.closest)retur
 addEventListener("pointerup",binUp);addEventListener("pointercancel",binUp);
 
 /* ---- Star Battle: slepen ---- */
-let drag=null;
+let drag=null,starLastTap={t:0,i:-1};
 const cellOf=el=>el&&el.dataset&&el.dataset.i!==undefined?+el.dataset.i:-1;
 const sym=v=>v===2?"★":v===1?"✕":"";
 function adjStar(i){const N=S.p.N,r=i/N|0,c=i%N;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const rr=r+dr,cc=c+dc;if(rr>=0&&rr<N&&cc>=0&&cc<N&&S.cur[rr*N+cc]===2)return true}return false}
@@ -1796,10 +1796,11 @@ const noteDisp=i=>noteVal(i)===2?2:(noteVal(i)===1||noteAdjStar(i))?1:0;
 function applyNoteDrag(i){if(disp(i)!==0)return;if(drag.mode==="add"){if(noteDisp(i)===0)noteDragWrite(drag,i,1)}else if(drag.mode==="del"){if(noteVal(i)===1)noteDragWrite(drag,i,0)}}
 function starDown(e){const mb=mouseLR(e);if(S.done||S.type!=="star"||e._closed||mb==="")return;if(drag&&drag.pid!==e.pointerId)starEnd();
  const N=S.p.N;S.sg=gridGeo(N);const i=gridHit(S.sg,e.clientX,e.clientY,N,N);if(i<0)return;
+ const dbl=mb==="l"&&starLastTap.i===i&&e.timeStamp-starLastTap.t<380;if(dbl)starLastTap={t:0,i:-1};else if(mb==="r")starLastTap={t:0,i:-1};
  e.preventDefault();if(!S.start)S.start=Date.now();clearHint();
  if(potlood&&mb==null){if(disp(i)!==0)return;const v=noteDisp(i);drag={note:true,pid:e.pointerId,mode:v===0?"add":v===1?"del":"none",start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map()};noteDragWrite(drag,i,v===0?1:v===1?2:0);return}
  begin();
- if(mb!==null){const target=mb==="l"?2:1,old=S.cur[i],mode=old===target?"del":"add";drag={direct:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map()};drag.prev.set(i,old);setCell(i,mode==="del"?0:target);return}
+ if(mb!==null){const target=mb==="l"?2:1,old=S.cur[i],mode=dbl?"add":old===target?"del":"add";drag={direct:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),dbl};drag.prev.set(i,old);setCell(i,dbl?2:mode==="del"?0:target);return}
  const v=disp(i);drag={pid:e.pointerId,mode:v===0?"add":v===1?"del":"none",start:i,last:i,moved:false,path:[i],prev:new Map()};
  setCell(i,v===0?1:v===1?2:0);
  lpStart(e,()=>{if(!drag||drag.moved||drag.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag=null;S.gs=null;paintAll();lpNote(i)})}
@@ -1812,7 +1813,7 @@ function starMove(e){if(!drag||S.type!=="star"||e.pointerId!==drag.pid)return;co
  if(!drag.moved){drag.moved=true;if(!drag.direct){if(drag.note){if(drag.mode==="del")noteDragWrite(drag,drag.start,0);else if(drag.mode==="none")noteDragWrite(drag,drag.start,2)}else{if(drag.mode==="del")setCell(drag.start,0);else if(drag.mode==="none")setCell(drag.start,2)}}}
  for(let k=1;k<=n;k++)starEnter(Math.round(r0+(r1-r0)*k/n)*N+Math.round(c0+(c1-c0)*k/n));
  drag.last=i}
-function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;starEnd()}
+function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;const d=drag;if(d.direct&&!d.moved&&!d.dbl&&e&&e.button===0)starLastTap={t:e.timeStamp,i:d.start};else if(d.dbl)starLastTap={t:0,i:-1};starEnd()}
 function starEnd(){const d=drag;drag=null;if(S.type!=="star")return;if(d.note){noteFinish(d,d.moved);return}commit();check()}
 addEventListener("pointerup",starUp);addEventListener("pointercancel",starUp);
 
