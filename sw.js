@@ -1,7 +1,7 @@
 /* Gepuzzellig: offline app-shell + altijd eerst de nieuwste online versie.
    Oude Gepuzzellig-caches worden bij activatie opgeruimd; andere caches op hetzelfde domein laten we met rust. */
 const PREFIX="gepuzzellig-";
-const C=PREFIX+"v41";
+const C=PREFIX+"v42";
 
 const sleutel=r=>{const u=new URL(r.url);u.search="";u.hash="";if(u.pathname.endsWith("/index.html"))u.pathname=u.pathname.slice(0,-10);return u.href};
 
