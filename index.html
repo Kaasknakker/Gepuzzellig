@@ -1748,13 +1748,12 @@ function binDown(e){const mb=mouseLR(e);if(S.done||S.type!=="bin"||e._closed||mb
   S.pick={t:drag2.line,at:ri>=0?ri:ci};binCompare();paintBin();return}
  const i=binCell(e.clientX,e.clientY);if(i<0)return;
  e.preventDefault();if(!S.start&&S.p.giv[i]<0)S.start=Date.now();clearHint();
- const N=S.p.W,r=i/N|0,c=i%N;
- if(potlood){
-  binLastTap={t:0,i:-1};const old=noteVal(i),editable=S.p.giv[i]<0&&S.cur[i]<0,target=mb==="r"?2:mb==="l"?1:0,to=!editable?old:mb==null?(old===1?2:old===2?0:1):(old===target?0:target);
-  drag2={note:true,start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp,nchanges:new Map(),mouseDirect:mb!==null};S.rd=S.cd=S.pick=null;
-  noteDragWrite(drag2,i,to);return}
- const dbl=mb!=="r"&&binLastTap.i===i&&e.timeStamp-binLastTap.t<380;
+ const N=S.p.W,r=i/N|0,c=i%N,dbl=mb!=="r"&&binLastTap.i===i&&e.timeStamp-binLastTap.t<380;
  if(dbl)binLastTap={t:0,i:-1};else if(mb==="r")binLastTap={t:0,i:-1};
+ if(potlood){
+  const old=noteVal(i),editable=S.p.giv[i]<0&&S.cur[i]<0,target=(mb==="r"||dbl)?2:mb==="l"?1:0,to=!editable?old:dbl?2:mb==null?(old===1?2:old===2?0:1):(old===target?0:target);
+  drag2={note:true,start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp,nchanges:new Map(),mouseDirect:mb!==null,dbl};S.rd=S.cd=S.pick=null;
+  noteDragWrite(drag2,i,to);return}
  begin();drag2={start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,old:S.cur[i],applied:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp,mouseDirect:mb!==null,dbl};S.rd=S.cd=S.pick=null;
  if(S.p.giv[i]<0){const o=S.cur[i],target=(mb==="r"||dbl)?1:0;if(dbl)S.cur[i]=1;else S.cur[i]=o===target?-1:target;drag2.applied=true}
  paintBin();
@@ -1769,7 +1768,7 @@ function binMove(e){if(!drag2||S.type!=="bin"||e.pointerId!==drag2.pid)return;
  if(d.note){noteDragRestore(d,d.start);paintNotes()}else if(d.applied){S.cur[d.start]=d.old;d.applied=false}
  S.pick=(d.maxr-d.minr)>=(d.maxc-d.minc)?{t:"r",a:d.minr,b:d.maxr,at:r}:{t:"c",a:d.minc,b:d.maxc,at:c};
  binCompare();paintBin()}
-function binUp(e){if(!drag2||(e&&e.pointerId!==drag2.pid))return;const d=drag2;if(!d.line&&!d.note&&!d.moved&&!d.dbl&&e&&e.button!==2)binLastTap={t:e.timeStamp,i:d.start};else if(d.dbl)binLastTap={t:0,i:-1};binEnd()}
+function binUp(e){if(!drag2||(e&&e.pointerId!==drag2.pid))return;const d=drag2;if(!d.line&&!d.moved&&!d.dbl&&e&&e.button!==2)binLastTap={t:e.timeStamp,i:d.start};else if(d.dbl)binLastTap={t:0,i:-1};binEnd()}
 function binEnd(){const d=drag2;drag2=null;if(S.type!=="bin")return;
  if(d.note){if(d.moved){S.pick=null;paintBin();noteFinish(d,false);return}noteFinish(d,false);return}
  if(d.moved){S.gs=null;S.pick=null;paintBin();return}
@@ -1799,11 +1798,11 @@ const noteDisp=i=>noteVal(i)===2?2:(noteVal(i)===1||noteAdjStar(i))?1:0;
 function applyNoteDrag(i){if(disp(i)!==0)return;if(drag.mode==="add"){if(noteDisp(i)===0)noteDragWrite(drag,i,1)}else if(drag.mode==="del"){if(noteVal(i)===1)noteDragWrite(drag,i,0)}}
 function starDown(e){const mb=mouseLR(e);if(S.done||S.type!=="star"||e._closed||mb==="")return;if(drag&&drag.pid!==e.pointerId)starEnd();
  const N=S.p.N;S.sg=gridGeo(N);const i=gridHit(S.sg,e.clientX,e.clientY,N,N);if(i<0)return;
- e.preventDefault();if(!S.start)S.start=Date.now();clearHint();
- if(potlood){starLastTap={t:0,i:-1};if(disp(i)!==0)return;const raw=noteVal(i),v=noteDisp(i);
-  if(mb!==null){const target=mb==="l"?2:1,mode=raw===target?"del":"add";drag={note:true,directNote:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map()};noteDragWrite(drag,i,mode==="del"?0:target);return}
-  drag={note:true,pid:e.pointerId,mode:v===0?"add":v===1?"del":"none",start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map()};noteDragWrite(drag,i,v===0?1:v===1?2:0);return}
  const dbl=mb==="l"&&starLastTap.i===i&&e.timeStamp-starLastTap.t<380;if(dbl)starLastTap={t:0,i:-1};else if(mb==="r")starLastTap={t:0,i:-1};
+ e.preventDefault();if(!S.start)S.start=Date.now();clearHint();
+ if(potlood){if(disp(i)!==0)return;const raw=noteVal(i),v=noteDisp(i);
+  if(mb!==null){const target=mb==="l"?2:1,mode=dbl?"add":raw===target?"del":"add";drag={note:true,directNote:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map(),dbl};noteDragWrite(drag,i,dbl?2:mode==="del"?0:target);return}
+  drag={note:true,pid:e.pointerId,mode:v===0?"add":v===1?"del":"none",start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map()};noteDragWrite(drag,i,v===0?1:v===1?2:0);return}
  begin();
  if(mb!==null){const target=mb==="l"?2:1,old=S.cur[i],mode=dbl?"add":old===target?"del":"add";drag={direct:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),dbl};drag.prev.set(i,old);setCell(i,dbl?2:mode==="del"?0:target);return}
  const v=disp(i);drag={pid:e.pointerId,mode:v===0?"add":v===1?"del":"none",start:i,last:i,moved:false,path:[i],prev:new Map()};
@@ -1818,7 +1817,7 @@ function starMove(e){if(!drag||S.type!=="star"||e.pointerId!==drag.pid)return;co
  if(!drag.moved){drag.moved=true;if(!drag.direct&&!drag.directNote){if(drag.note){if(drag.mode==="del")noteDragWrite(drag,drag.start,0);else if(drag.mode==="none")noteDragWrite(drag,drag.start,2)}else{if(drag.mode==="del")setCell(drag.start,0);else if(drag.mode==="none")setCell(drag.start,2)}}}
  for(let k=1;k<=n;k++)starEnter(Math.round(r0+(r1-r0)*k/n)*N+Math.round(c0+(c1-c0)*k/n));
  drag.last=i}
-function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;const d=drag;if(d.direct&&!d.moved&&!d.dbl&&e&&e.button===0)starLastTap={t:e.timeStamp,i:d.start};else if(d.dbl)starLastTap={t:0,i:-1};starEnd()}
+function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;const d=drag;if((d.direct||d.directNote)&&!d.moved&&!d.dbl&&e&&e.button===0)starLastTap={t:e.timeStamp,i:d.start};else if(d.dbl)starLastTap={t:0,i:-1};starEnd()}
 function starEnd(){const d=drag;drag=null;if(S.type!=="star")return;if(d.note){noteFinish(d,d.moved);return}commit();check()}
 addEventListener("pointerup",starUp);addEventListener("pointercancel",starUp);
 
@@ -3043,8 +3042,8 @@ if(NIEUW){showHome();HOMEREADY=true}
 /* ---- Bediening per puzzel ---- */
 function controlsOf(t){const common=[],rows=[];
  if(t==="nono"){rows.push(["Tik / linksklik","Gebruik de actieve vul-, kleur- of kruisstand"],["Rechtermuisknop","Gebruik de andere stand: kruisje ↔ vullen/laatst gekozen kleur"],["Dubbeltik / dubbelklik","Zet altijd een kruisje zonder je actieve stand of kleur te veranderen"],["Slepen","Vul of kruis meerdere vakjes in dezelfde stand"],["Naast het bord","Wissel tussen vullen/kleur en kruisjes"]);common.push(["Spatie","wissel stand"])}
- else if(t==="bin"){rows.push(["Tik / linksklik","Plaats ✕"],["Dubbeltik / dubbelklik","Plaats ○"],["Rechtermuisknop","Plaats direct ○"],["Potlood + muis","Links = kleine ✕ · rechts = kleine ○"],["Teller slepen","Vergelijk die rij of kolom met de andere"])}
- else if(t==="star"){rows.push(["Touch","Tik om kruisje/ster te plaatsen; slepen zet snel kruisjes"],["Linkermuisknop","Plaats direct een ster"],["Rechtermuisknop","Plaats direct een kruisje"],["Potlood + muis","Links = kleine ★ · rechts = klein ✕"],["Slepen met muis","Plaats dezelfde markering in meerdere vakjes"])}
+ else if(t==="bin"){rows.push(["Tik / linksklik","Plaats ✕"],["Dubbeltik / dubbelklik","Plaats ○"],["Rechtermuisknop","Plaats direct ○"],["Potlood","Zelfde bediening als normaal, maar met kleine ✕ en ○"],["Teller slepen","Vergelijk die rij of kolom met de andere"])}
+ else if(t==="star"){rows.push(["Touch","Tik om kruisje/ster te plaatsen; slepen zet snel kruisjes"],["Linkermuisknop","Plaats direct een ster"],["Rechtermuisknop","Plaats direct een kruisje"],["Potlood","Zelfde bediening als normaal, maar met kleine ★ en ✕"],["Slepen met muis","Plaats dezelfde markering in meerdere vakjes"])}
  else if(t==="plus"){rows.push(["Tik / linksklik","Gebruik de actieve stand: omcirkelen of wegstrepen"],["Rechtermuisknop","Gebruik de andere stand: omcirkelen ↔ wegstrepen"],["Slepen","Markeer meerdere getallen in dezelfde stand"],["Naast het bord","Wissel stand"]);common.push(["Spatie","wissel stand"])}
  else if(t==="hex"){rows.push(["Tik / linksklik","Gebruik de actieve stand: blauw of zwart"],["Rechtermuisknop","Gebruik de andere stand: blauw ↔ zwart"],["Blauw/grijs vlak","Wissel tussen blauw en zwart"],["Rand- of blauw cijfer","Links gebruikt de actieve stand; rechts de andere stand"]);common.push(["Spatie","wissel blauw/zwart"])}
  else if(t==="mur"){rows.push(["Tik / linksklik","Gebruik de actieve plaats- of kruisstand"],["Rechtermuisknop","Gebruik de andere stand: plaatsen ↔ wegkruisen"],["Naast het bord","Wissel tussen plaatsen en wegkruisen"]);common.push(["Spatie","wissel stand"])}
