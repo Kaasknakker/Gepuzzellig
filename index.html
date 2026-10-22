@@ -910,7 +910,35 @@ body.phone .personview .spmeta{font-size:10px}body.phone .spdrow{grid-template-c
 
 
 /* Home responsive finetuning: op iPhone geen dubbele puzzelnavigatie; op iPad grotere typografie zonder extra verticale ruimte. */
-body.phone.home header{display:none!important}
+/* iOS legt aan de bovenrand een visuele fade over scrollende inhoud. Houd de mobiele bediening daar bewust onder. */
+body.phone header{display:none!important}
+body.phone.home #home .hwrap:not(.sco){padding-top:18px}
+body.phone:not(.home):not(.newpick) #prow{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:10px;
+ min-height:58px;
+ padding:14px 6px 7px;
+}
+body.phone:not(.home):not(.newpick) #prow>:not(#tbHome):not(#pm){display:none!important}
+body.phone #prow #tbHome,
+body.phone #prow #pm{
+ position:static;
+ display:flex;
+ width:42px;
+ height:42px;
+ flex:0 0 42px;
+ align-items:center;
+ justify-content:center;
+ padding:0;
+ border-radius:14px;
+ font-size:22px;
+ line-height:1;
+ box-shadow:0 2px 0 var(--line);
+}
+body.phone #prow #pm{margin-left:auto}
+body.phone #pmp.open{top:calc(env(safe-area-inset-top) + 72px)}
 
 body.tablet.home #home .hwrap:not(.sco) .hbrand{font-size:22px}
 body.tablet.home #home .hwrap:not(.sco) h2{font-size:30px;line-height:1.04}
@@ -3111,9 +3139,9 @@ $("#theme").onclick=()=>{const m=themeMode(),next=m==="system"?"light":m==="ligh
 updTheme(false);{const mq=matchMedia("(prefers-color-scheme: dark)"),fn=()=>{if(themeMode()==="system")updTheme(true)};if(mq.addEventListener)mq.addEventListener("change",fn);else if(mq.addListener)mq.addListener(fn)}
 /* ---- iPhone-indeling: bovenbalk, compact menu en knoppenbalk onderaan ---- */
 function phoneLayout(){document.body.classList.add("phone");const hd=$("header"),main=$("main");
- const pm=document.createElement("button");pm.id="pm";pm.textContent="⋯";pm.title="Menu";hd.append(pm);
+ const pm=document.createElement("button");pm.id="pm";pm.textContent="⋯";pm.title="Menu";
  const pmp=document.createElement("div");pmp.id="pmp";document.body.append(pmp);
- const prow=document.createElement("div");prow.id="prow";main.insertBefore(prow,main.firstChild);const plive=document.createElement("div");plive.id="peerLive";plive.className="peerlive";plive.hidden=true;plive.innerHTML="<i></i><span></span>";prow.append(plive);
+ const prow=document.createElement("div");prow.id="prow";main.insertBefore(prow,main.firstChild);const plive=document.createElement("div");plive.id="peerLive";plive.className="peerlive";plive.hidden=true;plive.innerHTML="<i></i><span></span>";prow.append(plive,pm);
  const pbot=document.createElement("div");pbot.id="pbot";document.body.append(pbot);
  prow.append($("#arch"),$("#hexstat"),$("#msg"));
  pbot.append($("#undo"),$("#redo"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✏️";$("#notewipe").innerHTML="🧹";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
