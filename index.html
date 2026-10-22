@@ -2158,7 +2158,7 @@ function check(){const{type,p,cur}=S;let ok;
  else if(type==="kak"){const{w,runs}=p;ok=cur.every((v,i)=>!w[i]||v>0)&&runs.every(r=>{const ds=r.cells.map(i=>cur[i]);return new Set(ds).size===ds.length&&ds.reduce((a,b)=>a+b,0)===r.sum})}
  if(ok)finish()}
 
-function finish(){S.secs=Math.max(1,Math.round(playMs()/1000));S.done=true;if(S.type==="nono"){const g=$("#grid");if(g)g.classList.add("nfin")}if(S.practice)clearFreeProgressType(S.type,null,S.type==="nono"?S.nv:null);else progDel(progKey(S.type,false,S.date,S.sf));hideHint();if(S.type==="hex")S.p.sol.forEach((v,i)=>S.hx.rev.add(i));
+function finish(){S.secs=Math.max(1,Math.round(playMs()/1000));S.done=true;clearOnline(true);if(S.type==="nono"){const g=$("#grid");if(g)g.classList.add("nfin")}if(S.practice)clearFreeProgressType(S.type,null,S.type==="nono"?S.nv:null);else progDel(progKey(S.type,false,S.date,S.sf));hideHint();if(S.type==="hex")S.p.sol.forEach((v,i)=>S.hx.rev.add(i));
  setT(fmt(S.secs));
  const bdg=badges({mist:S.mist||0,hints:S.hints||0},S.type);$("#msg").textContent=(S.practice?"Opgelost! 🎉":"Klaar! 🎉"+(TSHOW?" "+fmt(S.secs):""))+(bdg?" "+bdg:"");if(S.practice)$("#next").classList.add("pulse");
  if(S.type!=="m24")render();
@@ -3024,16 +3024,19 @@ function board(rows){try{localStorage.setItem("pdrows",JSON.stringify(lastRows))
 let unsub=null,listenDate="";
 /* "Bezig": als iemand een dagpuzzel heeft aangeraakt, ziet de ander dat (alleen de soort, geen zetten). */
 let STAT=[],unsubS=null,lastPing={k:"",t:0},lastOnline=0;
-function liveOf(u){const g=($("#group").value||"").trim().toLowerCase(),st=STAT.find(x=>x.uid===u&&(x.group||"").toLowerCase()===g);return st&&st.onlineAt&&Date.now()-st.onlineAt<75000?st:null}
+function liveOf(u){const g=($("#group").value||"").trim().toLowerCase(),st=STAT.find(x=>x.uid===u&&(x.group||"").toLowerCase()===g);if(!st||!st.onlineAt||Date.now()-st.onlineAt>=75000)return null;
+ /* Een afgeronde dagpuzzel wint altijd van een eventueel nog geldige laatste online-ping. */
+ if(!st.onlinePractice&&st.onlineType&&lastRows.some(r=>r.uid===u&&r.date===dstr()&&(r.group||"").toLowerCase()===g&&r.secs>0&&!String(r.type).startsWith("v~")&&String(r.type).split(".")[0]===st.onlineType))return null;
+ return st}
 function liveTitle(st){if(!st)return"";const t=st.onlineType&&TYPES[st.onlineType]?TYPES[st.onlineType]:"puzzel",bits=[(st.name||"Iemand")+" is online",t];if(st.onlinePractice)bits.push("Vrij puzzelen");else bits.push("Dagpuzzel");if(st.onlineLvl&&LVL[st.onlineLvl])bits.push(LVL[st.onlineLvl]);if(st.onlineType==="nono"&&st.onlineNono)bits.push(st.onlineNono==="color"?"Kleur":"Klassiek");return bits.join(" · ")}
 function updatePeerLive(){const el=$("#peerLive");if(!el)return;const o=SET&&SET.players?SET.players.map(p=>({p,u:uidOf(p)})).filter(x=>x.u!==uid).map(x=>({p:x.p,st:liveOf(x.u)})).find(x=>x.st):null;el.hidden=!o;if(!o)return;const sp=el.querySelector("span");if(sp)sp.textContent=o.p;el.title=liveTitle(o.st)}
 function pingOnline(force){try{if(!window.PD_DB||!window.PD_DB.setStatus||!uid||uid==="x"||document.hidden||document.body.classList.contains("home")||!S.p||S.done)return;const now=Date.now();if(!force&&now-lastOnline<30000)return;lastOnline=now;window.PD_DB.setStatus({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",onlineAt:now,onlineType:S.type,onlinePractice:!!S.practice,onlineLvl:S.lvl||0,onlineNono:S.type==="nono"?S.nv:""}).catch(()=>{})}catch(e){}}
-function clearOnline(){try{lastOnline=0;if(window.PD_DB&&window.PD_DB.setStatus&&uid&&uid!=="x")window.PD_DB.setStatus({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",onlineAt:0}).catch(()=>{})}catch(e){}}
+function clearOnline(solved){try{lastOnline=0;const p={uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",onlineAt:0};if(solved){lastPing={k:"",t:0};p.date="";p.type="";p.at=0}if(window.PD_DB&&window.PD_DB.setStatus&&uid&&uid!=="x")window.PD_DB.setStatus(p).catch(()=>{})}catch(e){}}
 function pingBusy(){pingOnline();try{if(!window.PD_DB||!window.PD_DB.setStatus||!S.p||S.practice||S.done||S.date!==dstr())return;const k=S.date+S.type+S.sf,now=Date.now();if(lastPing.k===k&&now-lastPing.t<90000)return;lastPing={k,t:now};
  window.PD_DB.setStatus({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",date:S.date,type:S.type+S.sf,at:now}).catch(()=>{})}catch(e){}}
 function busyOf(u,date,ty){const g=($("#group").value||"").trim().toLowerCase(),st=STAT.find(x=>x.uid===u&&(x.group||"").toLowerCase()===g);if(!st||st.date!==date||st.type!==ty)return 0;return Date.now()-st.at<10*60000?2:1}
 function startStatus(){if(!window.PD_DB||!window.PD_DB.listenStatus)return;if(unsubS)unsubS();try{unsubS=window.PD_DB.listenStatus($("#group").value.trim(),r=>{STAT=r;try{updatePeerLive();board(lastRows);if(document.body.classList.contains("home")&&typeof renderHome==="function"&&HVIEW==="")renderHome()}catch(e){}},()=>{clearTimeout(startStatus.t);startStatus.t=setTimeout(startStatus,30000)})}catch(e){}}
-setInterval(()=>{if(STAT.length&&S&&S.p){try{updatePeerLive()}catch(e){}}},15000);
+setInterval(()=>{try{updatePeerLive();/* De Home-balk is statische HTML; zolang hij zichtbaar is opnieuw renderen zodat een verlopen online-status vanzelf verdwijnt. */if(document.body.classList.contains("home")&&typeof renderHome==="function"&&HVIEW===""&&document.querySelector("#home .hlivebar"))renderHome()}catch(e){}},15000);
 setInterval(()=>pingOnline(false),30000);
 document.addEventListener("visibilitychange",()=>{if(document.hidden)clearOnline();else setTimeout(()=>pingOnline(true),300)});
 addEventListener("pagehide",clearOnline);
