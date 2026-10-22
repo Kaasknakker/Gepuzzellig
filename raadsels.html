@@ -853,6 +853,20 @@ const ZES3=[
 ];
 RAAD.push(...RAAD3);ZES.push(...ZES3);
 const $=s=>document.querySelector(s);
+/* Gewone UI-knoppen reageren bij Apple Pencil direct op pointerevents.
+   Rekenmachine en kladcanvas hebben hun eigen Pencil-logica en vallen hier buiten. */
+function fastPenUI(){
+ const excluded="#calc,#papier,canvas";
+ const targetAt=(x,y)=>{const el=document.elementFromPoint(x,y),b=el&&el.closest&&el.closest("button,a[href],summary,[role=button]");if(!b||b.matches(":disabled")||b.closest(excluded))return null;return b};
+ const active=new Set();let firing=false,last=null,lastAt=-1e9;
+ const fire=b=>{if(!b)return false;const now=performance.now();if(b===last&&now-lastAt<35)return true;firing=true;try{b.click()}finally{firing=false}last=b;lastAt=now;return true};
+ document.addEventListener("pointerdown",e=>{if(e.pointerType!=="pen"||e.button>0)return;const b=targetAt(e.clientX,e.clientY);if(!b)return;e.preventDefault();active.add(e.pointerId);fire(b)},true);
+ document.addEventListener("pointerup",e=>{if(e.pointerType!=="pen")return;const had=active.delete(e.pointerId);if(had)return;const b=targetAt(e.clientX,e.clientY);if(!b)return;e.preventDefault();fire(b)},true);
+ document.addEventListener("pointercancel",e=>active.delete(e.pointerId),true);
+ document.addEventListener("touchstart",e=>{const t=[...e.changedTouches].find(t=>t.touchType==="stylus");if(!t)return;const b=targetAt(t.clientX,t.clientY);if(!b)return;e.preventDefault();fire(b)},{passive:false,capture:true});
+ document.addEventListener("click",e=>{if(firing||!last||performance.now()-lastAt>520)return;const b=e.target.closest&&e.target.closest("button,a[href],summary,[role=button]");if(b===last){e.preventDefault();e.stopImmediatePropagation()}},true);
+}
+fastPenUI();
 const hashS=s=>{let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
 const vandaag=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 function kaart(q,onDone){const c=document.createElement("div");c.className="card";const st={mist:0,hints:0,done:false};
