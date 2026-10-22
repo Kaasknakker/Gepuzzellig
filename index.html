@@ -412,9 +412,21 @@ body[data-t=plus].phone #pbot #hintb,body[data-t=plus].phone #pbot #chk{flex:0 0
 /* ===== iPhone ===== */
 #prow,#pbot,#pmp,#pm{display:none}
 body.phone{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);overflow:hidden;overscroll-behavior:none}
-/* ios-scroll-edge-guard: iOS 26 geeft scrollende webapps standaard een zachte blur/fade aan de bovenrand.
-   Een viewport-vast element tegen die rand laat WebKit daar een egale appkleur gebruiken in plaats van de scroll-edge blur. */
-body.phone::before{content:"";position:fixed;top:0;left:0;right:0;height:1px;background:var(--bg);pointer-events:none;z-index:1000}
+/* iOS 26 scroll-edge guard.
+   Gebruik een echt viewport-vast DOM-element: WebKit gebruikt vaste/sticky elementen aan de schermrand
+   om de zachte scroll-edge blur te vervangen door een egale kleur in de safe-area. */
+#iosEdgeGuard{display:none}
+body.phone #iosEdgeGuard{
+ display:block;
+ position:fixed;
+ top:0;
+ left:0;
+ right:0;
+ height:calc(env(safe-area-inset-top) + 2px);
+ background:var(--bg);
+ pointer-events:none;
+ z-index:1000;
+}
 body.phone header{position:relative;display:flex;align-items:center;flex-wrap:nowrap;gap:0;padding:4px 46px 4px 4px;min-height:40px;box-sizing:border-box}
 body.phone header h1{display:none}
 body.phone header nav{order:0;flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;align-items:center;gap:5px;padding:2px 5px 4px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:18px;overscroll-behavior-x:contain}
@@ -973,6 +985,7 @@ window.FIREBASE_CONFIG={
 };
 </script>
 </head><body>
+<div id="iosEdgeGuard" aria-hidden="true"></div>
 <header><h1><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="ttl">Gepuzzellig</span></h1><nav id="tabs" aria-label="Puzzelsoorten"></nav>
 <button id="theme" title="Donkere of lichte weergave" aria-label="Donkere of lichte weergave"></button><button id="sbtn" title="Overzicht en statistieken" aria-label="Overzicht en statistieken">📊</button><button id="who" title="Wissel van speler" aria-label="Wissel van speler"></button><input id="name" type="hidden"><input id="group" type="hidden"></header>
 <div id="pick"><div class="pc"><h2>Wie ben jij?</h2><div id="pickb"></div><p class="mut">Je kiest dit één keer. Daarna onthoudt de app het.</p></div></div>
