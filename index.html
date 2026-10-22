@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl" data-auth-pending><head><meta charset="utf-8">
+<html lang="nl" data-auth-pending data-ui-pending><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -33,6 +33,12 @@
  }
 }
 body{background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+html[data-ui-pending],html[data-auth-pending]{overflow:hidden}
+#bootveil{display:none;position:fixed;inset:0;z-index:2147483646;place-items:center;background:var(--bg);color:var(--fg);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+html[data-ui-pending] #bootveil,html[data-auth-pending] #bootveil{display:grid}
+#bootveil .bootinner{display:flex;flex-direction:column;align-items:center;gap:8px;transform:translateY(-2vh)}
+#bootveil .bootlogo{margin:0;transform:scale(1.25)}
+#bootveil b{font-size:20px;letter-spacing:.01em}
 header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:10px 16px}
 h1{font-size:20px;margin:0;flex:1}
 label.mut{display:flex;gap:6px;align-items:center}
@@ -1002,6 +1008,7 @@ window.FIREBASE_CONFIG={
 </script>
 </head><body>
 <div id="iosPwaStatusStrip" aria-hidden="true"></div>
+<div id="bootveil" aria-hidden="true"><div class="bootinner"><span class="authlogo bootlogo"><i></i><i></i><i></i><i></i></span><b>Gepuzzellig</b></div></div>
 <header><h1><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="ttl">Gepuzzellig</span></h1><nav id="tabs" aria-label="Puzzelsoorten"></nav>
 <button id="theme" title="Donkere of lichte weergave" aria-label="Donkere of lichte weergave"></button><button id="sbtn" title="Overzicht en statistieken" aria-label="Overzicht en statistieken">📊</button><button id="authbtn" title="Google-account" aria-label="Google-account">Account</button><input id="name" type="hidden"><input id="group" type="hidden"></header>
 <div id="authgate" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="authgt">
@@ -3278,7 +3285,7 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
 function updTop(){if(!S||!S.p)return;document.querySelectorAll("#pbot .pgrp").forEach(mg=>mg.classList.toggle("leeg",![...mg.children].some(x=>getComputedStyle(x).display!=="none")));const t=S.type,ti=$("#tbTitle");document.documentElement.style.setProperty("--tc",TCOL[t]);
  const fnv=t==="nono"&&S.practice?S.nv:"",ttl=FREE_NAME(t,fnv),sub=(S.practice?"Vrij puzzelen":S.arch?"Dagpuzzel van "+dnl(S.date):"Dagpuzzel")+(t==="nono"&&!S.practice?" · "+(S.nv==="color"?"Kleur":"Klassiek"):"")+(LVN[t]?" · "+LVL[S.lvl]:"")+(!S.practice&&featOf(S.date)===t?" · ⭐":"");
  if(ti)ti.innerHTML=tIcon(t,false,fnv)+`<div><b>${ttl}</b><small>${sub}</small></div>`;updatePeerLive()}
-function showHome(){RANDOM=false;if(HOMEREADY)pauseAndPersistActive(true);clearOnline();HVIEW="";HDOPEN="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.remove("newpick");document.body.classList.add("home");if(window.PD_APPLY_SW_UPDATE&&window.PD_APPLY_SW_UPDATE())return;const np=$("#npm");if(np)np.hidden=true;tapMode();renderHome();pageIn($("#home"));window.scrollTo(0,0)}
+function showHome(){RANDOM=false;if(HOMEREADY)pauseAndPersistActive(true);clearOnline();HVIEW="";HDOPEN="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.remove("newpick");document.body.classList.add("home");if(window.PD_APPLY_SW_UPDATE&&window.PD_APPLY_SW_UPDATE())return;const np=$("#npm");if(np)np.hidden=true;tapMode();renderHome();if(HOMEREADY)pageIn($("#home"));window.scrollTo(0,0)}
 const dayLvDevice=(t,ds,phone)=>{if(!dagVast(ds))return null;const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay(),wk=w===0||w===6;return phone?(wk?6:5):(wk?3:2)};
 const dayTypeDevice=(t,ds,phone)=>{const l=dayLvDevice(t,ds,phone);return t+sfx(l||dagLv(t,ds))};
 function myDone(td,t){if(!dagVast(td)){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))||""}const ty=dayTypeDevice(t,td,PHONE),k=td+ty,g=($("#group").value||"").trim().toLowerCase();return localDoneInGroup(k,g)||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty&&(r.group||"").toLowerCase()===g)?k:""}
@@ -3415,6 +3422,8 @@ if(NIEUW)nieuwLayout();
 {const td=dstr(),ft=featOf(td),first=lsGet("pdfeat")!==td;lsSet("pdfeat",td);
  const t=first&&!myDone(td,ft)?ft:TYPES[lsGet("pdtab")]?lsGet("pdtab"):ft;first&&!myDone(td,ft)?load(t,false):openType(t)}
 if(NIEUW){showHome();HOMEREADY=true}
+/* Laat de uiteindelijke layout eerst volledig berekenen en schilder hem daarna in één keer. */
+requestAnimationFrame(()=>document.documentElement.removeAttribute("data-ui-pending"));
 
 /* ---- Bediening per puzzel ---- */
 function controlsOf(t){const common=[],rows=[];
