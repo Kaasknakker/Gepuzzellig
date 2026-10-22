@@ -745,6 +745,12 @@ body.phone #nvcolor::after{content:"🎨";font-size:15px}
 body.phone #nmode.ncolor{flex:0 0 auto!important}
 body.phone #nmode.ncolor>button{flex:0 0 32px!important;min-width:32px!important;padding:6px 2px!important}
 body.phone #pbot:has(#nmode.ncolor):has(#nvariant:not(.locked)) #redo{display:none!important}
+/* Variant en moeilijkheid zijn keuzes bij Nieuwe puzzel, niet tijdens het spelen. */
+#nvariant{display:none!important}
+#npvar button{display:flex!important;flex-direction:column;align-items:flex-start;gap:2px;text-align:left}
+#npvar button>span{display:block;font-weight:800}
+#npvar button small{display:block;color:var(--mut);font-size:12px;font-weight:600}
+#npvar button.hasopen small{color:var(--ok);font-weight:750}
 
 </style>
 <script>
@@ -1636,7 +1642,7 @@ let RANDOM=false;const rndType=not=>{const L=Object.keys(TYPES).filter(t=>t!==no
 function load(type,practice,fresh,date){if(S&&S.p&&!S.done&&S.start){pausePlay();persist(true)}if(!practice)RANDOM=false;if(NIEUW&&HOMEREADY){if(document.body.classList.contains("home")||document.body.classList.contains("newpick"))window.scrollTo(0,0);document.body.classList.remove("home","newpick");const np=$("#npm");if(np)np.hidden=true}
  const dd=!practice&&date?date:dstr(),id=++loadId,lvl0=practice?lvOf(type):dagLv(type,dd),sf0=sfx(lvl0);lsSet("pdtab",type);{const fn=$("#fin");if(fn)fn.hidden=true}potlood=false;S={nt:{},type,practice,date:dd,hard:!practice&&isWk(dd)&&!dagVast(dd),arch:dd!==dstr(),start:0,done:false,secs:0,sel:-1,id,hist:[],redo:[],pen:0,mist:0,hints:0,flash:-1,hl:-1,lvl:lvl0,sf:sf0,nv:type==="nono"?(practice?nonoVariant:nonoDayVariant(dd)):"classic"};hideHint();ub();renderLvl();$("#next").classList.remove("pulse");
  const pk0=progKey(type,practice,S.date,sf0),sv0=fresh?null:progAll()[pk0];if(fresh)progDel(pk0);
- document.body.dataset.t=type;document.querySelectorAll("#tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.t===type);if(PHONE&&b.dataset.t===type)try{b.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"})}catch(e){}});$("#today").classList.toggle("on",!practice);$("#prac").classList.toggle("on",!!practice);dayLabel();{const nb=$("#next");if(nb.closest("#more"))nb.innerHTML='<span class="ic">🎲</span><span>'+(practice?"Volgende puzzel":"Nog een puzzel")+'</span>';else nb.textContent=PHONE?"➜":practice?"Volgende puzzel ➜":"Nog een puzzel ➜"}if(PHONE)$("#next").style.display=practice?"":"none";$("#next").title=practice?"Volgende puzzel":"Nog een puzzel (vrij)";
+ document.body.dataset.t=type;document.querySelectorAll("#tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.t===type);if(PHONE&&b.dataset.t===type)try{b.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"})}catch(e){}});$("#today").classList.toggle("on",!practice);$("#prac").classList.toggle("on",!!practice);dayLabel();{const nb=$("#next");if(nb.closest("#more"))nb.innerHTML='<span class="ic">🎲</span><span>Nieuwe puzzel</span>';else nb.textContent=PHONE?"🎲 Nieuwe puzzel":"Nieuwe puzzel ➜"}if(PHONE)$("#next").style.display="";$("#next").title="Nieuwe puzzel";
  $("#help").textContent=helpOf(type);$("#grid").innerHTML="";$("#m24").innerHTML="";$("#mur").innerHTML="";$("#hexsvg").innerHTML="";$("#pad").style.display="none";$("#m24").style.display="none";
  $("#msg").textContent="Puzzel maken...";setT("0:00");$("#grid").classList.remove("nfin");
  setTimeout(()=>{if(id!==loadId)return;
@@ -1914,7 +1920,7 @@ function check(){const{type,p,cur}=S;let ok;
  else if(type==="kak"){const{w,runs}=p;ok=cur.every((v,i)=>!w[i]||v>0)&&runs.every(r=>{const ds=r.cells.map(i=>cur[i]);return new Set(ds).size===ds.length&&ds.reduce((a,b)=>a+b,0)===r.sum})}
  if(ok)finish()}
 
-function finish(){S.secs=Math.max(1,Math.round(playMs()/1000));S.done=true;if(S.type==="nono"){const g=$("#grid");if(g)g.classList.add("nfin")}if(S.practice)clearFreeProgressType(S.type);else progDel(progKey(S.type,false,S.date,S.sf));hideHint();if(S.type==="hex")S.p.sol.forEach((v,i)=>S.hx.rev.add(i));
+function finish(){S.secs=Math.max(1,Math.round(playMs()/1000));S.done=true;if(S.type==="nono"){const g=$("#grid");if(g)g.classList.add("nfin")}if(S.practice)clearFreeProgressType(S.type,null,S.type==="nono"?S.nv:null);else progDel(progKey(S.type,false,S.date,S.sf));hideHint();if(S.type==="hex")S.p.sol.forEach((v,i)=>S.hx.rev.add(i));
  setT(fmt(S.secs));
  const bdg=badges({mist:S.mist||0,hints:S.hints||0},S.type);$("#msg").textContent=(S.practice?"Opgelost! 🎉":"Klaar! 🎉"+(TSHOW?" "+fmt(S.secs):""))+(bdg?" "+bdg:"");if(S.practice)$("#next").classList.add("pulse");
  if(S.type!=="m24")render();
@@ -2909,9 +2915,9 @@ function phoneLayout(){document.body.classList.add("phone");const hd=$("header")
  const pmp=document.createElement("div");pmp.id="pmp";document.body.append(pmp);
  const prow=document.createElement("div");prow.id="prow";main.insertBefore(prow,main.firstChild);const plive=document.createElement("div");plive.id="peerLive";plive.className="peerlive";plive.hidden=true;plive.innerHTML="<i></i><span></span>";prow.append(plive);
  const pbot=document.createElement("div");pbot.id="pbot";document.body.append(pbot);
- prow.append($("#seg"),$("#arch"),$("#lvl"),$("#next"),$("#hexstat"),$("#msg"));
- pbot.append($("#undo"),$("#redo"),$("#nvariant"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✏️";$("#notewipe").innerHTML="🧹";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
- pmp.append($("#sbtn"),$("#helpb"),$("#ctrlb"),$("#reset"),$("#time"),$("#streak"),$("#theme"),$("#who"));
+ prow.append($("#arch"),$("#hexstat"),$("#msg"));
+ pbot.append($("#undo"),$("#redo"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✏️";$("#notewipe").innerHTML="🧹";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
+ pmp.append($("#next"),$("#sbtn"),$("#helpb"),$("#ctrlb"),$("#reset"),$("#time"),$("#streak"),$("#theme"),$("#who"));
  $("#chk").innerHTML="✓<span> Klopt?</span>";$("#hintb").innerHTML="💡<span> Hint</span>";$("#today").textContent="Dag";$("#prac").textContent="Vrij";
  pm.onclick=()=>pmp.classList.toggle("open");pmp.addEventListener("click",e=>{if(e.target.closest("button"))setTimeout(()=>pmp.classList.remove("open"),80)});
  document.addEventListener("pointerdown",e=>{if(pmp.classList.contains("open")&&!e.target.closest("#pmp,#pm")){pmp.classList.remove("open");e._closed=true}
@@ -2932,14 +2938,14 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
   $("main").before(tb);$("#tbMid").append($("#msg"),$("#hexstat"),$("#time"));
   const pbot=document.createElement("div");pbot.id="pbot";document.body.append(pbot);
   const g1=document.createElement("div");g1.className="pgrp g1";g1.append($("#undo"),$("#redo"));
-  const g2=document.createElement("div");g2.className="pgrp modes";g2.append($("#nvariant"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"));
+  const g2=document.createElement("div");g2.className="pgrp modes";g2.append($("#nmode"),$("#pmode"),$("#mb"),$("#mz"));
   const g3=document.createElement("div");g3.className="pgrp";g3.append($("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));
   pbot.append(g1,g2,g3);
   const more=document.createElement("div");more.id="more";document.body.append(more);
   const sec=(t)=>{const h=document.createElement("div");h.className="mh";h.textContent=t;more.append(h)};
   const lst=(...ids)=>{const d=document.createElement("div");d.className="mlist";ids.forEach(i=>d.append($(i)));more.append(d)};
   const ic=(b,i,t)=>{b.innerHTML='<span class="ic">'+i+'</span><span>'+t+'</span>'};
-  sec("Puzzel");more.append($("#seg"),$("#lvl"));lst("#arch","#next");sec("Overig");lst("#sbtn","#helpb","#ctrlb","#reset","#theme","#who");more.append($("#streak"));
+  sec("Puzzel");lst("#arch","#next");sec("Overig");lst("#sbtn","#helpb","#ctrlb","#reset","#theme","#who");more.append($("#streak"));
   ic($("#arch"),"📅","Eerdere dagpuzzels");ic($("#next"),"🎲","Nog een puzzel");ic($("#sbtn"),"📊","Scorebord en weekoverzicht");ic($("#helpb"),"❓","Uitleg van deze puzzel");ic($("#ctrlb"),"⌨️","Bediening");
   {const r=$("#reset");r.innerHTML='<b class="ic">⟲</b><span>Reset</span>'}updTheme();{const n=$("#name").value;if(n)ic($("#who"),"👤","Speler: "+n)}
   $("#tbHome").onclick=showHome;$("#tbMore").onclick=e=>{e.stopPropagation();more.classList.toggle("open")};
@@ -2955,24 +2961,38 @@ function showHome(){if(HOMEREADY&&S&&S.p&&!S.done&&S.start){pausePlay();persist(
 function myDone(td,t){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))}
 function progressMeta(k,e){let m;if((m=/^d:(\\d{4}-\\d\\d-\\d\\d):([a-z0-9]+)(?:\\.(\\d))?$/.exec(k))){const t=m[2],d=m[1];return{k,e,practice:false,date:d,type:t,lvl:+(m[3]||2),color:t==="nono"&&nonoDayVariant(d)==="color"}};
  if((m=/^p:([a-z0-9]+?)(?:\\.(\\d))?(c)?$/.exec(k)))return{k,e,practice:true,date:dstr(),type:m[1],lvl:+(m[2]||2),color:!!m[3]};return null}
-function freeProgressList(t){return Object.entries(progAll()).map(([k,e])=>progressMeta(k,e)).filter(m=>m&&m.practice&&(!t||m.type===t)&&progressRelevant(m.k)&&!progressSolved(m.k,m.e)).sort((a,b)=>(b.e.at||0)-(a.e.at||0))}
-function clearFreeProgressType(t,keep){freeProgressList(t).forEach(m=>{if(m.k!==keep)progDel(m.k)})}
-function latestFreeProgress(t){const a=freeProgressList(t),m=a[0]||null;if(m&&a.length>1)clearFreeProgressType(t,m.k);return m}
-function resumeProgress(k){const e=progAll()[k],m=progressMeta(k,e);if(!m)return;if(!m.practice){load(m.type,false,false,m.date);return}clearFreeProgressType(m.type,k);RANDOM=false;if(LVN[m.type]){LV[m.type]=m.lvl;lsSet("pdlvl",JSON.stringify(LV))}if(m.type==="nono"){nonoVariant=m.color?"color":"classic";lsSet("pdnvar",nonoVariant)}load(m.type,true,false)}
-function startChosenFree(t,l,nv,random,replace){if(replace)clearFreeProgressType(t);if(LVN[t]){LV[t]=l;lsSet("pdlvl",JSON.stringify(LV))}if(t==="nono"){nonoVariant=nv;lsSet("pdnvar",nv)}RANDOM=!!random;$("#npm").hidden=true;document.body.classList.remove("newpick");load(t,true,true)}
-/* Nieuwe vrije puzzel is een eigen scherm. Als er al een vrije puzzel van dit type bezig is,
-   kies je eerst tussen verdergaan en een nieuwe starten. Pas daarna kies je variant/niveau. */
-function showNewFree(t,random,skipExisting){if(!TYPES[t])return;if(S&&S.p&&!S.done&&S.start){pausePlay();persist(true)}clearOnline();document.body.classList.remove("home");document.body.classList.add("newpick");toggleSide(false);const m=$("#npm"),varBox=$("#npvar"),lvBox=$("#nplv"),sub=$("#npsub");let nv=t==="nono"?(nonoVariant==="color"?"color":"classic"):"classic";const old=latestFreeProgress(t);
+const nonoMetaVariant=m=>m&&m.type==="nono"?(m.color?"color":"classic"):"";
+function freeProgressList(t,nv){return Object.entries(progAll()).map(([k,e])=>progressMeta(k,e)).filter(m=>m&&m.practice&&(!t||m.type===t)&&(!nv||m.type!=="nono"||nonoMetaVariant(m)===nv)&&progressRelevant(m.k)&&!progressSolved(m.k,m.e)).sort((a,b)=>(b.e.at||0)-(a.e.at||0))}
+function clearFreeProgressType(t,keep,nv){let target=nv||"";if(t==="nono"&&!target&&keep){const e=progAll()[keep],m=progressMeta(keep,e);target=nonoMetaVariant(m)}freeProgressList(t).forEach(m=>{if(m.k!==keep&&(t!=="nono"||!target||nonoMetaVariant(m)===target))progDel(m.k)})}
+function latestFreeProgress(t,nv){if(t==="nono"&&!nv){for(const v of["classic","color"]){const a=freeProgressList(t,v);a.slice(1).forEach(m=>progDel(m.k))}return freeProgressList(t)[0]||null}const a=freeProgressList(t,nv),m=a[0]||null;a.slice(1).forEach(x=>progDel(x.k));return m}
+function resumeProgress(k){const e=progAll()[k],m=progressMeta(k,e);if(!m)return;if(!m.practice){load(m.type,false,false,m.date);return}clearFreeProgressType(m.type,k,m.type==="nono"?nonoMetaVariant(m):null);RANDOM=false;if(LVN[m.type]){LV[m.type]=m.lvl;lsSet("pdlvl",JSON.stringify(LV))}if(m.type==="nono"){nonoVariant=m.color?"color":"classic";lsSet("pdnvar",nonoVariant)}load(m.type,true,false)}
+function startChosenFree(t,l,nv,random,replace){if(replace)clearFreeProgressType(t,null,t==="nono"?nv:null);if(LVN[t]){LV[t]=l;lsSet("pdlvl",JSON.stringify(LV))}if(t==="nono"){nonoVariant=nv;lsSet("pdnvar",nv)}RANDOM=!!random;$("#npm").hidden=true;document.body.classList.remove("newpick");load(t,true,true)}
+/* Nieuwe vrije puzzel: nooit verborgen wisselen. Nonogram kiest eerst Klassiek/Kleur.
+   Een lopende huidige puzzel krijgt één bevestiging; een opgeslagen sessie van de gekozen
+   Nonogramvariant krijgt daarna expliciet Verdergaan of Nieuwe starten. */
+function showNewFree(t,random,fromCurrent){if(!TYPES[t])return;
+ const origin=S&&S.p?{type:S.type,practice:!!S.practice,date:S.date,nv:S.nv,lvl:S.lvl,done:!!S.done,pc:progressPct(),key:S.practice?progKey(S.type,S.practice,S.date,S.sf):""}:null;
+ if(origin&&!origin.done&&S.start){pausePlay();persist(true)}
+ clearOnline();document.body.classList.remove("home");document.body.classList.add("newpick");toggleSide(false);
+ const m=$("#npm"),varBox=$("#npvar"),lvBox=$("#nplv"),sub=$("#npsub");let nv=t==="nono"?(nonoVariant==="color"?"color":"classic"):"classic";
  document.body.dataset.t=t;document.documentElement.style.setProperty("--tc",TCOL[t]||"var(--pc)");document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));const ti=$("#tbTitle");if(ti)ti.innerHTML=tIcon(t)+`<div><b>${TYPES[t]}</b><small>Vrij puzzelen · Nieuwe puzzel</small></div>`;m.hidden=false;window.scrollTo(0,0);
- const oldMeta=old?[old.type==="nono"?(old.color?"Kleur":"Klassiek"):"",LVN[t]?LVL[old.lvl]:"",old.e.pc!=null?old.e.pc+"% klaar":""].filter(Boolean).join(" · "):"";
- const existing=()=>{$("#npmt").textContent=TYPES[t];sub.textContent="Je hebt nog een onafgemaakte vrije puzzel.";varBox.innerHTML="";lvBox.innerHTML='<div class="npwarn"><b>Wat wil je doen?</b><p>'+(oldMeta||"Je kunt verder waar je was gebleven.")+'</p><div class="npactions"><button id="npcontinue">Verder puzzelen</button><button id="npreplace" class="secondary">Nieuwe puzzel</button></div></div>';
-  $("#npcontinue").onclick=()=>resumeProgress(old.k);$("#npreplace").onclick=draw};
- const draw=()=>{$("#npmt").textContent="Nieuwe "+TYPES[t];sub.textContent=t==="nono"?"Kies eerst de variant en daarna de moeilijkheid.":LVN[t]?"Kies de moeilijkheid.":"Klaar voor een nieuwe puzzel?";
-  varBox.innerHTML=t==="nono"?'<button data-v="classic">▦ Klassiek</button><button data-v="color">🎨 Kleur</button>':"";
-  varBox.querySelectorAll("button").forEach(b=>{b.classList.toggle("on",b.dataset.v===nv);b.onclick=()=>{nv=b.dataset.v;draw()}});
-  lvBox.innerHTML="";const levels=LVN[t]||[2];levels.forEach(l=>{const b=document.createElement("button");b.className="nplvb";const desc=t==="nono"&&nv==="color"?(LVS[t][l]||"")+" · "+nonoColorCount(l)+" kleuren":LVS[t]&&LVS[t][l]?LVS[t][l]:"";b.innerHTML="<b>"+(LVN[t]?LVL[l]:"Starten")+"</b><small>"+desc+"</small><span>›</span>";b.onclick=()=>startChosenFree(t,l,nv,random,!!old);lvBox.append(b)});
-  if(old&&!skipExisting){const b=document.createElement("button");b.id="npbackchoice";b.className="npbackchoice";b.textContent="← Terug";b.onclick=existing;lvBox.append(b)}};
- if(old&&!skipExisting)existing();else draw()}
+ const meta=old=>[old&&old.type==="nono"?(old.color?"Kleur":"Klassiek"):"",old&&LVN[old.type]?LVL[old.lvl]:"",old&&old.e.pc!=null?old.e.pc+"% klaar":""].filter(Boolean).join(" · ");
+ const sameOrigin=old=>!!(fromCurrent&&origin&&origin.practice&&old&&old.k===origin.key);
+ const backToOrigin=()=>{if(!origin){showHome();return}if(origin.type==="nono"&&origin.nv){nonoVariant=origin.nv;lsSet("pdnvar",nonoVariant)}document.body.classList.remove("newpick");m.hidden=true;load(origin.type,origin.practice,false,origin.date)};
+ const levelScreen=(v,back)=>{nv=v||nv;$("#npmt").textContent="Nieuwe "+TYPES[t];sub.textContent=t==="nono"?(nv==="color"?"Kleur · kies de moeilijkheid.":"Klassiek · kies de moeilijkheid."):LVN[t]?"Kies de moeilijkheid.":"Klaar voor een nieuwe puzzel?";varBox.innerHTML="";
+  lvBox.innerHTML="";const old=latestFreeProgress(t,t==="nono"?nv:undefined),levels=LVN[t]||[2];levels.forEach(l=>{const b=document.createElement("button");b.className="nplvb";const desc=t==="nono"&&nv==="color"?(LVS[t][l]||"")+" · "+nonoColorCount(l)+" kleuren":LVS[t]&&LVS[t][l]?LVS[t][l]:"";b.innerHTML="<b>"+(LVN[t]?LVL[l]:"Starten")+"</b><small>"+desc+"</small><span>›</span>";b.onclick=()=>startChosenFree(t,l,nv,random,!!old);lvBox.append(b)});
+  if(back){const b=document.createElement("button");b.className="npbackchoice";b.textContent="← Terug";b.onclick=back;lvBox.append(b)}};
+ const variantScreen=()=>{const cl=latestFreeProgress("nono","classic"),co=latestFreeProgress("nono","color"),status=x=>x?(LVL[x.lvl]+" · "+(x.e.pc==null?0:x.e.pc)+"% klaar"):"Geen open puzzel";$("#npmt").textContent="Nieuwe Nonogram";sub.textContent="Kies eerst Klassiek of Kleur.";lvBox.innerHTML="";
+  varBox.innerHTML='<button data-v="classic" class="'+(cl?"hasopen ":"")+(nv==="classic"?"on":"")+'"><span>▦ Klassiek</span><small>'+status(cl)+'</small></button><button data-v="color" class="'+(co?"hasopen ":"")+(nv==="color"?"on":"")+'"><span>🎨 Kleur</span><small>'+status(co)+'</small></button>';
+  varBox.querySelectorAll("button").forEach(b=>b.onclick=()=>{nv=b.dataset.v;const old=latestFreeProgress("nono",nv);if(old&&!sameOrigin(old))variantExisting(nv,old);else levelScreen(nv,variantScreen)})};
+ const variantExisting=(v,old)=>{$("#npmt").textContent=v==="color"?"Kleur Nonogram":"Klassieke Nonogram";sub.textContent="Je hebt van deze variant nog een onafgemaakte puzzel.";varBox.innerHTML="";lvBox.innerHTML='<div class="npwarn"><b>Wat wil je doen?</b><p>'+meta(old)+'</p><div class="npactions"><button id="npcontinue">Verder puzzelen</button><button id="npreplace" class="secondary">Nieuwe starten</button></div></div><button id="npbackchoice" class="npbackchoice">← Terug naar Klassiek / Kleur</button>';
+  $("#npcontinue").onclick=()=>resumeProgress(old.k);$("#npreplace").onclick=()=>levelScreen(v,variantScreen);$("#npbackchoice").onclick=variantScreen};
+ const genericExisting=old=>{$("#npmt").textContent=TYPES[t];sub.textContent="Je hebt nog een onafgemaakte vrije puzzel.";varBox.innerHTML="";lvBox.innerHTML='<div class="npwarn"><b>Wat wil je doen?</b><p>'+meta(old)+'</p><div class="npactions"><button id="npcontinue">Verder puzzelen</button><button id="npreplace" class="secondary">Nieuwe puzzel</button></div></div>';
+  $("#npcontinue").onclick=()=>resumeProgress(old.k);$("#npreplace").onclick=()=>levelScreen(nv,null)};
+ const picker=()=>{if(t==="nono"){variantScreen();return}const old=latestFreeProgress(t);if(old&&!sameOrigin(old))genericExisting(old);else levelScreen(nv,null)};
+ const confirmNew=()=>{$("#npmt").textContent="Nieuwe puzzel?";sub.textContent="Je huidige puzzel is nog niet af.";varBox.innerHTML="";const p=origin&&origin.pc!=null?origin.pc:0;lvBox.innerHTML='<div class="npwarn"><b>Weet je het zeker?</b><p>Je bent nog bezig met deze puzzel'+(p>0?" ("+p+"% klaar)":"")+'. Je voortgang blijft bewaard totdat je echt een nieuwe puzzel start.</p><div class="npactions"><button id="npstay" class="secondary">Blijven puzzelen</button><button id="npgo">Ja, nieuwe puzzel</button></div></div>';
+  $("#npstay").onclick=backToOrigin;$("#npgo").onclick=picker};
+ if(fromCurrent&&origin&&!origin.done&&origin.pc>0)confirmNew();else picker()}
 $("#npmx").onclick=showHome;
 
 /* Puzzelsoort openen: hervat eerst de meest recente onafgemaakte sessie van dit type. Een bewust nieuwe vrije puzzel loopt via showNewFree(). */
