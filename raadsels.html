@@ -107,6 +107,23 @@ h1{font-size:26px;font-weight:900;margin:0;letter-spacing:-.01em;text-wrap:balan
 .chiph:first-child{margin-top:0}
 .score{display:flex;gap:16px;flex-wrap:wrap;font-weight:800}
 @media (max-width:480px){body{font-size:16px}.card{padding:14px 14px}h1{font-size:22px}}
+
+/* Gepuzzellig-stijl: rekenen + de familieknipoog "altijd 6". */
+body{
+ background-color:color-mix(in srgb,#efc76f 7%,var(--bg));
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='172' height='154' viewBox='0 0 172 154'%3E%3Cg fill='%239a9eab' opacity='.14' font-family='Arial,sans-serif' font-weight='700'%3E%3Ctext x='17' y='34' font-size='17'%3E3+3%3C/text%3E%3Ctext x='104' y='43' font-size='18'%3E2×3%3C/text%3E%3Ctext x='27' y='111' font-size='18'%3E7−1%3C/text%3E%3Ctext x='105' y='120' font-size='18'%3E12÷2%3C/text%3E%3Ctext x='77' y='82' font-size='22'%3E6%3C/text%3E%3C/g%3E%3Cg fill='%239a9eab' opacity='.11'%3E%3Ccircle cx='145' cy='84' r='2'/%3E%3Ccircle cx='155' cy='84' r='2'/%3E%3Ccircle cx='165' cy='84' r='2'/%3E%3Ccircle cx='145' cy='94' r='2'/%3E%3Ccircle cx='155' cy='94' r='2'/%3E%3Ccircle cx='165' cy='94' r='2'/%3E%3C/g%3E%3C/svg%3E");
+ background-attachment:fixed;
+ transition:background-color .24s ease;
+}
+.app{animation:rrPageIn .2s cubic-bezier(.2,.7,.3,1) both}
+#vDag:not([hidden]),#vSoort:not([hidden]){animation:rrSwap .18s ease-out both}
+.card{background:color-mix(in srgb,var(--card) 97%,transparent);transition:border-color .2s ease,box-shadow .2s ease,transform .12s ease}
+.card:hover{box-shadow:0 8px 22px color-mix(in srgb,var(--fg) 8%,transparent)}
+.seg,.ktools,.papier{transition:background-color .2s ease,border-color .2s ease,box-shadow .2s ease}
+@keyframes rrPageIn{from{opacity:.35;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes rrSwap{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.app,#vDag:not([hidden]),#vSoort:not([hidden]){animation:none!important}}
+
 </style>
 <style>.terug{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--fg);text-decoration:none;font-size:22px;font-weight:700;box-shadow:0 3px 0 var(--line);flex:none}</style>
 </head><body>
