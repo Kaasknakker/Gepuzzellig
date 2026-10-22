@@ -3086,7 +3086,7 @@ function liveOf(u){const g=($("#group").value||"").trim().toLowerCase(),st=STAT.
  if(!st.onlinePractice&&st.onlineType&&lastRows.some(r=>{if(r.uid!==u||r.date!==dstr()||(r.group||"").toLowerCase()!==g||!(r.secs>0)||String(r.type).startsWith("v~"))return false;return st.onlineLvl?r.type===st.onlineType+sfx(st.onlineLvl):String(r.type).split(".")[0]===st.onlineType}))return null;
  return st}
 function liveTitle(st){if(!st)return"";const t=st.onlineType&&TYPES[st.onlineType]?TYPES[st.onlineType]:"puzzel",bits=[(st.name||"Iemand")+" is online",t];if(st.onlinePractice)bits.push("Vrij puzzelen");else bits.push("Dagpuzzel");if(st.onlineLvl&&LVL[st.onlineLvl])bits.push(LVL[st.onlineLvl]);if(st.onlineType==="nono"&&st.onlineNono)bits.push(st.onlineNono==="color"?"Kleur":"Klassiek");return bits.join(" · ")}
-function updatePeerLive(){const el=$("#peerLive");if(!el)return;const o=SET&&SET.players?SET.players.map(p=>({p,u:uidOf(p)})).filter(x=>x.u!==uid).map(x=>({p:x.p,st:liveOf(x.u)})).find(x=>x.st):null;el.hidden=!o;if(!o)return;const sp=el.querySelector("span");if(sp)sp.textContent=o.p;el.title=liveTitle(o.st)}
+function updatePeerLive(){const el=$("#peerLive");if(!el)return;const o=SET&&SET.players?SET.players.map(p=>({p,u:uidOf(p)})).filter(x=>x.u!==uid).map(x=>({p:x.p,st:liveOf(x.u)})).find(x=>x.st):null;el.hidden=!o;if(!o)return;const sp=el.querySelector("span");if(sp)sp.textContent=playerName(o.p);el.title=liveTitle(o.st)}
 function pingOnline(force){try{if(!window.PD_DB||!window.PD_DB.setStatus||!uid||uid==="x"||document.hidden||document.body.classList.contains("home")||!S.p||S.done)return;const now=Date.now();if(!force&&now-lastOnline<30000)return;lastOnline=now;window.PD_DB.setStatus({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",onlineAt:now,onlineType:S.type,onlinePractice:!!S.practice,onlineLvl:S.lvl||0,onlineNono:S.type==="nono"?S.nv:""}).catch(()=>{})}catch(e){}}
 function clearOnline(solved){try{lastOnline=0;const p={uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",onlineAt:0};if(solved){lastPing={k:"",t:0};p.date="";p.type="";p.at=0}if(window.PD_DB&&window.PD_DB.setStatus&&uid&&uid!=="x")window.PD_DB.setStatus(p).catch(()=>{})}catch(e){}}
 function pingBusy(){pingOnline();try{if(!window.PD_DB||!window.PD_DB.setStatus||!S.p||S.practice||S.done||S.date!==dstr())return;const k=S.date+S.type+S.sf,now=Date.now();if(lastPing.k===k&&now-lastPing.t<90000)return;lastPing={k,t:now};
@@ -3324,7 +3324,7 @@ function showScore(who="all"){HVIEW="score";SCOREWHO=who||"all";SWK=0;renderHome
 function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r=>!isFree(r)),today=dstr(),dow=(new Date().getDay()+6)%7,mon0=addDays(today,-dow),TS=Object.keys(TYPES);
  const pl=new Map();SET.players.forEach(p=>pl.set(uidOf(p),playerName(p)));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});const us=[...pl.keys()];
  if(SCOREWHO!=="all"&&!pl.has(SCOREWHO))SCOREWHO="all";
- setHomeSkin(SCOREWHO==="all"?"shared":String(pl.get(SCOREWHO)||"").toLowerCase()==="aart"?"aart":"peter");
+ setHomeSkin(SCOREWHO==="all"?"shared":SCOREWHO===uidOf("Aart")?"aart":"peter");
  const inP=d=>OPER==="week"?d>=mon0&&d<=addDays(mon0,6):OPER==="maand"?d.slice(0,7)===today.slice(0,7):OPER==="jaar"?d.slice(0,4)===today.slice(0,4):true;
  const PN={week:"deze week",maand:"deze maand",jaar:"dit jaar",alles:"in totaal"}[OPER]||"";
  const q=r=>r.uid===uid&&XS[r.date+r.type]?Object.assign({},r,XS[r.date+r.type]):r,pc=(a,b)=>b?Math.round(100*a/b)+"%":"–";
@@ -3335,7 +3335,7 @@ function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r
   const per={},perD={};mine.forEach(r=>{const t=baseT(r);per[t]=(per[t]||0)+1;if(!isFree(r))perD[t]=(perD[t]||0)+1});const fav=Object.entries(per).sort((a,b)=>b[1]-a[1])[0];
   return{u,i,nm:pl.get(u),d:d.length,v:mine.length-d.length,fl,km,nh,kh,streak:streakOf(rows,u),best,fav:fav&&fav[0],per,perD,mine}});
  const together=st.reduce((a,x)=>a+x.d+x.v,0);
- const views=`<div class="sviews">${[["all","Overzicht"],...SET.players.map(p=>[uidOf(p),p])].map(([k,t])=>`<button data-who="${k}" class="${k===SCOREWHO?"on":""}">${k==="all"?"▦":"👤"} ${t}</button>`).join("")}</div>`;
+ const views=`<div class="sviews">${[["all","Overzicht"],...SET.players.map(p=>[uidOf(p),playerName(p)])].map(([k,t])=>`<button data-who="${k}" class="${k===SCOREWHO?"on":""}">${k==="all"?"▦":"👤"} ${t}</button>`).join("")}</div>`;
  const period=`<div class="sper">${[["week","Week"],["maand","Maand"],["jaar","Jaar"],["alles","Alles"]].map(([k,t])=>`<button data-p="${k}" class="${k===OPER?"on":""}">${t}</button>`).join("")}</div>`;
  const head=(title,sub)=>`<div class="stop"><button id="sBack" aria-label="Terug">←</button><div><h2>${title}</h2><div class="mut">${sub}</div></div></div>`;
  if(SCOREWHO!=="all"){
