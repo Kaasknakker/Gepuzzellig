@@ -3037,7 +3037,17 @@ function resync(rows){if(!window.PD_DB||resync.done)return;resync.done=true;cons
  Object.keys(store).forEach(k=>{const d=k.slice(0,10),t=k.slice(10);if(d<from||!/^\d{4}-\d\d-\d\d$/.test(d)||!t)return;
   if(!rows.some(r=>r.uid===uid&&r.date===d&&r.type===t))dbSave(myRow(d,t)).catch(()=>{})})}
 addEventListener("pdready",startBoard);addEventListener("pdready",()=>setTimeout(()=>pullCloudProgress(true),300));
-if("serviceWorker"in navigator&&(location.protocol==="https:"||location.hostname==="localhost"))addEventListener("load",()=>{try{navigator.serviceWorker.register("sw.js").catch(()=>{})}catch(e){}});
+if("serviceWorker"in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){
+ /* iOS kan een beginscherm-app lang in het geheugen houden. Controleer daarom ook bij terugkeer naar de app op een nieuwe worker. */
+ const swHadController=!!navigator.serviceWorker.controller;let swPending=false,swReloading=false;
+ const swApply=()=>{if(!swPending||swReloading||!document.body.classList.contains("home"))return false;swReloading=true;location.reload();return true};
+ window.PD_APPLY_SW_UPDATE=swApply;
+ navigator.serviceWorker.addEventListener("controllerchange",()=>{if(!swHadController)return;swPending=true;swApply()});
+ const swCheck=()=>navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{});
+ addEventListener("load",async()=>{try{let r;try{r=await navigator.serviceWorker.register("sw.js",{updateViaCache:"none"})}catch(e){r=await navigator.serviceWorker.register("sw.js")}r.update().catch(()=>{})}catch(e){}});
+ addEventListener("pageshow",swCheck);
+ document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")swCheck()});
+}
 addEventListener("online",()=>{const m=$("#board");if(window.PD_DB&&m&&/niet bereikbaar/.test(m.textContent))startBoard();pullCloudProgress(true)});
 addEventListener("pdnodb",e=>{$("#board").textContent=e.detail||"Scorebord nog niet ingesteld (zie stappenplan)."});
 if(window.PD_DB)startBoard();
@@ -3185,7 +3195,7 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
 function updTop(){if(!S||!S.p)return;document.querySelectorAll("#pbot .pgrp").forEach(mg=>mg.classList.toggle("leeg",![...mg.children].some(x=>getComputedStyle(x).display!=="none")));const t=S.type,ti=$("#tbTitle");document.documentElement.style.setProperty("--tc",TCOL[t]);
  const fnv=t==="nono"&&S.practice?S.nv:"",ttl=FREE_NAME(t,fnv),sub=(S.practice?"Vrij puzzelen":S.arch?"Dagpuzzel van "+dnl(S.date):"Dagpuzzel")+(t==="nono"&&!S.practice?" · "+(S.nv==="color"?"Kleur":"Klassiek"):"")+(LVN[t]?" · "+LVL[S.lvl]:"")+(!S.practice&&featOf(S.date)===t?" · ⭐":"");
  if(ti)ti.innerHTML=tIcon(t,false,fnv)+`<div><b>${ttl}</b><small>${sub}</small></div>`;updatePeerLive()}
-function showHome(){RANDOM=false;if(HOMEREADY)pauseAndPersistActive(true);clearOnline();HVIEW="";HDOPEN="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.remove("newpick");document.body.classList.add("home");const np=$("#npm");if(np)np.hidden=true;tapMode();renderHome();pageIn($("#home"));window.scrollTo(0,0)}
+function showHome(){RANDOM=false;if(HOMEREADY)pauseAndPersistActive(true);clearOnline();HVIEW="";HDOPEN="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.remove("newpick");document.body.classList.add("home");if(window.PD_APPLY_SW_UPDATE&&window.PD_APPLY_SW_UPDATE())return;const np=$("#npm");if(np)np.hidden=true;tapMode();renderHome();pageIn($("#home"));window.scrollTo(0,0)}
 function myDone(td,t){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))}
 function progressMeta(k,e){let m;if((m=/^d:(\\d{4}-\\d\\d-\\d\\d):([a-z0-9]+)(?:\\.(\\d))?$/.exec(k))){const t=m[2],d=m[1];return{k,e,practice:false,date:d,type:t,lvl:+(m[3]||2),color:t==="nono"&&nonoDayVariant(d)==="color"}};
  if((m=/^p:([a-z0-9]+?)(?:\\.(\\d))?(c)?$/.exec(k)))return{k,e,practice:true,date:dstr(),type:m[1],lvl:+(m[2]||2),color:!!m[3]};return null}
