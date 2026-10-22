@@ -1373,13 +1373,23 @@ function cnQuality(p,rt,lv){const W=p.W,H=p.H;
  const ok=easy?(rt.passes>=2&&rep<.82):(normal?(rt.passes>=4&&init<.76&&rep<.62&&ur>.42&&uc>.42):(rt.passes>=5&&init<.66&&rep<.55&&ur>.48&&uc>.48));
  const score=rt.passes*7+(ur+uc)*18+multi*12+Math.min(18,trans*.35)-init*28-rep*22;
  return{ok,score,init,rep,ur,uc,multi,trans}}
-function genColorNono(R,lv,hard){const K=nonoColorCount(lv),minScore=(lv===1||lv===4)?50:(lv===2||lv===5)?70:90;let best=null,bs=-1,W=0,H=0;
+/* Kleuring "gemengd" (vanaf 24 oktober 2026): elke kleur in 2 à 3 kleinere vlekken verspreid over het veld,
+   en vlekken die naast elkaar liggen zo veel mogelijk een andere kleur. Zo zit niet elke kleur als één groot vlak bij elkaar. */
+function nonoMixColor(R,mask,W,H,K){const per=K===4?2:3,M=K*per,cols=Math.ceil(Math.sqrt(M*W/H)),rows=Math.ceil(M/cols),ctr=[];
+ for(const k of shuf([...Array(cols*rows).keys()],R).slice(0,M)){const cx=k%cols,cy=k/cols|0;ctr.push({x:(cx+.2+R()*.6)*W/cols,y:(cy+.2+R()*.6)*H/rows,w:.7+R()*.6})}
+ let best=null,bs=-1;for(let t=0;t<40;t++){const cl=shuf([...Array(M).keys()].map(i=>i%K+1),R);let sc=0;
+  for(let a=0;a<M;a++)for(let b=a+1;b<M;b++){if(cl[a]===cl[b]&&Math.hypot(ctr[a].x-ctr[b].x,(ctr[a].y-ctr[b].y)*W/H)<W/cols*1.6)sc--}
+  if(best===null||sc>bs){bs=sc;best=cl}}
+ const sol=Array(W*H).fill(0),use=Array(K+1).fill(0);
+ for(let i=0;i<W*H;i++)if(mask[i]){const r=i/W|0,x=i%W;let bc=1,bd=1e9;for(let k=0;k<M;k++){const a=ctr[k],d=(((x+.5-a.x)/(W/cols))**2+((r+.5-a.y)/(H/rows))**2)/a.w+(R()-.5)*.08;if(d<bd){bd=d;bc=best[k]}}sol[i]=bc;use[bc]++}
+ return{sol,use}}
+function genColorNono(R,lv,hard,mix){const K=nonoColorCount(lv),minScore=(lv===1||lv===4)?50:(lv===2||lv===5)?70:90;let best=null,bs=-1,W=0,H=0;
  /* Een goede kandidaat is goed genoeg: maximaal 3 basisvormen × 18 kleuringen. */
  for(let batch=0;batch<3||(!best&&batch<12);batch++){const base=genNono(R,lv,hard),mask=base.sol;W=base.W;H=base.H;
-  for(let t=0;t<18;t++){const ctr=Array.from({length:K},(_,k)=>({x:(k+.28+R()*.44)*W/K,y:(.12+R()*.76)*H,w:.65+R()*.9,tilt:(R()-.5)*.32}));shuf(ctr,R);
-   const sol=Array(W*H).fill(0),use=Array(K+1).fill(0);
+  for(let t=0;t<18;t++){let sol,use;if(mix){({sol,use}=nonoMixColor(R,mask,W,H,K))}else{const ctr=Array.from({length:K},(_,k)=>({x:(k+.28+R()*.44)*W/K,y:(.12+R()*.76)*H,w:.65+R()*.9,tilt:(R()-.5)*.32}));shuf(ctr,R);
+   sol=Array(W*H).fill(0);use=Array(K+1).fill(0);
    for(let i=0;i<sol.length;i++)if(mask[i]){const r=i/W|0,x=i%W;let bc=1,bd=1e9;for(let k=0;k<K;k++){const a=ctr[k],xx=x+.5+a.tilt*(r-H/2),d=((xx-a.x)/(W/K*a.w))**2+((r+.5-a.y)/(H*.58))**2+(R()-.5)*.055;if(d<bd){bd=d;bc=k+1}}sol[i]=bc;use[bc]++}
-   if(use.slice(1).some(n=>n<2))continue;
+   }if(use.slice(1).some(n=>n<2))continue;
    const p={N:W,W,H,K,color:1,rc:rowsOf(sol,W,H).map(cnClue),cc:colsOf(sol,W,H).map(cnClue),sol,pic:base.pic||""},rt=cnHuman(p);if(!rt.solved)continue;
    const q=cnQuality(p,rt,lv);p.rate=rt.steps+"/"+rt.passes+" c"+K+" q"+q.score.toFixed(0);
    if(q.ok&&q.score>=minScore)return p;
@@ -1954,9 +1964,11 @@ const isFree=r=>/^v~/.test(r.type);
 function freeLoc(){try{return JSON.parse(lsGet("pdfree")||"[]")}catch(e){return[]}}
 /* Gemaakte puzzels bewaren (de laatste 16), zodat terugkomen op een puzzel meteen gaat. GV ophogen als een generator verandert. */
 const GV="g17";
-function genCached(type,seed,lv,hard,nv){const vk=type==="nono"&&nv==="color"?"|color":"";const k=GV+(type==="mur"?MGV:type==="plus"?PGV:"")+"|"+type+"|"+seed+"|"+lv+(hard?"|w":"")+vk;let all={};try{all=JSON.parse(lsGet("pdgen")||"{}")}catch(e){all={}}
+/* Kleurnonogram: gemengde kleuren voor nieuwe vrije puzzels (seed "q…") en voor dagpuzzels vanaf 24 oktober 2026. Oudere puzzels blijven precies hetzelfde. */
+const nonoMixOn=seed=>{seed=String(seed);if(seed[0]==="q")return true;const m=seed.match(/^nono(\d{4}-\d{2}-\d{2})/);return!!m&&m[1]>="2026-10-24"};
+function genCached(type,seed,lv,hard,nv){const cmix=type==="nono"&&nv==="color"&&nonoMixOn(seed),vk=type==="nono"&&nv==="color"?"|color"+(cmix?"|m2":""):"";const k=GV+(type==="mur"?MGV:type==="plus"?PGV:"")+"|"+type+"|"+seed+"|"+lv+(hard?"|w":"")+vk;let all={};try{all=JSON.parse(lsGet("pdgen")||"{}")}catch(e){all={}}
  if(all[k])try{return JSON.parse(all[k])}catch(e){}
- const p=type==="nono"&&nv==="color"?genColorNono(rng(hash(seed+"|color")),lv,!!hard):GEN[type](rng(hash(seed)),lv,!!hard);try{all[k]=JSON.stringify(p);const ks=Object.keys(all);for(const x of ks.slice(0,Math.max(0,ks.length-16)))delete all[x];lsSet("pdgen",JSON.stringify(all))}catch(e){}
+ const p=type==="nono"&&nv==="color"?genColorNono(rng(hash(seed+"|color")),lv,!!hard,cmix):GEN[type](rng(hash(seed)),lv,!!hard);try{all[k]=JSON.stringify(p);const ks=Object.keys(all);for(const x of ks.slice(0,Math.max(0,ks.length-16)))delete all[x];lsSet("pdgen",JSON.stringify(all))}catch(e){}
  return p}
 /* Weekend (zaterdag en zondag): de dagpuzzel is wat pittiger. Het archief: dagpuzzels van de afgelopen week alsnog doen. */
 const isWk=ds=>{const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay();return w===0||w===6};
@@ -1973,7 +1985,7 @@ function load(type,practice,fresh,date){document.documentElement.classList.remov
  $("#help").textContent=helpOf(type);$("#grid").innerHTML="";$("#m24").innerHTML="";$("#mur").innerHTML="";$("#hexsvg").innerHTML="";$("#pad").style.display="none";$("#m24").style.display="none";
  $("#msg").textContent="Puzzel maken...";setT("0:00");$("#grid").classList.remove("nfin");
  setTimeout(()=>{if(id!==loadId)return;
-  const seed=practice?(sv0&&sv0.seed?sv0.seed:"p"+Math.random()):type+S.date+sf0,ck=type+seed+(type==="nono"?"|"+S.nv:"");S.seed=seed;
+  const seed=practice?(sv0&&sv0.seed?sv0.seed:"q"+Math.random()):type+S.date+sf0,ck=type+seed+(type==="nono"?"|"+S.nv:"");S.seed=seed;
   const p=cache[ck+(S.hard?"|w":"")]||(cache[ck+(S.hard?"|w":"")]=genCached(type,seed,lvl0,S.hard,S.nv));S.p=p;if(type==="star")STK=p.K||2;
   const N=p.N||0;
   if(type==="bin")S.cur=p.giv.slice();else if(type==="kak")S.cur=Array(p.W*p.H).fill(0);else if(type==="m24"){S.r=0;setRound()}else if(type==="hex"){S.hx={rev:new Set([...p.rev0,...(p.zs||[])])};S.cs={}}else if(type==="mur"){S.cur=Array(N*N).fill(-1);S.ms=0;S.mxm=false;S.str=new Set()}else if(type==="plus"){S.cur=Array(p.W*p.H).fill(0);S.str=new Set()}else S.cur=Array(type==="nono"||type==="plus"?p.W*p.H:N*N).fill(0);
