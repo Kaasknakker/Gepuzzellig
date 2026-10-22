@@ -3124,14 +3124,14 @@ addEventListener("pagehide",clearOnline);
 function startBoard(){if(!window.PD_DB)return;if(unsub)unsub();listenDate=dstr();startStatus();
  unsub=window.PD_DB.listenFrom(addDays(listenDate,-800),rows=>{lastRows=mergeRows(lastRows,rows);pullMine(lastRows);board(lastRows);resync(rows)},()=>{$("#board").textContent="Scorebord niet bereikbaar";clearTimeout(startBoard.t);startBoard.t=setTimeout(startBoard,30000)})}
 /* Scores worden nooit weggehaald: een (gedeeltelijke) momentopname uit de cache mag dus nooit regels laten verdwijnen. */
-function mergeRows(oud,nieuw){const m=new Map();const k=r=>r.uid+"|"+r.date+"|"+r.type;oud.forEach(r=>m.set(k(r),r));nieuw.forEach(r=>m.set(k(r),r));return[...m.values()]}
+function mergeRows(oud,nieuw){const m=new Map();const k=r=>(r.group||"")+"|"+r.uid+"|"+r.date+"|"+r.type;oud.forEach(r=>m.set(k(r),r));nieuw.forEach(r=>m.set(k(r),r));return[...m.values()]}
 /* Andersom: dagpuzzels die volgens het scorebord al af zijn, maar die dit apparaat niet (meer) kent
    (bijv. andere browser, beginscherm-app tegenover Safari, gewiste gegevens), ook hier als klaar markeren. */
-function pullMine(rows){let ch=false;
- rows.forEach(r=>{if(r.uid!==uid||!r.date||!r.type||String(r.type).startsWith("v~")||!(r.secs>0))return;const k=r.date+r.type;
+function pullMine(rows){let ch=false,g=$("#group").value.trim().toLowerCase();
+ rows.forEach(r=>{if(r.uid!==uid||(r.group||"").toLowerCase()!==g||!r.date||!r.type||String(r.type).startsWith("v~")||!(r.secs>0))return;const k=r.date+r.type;
   if(!store[k]||scoreGroup(k)!==(r.group||legacyGroup())){store[k]=r.secs;SG[k]=r.group||legacyGroup();ch=true;if(!XS[k]&&(r.mist!=null||r.hints!=null)){XS[k]={};if(r.mist!=null)XS[k].mist=r.mist;if(r.hints!=null)XS[k].hints=r.hints}}});
  if(!ch)return;save();saveSG();try{xsSave()}catch(e){}
- if(S.p&&!S.practice&&!S.done&&store[S.date+S.type+S.sf]){progDel(progKey(S.type,false,S.date,S.sf));load(S.type,false,false,S.date)}}
+ if(S.p&&!S.practice&&!S.done&&localDoneInGroup(S.date+S.type+S.sf,g)){progDel(progKey(S.type,false,S.date,S.sf));load(S.type,false,false,S.date)}}
 /* Tijden die nog niet op het scorebord staan (bijv. offline gespeeld) alsnog versturen. */
 function resync(rows){if(!window.PD_DB||resync.done)return;resync.done=true;const from=addDays(dstr(),-14);
  Object.keys(store).forEach(k=>{const d=k.slice(0,10),t=k.slice(10);if(d<from||!/^\d{4}-\d\d-\d\d$/.test(d)||!t||scoreGroup(k)!==$("#group").value.trim())return;
@@ -3162,7 +3162,7 @@ const SET=window.PD_SETUP||{players:["Speler"],group:"lokaal",groupName:"Groep"}
 function setMe(p,displayName){lsSet("pdme",p);uid=uidOf(p);const nm=(displayName||playerName(p)||p).trim()||p;$("#name").value=nm;{const w=$("#who");if(w.closest("#more"))w.innerHTML='<span class="ic">👤</span><span>Speler: '+nm+'</span>';else w.textContent="👤 "+nm}$("#pick").classList.remove("on");board(lastRows);setTimeout(()=>pullCloudProgress(true),0)}
 SET.players.forEach(p=>{const b=document.createElement("button");b.textContent=p;b.onclick=()=>setMe(p);$("#pickb").append(b)});
 $("#who").onclick=()=>{if(window.PD_PROFILE_LINKED){window.dispatchEvent(new Event("pdopenprofile"));return}$("#pick").classList.add("on")};
-addEventListener("pdprofile",e=>{const d=e.detail||{},pr=d.profile||{};PROFILE_NAMES={};GROUP_MEMBERS=d.members||[];GROUP_INFO=d.group||{};(d.members||[]).forEach(x=>{if(x&&x.playerId&&x.displayName)PROFILE_NAMES[x.playerId]=x.displayName});if(pr.playerId&&pr.displayName)PROFILE_NAMES[pr.playerId]=pr.displayName;GROUP_NAME=d.groupName||SET.groupName||"Puzzelsukkels";if(pr.groupId)$("#group").value=pr.groupId;const p=SET.players.find(x=>uidOf(x)===pr.playerId);if(p){window.PD_PROFILE_LINKED=true;setMe(p,pr.displayName);$("#who").style.display="none";if(window.PD_DB)startBoard();if(document.body.classList.contains("home")&&typeof renderHome==="function")renderHome()}});
+addEventListener("pdprofile",e=>{const d=e.detail||{},pr=d.profile||{};PROFILE_NAMES={};GROUP_MEMBERS=d.members||[];GROUP_INFO=d.group||{};(d.members||[]).forEach(x=>{if(x&&x.playerId&&x.displayName)PROFILE_NAMES[x.playerId]=x.displayName});if(pr.playerId&&pr.displayName)PROFILE_NAMES[pr.playerId]=pr.displayName;GROUP_NAME=d.groupName||SET.groupName||"Puzzelsukkels";if(pr.groupId&&$("#group").value!==pr.groupId){try{clearOnline(true)}catch(e){}$("#group").value=pr.groupId;STAT=[];resync.done=false}const p=SET.players.find(x=>uidOf(x)===pr.playerId);if(p){window.PD_PROFILE_LINKED=true;setMe(p,pr.displayName);$("#who").style.display="none";if(window.PD_DB)startBoard();if(document.body.classList.contains("home")&&typeof renderHome==="function")renderHome()}});
 addEventListener("pdauthout",()=>{window.PD_PROFILE_LINKED=false;$("#who").style.display="";PROFILE_NAMES={};GROUP_MEMBERS=[];GROUP_INFO={};GROUP_NAME=SET.groupName||"Puzzelsukkels";$("#group").value=SET.group});
 {const q=(new URLSearchParams(location.search).get("ik")||"").toLowerCase(),f=SET.players.find(p=>p.toLowerCase()===q),m=lsGet("pdme"),k=SET.players.includes(m)?m:"";
  if(f)setMe(f);else if(k)setMe(k);else{$("#who").textContent="👤 Kies speler";$("#pick").classList.add("on")}}
@@ -3190,7 +3190,7 @@ const cloudProgKey=k=>encodeURIComponent(k).replace(/\./g,"%2E");
 const cloudProgOk=()=>!PHONE&&uid&&uid!=="x"&&window.PD_DB&&window.PD_DB.saveProgress;
 let cloudProgLast={},cloudProgPullAt=0,cloudProgPulling=false;
 function progressRelevant(k){return !k.startsWith("d:")||k.split(":")[1]>=addDays(dstr(),-8)}
-function progressSolved(k,e){if(k.startsWith("d:")){const a=k.split(":");return !!store[a[1]+a.slice(2).join(":")]}if(k.startsWith("p:")&&e&&e.seed){const sid=String(e.seed).replace(/\W/g,"").slice(-8);return freeLoc().some(r=>String(r.type).endsWith("~"+sid))}return false}
+function progressSolved(k,e){const g=String(e&&e.group||legacyGroup()).toLowerCase();if(k.startsWith("d:")){const a=k.split(":"),sk=a[1]+a.slice(2).join(":");return localDoneInGroup(sk,g)}if(k.startsWith("p:")&&e&&e.seed){const sid=String(e.seed).replace(/\W/g,"").slice(-8);return freeLoc().some(r=>String(r.group||legacyGroup()).toLowerCase()===g&&String(r.type).endsWith("~"+sid))}return false}
 function progressPct(){if(!S||!S.p)return 0;const p=S.p,cur=S.cur,ratio=(a,b)=>b?Math.max(0,Math.min(99,Math.round(100*a/b))):0;
  if(S.type==="bin"&&cur){let a=0,b=0;for(let i=0;i<cur.length;i++)if(!p.giv||p.giv[i]<0){b++;if(cur[i]>=0)a++}return ratio(a,b)}
  if(["star","nono","plus"].includes(S.type)&&cur)return ratio(cur.filter(v=>v!==0).length,cur.length);
