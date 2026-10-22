@@ -108,7 +108,8 @@ service cloud.firestore {
     }
 
     match /results/{id} {
-      allow read: if true;
+      allow read: if hasProfile()
+        && resource.data.group == myGroup();
       allow create: if validResult(id);
       allow update: if validResult(id)
         && resource.data.uid == myPlayer()
@@ -121,7 +122,8 @@ service cloud.firestore {
     }
 
     match /status/{id} {
-      allow read: if true;
+      allow read: if hasProfile()
+        && resource.data.group == myGroup();
       allow create: if validStatus(id);
       allow update: if validStatus(id)
         && resource.data.uid == myPlayer()
