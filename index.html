@@ -1737,25 +1737,26 @@ const penUp=e=>{if(e.pointerType==="pen"&&penAct&&penAct.id===e.pointerId)penAct
 function gridGeo(W){const g=$("#grid"),gr=g.getBoundingClientRect(),a=S.cells[0],b=S.cells[1]||a,d=S.cells[W]||a;
  return{x:gr.left+a.offsetLeft-g.offsetLeft,y:gr.top+a.offsetTop-g.offsetTop,pw:(b.offsetLeft-a.offsetLeft)||a.offsetWidth,ph:(d.offsetTop-a.offsetTop)||a.offsetHeight}}
 function gridHit(G,x,y,W,H){if(!G)return -1;const c=Math.floor((x-G.x)/G.pw),r=Math.floor((y-G.y)/G.ph);return c<0||r<0||c>=W||r>=H?-1:r*W+c}
-function binDown(e){if(S.done||S.type!=="bin"||e._closed||e.button>0)return;if(drag2&&drag2.pid!==e.pointerId)binEnd();
+function binDown(e){const mb=mouseLR(e);if(S.done||S.type!=="bin"||e._closed||mb==="")return;if(drag2&&drag2.pid!==e.pointerId)binEnd();
  const g=gridGeo(S.p.W);G2={x:g.x,y:g.y,cs:g.pw,W:S.p.W,H:S.p.H};
  /* Op de tellers naast het veld drukken/slepen: die rij (of kolom) vergelijken met de andere, zonder iets in te vullen. */
  const k=e.target.closest&&e.target.closest(".cnt");
- if(k){const ri=S.rowc.indexOf(k),ci=S.colc.indexOf(k);if(ri<0&&ci<0)return;e.preventDefault();clearHint();
+ if(k){if(mb==="r")return;const ri=S.rowc.indexOf(k),ci=S.colc.indexOf(k);if(ri<0&&ci<0)return;e.preventDefault();clearHint();
   drag2={line:ri>=0?"r":"c",pid:e.pointerId,moved:true};try{$("#grid").setPointerCapture(e.pointerId)}catch(x){}
   S.pick={t:drag2.line,at:ri>=0?ri:ci};binCompare();paintBin();return}
  const i=binCell(e.clientX,e.clientY);if(i<0)return;
  e.preventDefault();if(!S.start&&S.p.giv[i]<0)S.start=Date.now();clearHint();
  const N=S.p.W,r=i/N|0,c=i%N;
- if(potlood){
+ if(potlood&&mb==null){
   const old=noteVal(i),to=S.p.giv[i]<0&&S.cur[i]<0?(old===1?2:old===2?0:1):old;
   drag2={note:true,start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp,nchanges:new Map()};S.rd=S.cd=S.pick=null;
   noteDragWrite(drag2,i,to);return}
- begin();drag2={start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,old:S.cur[i],applied:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp};S.rd=S.cd=S.pick=null;
- if(S.p.giv[i]<0){const o=S.cur[i];S.cur[i]=o<0?0:o===0?1:-1;drag2.applied=true}
+ begin();drag2={start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,old:S.cur[i],applied:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp,mouseDirect:mb!==null};S.rd=S.cd=S.pick=null;
+ if(S.p.giv[i]<0){const o=S.cur[i];if(mb==="l")S.cur[i]=o===0?-1:0;else if(mb==="r")S.cur[i]=o===1?-1:1;else S.cur[i]=o<0?0:o===0?1:-1;drag2.applied=true}
  paintBin();
- lpStart(e,()=>{if(!drag2||drag2.moved||drag2.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag2=null;S.gs=null;paintBin();lpNote(i)})}
+ if(mb===null)lpStart(e,()=>{if(!drag2||drag2.moved||drag2.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag2=null;S.gs=null;paintBin();lpNote(i)})}
 function binMove(e){if(!drag2||S.type!=="bin"||e.pointerId!==drag2.pid)return;
+ if(drag2.mouseDirect)return;
  if(drag2.line){const g=G2,rows=drag2.line==="r",n=rows?g.H:g.W,x=Math.max(0,Math.min(n-1,Math.floor(rows?(e.clientY-g.y)/g.cs:(e.clientX-g.x)/g.cs)));
   if(S.pick&&S.pick.at!==x){S.pick={t:drag2.line,at:x};binCompare();paintBin()}return}if(!drag2.moved&&Math.hypot(e.clientX-drag2.x,e.clientY-drag2.y)<Math.max(14,CS*.6))return;const i=binCell(e.clientX,e.clientY);if(i<0)return;
  const N=S.p.W,r=i/N|0,c=i%N,d=drag2;
@@ -1792,19 +1793,22 @@ function applyDrag(i){if(drag.mode==="add"){if(disp(i)===0)setCell(i,1)}else if(
 function noteAdjStar(i){const N=S.p.N,r=i/N|0,c=i%N;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const rr=r+dr,cc=c+dc,j=rr*N+cc;if(rr>=0&&rr<N&&cc>=0&&cc<N&&noteVal(j)===2&&disp(j)===0)return true}return false}
 const noteDisp=i=>noteVal(i)===2?2:(noteVal(i)===1||noteAdjStar(i))?1:0;
 function applyNoteDrag(i){if(disp(i)!==0)return;if(drag.mode==="add"){if(noteDisp(i)===0)noteDragWrite(drag,i,1)}else if(drag.mode==="del"){if(noteVal(i)===1)noteDragWrite(drag,i,0)}}
-function starDown(e){if(S.done||S.type!=="star"||e._closed||e.button>0)return;if(drag&&drag.pid!==e.pointerId)starEnd();
+function starDown(e){const mb=mouseLR(e);if(S.done||S.type!=="star"||e._closed||mb==="")return;if(drag&&drag.pid!==e.pointerId)starEnd();
  const N=S.p.N;S.sg=gridGeo(N);const i=gridHit(S.sg,e.clientX,e.clientY,N,N);if(i<0)return;
  e.preventDefault();if(!S.start)S.start=Date.now();clearHint();
- if(potlood){if(disp(i)!==0)return;const v=noteDisp(i);drag={note:true,pid:e.pointerId,mode:v===0?"add":v===1?"del":"none",start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map()};noteDragWrite(drag,i,v===0?1:v===1?2:0);return}
- begin();const v=disp(i);
- drag={pid:e.pointerId,mode:v===0?"add":v===1?"del":"none",start:i,last:i,moved:false,path:[i],prev:new Map()};
+ if(potlood&&mb==null){if(disp(i)!==0)return;const v=noteDisp(i);drag={note:true,pid:e.pointerId,mode:v===0?"add":v===1?"del":"none",start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map()};noteDragWrite(drag,i,v===0?1:v===1?2:0);return}
+ begin();
+ if(mb!==null){const target=mb==="l"?2:1,old=S.cur[i],mode=old===target?"del":"add";drag={direct:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map()};drag.prev.set(i,old);setCell(i,mode==="del"?0:target);return}
+ const v=disp(i);drag={pid:e.pointerId,mode:v===0?"add":v===1?"del":"none",start:i,last:i,moved:false,path:[i],prev:new Map()};
  setCell(i,v===0?1:v===1?2:0);
  lpStart(e,()=>{if(!drag||drag.moved||drag.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag=null;S.gs=null;paintAll();lpNote(i)})}
 function starEnter(j){const d=drag,k=d.path.indexOf(j);if(k>=0){while(d.path.length>k+1){const c=d.path.pop();if(d.prev.has(c)){if(d.note)noteDragWrite(d,c,d.prev.get(c));else S.cur[c]=d.prev.get(c);d.prev.delete(c)}}d.note?paintNotes():paintAll();return}
- d.path.push(j);if(d.note){const o=noteVal(j);applyNoteDrag(j);if(noteVal(j)!==o)d.prev.set(j,o);return}const o=S.cur[j];applyDrag(j);if(S.cur[j]!==o)d.prev.set(j,o)}
+ d.path.push(j);if(d.note){const o=noteVal(j);applyNoteDrag(j);if(noteVal(j)!==o)d.prev.set(j,o);return}
+ if(d.direct){const o=S.cur[j],nv=d.mode==="del"?(o===d.target?0:o):d.target;if(nv!==o){d.prev.set(j,o);S.cur[j]=nv;paintAll()}return}
+ const o=S.cur[j];applyDrag(j);if(S.cur[j]!==o)d.prev.set(j,o)}
 function starMove(e){if(!drag||S.type!=="star"||e.pointerId!==drag.pid)return;const N=S.p.N,i=gridHit(S.sg,e.clientX,e.clientY,N,N);if(i<0||i===drag.last)return;
  const r0=drag.last/N|0,c0=drag.last%N,r1=i/N|0,c1=i%N,n=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));
- if(!drag.moved){drag.moved=true;if(drag.note){if(drag.mode==="del")noteDragWrite(drag,drag.start,0);else if(drag.mode==="none")noteDragWrite(drag,drag.start,2)}else{if(drag.mode==="del")setCell(drag.start,0);else if(drag.mode==="none")setCell(drag.start,2)}}
+ if(!drag.moved){drag.moved=true;if(!drag.direct){if(drag.note){if(drag.mode==="del")noteDragWrite(drag,drag.start,0);else if(drag.mode==="none")noteDragWrite(drag,drag.start,2)}else{if(drag.mode==="del")setCell(drag.start,0);else if(drag.mode==="none")setCell(drag.start,2)}}}
  for(let k=1;k<=n;k++)starEnter(Math.round(r0+(r1-r0)*k/n)*N+Math.round(c0+(c1-c0)*k/n));
  drag.last=i}
 function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;starEnd()}
@@ -2284,7 +2288,7 @@ const isStylus=e=>[...(e.changedTouches||[])].some(t=>t.touchType==="stylus");
 const bgTouch=e=>{if(!twoMode())return;const t=e.target;if(t.closest&&t.closest(BGX))return;if(document.documentElement.classList.contains("tap")||isStylus(e))e.preventDefault()};
 document.addEventListener("touchstart",bgTouch,{passive:false,capture:true});document.addEventListener("touchend",e=>{if(isStylus(e))bgTouch(e)},{passive:false,capture:true});
 document.addEventListener("dblclick",e=>{if(twoMode())e.preventDefault()},{capture:true});
-document.addEventListener("contextmenu",e=>{if(!twoMode())return;const t=e.target;if(t&&t.closest&&t.closest("#grid,#hexsvg,#mgrid"))e.preventDefault()},{capture:true});
+document.addEventListener("contextmenu",e=>{if(!(twoMode()||S&&["star","bin"].includes(S.type)))return;const t=e.target;if(t&&t.closest&&t.closest("#grid,#hexsvg,#mgrid"))e.preventDefault()},{capture:true});
 /* Verborgen tik-meter (5 keer snel op het logo tikken): laat zien welke aanrakingen de iPad doorgeeft, met de tijd ertussen. */
 let TD=null,tdTaps=[];const tdLog=[];let tdLast=0;
 function tdAdd(s){if(!TD)return;const n=performance.now();tdLog.unshift(String(Math.round(n-tdLast)).padStart(5)+" ms  "+s);tdLast=n;tdLog.length=Math.min(tdLog.length,16);TD.textContent="Tik-meter (5x op logo = uit)\n"+tdLog.join("\n")}
