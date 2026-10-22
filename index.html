@@ -111,7 +111,6 @@ h2{font-size:15px;margin:10px 0 4px}
 .row{display:flex;justify-content:space-between;font-size:15px;padding:2px 0}
 .mut{color:var(--mut);font-size:14px}
 
-#who{font-weight:700;padding:6px 14px}
 .st{transition:background .2s;background:#2f9fe8;color:#fff;padding:8px 16px 6px;text-align:right;min-width:140px;line-height:1.1}
 .st span{display:block;font-size:12px;font-weight:800;letter-spacing:.02em}
 .st b{font-size:34px;font-weight:800;line-height:1.05}.st small{display:block;font-size:12px;opacity:.85}
@@ -257,7 +256,6 @@ header h1{flex:none;font-size:20px;gap:8px}
 header nav{flex:1;padding:0;gap:6px;flex-wrap:wrap;justify-content:center;min-width:0}
 header nav button{padding:7px 13px 7px 10px;gap:6px;font-size:15px}
 #theme,#sbtn{padding:6px 11px;font-size:17px}
-#who{padding:6px 12px;font-size:15px}
 main{grid-template-columns:128px minmax(0,1fr);gap:14px;padding:4px 12px 16px;max-width:none}
 #rail{gap:10px;top:6px}
 #time{font-size:28px;padding:8px 10px}
@@ -280,7 +278,7 @@ main{grid-template-columns:128px minmax(0,1fr) 150px}
  #rail2 #segrow{flex-direction:row;flex-wrap:wrap;justify-content:center}}
 @media(max-width:1100px) and (min-aspect-ratio:1/1){
 header{gap:6px;padding:6px 8px}header nav{gap:4px}header nav button{padding:6px 9px 6px 8px;font-size:14px;gap:5px}
-#theme,#sbtn{padding:6px 9px}#who{padding:6px 9px;font-size:14px}
+#theme,#sbtn{padding:6px 9px}
 main{grid-template-columns:112px minmax(0,1fr) 126px;gap:8px;padding:4px 8px 12px}
 #tools button{padding:8px 4px;gap:5px}#tools button span{font-size:13px}#rail2 #next{font-size:14px;padding:9px 4px}
 #hintb,#chk,#helpb{font-size:14px;padding:11px 4px;white-space:nowrap}#streak{font-size:13px}}
@@ -988,10 +986,9 @@ body.tablet.home #home .hwrap:not(.sco) .hscount b{font-size:17px}
 .authactions{display:flex;gap:8px}.authactions button{flex:1}.authsecondary{background:var(--card);color:var(--fg);border:1px solid var(--line)}
 #authbtn .authdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#28a745}
 body.phone #authbtn{width:100%;text-align:left}
-.authform{position:relative;text-align:left}.authform h2,.authform>p{text-align:center}.authform label{display:block;margin:11px 0 0;font-size:12px;font-weight:850;color:var(--mut)}.authform input{display:block;width:100%;margin-top:5px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:700 15px inherit;font-family:inherit;outline:none}.authform input:focus{border-color:var(--pc);box-shadow:0 0 0 3px color-mix(in srgb,var(--pc) 15%,transparent)}.authform>button:not(.authx){width:100%;margin-top:14px}.authx{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:11px;padding:0;border:1px solid var(--line);background:var(--card);color:var(--mut);box-shadow:none}.authplayers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0 4px}.authplayers button{padding:12px 8px;background:var(--card);color:var(--fg);border:1px solid var(--line);box-shadow:none}.authplayers button.on{border-color:var(--pc);background:color-mix(in srgb,var(--pc) 9%,var(--card));box-shadow:0 0 0 2px color-mix(in srgb,var(--pc) 16%,transparent)}
-.hactions{display:flex;align-items:center;gap:7px;flex:none}.hprofile{width:39px;height:39px;display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--fg);box-shadow:0 2px 8px var(--sh);font-weight:900;font-size:14px;overflow:hidden}.hprofile img{width:100%;height:100%;object-fit:cover}.hprofile:hover{transform:none;background:color-mix(in srgb,var(--pc) 6%,var(--card))}
+.authform{position:relative;text-align:left}.authform h2,.authform>p{text-align:center}.authform label{display:block;margin:11px 0 0;font-size:12px;font-weight:850;color:var(--mut)}.authform input{display:block;width:100%;margin-top:5px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:700 15px inherit;font-family:inherit;outline:none}.authform input:focus{border-color:var(--pc);box-shadow:0 0 0 3px color-mix(in srgb,var(--pc) 15%,transparent)}.authform>button:not(.authx){width:100%;margin-top:14px}.authx{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:11px;padding:0;border:1px solid var(--line);background:var(--card);color:var(--mut);box-shadow:none}.hactions{display:flex;align-items:center;gap:7px;flex:none}.hprofile{width:39px;height:39px;display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--fg);box-shadow:0 2px 8px var(--sh);font-weight:900;font-size:14px;overflow:hidden}.hprofile img{width:100%;height:100%;object-fit:cover}.hprofile:hover{transform:none;background:color-mix(in srgb,var(--pc) 6%,var(--card))}
 .profgroupcard,.groupcurrent,.groupinvite,.groupmembers{margin-top:13px;padding:12px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--line) 14%,var(--card))}.profgroupcard small,.profgroupcard b,.groupcurrent small,.groupcurrent b,.groupinvite>small,.groupmembers>small{display:block}.profgroupcard b,.groupcurrent b{font-size:17px;margin:2px 0 8px}.profgroupcard button{width:100%;box-shadow:none}.groupform>div+div{margin-top:12px}.groupinvite>div{display:flex;align-items:center;gap:8px;margin-top:7px}.groupinvite code{flex:1;font:900 18px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;padding:9px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}.groupinvite button{width:auto;margin:0}.groupmembers #groupmembers{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.groupmember{padding:5px 9px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:11px;font-weight:800}.groupswitch{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}.groupswitch summary{cursor:pointer;font-weight:850}.groupswitch button{width:100%;margin-top:8px}.groupor{display:flex;align-items:center;gap:9px;margin:12px 0;color:var(--mut);font-size:11px}.groupor:before,.groupor:after{content:"";height:1px;background:var(--line);flex:1}.groupor span{flex:none}.scoregroupedit{margin-left:7px;width:30px;height:30px;padding:0;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--mut);box-shadow:none;vertical-align:middle;font-size:14px}.scoregroupedit:hover{transform:none}
-@media(max-width:560px){.hactions{gap:5px}.hprofile{width:36px;height:36px}.authcard{padding:22px 18px}.authplayers{gap:6px}.groupform{max-height:calc(100dvh - 28px);overflow:auto}}
+@media(max-width:560px){.hactions{gap:5px}.hprofile{width:36px;height:36px}.authcard{padding:22px 18px}.groupform{max-height:calc(100dvh - 28px);overflow:auto}}
 </style>
 <script>
 /* ===== STAP 4 van het stappenplan: plak hier jouw Firebase-gegevens ===== */
@@ -1006,7 +1003,7 @@ window.FIREBASE_CONFIG={
 </head><body>
 <div id="iosPwaStatusStrip" aria-hidden="true"></div>
 <header><h1><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="ttl">Gepuzzellig</span></h1><nav id="tabs" aria-label="Puzzelsoorten"></nav>
-<button id="theme" title="Donkere of lichte weergave" aria-label="Donkere of lichte weergave"></button><button id="sbtn" title="Overzicht en statistieken" aria-label="Overzicht en statistieken">📊</button><button id="who" hidden aria-hidden="true"></button><button id="authbtn" title="Google-account" aria-label="Google-account">Account</button><input id="name" type="hidden"><input id="group" type="hidden"></header>
+<button id="theme" title="Donkere of lichte weergave" aria-label="Donkere of lichte weergave"></button><button id="sbtn" title="Overzicht en statistieken" aria-label="Overzicht en statistieken">📊</button><button id="authbtn" title="Google-account" aria-label="Google-account">Account</button><input id="name" type="hidden"><input id="group" type="hidden"></header>
 <div id="authgate" class="authcover" role="dialog" aria-modal="true" aria-labelledby="authgt">
  <div class="authcard"><span class="authlogo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><h2 id="authgt">Welkom bij Gepuzzellig</h2><p>Log in met Google om je gekoppelde profiel en groep te gebruiken.</p><button id="authgoogle" class="authgoogle"><span class="g">G</span> Doorgaan met Google</button><p id="authmsg" class="authmsg"></p></div>
 </div>
@@ -3241,7 +3238,7 @@ function phoneLayout(){document.body.classList.add("phone");const hd=$("header")
  const pbot=document.createElement("div");pbot.id="pbot";document.body.append(pbot);
  prow.append($("#arch"),$("#hexstat"),$("#msg"));
  pbot.append($("#undo"),$("#redo"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✏️";$("#notewipe").innerHTML="🧹";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
- pmp.append($("#next"),$("#sbtn"),$("#helpb"),$("#ctrlb"),$("#reset"),$("#time"),$("#streak"),makeThemeSeg(),$("#who"),$("#authbtn"));$("#theme").hidden=true;
+ pmp.append($("#next"),$("#sbtn"),$("#helpb"),$("#ctrlb"),$("#reset"),$("#time"),$("#streak"),makeThemeSeg(),$("#authbtn"));$("#theme").hidden=true;
  $("#chk").innerHTML="✓<span> Klopt?</span>";$("#hintb").innerHTML="💡<span> Hint</span>";
  pm.onclick=()=>pmp.classList.toggle("open");pmp.addEventListener("click",e=>{if(e.target.closest("button"))setTimeout(()=>pmp.classList.remove("open"),80)});
  document.addEventListener("pointerdown",e=>{if(pmp.classList.contains("open")&&!e.target.closest("#pmp,#pm")){pmp.classList.remove("open");e._closed=true}},true);
@@ -3269,9 +3266,9 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
   const sec=(t)=>{const h=document.createElement("div");h.className="mh";h.textContent=t;more.append(h)};
   const lst=(...ids)=>{const d=document.createElement("div");d.className="mlist";ids.forEach(i=>d.append($(i)));more.append(d)};
   const ic=(b,i,t)=>{b.innerHTML='<span class="ic">'+i+'</span><span>'+t+'</span>'};
-  sec("Puzzel");lst("#arch","#next");sec("Weergave");more.append(makeThemeSeg());sec("Overig");lst("#sbtn","#helpb","#ctrlb","#reset","#who","#authbtn");more.append($("#streak"));$("#theme").hidden=true;
+  sec("Puzzel");lst("#arch","#next");sec("Weergave");more.append(makeThemeSeg());sec("Overig");lst("#sbtn","#helpb","#ctrlb","#reset","#authbtn");more.append($("#streak"));$("#theme").hidden=true;
   ic($("#arch"),"📅","Eerdere dagpuzzels");ic($("#next"),"🎲","Nog een puzzel");ic($("#sbtn"),"📊","Overzicht en statistieken");ic($("#helpb"),"❓","Uitleg van deze puzzel");ic($("#ctrlb"),"⌨️","Bediening");
-  {const r=$("#reset");r.innerHTML='<b class="ic">⟲</b><span>Reset</span>'}updTheme();{const n=$("#name").value;if(n)ic($("#who"),"👤","Speler: "+n)}
+  {const r=$("#reset");r.innerHTML='<b class="ic">⟲</b><span>Reset</span>'}updTheme();
   $("#tbHome").onclick=showHome;$("#tbMore").onclick=e=>{e.stopPropagation();more.classList.toggle("open")};
   /* Het menu blijft open; alleen bij "Nog een puzzel" gaat het dicht. */
   more.addEventListener("click",e=>{const b=e.target.closest("button");if(b&&b.id==="next")setTimeout(()=>more.classList.remove("open"),80)});
