@@ -996,7 +996,8 @@ body.tablet.home #home .hwrap:not(.sco) .hscount b{font-size:17px}
 body.phone #authbtn{width:100%;text-align:left}
 .authform{position:relative;text-align:left}.authform h2,.authform>p{text-align:center}.authform label{display:block;margin:11px 0 0;font-size:12px;font-weight:850;color:var(--mut)}.authform input{display:block;width:100%;margin-top:5px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:700 15px inherit;font-family:inherit;outline:none}.authform input:focus{border-color:var(--pc);box-shadow:0 0 0 3px color-mix(in srgb,var(--pc) 15%,transparent)}.authform>button:not(.authx){width:100%;margin-top:14px}.authx{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:11px;padding:0;border:1px solid var(--line);background:var(--card);color:var(--mut);box-shadow:none}.authplayers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0 4px}.authplayers button{padding:12px 8px;background:var(--card);color:var(--fg);border:1px solid var(--line);box-shadow:none}.authplayers button.on{border-color:var(--pc);background:color-mix(in srgb,var(--pc) 9%,var(--card));box-shadow:0 0 0 2px color-mix(in srgb,var(--pc) 16%,transparent)}
 .hactions{display:flex;align-items:center;gap:7px;flex:none}.hprofile{width:39px;height:39px;display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--fg);box-shadow:0 2px 8px var(--sh);font-weight:900;font-size:14px;overflow:hidden}.hprofile img{width:100%;height:100%;object-fit:cover}.hprofile:hover{transform:none;background:color-mix(in srgb,var(--pc) 6%,var(--card))}
-@media(max-width:560px){.hactions{gap:5px}.hprofile{width:36px;height:36px}.authcard{padding:22px 18px}.authplayers{gap:6px}}
+.profgroupcard,.groupcurrent,.groupinvite,.groupmembers{margin-top:13px;padding:12px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--line) 14%,var(--card))}.profgroupcard small,.profgroupcard b,.groupcurrent small,.groupcurrent b,.groupinvite>small,.groupmembers>small{display:block}.profgroupcard b,.groupcurrent b{font-size:17px;margin:2px 0 8px}.profgroupcard button{width:100%;box-shadow:none}.groupform>div+div{margin-top:12px}.groupinvite>div{display:flex;align-items:center;gap:8px;margin-top:7px}.groupinvite code{flex:1;font:900 18px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;padding:9px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}.groupinvite button{width:auto;margin:0}.groupmembers #groupmembers{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.groupmember{padding:5px 9px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:11px;font-weight:800}.groupswitch{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}.groupswitch summary{cursor:pointer;font-weight:850}.groupswitch button{width:100%;margin-top:8px}.groupor{display:flex;align-items:center;gap:9px;margin:12px 0;color:var(--mut);font-size:11px}.groupor:before,.groupor:after{content:"";height:1px;background:var(--line);flex:1}.groupor span{flex:none}.scoregroupedit{margin-left:7px;width:30px;height:30px;padding:0;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--mut);box-shadow:none;vertical-align:middle;font-size:14px}.scoregroupedit:hover{transform:none}
+@media(max-width:560px){.hactions{gap:5px}.hprofile{width:36px;height:36px}.authcard{padding:22px 18px}.authplayers{gap:6px}.groupform{max-height:calc(100dvh - 28px);overflow:auto}}
 </style>
 <script>
 /* ===== STAP 4 van het stappenplan: plak hier jouw Firebase-gegevens ===== */
@@ -1027,9 +1028,26 @@ window.FIREBASE_CONFIG={
 <div id="authaccount" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="authat">
  <div class="authcard authform"><button id="authx" class="authx" aria-label="Sluiten">✕</button><h2 id="authat">Profiel</h2><div id="authwho" class="authwho"></div>
   <label>Naam<input id="profname" maxlength="30" autocomplete="nickname"></label>
-  <label>Groep<input id="profgroup" maxlength="40"></label>
-  <div class="authactions"><button id="profsave">Opslaan</button><button id="authout" class="authsecondary">Uitloggen</button></div>
+  <div class="profgroupcard"><small>Mijn groep</small><b id="profgroupname">Puzzelsukkels</b><button id="profgroupmanage" class="authsecondary">Groep beheren ›</button></div>
+  <div class="authactions"><button id="profsave">Naam opslaan</button><button id="authout" class="authsecondary">Uitloggen</button></div>
   <p id="profmsg" class="authmsg"></p>
+ </div>
+</div>
+<div id="groupaccount" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="groupat">
+ <div class="authcard authform groupform"><button id="groupx" class="authx" aria-label="Sluiten">✕</button><h2 id="groupat">Mijn groep</h2>
+  <div class="groupcurrent"><small>Huidige groep</small><b id="groupcurrentname">Puzzelsukkels</b><span id="grouprole" class="mut"></span></div>
+  <div id="groupownerbox">
+   <label>Groepsnaam<input id="groupnameedit" maxlength="40"></label>
+   <button id="groupnamesave">Naam wijzigen</button>
+  </div>
+  <div class="groupinvite"><small>Uitnodigingscode</small><div><code id="groupcode">—</code><button id="groupcopy" class="authsecondary">Kopieer</button></div><p class="mut sm">Deel deze code met iemand die bij jullie groep hoort.</p></div>
+  <div class="groupmembers"><small>Leden</small><div id="groupmembers"></div></div>
+  <details class="groupswitch"><summary>Andere groep</summary>
+   <label>Deelnemen met code<input id="groupjoincode" maxlength="12" autocapitalize="characters" placeholder="Bijv. PUZZEL6"></label><button id="groupjoin">Deelnemen</button>
+   <div class="groupor"><span>of</span></div>
+   <label>Nieuwe groep maken<input id="groupnewname" maxlength="40" placeholder="Naam van de groep"></label><button id="groupcreate" class="authsecondary">Nieuwe groep maken</button>
+  </details>
+  <p id="groupmsg" class="authmsg"></p>
  </div>
 </div>
 
@@ -1874,10 +1892,15 @@ const dstr=()=>new Date().toLocaleDateString("sv");
 const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
 const fmtDuration=s=>{s=Math.max(0,Math.round(+s||0));const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h?`${h} u ${m} min`:`${m} min`};
 const GEN={bin:genBin,star:genStar,nono:genNono,kak:genKak,hex:genHex,plus:genPlus,mur:genMur,m24:gen24};
-let S={},store={},cache={},loadId=0,lastRows=[],CS=40;
+let S={},store={},cache={},loadId=0,lastRows=[],CS=40,SG={};
 try{const _r=JSON.parse(localStorage.getItem("pdrows")||"[]");if(Array.isArray(_r))lastRows=_r}catch(e){}
 try{store=JSON.parse(localStorage.getItem("pd2")||"{}")}catch(e){}
+try{SG=JSON.parse(localStorage.getItem("pdscoregroups")||"{}")}catch(e){SG={}}
 const save=()=>{try{localStorage.setItem("pd2",JSON.stringify(store))}catch(e){}};
+const saveSG=()=>{try{localStorage.setItem("pdscoregroups",JSON.stringify(SG))}catch(e){}};
+const legacyGroup=()=>window.PD_SETUP&&window.PD_SETUP.group||"";
+const scoreGroup=k=>SG[k]||legacyGroup();
+const localDoneInGroup=(k,g)=>!!store[k]&&scoreGroup(k).toLowerCase()===String(g||"").toLowerCase();
 let uid="x";
 const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 let nonoVariant=lsGet("pdnvar")==="color"?"color":"classic";
@@ -1942,7 +1965,7 @@ function load(type,practice,fresh,date){document.documentElement.classList.remov
   const N=p.N||0;
   if(type==="bin")S.cur=p.giv.slice();else if(type==="kak")S.cur=Array(p.W*p.H).fill(0);else if(type==="m24"){S.r=0;setRound()}else if(type==="hex"){S.hx={rev:new Set([...p.rev0,...(p.zs||[])])};S.cs={}}else if(type==="mur"){S.cur=Array(N*N).fill(-1);S.ms=0;S.mxm=false;S.str=new Set()}else if(type==="plus"){S.cur=Array(p.W*p.H).fill(0);S.str=new Set()}else S.cur=Array(type==="nono"||type==="plus"?p.W*p.H:N*N).fill(0);
   const key=S.date+type+sf0;
-  if(!practice&&store[key]){S.done=true;S.secs=store[key];
+  if(!practice&&localDoneInGroup(key,$("#group").value)){S.done=true;S.secs=store[key];
    if(type==="bin")S.cur=p.sol.slice();else if(type==="star")S.cur=p.sol.map(v=>v?2:0);else if(type==="nono")S.cur=p.sol.slice();else if(type==="kak")S.cur=p.sol.slice();else if(type==="hex")p.sol.forEach((v,i)=>S.hx.rev.add(i));else if(type==="plus")S.cur=p.sol.map(v=>v?1:2);else if(type==="mur")S.cur=solCur(p)}
   if(!S.done&&sv0&&sv0.seed===seed&&((type!=="hex"&&type!=="plus"&&type!=="nono")||sv0.gv===GV)&&(type!=="mur"||sv0.mv===MGV)&&(type!=="plus"||sv0.pv===PGV)){try{
    if(sv0.cur&&S.cur&&sv0.cur.length===S.cur.length)S.cur=sv0.cur.slice();
@@ -2215,10 +2238,10 @@ function finish(){S.secs=Math.max(1,Math.round(playMs()/1000));S.done=true;clear
  if(S.type!=="m24")render();
  celebrate();
  if(S.practice){const sid=String(S.seed).replace(/\W/g,"").slice(-8),row={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date:S.date,type:"v~"+S.type+S.sf+"~"+sid,secs:S.secs,uid,mist:S.mist||0,hints:S.hints||0};
-  const fl=freeLoc();fl.push({date:row.date,type:row.type,secs:row.secs});lsSet("pdfree",JSON.stringify(fl.slice(-400)));
+  const fl=freeLoc();fl.push({date:row.date,type:row.type,secs:row.secs,group:row.group});lsSet("pdfree",JSON.stringify(fl.slice(-400)));
   lastRows=lastRows.filter(r=>!(r.uid===uid&&r.type===row.type));lastRows.push(row);renderStats();
   dbSave(row);setTimeout(()=>{if(S.done&&S.practice)showFinFree(S.type+S.sf)},900);return}
- store[S.date+S.type+S.sf]=S.secs;save();XS[S.date+S.type+S.sf]={mist:S.mist||0,hints:S.hints||0};xsSave();
+ {const sk=S.date+S.type+S.sf;store[sk]=S.secs;SG[sk]=$("#group").value.trim();save();saveSG();XS[sk]={mist:S.mist||0,hints:S.hints||0}}xsSave();
  const row=myRow(S.date,S.type+S.sf);
  lastRows=lastRows.filter(r=>!(r.uid===uid&&r.date===row.date&&r.type===row.type));lastRows.push(row);board(lastRows);
  dbSave(row).catch(()=>{$("#msg").textContent+=" (scorebord niet bereikbaar)"});
@@ -2932,16 +2955,17 @@ let XS={};try{XS=JSON.parse(lsGet("pdx")||"{}")}catch(e){XS={}}
 const xsSave=()=>lsSet("pdx",JSON.stringify(XS));
 let OLDRULES=false;
 const uidOf=p=>"u-"+p.toLowerCase().replace(/[^a-z0-9]/g,"");
-let PROFILE_NAMES={},GROUP_NAME=(window.PD_SETUP&&window.PD_SETUP.groupName)||"Puzzelsukkels";
+let PROFILE_NAMES={},GROUP_NAME=(window.PD_SETUP&&window.PD_SETUP.groupName)||"Puzzelsukkels",GROUP_MEMBERS=[],GROUP_INFO={};
 const playerName=p=>PROFILE_NAMES[uidOf(p)]||p;
 const playerNameUid=(u,fallback)=>PROFILE_NAMES[u]||fallback||SET.players.find(p=>uidOf(p)===u)||"Speler";
+const groupPlayers=()=>{const gid=($("#group")&&$("#group").value)||legacyGroup();if(gid===legacyGroup())return SET.players;const ids=new Set(GROUP_MEMBERS.map(x=>x&&x.playerId).filter(Boolean)),a=SET.players.filter(p=>ids.has(uidOf(p)));return a.length?a:SET.players.filter(p=>uidOf(p)===uid)};
 const pIdx=r=>{const k=SET.players.findIndex(p=>uidOf(p)===r.uid);return k<0?99:k};
-const othersTxt=()=>{const o=SET.players.filter(p=>uidOf(p)!==uid).map(playerName);return o.length===1?o[0]:"de anderen"};
+const othersTxt=()=>{const o=groupPlayers().filter(p=>uidOf(p)!==uid).map(playerName);return o.length===1?o[0]:"de anderen"};
 const badges=(r,t)=>{t=String(t).split(".")[0];const a=[];if(r.mist===0)a.push("🎯");if(HINTT.includes(t)&&r.hints===0)a.push("💡");return a.join(" ")};
 const badgeLong=(r,t)=>{t=String(t).split(".")[0];const a=[];if(r.mist===0)a.push("🎯 foutloos");else if(r.mist>0)a.push(r.mist===1?"1 fout gezien":r.mist+" fouten gezien");
  if(HINTT.includes(t)){if(r.hints===0)a.push("💡 zonder hint");else if(r.hints>0)a.push(r.hints===1?"1 hint":r.hints+" hints")}return a.join(" · ")};
 const quickBadges=(r,t)=>{if(!r)return"";t=String(t).split(".")[0];const a=[];if(r.mist!=null)a.push(r.mist===0?'<span class="rq good" title="Foutloos">🎯</span>':'<span class="rq" title="'+r.mist+(r.mist===1?" fout":" fouten")+'">❌ '+r.mist+'</span>');if(HINTT.includes(t)&&r.hints!=null)a.push(r.hints===0?'<span class="rq good" title="Zonder hint">💡</span>':'<span class="rq" title="'+r.hints+(r.hints===1?" hint":" hints")+'">💡 '+r.hints+'</span>');return a.join("")};
-function ownDayResult(date,t){const ty=t+sfx(dagLv(t,date)),g=($("#group").value||"").trim().toLowerCase(),sync=lastRows.find(x=>x.uid===uid&&x.date===date&&x.type===ty&&(x.group||"").toLowerCase()===g);let r=store[date+ty]?myRow(date,ty):sync?Object.assign({},sync):null;if(r&&sync){if(r.mist==null&&sync.mist!=null)r.mist=sync.mist;if(r.hints==null&&sync.hints!=null)r.hints=sync.hints;if(!r.secs&&sync.secs)r.secs=sync.secs}if(r){r.type=ty;r.secs=r.secs||store[date+ty]||0}return r}
+function ownDayResult(date,t){const ty=t+sfx(dagLv(t,date)),g=($("#group").value||"").trim().toLowerCase(),sync=lastRows.find(x=>x.uid===uid&&x.date===date&&x.type===ty&&(x.group||"").toLowerCase()===g);let r=localDoneInGroup(date+ty,g)?myRow(date,ty):sync?Object.assign({},sync):null;if(r&&sync){if(r.mist==null&&sync.mist!=null)r.mist=sync.mist;if(r.hints==null&&sync.hints!=null)r.hints=sync.hints;if(!r.secs&&sync.secs)r.secs=sync.secs}if(r){r.type=ty;r.secs=r.secs||store[date+ty]||0}return r}
 function myRow(date,type){const x=XS[date+type]||{},r={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date,type,secs:store[date+type]||1,uid};
  if(x.mist!=null)r.mist=x.mist;if(x.hints!=null)r.hints=x.hints;return r}
 function dbSave(row){if(!window.PD_DB)return Promise.resolve();
@@ -3001,12 +3025,12 @@ const dnl=ds=>{const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d).t
 function allRows(){const g=$("#group").value.trim().toLowerCase(),seen=new Set(),out=[];
  const add=r=>{if(!TYPES[baseT(r)])return;const k=r.uid+"|"+r.date+"|"+r.type;if(seen.has(k))return;seen.add(k);out.push(r)};
  lastRows.filter(r=>(r.group||"").toLowerCase()===g).forEach(add);
- freeLoc().forEach(r=>add({name:$("#name").value||"Speler",group:g,date:r.date,type:r.type,secs:r.secs,uid}));
- for(const k in store){const m=/^(\d{4}-\d\d-\d\d)(.+)$/.exec(k);if(m)add({name:$("#name").value||"Speler",group:g,date:m[1],type:m[2],secs:store[k],uid})}
+ freeLoc().filter(r=>String(r.group||legacyGroup()).toLowerCase()===g).forEach(r=>add({name:$("#name").value||"Speler",group:g,date:r.date,type:r.type,secs:r.secs,uid}));
+ for(const k in store){const m=/^(\d{4}-\d\d-\d\d)(.+)$/.exec(k);if(m&&scoreGroup(k).toLowerCase()===g)add({name:$("#name").value||"Speler",group:g,date:m[1],type:m[2],secs:store[k],uid})}
  return out}
 function streakOf(rows,u){const ds=new Set(rows.filter(r=>r.uid===u).map(r=>r.date));let d=dstr();if(!ds.has(d))d=addDays(d,-1);let n=0;while(ds.has(d)){n++;d=addDays(d,-1)}return n}
 function renderStats(){const raw=allRows(),all=statsRows(raw),rows=all.filter(r=>!isFree(r)),frs=all.filter(isFree),today=dstr(),dow=(new Date().getDay()+6)%7,mon=addDays(today,-dow),sun=addDays(mon,6);
- const pl=new Map();SET.players.forEach(p=>pl.set(uidOf(p),playerName(p)));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});
+ const pl=new Map();groupPlayers().forEach(p=>pl.set(uidOf(p),playerName(p)));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});
  const sc=new Map([...pl.keys()].map(u=>[u,{pts:0,n:0,w:0,fw:0,ft:0}])),grp=new Map();
  rows.filter(r=>r.date>=mon&&r.date<=sun).forEach(r=>{const k=r.date+"|"+r.type;if(!grp.has(k))grp.set(k,[]);grp.get(k).push(r)});
  grp.forEach(a=>a.forEach(r=>{const x=sc.get(r.uid);if(!x)return;x.n++;x.pts++;const q=r.uid===uid&&XS[r.date+r.type]?XS[r.date+r.type]:r;if(q.mist===0)x.fl=(x.fl||0)+1;if(HINTT.includes(baseT(r))&&q.hints===0)x.nh=(x.nh||0)+1}));
@@ -3086,7 +3110,7 @@ function liveOf(u){const g=($("#group").value||"").trim().toLowerCase(),st=STAT.
  if(!st.onlinePractice&&st.onlineType&&lastRows.some(r=>{if(r.uid!==u||r.date!==dstr()||(r.group||"").toLowerCase()!==g||!(r.secs>0)||String(r.type).startsWith("v~"))return false;return st.onlineLvl?r.type===st.onlineType+sfx(st.onlineLvl):String(r.type).split(".")[0]===st.onlineType}))return null;
  return st}
 function liveTitle(st){if(!st)return"";const t=st.onlineType&&TYPES[st.onlineType]?TYPES[st.onlineType]:"puzzel",bits=[(st.name||"Iemand")+" is online",t];if(st.onlinePractice)bits.push("Vrij puzzelen");else bits.push("Dagpuzzel");if(st.onlineLvl&&LVL[st.onlineLvl])bits.push(LVL[st.onlineLvl]);if(st.onlineType==="nono"&&st.onlineNono)bits.push(st.onlineNono==="color"?"Kleur":"Klassiek");return bits.join(" · ")}
-function updatePeerLive(){const el=$("#peerLive");if(!el)return;const o=SET&&SET.players?SET.players.map(p=>({p,u:uidOf(p)})).filter(x=>x.u!==uid).map(x=>({p:x.p,st:liveOf(x.u)})).find(x=>x.st):null;el.hidden=!o;if(!o)return;const sp=el.querySelector("span");if(sp)sp.textContent=playerName(o.p);el.title=liveTitle(o.st)}
+function updatePeerLive(){const el=$("#peerLive");if(!el)return;const o=SET&&SET.players?groupPlayers().map(p=>({p,u:uidOf(p)})).filter(x=>x.u!==uid).map(x=>({p:x.p,st:liveOf(x.u)})).find(x=>x.st):null;el.hidden=!o;if(!o)return;const sp=el.querySelector("span");if(sp)sp.textContent=playerName(o.p);el.title=liveTitle(o.st)}
 function pingOnline(force){try{if(!window.PD_DB||!window.PD_DB.setStatus||!uid||uid==="x"||document.hidden||document.body.classList.contains("home")||!S.p||S.done)return;const now=Date.now();if(!force&&now-lastOnline<30000)return;lastOnline=now;window.PD_DB.setStatus({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",onlineAt:now,onlineType:S.type,onlinePractice:!!S.practice,onlineLvl:S.lvl||0,onlineNono:S.type==="nono"?S.nv:""}).catch(()=>{})}catch(e){}}
 function clearOnline(solved){try{lastOnline=0;const p={uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",onlineAt:0};if(solved){lastPing={k:"",t:0};p.date="";p.type="";p.at=0}if(window.PD_DB&&window.PD_DB.setStatus&&uid&&uid!=="x")window.PD_DB.setStatus(p).catch(()=>{})}catch(e){}}
 function pingBusy(){pingOnline();try{if(!window.PD_DB||!window.PD_DB.setStatus||!S.p||S.practice||S.done||S.date!==dstr())return;const k=S.date+S.type+S.sf,now=Date.now();if(lastPing.k===k&&now-lastPing.t<90000)return;lastPing={k,t:now};
@@ -3105,13 +3129,13 @@ function mergeRows(oud,nieuw){const m=new Map();const k=r=>r.uid+"|"+r.date+"|"+
    (bijv. andere browser, beginscherm-app tegenover Safari, gewiste gegevens), ook hier als klaar markeren. */
 function pullMine(rows){let ch=false;
  rows.forEach(r=>{if(r.uid!==uid||!r.date||!r.type||String(r.type).startsWith("v~")||!(r.secs>0))return;const k=r.date+r.type;
-  if(!store[k]){store[k]=r.secs;ch=true;if(!XS[k]&&(r.mist!=null||r.hints!=null)){XS[k]={};if(r.mist!=null)XS[k].mist=r.mist;if(r.hints!=null)XS[k].hints=r.hints}}});
- if(!ch)return;save();try{xsSave()}catch(e){}
+  if(!store[k]||scoreGroup(k)!==(r.group||legacyGroup())){store[k]=r.secs;SG[k]=r.group||legacyGroup();ch=true;if(!XS[k]&&(r.mist!=null||r.hints!=null)){XS[k]={};if(r.mist!=null)XS[k].mist=r.mist;if(r.hints!=null)XS[k].hints=r.hints}}});
+ if(!ch)return;save();saveSG();try{xsSave()}catch(e){}
  if(S.p&&!S.practice&&!S.done&&store[S.date+S.type+S.sf]){progDel(progKey(S.type,false,S.date,S.sf));load(S.type,false,false,S.date)}}
 /* Tijden die nog niet op het scorebord staan (bijv. offline gespeeld) alsnog versturen. */
 function resync(rows){if(!window.PD_DB||resync.done)return;resync.done=true;const from=addDays(dstr(),-14);
- Object.keys(store).forEach(k=>{const d=k.slice(0,10),t=k.slice(10);if(d<from||!/^\d{4}-\d\d-\d\d$/.test(d)||!t)return;
-  if(!rows.some(r=>r.uid===uid&&r.date===d&&r.type===t))dbSave(myRow(d,t)).catch(()=>{})})}
+ Object.keys(store).forEach(k=>{const d=k.slice(0,10),t=k.slice(10);if(d<from||!/^\d{4}-\d\d-\d\d$/.test(d)||!t||scoreGroup(k)!==$("#group").value.trim())return;
+  if(!rows.some(r=>r.uid===uid&&r.date===d&&r.type===t&&(r.group||"")===scoreGroup(k)))dbSave(myRow(d,t)).catch(()=>{})})}
 addEventListener("pdready",startBoard);addEventListener("pdready",()=>setTimeout(()=>pullCloudProgress(true),300));
 if("serviceWorker"in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){
  /* iOS kan een beginscherm-app lang in het geheugen houden. Controleer daarom ook bij terugkeer naar de app op een nieuwe worker. */
@@ -3138,8 +3162,8 @@ const SET=window.PD_SETUP||{players:["Speler"],group:"lokaal",groupName:"Groep"}
 function setMe(p,displayName){lsSet("pdme",p);uid=uidOf(p);const nm=(displayName||playerName(p)||p).trim()||p;$("#name").value=nm;{const w=$("#who");if(w.closest("#more"))w.innerHTML='<span class="ic">👤</span><span>Speler: '+nm+'</span>';else w.textContent="👤 "+nm}$("#pick").classList.remove("on");board(lastRows);setTimeout(()=>pullCloudProgress(true),0)}
 SET.players.forEach(p=>{const b=document.createElement("button");b.textContent=p;b.onclick=()=>setMe(p);$("#pickb").append(b)});
 $("#who").onclick=()=>{if(window.PD_PROFILE_LINKED){window.dispatchEvent(new Event("pdopenprofile"));return}$("#pick").classList.add("on")};
-addEventListener("pdprofile",e=>{const d=e.detail||{},pr=d.profile||{};PROFILE_NAMES={};(d.members||[]).forEach(x=>{if(x&&x.playerId&&x.displayName)PROFILE_NAMES[x.playerId]=x.displayName});if(pr.playerId&&pr.displayName)PROFILE_NAMES[pr.playerId]=pr.displayName;GROUP_NAME=d.groupName||SET.groupName||"Puzzelsukkels";const p=SET.players.find(x=>uidOf(x)===pr.playerId);if(p){window.PD_PROFILE_LINKED=true;setMe(p,pr.displayName);$("#who").style.display="none";if(document.body.classList.contains("home")&&typeof renderHome==="function")renderHome()}});
-addEventListener("pdauthout",()=>{window.PD_PROFILE_LINKED=false;$("#who").style.display="";PROFILE_NAMES={};GROUP_NAME=SET.groupName||"Puzzelsukkels"});
+addEventListener("pdprofile",e=>{const d=e.detail||{},pr=d.profile||{};PROFILE_NAMES={};GROUP_MEMBERS=d.members||[];GROUP_INFO=d.group||{};(d.members||[]).forEach(x=>{if(x&&x.playerId&&x.displayName)PROFILE_NAMES[x.playerId]=x.displayName});if(pr.playerId&&pr.displayName)PROFILE_NAMES[pr.playerId]=pr.displayName;GROUP_NAME=d.groupName||SET.groupName||"Puzzelsukkels";if(pr.groupId)$("#group").value=pr.groupId;const p=SET.players.find(x=>uidOf(x)===pr.playerId);if(p){window.PD_PROFILE_LINKED=true;setMe(p,pr.displayName);$("#who").style.display="none";if(window.PD_DB)startBoard();if(document.body.classList.contains("home")&&typeof renderHome==="function")renderHome()}});
+addEventListener("pdauthout",()=>{window.PD_PROFILE_LINKED=false;$("#who").style.display="";PROFILE_NAMES={};GROUP_MEMBERS=[];GROUP_INFO={};GROUP_NAME=SET.groupName||"Puzzelsukkels";$("#group").value=SET.group});
 {const q=(new URLSearchParams(location.search).get("ik")||"").toLowerCase(),f=SET.players.find(p=>p.toLowerCase()===q),m=lsGet("pdme"),k=SET.players.includes(m)?m:"";
  if(f)setMe(f);else if(k)setMe(k);else{$("#who").textContent="👤 Kies speler";$("#pick").classList.add("on")}}
 for(const t in TYPES){const b=document.createElement("button");b.dataset.t=t;const sp=document.createElement("span");sp.textContent=TYPES[t];b.append(sp);b.onclick=()=>openType(t);$("#tabs").append(b)}
@@ -3150,7 +3174,7 @@ function updateArchiveVisibility(){const a=$("#arch");if(a){a.style.display=S.pr
  ab.onclick=e=>{e.stopPropagation();if(pop.classList.contains("open")){pop.classList.remove("open");return}pop.innerHTML="";const td=dstr(),g=($("#group").value||"").trim().toLowerCase(),t=S.type;
   const h=document.createElement("div");h.className="mut sm";h.textContent=TYPES[t];pop.append(h);
   for(let k=0;k<=7;k++){const d=addDays(td,-k),ty=t+sfx(dagLv(t,d)),b=document.createElement("button");b.className=d===S.date?"on":"";
-   const who=SET.players.filter(pl=>{const u=uidOf(pl);return(u===uid&&store[d+ty])||lastRows.some(r=>r.uid===u&&r.date===d&&r.type===ty&&(r.group||"").toLowerCase()===g)}).map(pl=>'<i class="pw'+(uidOf(pl)===uid?" me":"")+'">'+playerName(pl)[0]+"</i>").join("");
+   const who=groupPlayers().filter(pl=>{const u=uidOf(pl);return(u===uid&&store[d+ty])||lastRows.some(r=>r.uid===u&&r.date===d&&r.type===ty&&(r.group||"").toLowerCase()===g)}).map(pl=>'<i class="pw'+(uidOf(pl)===uid?" me":"")+'">'+playerName(pl)[0]+"</i>").join("");
    b.innerHTML="<span>"+(k===0?"Vandaag":k===1?"Gisteren":dnl(d))+(isWk(d)?" 💪":"")+(featOf(d)===t?" ⭐":"")+"</span>"+(who?'<span class="lw">'+who+"</span>":"");
    b.onclick=ev=>{ev.stopPropagation();pop.classList.remove("open");load(S.type,false,false,d)};pop.append(b)}
   const r=ab.getBoundingClientRect();pop.style.top=Math.round(r.bottom+6)+"px";pop.style.left=Math.round(Math.max(6,Math.min(innerWidth-236,r.left+r.width/2-115)))+"px";pop.classList.add("open")};
@@ -3189,7 +3213,7 @@ function persist(forceCloud){if(!S.p||S.done||!S.start||!S.seed)return;const a=p
  const k=progKey(S.type,S.practice,S.date,S.sf),pc=progressPct();
  /* Een onaangeraakte of weer volledig leeggemaakte puzzel is geen lopende puzzel. */
  if(pc<=0){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;return}
- const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,pc};
+ const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,pc,group:$("#group").value.trim()};
  if(S.hx){e.rev=[...S.hx.rev];e.cs=S.cs||{}}else if(S.type==="m24")e.r=S.r;else if(S.cur)e.cur=S.cur;if(S.str)e.str=[...S.str];if(S.nt&&Object.keys(S.nt).length)e.nt=S.nt;
  /* Hervatten moet ook echt hervatten: bewaar een begrensde undo/redo-geschiedenis.
     Maak 24 heeft een eigen ronde-state en laten we hier bewust buiten. */
@@ -3279,15 +3303,15 @@ function updTop(){if(!S||!S.p)return;document.querySelectorAll("#pbot .pgrp").fo
 function showHome(){RANDOM=false;if(HOMEREADY)pauseAndPersistActive(true);clearOnline();HVIEW="";HDOPEN="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.remove("newpick");document.body.classList.add("home");if(window.PD_APPLY_SW_UPDATE&&window.PD_APPLY_SW_UPDATE())return;const np=$("#npm");if(np)np.hidden=true;tapMode();renderHome();pageIn($("#home"));window.scrollTo(0,0)}
 const dayLvDevice=(t,ds,phone)=>{if(!dagVast(ds))return null;const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay(),wk=w===0||w===6;return phone?(wk?6:5):(wk?3:2)};
 const dayTypeDevice=(t,ds,phone)=>{const l=dayLvDevice(t,ds,phone);return t+sfx(l||dagLv(t,ds))};
-function myDone(td,t){if(!dagVast(td)){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))||""}const ty=dayTypeDevice(t,td,PHONE),k=td+ty,g=($("#group").value||"").trim().toLowerCase();return store[k]||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty&&(r.group||"").toLowerCase()===g)?k:""}
-function myDoneOther(td,t){if(!dagVast(td))return"";const ty=dayTypeDevice(t,td,!PHONE),k=td+ty,g=($("#group").value||"").trim().toLowerCase();return store[k]||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty&&(r.group||"").toLowerCase()===g)?k:""}
+function myDone(td,t){if(!dagVast(td)){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))||""}const ty=dayTypeDevice(t,td,PHONE),k=td+ty,g=($("#group").value||"").trim().toLowerCase();return localDoneInGroup(k,g)||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty&&(r.group||"").toLowerCase()===g)?k:""}
+function myDoneOther(td,t){if(!dagVast(td))return"";const ty=dayTypeDevice(t,td,!PHONE),k=td+ty,g=($("#group").value||"").trim().toLowerCase();return localDoneInGroup(k,g)||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty&&(r.group||"").toLowerCase()===g)?k:""}
 function progressMeta(k,e){let m;if((m=/^d:(\\d{4}-\\d\\d-\\d\\d):([a-z0-9]+)(?:\\.(\\d))?$/.exec(k))){const t=m[2],d=m[1];return{k,e,practice:false,date:d,type:t,lvl:+(m[3]||2),color:t==="nono"&&nonoDayVariant(d)==="color"}};
  if((m=/^p:([a-z0-9]+?)(?:\\.(\\d))?(c)?$/.exec(k)))return{k,e,practice:true,date:dstr(),type:m[1],lvl:+(m[2]||2),color:!!m[3]};return null}
 const nonoMetaVariant=m=>m&&m.type==="nono"?(m.color?"color":"classic"):"";
 function currentSessionMeta(){return S&&S.p?{type:S.type,practice:!!S.practice,date:S.date,nv:S.nv,lvl:S.lvl,done:!!S.done,pc:progressPct(),key:S.practice?progKey(S.type,S.practice,S.date,S.sf):""}:null}
 function pauseAndPersistActive(forceCloud){if(!S||!S.p||S.done||!S.start)return false;pausePlay();persist(!!forceCloud);return true}
 function setFreePreferences(t,l,nv){if(LVN[t]&&l){LV[t]=l;lsSet("pdlvl",JSON.stringify(LV))}if(t==="nono"&&nv){nonoVariant=nv;lsSet("pdnvar",nv)}}
-function progressList(filter={},source){const{practice=null,type="",date="",variant=""}=filter;return Object.entries(source||progAll()).map(([k,e])=>progressMeta(k,e)).filter(m=>m&&progressRelevant(m.k)&&!progressSolved(m.k,m.e)&&(practice===null||m.practice===practice)&&(!type||m.type===type)&&(!date||m.date===date)&&(!variant||m.type!=="nono"||nonoMetaVariant(m)===variant)).sort((a,b)=>(b.e.at||0)-(a.e.at||0))}
+function progressList(filter={},source){const{practice=null,type="",date="",variant=""}=filter,g=$("#group").value.trim().toLowerCase();return Object.entries(source||progAll()).map(([k,e])=>progressMeta(k,e)).filter(m=>m&&String(m.e.group||legacyGroup()).toLowerCase()===g&&progressRelevant(m.k)&&!progressSolved(m.k,m.e)&&(practice===null||m.practice===practice)&&(!type||m.type===type)&&(!date||m.date===date)&&(!variant||m.type!=="nono"||nonoMetaVariant(m)===variant)).sort((a,b)=>(b.e.at||0)-(a.e.at||0))}
 function freeProgressList(t,nv){return progressList({practice:true,type:t||"",variant:nv||""})}
 function clearFreeProgressType(t,keep,nv){let target=nv||"";if(t==="nono"&&!target&&keep){const e=progAll()[keep],m=progressMeta(keep,e);target=nonoMetaVariant(m)}freeProgressList(t).forEach(m=>{if(m.k!==keep&&(t!=="nono"||!target||nonoMetaVariant(m)===target))progDel(m.k)})}
 function latestFreeProgress(t,nv){if(t==="nono"&&!nv){for(const v of["classic","color"]){const a=freeProgressList(t,v);a.slice(1).forEach(m=>progDel(m.k))}return freeProgressList(t)[0]||null}const a=freeProgressList(t,nv),m=a[0]||null;a.slice(1).forEach(x=>progDel(x.k));return m}
@@ -3322,7 +3346,7 @@ function pageIn(el){if(!el||matchMedia("(prefers-reduced-motion: reduce)").match
 function fitHomePage(){document.documentElement.classList.remove("pagefit");document.body.classList.remove("pagefit");requestAnimationFrame(()=>{if(!document.body.classList.contains("home")||HVIEW==="score"||innerWidth<761)return;const h=$("#home");if(h&&h.scrollHeight<=innerHeight+2){document.documentElement.classList.add("pagefit");document.body.classList.add("pagefit")}})}
 function showScore(who="all"){HVIEW="score";SCOREWHO=who||"all";SWK=0;renderHome();pageIn($("#home"));window.scrollTo(0,0)}
 function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r=>!isFree(r)),today=dstr(),dow=(new Date().getDay()+6)%7,mon0=addDays(today,-dow),TS=Object.keys(TYPES);
- const pl=new Map();SET.players.forEach(p=>pl.set(uidOf(p),playerName(p)));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});const us=[...pl.keys()];
+ const pl=new Map();groupPlayers().forEach(p=>pl.set(uidOf(p),playerName(p)));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});const us=[...pl.keys()];
  if(SCOREWHO!=="all"&&!pl.has(SCOREWHO))SCOREWHO="all";
  setHomeSkin(SCOREWHO==="all"?"shared":SCOREWHO===uidOf("Aart")?"aart":"peter");
  const inP=d=>OPER==="week"?d>=mon0&&d<=addDays(mon0,6):OPER==="maand"?d.slice(0,7)===today.slice(0,7):OPER==="jaar"?d.slice(0,4)===today.slice(0,4):true;
@@ -3335,7 +3359,7 @@ function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r
   const per={},perD={};mine.forEach(r=>{const t=baseT(r);per[t]=(per[t]||0)+1;if(!isFree(r))perD[t]=(perD[t]||0)+1});const fav=Object.entries(per).sort((a,b)=>b[1]-a[1])[0];
   return{u,i,nm:pl.get(u),d:d.length,v:mine.length-d.length,fl,km,nh,kh,streak:streakOf(rows,u),best,fav:fav&&fav[0],per,perD,mine}});
  const together=st.reduce((a,x)=>a+x.d+x.v,0);
- const views=`<div class="sviews">${[["all","Overzicht"],...SET.players.map(p=>[uidOf(p),playerName(p)])].map(([k,t])=>`<button data-who="${k}" class="${k===SCOREWHO?"on":""}">${k==="all"?"▦":"👤"} ${t}</button>`).join("")}</div>`;
+ const views=`<div class="sviews">${[["all","Overzicht"],...groupPlayers().map(p=>[uidOf(p),playerName(p)])].map(([k,t])=>`<button data-who="${k}" class="${k===SCOREWHO?"on":""}">${k==="all"?"▦":"👤"} ${t}</button>`).join("")}</div>`;
  const period=`<div class="sper">${[["week","Week"],["maand","Maand"],["jaar","Jaar"],["alles","Alles"]].map(([k,t])=>`<button data-p="${k}" class="${k===OPER?"on":""}">${t}</button>`).join("")}</div>`;
  const head=(title,sub)=>`<div class="stop"><button id="sBack" aria-label="Terug">←</button><div><h2>${title}</h2><div class="mut">${sub}</div></div></div>`;
  if(SCOREWHO!=="all"){
@@ -3357,9 +3381,10 @@ function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r
   const bars=`<div class="hcard"><div class="shd1"><b>Per puzzel</b><span class="mut">${PN}</span></div>${TS.map(t=>`<div class="sbr"><div class="sbt"><i style="background:${TCOL[t]}"></i>${TYPES[t]}</div><div class="sbb">${st.map(x=>{const n=x.per[t]||0;return`<div class="sbl p${x.i%2}"><span class="si">${x.nm[0]}</span><div class="strk"><div style="width:${Math.max(n?3:0,100*n/mx)}%;background:${TCOL[t]}"></div></div><span class="sn">${n}</span></div>`}).join("")}</div></div>`).join("")}</div>`;
   const W=16,start=addDays(mon0,-7*(W-1));
   const heat=`<div class="hcard"><div class="shd1"><b>Laatste ${W} weken</b><span class="mut">dagpuzzels per dag</span></div><div class="shm">${st.map(x=>{const cnt={};rows.forEach(r=>{if(r.uid===x.u&&r.date>=start)cnt[r.date]=(cnt[r.date]||0)+1});let o=`<div class="shp"><div class="srn">${x.nm}</div><div class="shg">`;for(let w=0;w<W;w++)for(let i=0;i<7;i++){const d=addDays(start,7*w+i),n=Math.min(TS.length,cnt[d]||0);o+=`<i class="${d>today?"fut":""}${d===today?" td":""}" style="${n?"background:color-mix(in srgb,var(--pc) "+Math.round(25+75*n/TS.length)+"%,transparent)":""}" title="${dnl(d)}: ${n}"></i>`}return o+"</div></div>"}).join("")}</div><div class="slg2 mut sm">minder <i></i><i style="background:color-mix(in srgb,var(--pc) 40%,transparent)"></i><i style="background:color-mix(in srgb,var(--pc) 70%,transparent)"></i><i style="background:var(--pc)"></i> meer</div></div>`;
-  h.innerHTML=`<div class="hwrap sco">${head("Overzicht","Samen "+together+" "+(together===1?"puzzel":"puzzels")+" opgelost "+PN)}<div class="scontrols">${views}${period}</div><div class="sovermain"><div class="soverheroes">${hero}</div>${cal}</div><div class="hgrid2 sh2">${bars}${heat}</div><div class="mut sm">Geen wedstrijd: gewoon kijken hoeveel jullie samen oplossen. Een telefoon- en groot-schermvariant van dezelfde dagpuzzel telt hier samen als één. 🎯 = foutloos, 💡 = zonder hint.</div></div>`;
+  h.innerHTML=`<div class="hwrap sco">${head(GROUP_NAME+' <button id="scoreGroupEdit" class="scoregroupedit" title="Groep beheren" aria-label="Groep beheren">✎</button>',"Samen "+together+" "+(together===1?"puzzel":"puzzels")+" opgelost "+PN)}<div class="scontrols">${views}${period}</div><div class="sovermain"><div class="soverheroes">${hero}</div>${cal}</div><div class="hgrid2 sh2">${bars}${heat}</div><div class="mut sm">Geen wedstrijd: gewoon kijken hoeveel jullie samen oplossen. Een telefoon- en groot-schermvariant van dezelfde dagpuzzel telt hier samen als één. 🎯 = foutloos, 💡 = zonder hint.</div></div>`;
  }
  $("#sBack").onclick=showHome;
+ {const ge=$("#scoreGroupEdit");if(ge)ge.onclick=()=>window.dispatchEvent(new Event("pdopengroup"))}
  h.querySelectorAll(".sviews button").forEach(b=>b.onclick=()=>{SCOREWHO=b.dataset.who;SWK=0;renderHome();pageIn($("#home"))});
  h.querySelectorAll(".sper button").forEach(b=>b.onclick=()=>{OPER=b.dataset.p;lsSet("pdper",OPER);renderHome()});
  h.querySelectorAll(".snav").forEach(b=>b.onclick=()=>{SWK=Math.min(0,SWK+ +b.dataset.w);renderHome()});h.querySelectorAll(".spmain").forEach(b=>b.onclick=()=>{const d=b.parentElement.querySelector(".spdetail"),open=!d.hidden;h.querySelectorAll(".spdetail").forEach(x=>x.hidden=true);h.querySelectorAll(".spmain").forEach(x=>{x.classList.remove("open");x.setAttribute("aria-expanded","false")});if(!open){d.hidden=false;b.classList.add("open");b.setAttribute("aria-expanded","true")}fitHomePage()});fitHomePage()}
@@ -3373,8 +3398,8 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  const otherLabel=PHONE?"Groot scherm":"Telefoon",otherIcon=PHONE?"🖥️":"📱";
  const dayExact=(name,t,phone)=>{const u=uidOf(name),ty=dayTypeDevice(t,td,phone),sync=homeRaw.find(x=>!isFree(x)&&x.uid===u&&x.date===td&&x.type===ty);if(u!==uid)return sync||null;const loc=store[td+ty]?myRow(td,ty):null;return loc?Object.assign({},sync||{},loc):sync||null};
  const dayResultFor=(name,t)=>dayExact(name,t,PHONE),dayOtherResultFor=(name,t)=>dagVast(td)?dayExact(name,t,!PHONE):null;
- const dayPeopleDetail=t=>`<div class="ddpeople">${SET.players.map(name=>{const r=dayResultFor(name,t),o=dayOtherResultFor(name,t);return`<span class="ddperson ${r?"done":o?"otherdone":""}"><b>${playerName(name)}</b>${r?`<i>✓</i><span>⏱ ${fmt(r.secs||0)}</span>${quickBadges(r,t)}`:"<span>Deze variant nog niet</span>"}${o?`<span class="ddother">${otherIcon} ${otherLabel} ✓</span>`:""}</span>`}).join("")}</div>`;
- const dayPeerCompact=t=>{const peers=SET.players.filter(name=>uidOf(name)!==uid);return peers.length?`<span class="daypeer">${peers.map(name=>{const u=uidOf(name),r=dayResultFor(name,t),o=dayOtherResultFor(name,t),ty=dayTypeDevice(t,td,PHONE),busy=!r&&!!busyOf(u,td,ty),cls=r?"done":busy?"busy":o?"otherdone":"";return`<span class="${cls}" title="${playerName(name)}: ${r?"deze variant klaar":busy?"bezig met deze variant":o?otherLabel+"-variant klaar":"nog niet klaar"}${r&&o?" · "+otherLabel+" ook klaar":""}"><b>${playerName(name)}</b> ${r?`✓${r.mist===0?' <i class="peerico">🎯</i>':""}${HINTT.includes(t)&&r.hints===0?' <i class="peerico">💡</i>':""}`:busy?"…":o?`<i class="peerdev">${otherIcon}✓</i>`:"—"}</span>`}).join("")}</span>`:""};
+ const dayPeopleDetail=t=>`<div class="ddpeople">${groupPlayers().map(name=>{const r=dayResultFor(name,t),o=dayOtherResultFor(name,t);return`<span class="ddperson ${r?"done":o?"otherdone":""}"><b>${playerName(name)}</b>${r?`<i>✓</i><span>⏱ ${fmt(r.secs||0)}</span>${quickBadges(r,t)}`:"<span>Deze variant nog niet</span>"}${o?`<span class="ddother">${otherIcon} ${otherLabel} ✓</span>`:""}</span>`}).join("")}</div>`;
+ const dayPeerCompact=t=>{const peers=groupPlayers().filter(name=>uidOf(name)!==uid);return peers.length?`<span class="daypeer">${peers.map(name=>{const u=uidOf(name),r=dayResultFor(name,t),o=dayOtherResultFor(name,t),ty=dayTypeDevice(t,td,PHONE),busy=!r&&!!busyOf(u,td,ty),cls=r?"done":busy?"busy":o?"otherdone":"";return`<span class="${cls}" title="${playerName(name)}: ${r?"deze variant klaar":busy?"bezig met deze variant":o?otherLabel+"-variant klaar":"nog niet klaar"}${r&&o?" · "+otherLabel+" ook klaar":""}"><b>${playerName(name)}</b> ${r?`✓${r.mist===0?' <i class="peerico">🎯</i>':""}${HINTT.includes(t)&&r.hints===0?' <i class="peerico">💡</i>':""}`:busy?"…":o?`<i class="peerdev">${otherIcon}✓</i>`:"—"}</span>`}).join("")}</span>`:""};
  const dayMistBadge=r=>!r||r.mist==null?"":r.mist===0?`<span class="rq good" title="Foutloos">🎯</span>`:`<span class="rq" title="${r.mist} ${r.mist===1?"fout":"fouten"}">❌ ${r.mist}</span>`;
  const dayHintBadge=(r,t)=>!r||!HINTT.includes(t)||r.hints==null?"":r.hints===0?`<span class="rq good" title="Zonder hint">💡</span>`:`<span class="rq" title="${r.hints} ${r.hints===1?"hint":"hints"}">💡 ${r.hints}</span>`;
  const detailMetric=(ic,lab,val,good)=>`<div class="ddmetric ${good?"good":""}"><span>${ic}</span><b>${val}</b><small>${lab}</small></div>`;
@@ -3384,7 +3409,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  const freeTiles=types.flatMap(t=>t==="nono"?[{t,nv:"classic",name:"Nonogram"},{t,nv:"color",name:"Kleurnonogram"}]:[{t,nv:"",name:TYPES[t]}]),freeTile=x=>{const t=x.t,nv=x.nv,sub=LVN[t]?"Kies niveau":"Nieuwe puzzel";return`<button class="tile free" data-free-t="${t}" data-free-nv="${nv}" style="--tc:${TCOL[t]}">${tIcon(t,1,nv)}<span>${x.name}</span><small class="tcount">${sub}</small></button>`};
  const homeRows=statsRows(homeRaw),countOf=(who,period)=>homeRows.filter(r=>r.uid===who&&TYPES[baseT(r)]&&(period==="today"?r.date===td:r.date.slice(0,7)===td.slice(0,7))).length,livePeers=others.map(name=>({name,st:liveOf(uidOf(name))})).filter(x=>x.st),liveTop=livePeers.map(x=>{const st=x.st,bits=[TYPES[st.onlineType]||"Puzzel",st.onlinePractice?"Vrij puzzelen":"Dagpuzzel",st.onlineType==="nono"&&st.onlineNono?(st.onlineNono==="color"?"Kleur":"Klassiek"):"",st.onlineLvl&&LVL[st.onlineLvl]?LVL[st.onlineLvl]:""].filter(Boolean);return `<div class="hlivebar" title="${liveTitle(st)}"><i></i><b>${playerName(x.name)} is online</b><span>${bits.join(" · ")}</span></div>`}).join("");
  const personCard=(name,who)=>{const mc=countOf(who,"month"),tc=countOf(who,"today");return`<button data-home-who="${who}"><span class="hvicon">👤</span><b>${playerName(name)}${who===uid?' <i>(jij)</i>':""}</b><small>🧩 ${mc} deze maand · ${tc} vandaag</small></button>`};
- const monthTogether=SET.players.reduce((n,p)=>n+countOf(uidOf(p),"month"),0),todayTogether=SET.players.reduce((n,p)=>n+countOf(uidOf(p),"today"),0);
+ const monthTogether=groupPlayers().reduce((n,p)=>n+countOf(uidOf(p),"month"),0),todayTogether=groupPlayers().reduce((n,p)=>n+countOf(uidOf(p),"today"),0);
  const allRowsN=homeRows.filter(r=>!isFree(r)),strk=streakOf(allRowsN,uid);
  h.innerHTML=`<div class="hwrap"><div class="hbrand"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Gepuzzellig</span></div><div class="htop"><div><h2>${groet} ${me}</h2><div class="mut">${datum[0].toUpperCase()+datum.slice(1)} · ${GROUP_NAME}</div></div><div class="hactions"><div class="htheme" role="group" aria-label="Weergave"><button data-theme-mode="system" title="Volg systeem"><span class="thi">◐</span><span class="thtxt">Systeem</span></button><button data-theme-mode="light" title="Lichte weergave"><span class="thi">☀️</span><span class="thtxt">Licht</span></button><button data-theme-mode="dark" title="Donkere weergave"><span class="thi">🌙</span><span class="thtxt">Donker</span></button></div><button id="hProfile" class="hprofile" title="Profiel" aria-label="Profiel">${(me[0]||"P").toUpperCase()}</button></div></div>${liveTop}
 
@@ -3399,7 +3424,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
   <div class="tiles freegrid">${freeTiles.map(freeTile).join("")}</div>
  </section>
 
- <section class="hsection htogether"><div class="hsecthead"><div><h3>👥 Jullie overzicht</h3><span class="mut">Samen of per persoon bekijken</span></div></div><div class="hhomeviews"><button data-home-who="all"><span class="hvicon">▦</span><b>Overzicht</b><small>🧩 ${monthTogether} samen deze maand · ${todayTogether} vandaag</small></button>${SET.players.map(p=>personCard(p,uidOf(p))).join("")}</div></section></div>`;
+ <section class="hsection htogether"><div class="hsecthead"><div><h3>👥 Jullie overzicht</h3><span class="mut">Samen of per persoon bekijken</span></div></div><div class="hhomeviews"><button data-home-who="all"><span class="hvicon">▦</span><b>Overzicht</b><small>🧩 ${monthTogether} samen deze maand · ${todayTogether} vandaag</small></button>${groupPlayers().map(p=>personCard(p,uidOf(p))).join("")}</div></section></div>`;
  h.querySelectorAll(".hdrow[data-day-t]").forEach(b=>b.onclick=()=>{const t=b.dataset.dayT;if(myDone(td,t)){HDOPEN=HDOPEN===t?"":t;renderHome()}else if(b.dataset.pk)resumeProgress(b.dataset.pk);else load(t,false)});
  h.querySelectorAll(".dayview[data-view-t]").forEach(b=>b.onclick=()=>load(b.dataset.viewT,false,false,td));
  h.querySelectorAll(".hcont[data-pk]").forEach(b=>b.onclick=()=>withFreshProgress(()=>resumeProgress(b.dataset.pk)));
@@ -3474,38 +3499,47 @@ else{try{
  const app=a.initializeApp(cfg);let db;const auth=fa.getAuth(app);
  try{db=f.initializeFirestore(app,{experimentalAutoDetectLongPolling:true})}catch(e2){db=f.getFirestore(app)}
 
- const gate=document.getElementById("authgate"),setup=document.getElementById("authsetup"),acct=document.getElementById("authaccount"),gb=document.getElementById("authgoogle"),skip=document.getElementById("authskip"),msg=document.getElementById("authmsg"),ab=document.getElementById("authbtn"),who=document.getElementById("authwho"),out=document.getElementById("authout"),ax=document.getElementById("authx"),ap=document.getElementById("authplayers"),an=document.getElementById("authname"),agn=document.getElementById("authgroupname"),asave=document.getElementById("authsave"),asetmsg=document.getElementById("authsetmsg"),pn=document.getElementById("profname"),pg=document.getElementById("profgroup"),ps=document.getElementById("profsave"),pmsg=document.getElementById("profmsg");
- let currentProfile=null,currentMembers=[],currentGroupName=(window.PD_SETUP&&window.PD_SETUP.groupName)||"Puzzelsukkels",unsubMembers=null,unsubGroup=null,chosenPlayer="";
+ const gate=document.getElementById("authgate"),setup=document.getElementById("authsetup"),acct=document.getElementById("authaccount"),gacct=document.getElementById("groupaccount"),gb=document.getElementById("authgoogle"),skip=document.getElementById("authskip"),msg=document.getElementById("authmsg"),ab=document.getElementById("authbtn"),who=document.getElementById("authwho"),out=document.getElementById("authout"),ax=document.getElementById("authx"),gx=document.getElementById("groupx"),ap=document.getElementById("authplayers"),an=document.getElementById("authname"),agn=document.getElementById("authgroupname"),asave=document.getElementById("authsave"),asetmsg=document.getElementById("authsetmsg"),pn=document.getElementById("profname"),ps=document.getElementById("profsave"),pmsg=document.getElementById("profmsg"),pgn=document.getElementById("profgroupname"),pgm=document.getElementById("profgroupmanage"),gcn=document.getElementById("groupcurrentname"),grole=document.getElementById("grouprole"),gowner=document.getElementById("groupownerbox"),gne=document.getElementById("groupnameedit"),gns=document.getElementById("groupnamesave"),gcode=document.getElementById("groupcode"),gcopy=document.getElementById("groupcopy"),gmembers=document.getElementById("groupmembers"),gjc=document.getElementById("groupjoincode"),gj=document.getElementById("groupjoin"),gnn=document.getElementById("groupnewname"),gc=document.getElementById("groupcreate"),gmsg=document.getElementById("groupmsg");
+ let currentProfile=null,currentMembers=[],currentGroupName=(window.PD_SETUP&&window.PD_SETUP.groupName)||"Puzzelsukkels",currentGroup={},unsubMembers=null,unsubGroup=null,unsubProfile=null,chosenPlayer="";
  const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
  const authLabel=u=>u?(u.displayName||u.email||"Google-account"):"Google-login";
+ const cleanCode=s=>String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,12);
+ const randomCode=(n=8)=>{const abc="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",a=new Uint8Array(n);crypto.getRandomValues(a);return[...a].map(x=>abc[x%abc.length]).join("")};
+ const randomGroupId=()=>{const a=new Uint8Array(9);crypto.getRandomValues(a);return"g_"+[...a].map(x=>x.toString(36)).join("").slice(0,14)};
  const drawAccountButton=()=>{const u=auth.currentUser,n=currentProfile&&currentProfile.displayName;if(ab)ab.innerHTML=u?'<span class="authdot"></span>'+(n?esc(n):authLabel(u)):"Google-login"};
- const dispatchProfile=()=>{if(!currentProfile)return;window.dispatchEvent(new CustomEvent("pdprofile",{detail:{profile:currentProfile,members:currentMembers,groupName:currentGroupName}}));drawAccountButton()};
- const stopWatches=()=>{if(unsubMembers){unsubMembers();unsubMembers=null}if(unsubGroup){unsubGroup();unsubGroup=null}};
- const watchProfile=pr=>{stopWatches();currentProfile=pr;const gid=pr.groupId;
-  unsubMembers=f.onSnapshot(f.query(f.collection(db,"profiles"),f.where("groupId","==",gid)),s=>{currentMembers=s.docs.map(d=>d.data());const me=currentMembers.find(x=>x.authUid===auth.currentUser?.uid);if(me)currentProfile=me;dispatchProfile()},()=>{currentMembers=[pr];dispatchProfile()});
-  unsubGroup=f.onSnapshot(f.doc(db,"groups",gid),d=>{if(d.exists()&&d.data().name)currentGroupName=d.data().name;dispatchProfile()},()=>dispatchProfile());
+ const dispatchProfile=()=>{if(!currentProfile)return;window.dispatchEvent(new CustomEvent("pdprofile",{detail:{profile:currentProfile,members:currentMembers,groupName:currentGroupName,group:currentGroup}}));drawAccountButton()};
+ const stopGroupWatches=()=>{if(unsubMembers){unsubMembers();unsubMembers=null}if(unsubGroup){unsubGroup();unsubGroup=null}};
+ const stopWatches=()=>{stopGroupWatches();if(unsubProfile){unsubProfile();unsubProfile=null}};
+ const ensureLegacyMeta=async()=>{if(!currentProfile||!auth.currentUser||currentProfile.groupId!==(window.PD_SETUP&&window.PD_SETUP.group)||currentProfile.playerId!=="u-peter"||currentGroup.ownerAuthUid&&currentGroup.inviteCode)return;const gid=currentProfile.groupId,code="PUZZEL6";try{await Promise.all([f.setDoc(f.doc(db,"groups",gid),{name:currentGroupName||"Puzzelsukkels",ownerAuthUid:auth.currentUser.uid,inviteCode:code,createdAt:currentGroup.createdAt||Date.now(),updatedAt:Date.now()},{merge:true}),f.setDoc(f.doc(db,"groupInvites",code),{groupId:gid,ownerAuthUid:auth.currentUser.uid,createdAt:Date.now()},{merge:true})])}catch(e){}};
+ const bindGroup=gid=>{stopGroupWatches();
+  unsubMembers=f.onSnapshot(f.query(f.collection(db,"profiles"),f.where("groupId","==",gid)),s=>{currentMembers=s.docs.map(d=>d.data());dispatchProfile()},()=>{currentMembers=currentProfile?[currentProfile]:[];dispatchProfile()});
+  unsubGroup=f.onSnapshot(f.doc(db,"groups",gid),d=>{currentGroup=d.exists()?d.data():{};currentGroupName=currentGroup.name||(gid===(window.PD_SETUP&&window.PD_SETUP.group)?(window.PD_SETUP.groupName||"Puzzelsukkels"):"Groep");dispatchProfile();ensureLegacyMeta()},()=>dispatchProfile());
  };
+ const watchProfile=pr=>{stopWatches();currentProfile=pr;bindGroup(pr.groupId);unsubProfile=f.onSnapshot(f.doc(db,"profiles",auth.currentUser.uid),d=>{if(!d.exists())return;const nx=d.data(),changed=!currentProfile||nx.groupId!==currentProfile.groupId;currentProfile=nx;if(changed)bindGroup(nx.groupId);else dispatchProfile()},()=>{})};
  const getProfile=u=>f.getDoc(f.doc(db,"profiles",u.uid)).then(d=>d.exists()?d.data():null);
  const choose=p=>{chosenPlayer=p;[...ap.querySelectorAll("button")].forEach(b=>b.classList.toggle("on",b.dataset.p===p));if(!an.value.trim())an.value=p};
  const showSetup=u=>{chosenPlayer="";ap.innerHTML="";const players=(window.PD_SETUP&&window.PD_SETUP.players)||["Speler"],local=localStorage.getItem("pdme")||"",def=players.includes(local)?local:players[0];players.forEach(p=>{const b=document.createElement("button");b.type="button";b.dataset.p=p;b.textContent=p;b.onclick=()=>choose(p);ap.append(b)});an.value=local||u.displayName||def;agn.value=(window.PD_SETUP&&window.PD_SETUP.groupName)||"Puzzelsukkels";choose(def);asetmsg.textContent="";setup.hidden=false;gate.hidden=true};
- const openProfile=()=>{const u=auth.currentUser;if(!u){localStorage.removeItem("pdauthskip");gate.hidden=false;return}if(!currentProfile){showSetup(u);return}const photo=u.photoURL?'<img class="authavatar" alt="" src="'+esc(u.photoURL)+'">':'<span class="authavatar">'+esc((currentProfile.displayName||authLabel(u))[0]||"?")+'</span>';who.innerHTML=photo+'<div><b>'+esc(currentProfile.displayName)+'</b><small>'+esc(u.email||"")+'</small></div>';pn.value=currentProfile.displayName||"";pg.value=currentGroupName||"";pmsg.textContent="";acct.hidden=false};
+ const openProfile=()=>{const u=auth.currentUser;if(!u){localStorage.removeItem("pdauthskip");gate.hidden=false;return}if(!currentProfile){showSetup(u);return}const photo=u.photoURL?'<img class="authavatar" alt="" src="'+esc(u.photoURL)+'">':'<span class="authavatar">'+esc((currentProfile.displayName||authLabel(u))[0]||"?")+'</span>';who.innerHTML=photo+'<div><b>'+esc(currentProfile.displayName)+'</b><small>'+esc(u.email||"")+'</small></div>';pn.value=currentProfile.displayName||"";if(pgn)pgn.textContent=currentGroupName||"Groep";pmsg.textContent="";acct.hidden=false};
+ const openGroup=()=>{if(!currentProfile||!auth.currentUser){openProfile();return}if(gcn)gcn.textContent=currentGroupName||"Groep";const owner=currentGroup.ownerAuthUid===auth.currentUser.uid;if(grole)grole.textContent=owner?"Beheerder":"Lid";if(gowner)gowner.hidden=!owner;if(gne)gne.value=currentGroupName||"";if(gcode)gcode.textContent=currentGroup.inviteCode||"Wordt aangemaakt…";if(gmembers)gmembers.innerHTML=(currentMembers.length?currentMembers:[currentProfile]).map(x=>'<span class="groupmember">'+esc(x.displayName||"Speler")+(x.authUid===currentGroup.ownerAuthUid?" · beheerder":"")+"</span>").join("");if(gjc)gjc.value="";if(gnn)gnn.value="";if(gmsg)gmsg.textContent="";acct.hidden=true;gacct.hidden=false;ensureLegacyMeta()};
  const claimProfile=async u=>{const p=chosenPlayer,n=an.value.trim(),gn=agn.value.trim()||"Puzzelsukkels",gid=window.PD_SETUP.group,pid="u-"+p.toLowerCase().replace(/[^a-z0-9]/g,"");if(!p||!n)throw new Error("Vul een naam in.");const claim=f.doc(db,"profileClaims",gid+"_"+pid),prof=f.doc(db,"profiles",u.uid),grp=f.doc(db,"groups",gid);
-  await f.runTransaction(db,async tx=>{const c=await tx.get(claim);if(c.exists()&&c.data().authUid!==u.uid){const e=new Error("Dit bestaande profiel is al aan een ander Google-account gekoppeld.");e.code="profile/already-claimed";throw e}tx.set(claim,{authUid:u.uid,playerId:pid,groupId:gid,claimedAt:Date.now()},{merge:true});tx.set(prof,{authUid:u.uid,playerId:pid,displayName:n,groupId:gid,email:u.email||"",photoURL:u.photoURL||"",updatedAt:Date.now()},{merge:true});tx.set(grp,{name:gn,updatedAt:Date.now()},{merge:true})});return getProfile(u)};
- const saveProfile=async()=>{if(!currentProfile||!auth.currentUser)return;const n=pn.value.trim(),gn=pg.value.trim();if(!n||!gn){pmsg.textContent="Naam en groep mogen niet leeg zijn.";return}pmsg.textContent="Opslaan…";try{await Promise.all([f.setDoc(f.doc(db,"profiles",auth.currentUser.uid),{displayName:n,updatedAt:Date.now()},{merge:true}),f.setDoc(f.doc(db,"groups",currentProfile.groupId),{name:gn,updatedAt:Date.now()},{merge:true})]);pmsg.textContent="Opgeslagen ✓"}catch(e){pmsg.textContent=e&&e.code==="permission-denied"?"Firebase-regels laten profielwijzigingen nog niet toe.":"Opslaan lukt niet: "+(e.code||e.message||"onbekende fout")}};
+  await f.runTransaction(db,async tx=>{const[c,g]=await Promise.all([tx.get(claim),tx.get(grp)]);if(c.exists()&&c.data().authUid!==u.uid){const e=new Error("Dit bestaande profiel is al aan een ander Google-account gekoppeld.");e.code="profile/already-claimed";throw e}tx.set(claim,{authUid:u.uid,playerId:pid,groupId:gid,claimedAt:Date.now()},{merge:true});tx.set(prof,{authUid:u.uid,playerId:pid,displayName:n,groupId:gid,email:u.email||"",photoURL:u.photoURL||"",updatedAt:Date.now()},{merge:true});if(!g.exists())tx.set(grp,{name:gn,updatedAt:Date.now()},{merge:true})});return getProfile(u)};
+ const saveProfile=async()=>{if(!currentProfile||!auth.currentUser)return;const n=pn.value.trim();if(!n){pmsg.textContent="Naam mag niet leeg zijn.";return}pmsg.textContent="Opslaan…";try{await f.setDoc(f.doc(db,"profiles",auth.currentUser.uid),{displayName:n,updatedAt:Date.now()},{merge:true});pmsg.textContent="Opgeslagen ✓"}catch(e){pmsg.textContent=e&&e.code==="permission-denied"?"Firebase-regels laten profielwijzigingen nog niet toe.":"Opslaan lukt niet: "+(e.code||e.message||"onbekende fout")}};
+ const saveGroupName=async()=>{if(!currentProfile||currentGroup.ownerAuthUid!==auth.currentUser.uid)return;const n=gne.value.trim();if(!n){gmsg.textContent="Groepsnaam mag niet leeg zijn.";return}gmsg.textContent="Opslaan…";try{await f.setDoc(f.doc(db,"groups",currentProfile.groupId),{name:n,updatedAt:Date.now()},{merge:true});gmsg.textContent="Groepsnaam aangepast ✓"}catch(e){gmsg.textContent=e.code==="permission-denied"?"Firebase-regels laten groepsbeheer nog niet toe.":"Opslaan lukt niet."}};
+ const createGroup=async()=>{const n=gnn.value.trim();if(!n||!currentProfile)return gmsg.textContent="Vul een groepsnaam in.";const gid=randomGroupId(),code=randomCode();gmsg.textContent="Groep maken…";try{await f.setDoc(f.doc(db,"groups",gid),{name:n,ownerAuthUid:auth.currentUser.uid,inviteCode:code,createdAt:Date.now(),updatedAt:Date.now()});await f.setDoc(f.doc(db,"groupInvites",code),{groupId:gid,ownerAuthUid:auth.currentUser.uid,createdAt:Date.now()});await f.setDoc(f.doc(db,"profiles",auth.currentUser.uid),{groupId:gid,updatedAt:Date.now()},{merge:true});gacct.hidden=true}catch(e){gmsg.textContent=e.code==="permission-denied"?"Firebase-regels laten nieuwe groepen nog niet toe.":"Nieuwe groep maken lukt niet."}};
+ const joinGroup=async()=>{const code=cleanCode(gjc.value);if(!code||!currentProfile)return gmsg.textContent="Vul een uitnodigingscode in.";gmsg.textContent="Groep zoeken…";try{const d=await f.getDoc(f.doc(db,"groupInvites",code));if(!d.exists())return gmsg.textContent="Deze uitnodigingscode bestaat niet.";const gid=d.data().groupId,gd=await f.getDoc(f.doc(db,"groups",gid));if(!gd.exists())return gmsg.textContent="De groep bestaat niet meer.";await f.setDoc(f.doc(db,"profiles",auth.currentUser.uid),{groupId:gid,updatedAt:Date.now()},{merge:true});gacct.hidden=true}catch(e){gmsg.textContent=e.code==="permission-denied"?"Firebase-regels laten deelnemen nog niet toe.":"Deelnemen lukt niet."}};
  await fa.setPersistence(auth,fa.browserLocalPersistence).catch(()=>{});
  window.PD_AUTH={user:()=>auth.currentUser,signIn:async()=>{if(msg)msg.textContent="";const p=new fa.GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});try{return await fa.signInWithPopup(auth,p)}catch(e){if(["auth/popup-blocked","auth/operation-not-supported-in-this-environment"].includes(e&&e.code)){await fa.signInWithRedirect(auth,p);return}if(msg)msg.textContent="Inloggen lukt niet: "+(e.code||"onbekende fout");throw e}},signOut:()=>fa.signOut(auth)};
  if(gb)gb.onclick=()=>window.PD_AUTH.signIn().catch(()=>{});
  if(skip)skip.onclick=()=>{localStorage.setItem("pdauthskip","1");gate.hidden=true};
  if(asave)asave.onclick=async()=>{asetmsg.textContent="Koppelen…";asave.disabled=true;try{const pr=await claimProfile(auth.currentUser);setup.hidden=true;localStorage.removeItem("pdauthskip");watchProfile(pr)}catch(e){asetmsg.textContent=e.code==="profile/already-claimed"?e.message:e.code==="permission-denied"?"Firebase-regels laten profielen nog niet toe.":e.message||"Koppelen lukt niet."}finally{asave.disabled=false}};
- if(ps)ps.onclick=saveProfile;
- if(ab)ab.onclick=openProfile;
- addEventListener("pdopenprofile",openProfile);
- if(ax)ax.onclick=()=>acct.hidden=true;
- if(out)out.onclick=()=>window.PD_AUTH.signOut();
- acct&&acct.addEventListener("pointerdown",e=>{if(e.target===acct)acct.hidden=true});
+ if(ps)ps.onclick=saveProfile;if(pgm)pgm.onclick=openGroup;if(gns)gns.onclick=saveGroupName;if(gc)gc.onclick=createGroup;if(gj)gj.onclick=joinGroup;
+ if(gcopy)gcopy.onclick=async()=>{const c=currentGroup.inviteCode||"";if(!c)return;try{await navigator.clipboard.writeText(c);gmsg.textContent="Code gekopieerd ✓"}catch(e){gmsg.textContent="Code: "+c}};
+ if(ab)ab.onclick=openProfile;addEventListener("pdopenprofile",openProfile);addEventListener("pdopengroup",openGroup);
+ if(ax)ax.onclick=()=>acct.hidden=true;if(gx)gx.onclick=()=>gacct.hidden=true;if(out)out.onclick=()=>window.PD_AUTH.signOut();
+ acct&&acct.addEventListener("pointerdown",e=>{if(e.target===acct)acct.hidden=true});gacct&&gacct.addEventListener("pointerdown",e=>{if(e.target===gacct)gacct.hidden=true});
  setup&&setup.addEventListener("pointerdown",e=>{if(e.target===setup&&currentProfile)setup.hidden=true});
  fa.getRedirectResult(auth).catch(e=>{if(msg)msg.textContent="Inloggen lukt niet: "+(e.code||"onbekende fout")});
- fa.onAuthStateChanged(auth,async u=>{stopWatches();currentProfile=null;currentMembers=[];window.PD_AUTH_USER=u||null;if(!u){drawAccountButton();acct.hidden=true;setup.hidden=true;gate.hidden=localStorage.getItem("pdauthskip")==="1";window.dispatchEvent(new Event("pdauthout"));return}gate.hidden=true;try{const pr=await getProfile(u);if(pr)watchProfile(pr);else showSetup(u)}catch(e){if(msg)msg.textContent=e.code==="permission-denied"?"Inloggen is gelukt, maar Firebase-regels laten profielen nog niet toe.":"Profiel laden lukt niet.";gate.hidden=false}});
+ fa.onAuthStateChanged(auth,async u=>{stopWatches();currentProfile=null;currentMembers=[];currentGroup={};window.PD_AUTH_USER=u||null;if(!u){drawAccountButton();acct.hidden=true;gacct.hidden=true;setup.hidden=true;gate.hidden=localStorage.getItem("pdauthskip")==="1";window.dispatchEvent(new Event("pdauthout"));return}gate.hidden=true;try{const pr=await getProfile(u);if(pr)watchProfile(pr);else showSetup(u)}catch(e){if(msg)msg.textContent=e.code==="permission-denied"?"Inloggen is gelukt, maar Firebase-regels laten profielen nog niet toe.":"Profiel laden lukt niet.";gate.hidden=false}});
  
  window.PD_DB={
   save:row=>f.setDoc(f.doc(db,"results",row.date+"_"+row.type+"_"+row.uid),row),
