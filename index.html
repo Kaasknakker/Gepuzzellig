@@ -594,7 +594,7 @@ body.nieuw.home main,body.nieuw.home #pbot,body.nieuw.home #topbar,body.nieuw.ho
 .hpill{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,#c2255c 14%,var(--card));color:#c2255c;vertical-align:2px}
 .hgo{font-size:28px;color:var(--mut);font-weight:300}
 .hlinks{display:flex;gap:10px;flex-wrap:wrap}.hlinks button{padding:10px 14px;border-radius:14px}
-.hcontinue .hh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}.hcontinue .hh b{font-size:17px}.hcontlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:7px}.hcont{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid color-mix(in srgb,var(--line) 70%,transparent);border-radius:13px;background:color-mix(in srgb,var(--line) 12%,var(--card));box-shadow:none;text-align:left;min-width:0}.hcont:hover{background:color-mix(in srgb,var(--pc) 7%,var(--card));transform:none}.hcont .ctxt{min-width:0;flex:1}.hcont .ctxt b,.hcont .ctxt small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hcont .ctxt small{color:var(--mut);font-size:11px;margin-top:1px}.hcont .pdonut{width:32px;height:32px}
+.hcontinue .hh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}.hcontinue .hh b{font-size:17px}.hcontgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}.hcontlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:7px}.hcont{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid color-mix(in srgb,var(--line) 70%,transparent);border-radius:13px;background:color-mix(in srgb,var(--line) 12%,var(--card));box-shadow:none;text-align:left;min-width:0}.hcont:hover{background:color-mix(in srgb,var(--pc) 7%,var(--card));transform:none}.hcont .ctxt{min-width:0;flex:1}.hcont .ctxt b,.hcont .ctxt small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hcont .ctxt small{color:var(--mut);font-size:11px;margin-top:1px}.hcont .pdonut{width:32px;height:32px}.livebadge,.peerlive{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--mut);white-space:nowrap}.livebadge i,.peerlive i{display:block;width:9px;height:9px;border-radius:50%;background:#28a745;box-shadow:0 0 0 3px color-mix(in srgb,#28a745 18%,transparent)}.livebadge{margin-left:auto;color:#218838}.peerlive{padding:5px 9px;border:1px solid color-mix(in srgb,#28a745 35%,var(--line));border-radius:999px;background:color-mix(in srgb,#28a745 8%,var(--card));color:var(--fg)}.peerlive[hidden]{display:none!important}body.tablet #topbar .peerlive{flex:none}@media(max-width:760px){.peerlive span{display:none}.peerlive{padding:7px}.hcontgrid{grid-template-columns:1fr}}
 @media(max-width:640px){#home .hgrid2{grid-template-columns:1fr}#home h2{font-size:22px}}
 /* Scorebord-pagina vanaf Vandaag */
 .sco .stop{display:flex;align-items:center;gap:12px}.sco #sBack{width:44px;height:44px;border-radius:14px;font-size:22px;padding:0;flex:none}
@@ -1654,7 +1654,7 @@ function load(type,practice,fresh,date){if(S&&S.p&&!S.done&&S.start){pausePlay()
    if(type==="m24"&&sv0.r){S.r=sv0.r;setRound()}
    if(sv0.str&&S.str)S.str=new Set(sv0.str);if(sv0.nt)S.nt=Object.assign({},sv0.nt);S.pen=0;S.mist=sv0.mist||0;S.hints=sv0.hints||0;S._saveAt=sv0.at||0;S.start=Date.now()-(sv0.el||0);S.pauseAt=0;S.resumed=true}catch(e){}}
   $("#msg").textContent=S.done?(S.arch?"Al klaar in ":"Vandaag al klaar in ")+fmt(S.secs):S.resumed?"Verder waar je was gebleven":(!practice&&type===featOf(S.date))?(PHONE?"⭐ Van de dag":"⭐ Puzzel van de dag"+(S.hard?" (weekend 💪)":"")):S.arch?"Dagpuzzel van "+dnl(S.date)+(S.hard?" 💪":""):S.hard?"Weekendpuzzel: wat pittiger 💪":"";setT(S.resumed?fmt(Math.round(playMs()/1000)):fmt(S.secs));
-  try{updTabs()}catch(e){}render();ub()},30)}
+  try{updTabs()}catch(e){}render();ub();setTimeout(()=>pingOnline(true),0)},30)}
 
 const LANDQ=matchMedia("(orientation:landscape) and (min-aspect-ratio:23/20)");
 const availBot=()=>{const b=$("#pbot");if(b&&!PHONE&&document.body.classList.contains("tablet")&&LANDQ.matches)return innerHeight+(window.scrollY||0)-14-HINTPAD;return b?b.getBoundingClientRect().top+(window.scrollY||0)-(PHONE?8:18)-HINTPAD:innerHeight-14};
@@ -2746,12 +2746,20 @@ function board(rows){try{localStorage.setItem("pdrows",JSON.stringify(lastRows))
  updTabs();renderStats()}
 let unsub=null,listenDate="";
 /* "Bezig": als iemand een dagpuzzel heeft aangeraakt, ziet de ander dat (alleen de soort, geen zetten). */
-let STAT=[],unsubS=null,lastPing={k:"",t:0};
-function pingBusy(){try{if(!window.PD_DB||!window.PD_DB.setStatus||!S.p||S.practice||S.done||S.date!==dstr())return;const k=S.date+S.type+S.sf,now=Date.now();if(lastPing.k===k&&now-lastPing.t<90000)return;lastPing={k,t:now};
+let STAT=[],unsubS=null,lastPing={k:"",t:0},lastOnline=0;
+function liveOf(u){const g=($("#group").value||"").trim().toLowerCase(),st=STAT.find(x=>x.uid===u&&(x.group||"").toLowerCase()===g);return st&&st.onlineAt&&Date.now()-st.onlineAt<75000?st:null}
+function liveTitle(st){if(!st)return"";const t=st.onlineType&&TYPES[st.onlineType]?TYPES[st.onlineType]:"puzzel",bits=[(st.name||"Iemand")+" is online",t];if(st.onlinePractice)bits.push("Vrij puzzelen");else bits.push("Dagpuzzel");if(st.onlineLvl&&LVL[st.onlineLvl])bits.push(LVL[st.onlineLvl]);if(st.onlineType==="nono"&&st.onlineNono)bits.push(st.onlineNono==="color"?"Kleur":"Klassiek");return bits.join(" · ")}
+function updatePeerLive(){const el=$("#peerLive");if(!el)return;const o=SET&&SET.players?SET.players.map(p=>({p,u:uidOf(p)})).filter(x=>x.u!==uid).map(x=>({p:x.p,st:liveOf(x.u)})).find(x=>x.st):null;el.hidden=!o;if(!o)return;const sp=el.querySelector("span");if(sp)sp.textContent=o.p;el.title=liveTitle(o.st)}
+function pingOnline(force){try{if(!window.PD_DB||!window.PD_DB.setStatus||!uid||uid==="x"||document.hidden||document.body.classList.contains("home")||!S.p||S.done)return;const now=Date.now();if(!force&&now-lastOnline<30000)return;lastOnline=now;window.PD_DB.setStatus({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",onlineAt:now,onlineType:S.type,onlinePractice:!!S.practice,onlineLvl:S.lvl||0,onlineNono:S.type==="nono"?S.nv:""}).catch(()=>{})}catch(e){}}
+function clearOnline(){try{lastOnline=0;if(window.PD_DB&&window.PD_DB.setStatus&&uid&&uid!=="x")window.PD_DB.setStatus({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",onlineAt:0}).catch(()=>{})}catch(e){}}
+function pingBusy(){pingOnline();try{if(!window.PD_DB||!window.PD_DB.setStatus||!S.p||S.practice||S.done||S.date!==dstr())return;const k=S.date+S.type+S.sf,now=Date.now();if(lastPing.k===k&&now-lastPing.t<90000)return;lastPing={k,t:now};
  window.PD_DB.setStatus({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",date:S.date,type:S.type+S.sf,at:now}).catch(()=>{})}catch(e){}}
 function busyOf(u,date,ty){const g=($("#group").value||"").trim().toLowerCase(),st=STAT.find(x=>x.uid===u&&(x.group||"").toLowerCase()===g);if(!st||st.date!==date||st.type!==ty)return 0;return Date.now()-st.at<10*60000?2:1}
-function startStatus(){if(!window.PD_DB||!window.PD_DB.listenStatus)return;if(unsubS)unsubS();try{unsubS=window.PD_DB.listenStatus($("#group").value.trim(),r=>{STAT=r;try{renderLvl();board(lastRows)}catch(e){}},()=>{clearTimeout(startStatus.t);startStatus.t=setTimeout(startStatus,30000)})}catch(e){}}
-setInterval(()=>{if(STAT.length&&S&&S.p){try{renderLvl()}catch(e){}}},60000);
+function startStatus(){if(!window.PD_DB||!window.PD_DB.listenStatus)return;if(unsubS)unsubS();try{unsubS=window.PD_DB.listenStatus($("#group").value.trim(),r=>{STAT=r;try{updatePeerLive();renderLvl();board(lastRows)}catch(e){}},()=>{clearTimeout(startStatus.t);startStatus.t=setTimeout(startStatus,30000)})}catch(e){}}
+setInterval(()=>{if(STAT.length&&S&&S.p){try{updatePeerLive();renderLvl()}catch(e){}}},15000);
+setInterval(()=>pingOnline(false),30000);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)clearOnline();else setTimeout(()=>pingOnline(true),300)});
+addEventListener("pagehide",clearOnline);
 function startBoard(){if(!window.PD_DB)return;if(unsub)unsub();listenDate=dstr();startStatus();
  unsub=window.PD_DB.listenFrom(addDays(listenDate,-800),rows=>{lastRows=mergeRows(lastRows,rows);pullMine(lastRows);board(lastRows);resync(rows)},()=>{$("#board").textContent="Scorebord niet bereikbaar";clearTimeout(startBoard.t);startBoard.t=setTimeout(startBoard,30000)})}
 /* Scores worden nooit weggehaald: een (gedeeltelijke) momentopname uit de cache mag dus nooit regels laten verdwijnen. */
@@ -2860,7 +2868,7 @@ updTheme();matchMedia("(prefers-color-scheme: dark)").addEventListener&&matchMed
 function phoneLayout(){document.body.classList.add("phone");const hd=$("header"),main=$("main");
  const pm=document.createElement("button");pm.id="pm";pm.textContent="⋯";pm.title="Menu";hd.append(pm);
  const pmp=document.createElement("div");pmp.id="pmp";document.body.append(pmp);
- const prow=document.createElement("div");prow.id="prow";main.insertBefore(prow,main.firstChild);
+ const prow=document.createElement("div");prow.id="prow";main.insertBefore(prow,main.firstChild);const plive=document.createElement("div");plive.id="peerLive";plive.className="peerlive";plive.hidden=true;plive.innerHTML="<i></i><span></span>";prow.append(plive);
  const pbot=document.createElement("div");pbot.id="pbot";document.body.append(pbot);
  prow.append($("#seg"),$("#arch"),$("#lvl"),$("#next"),$("#hexstat"),$("#msg"));
  pbot.append($("#undo"),$("#redo"),$("#nvariant"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✏️";$("#notewipe").innerHTML="🧹";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
@@ -2881,7 +2889,7 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
  if(PHONE){const bk=document.createElement("button");bk.id="tbHome";bk.textContent="←";bk.title="Terug naar Vandaag";$("#prow").prepend(bk);bk.onclick=showHome}
  else{B.classList.add("tablet");
   const tb=document.createElement("div");tb.id="topbar";
-  tb.innerHTML='<button id="tbHome" title="Terug naar Vandaag" aria-label="Terug naar Vandaag">←</button><div id="tbTitle"></div><div id="tbMid"></div><button id="tbMore" title="Meer" aria-label="Meer">⋯</button>';
+  tb.innerHTML='<button id="tbHome" title="Terug naar Vandaag" aria-label="Terug naar Vandaag">←</button><div id="tbTitle"></div><div id="tbMid"></div><div id="peerLive" class="peerlive" hidden><i></i><span></span></div><button id="tbMore" title="Meer" aria-label="Meer">⋯</button>';
   $("main").before(tb);$("#tbMid").append($("#msg"),$("#hexstat"),$("#time"));
   const pbot=document.createElement("div");pbot.id="pbot";document.body.append(pbot);
   const g1=document.createElement("div");g1.className="pgrp g1";g1.append($("#undo"),$("#redo"));
@@ -2903,10 +2911,10 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
  const home=document.createElement("section");home.id="home";$("main").before(home)}
 function updTop(){if(!S||!S.p)return;document.querySelectorAll("#pbot .pgrp").forEach(mg=>mg.classList.toggle("leeg",![...mg.children].some(x=>getComputedStyle(x).display!=="none")));const t=S.type,ti=$("#tbTitle");document.documentElement.style.setProperty("--tc",TCOL[t]);
  const sub=(S.practice?"Vrij puzzelen":S.arch?"Dagpuzzel van "+dnl(S.date):"Dagpuzzel")+(t==="nono"?" · "+(S.nv==="color"?"Kleur":"Klassiek"):"")+(LVN[t]?" · "+LVL[S.lvl]:"")+(!S.practice&&featOf(S.date)===t?" · ⭐":"");
- if(ti)ti.innerHTML=tIcon(t)+`<div><b>${TYPES[t]}</b><small>${sub}</small></div>`}
-function showHome(){if(HOMEREADY&&S&&S.p&&!S.done&&S.start){pausePlay();persist(true)}HVIEW="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.add("home");tapMode();renderHome();window.scrollTo(0,0)}
+ if(ti)ti.innerHTML=tIcon(t)+`<div><b>${TYPES[t]}</b><small>${sub}</small></div>`;updatePeerLive()}
+function showHome(){if(HOMEREADY&&S&&S.p&&!S.done&&S.start){pausePlay();persist(true)}clearOnline();HVIEW="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.add("home");tapMode();renderHome();window.scrollTo(0,0)}
 function myDone(td,t){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))}
-function progressMeta(k,e){let m;if((m=/^d:(\\d{4}-\\d\\d-\\d\\d):([a-z0-9]+)(?:\\.(\\d))?$/.exec(k)))return{k,e,practice:false,date:m[1],type:m[2],lvl:+(m[3]||2),color:false};
+function progressMeta(k,e){let m;if((m=/^d:(\\d{4}-\\d\\d-\\d\\d):([a-z0-9]+)(?:\\.(\\d))?$/.exec(k))){const t=m[2],d=m[1];return{k,e,practice:false,date:d,type:t,lvl:+(m[3]||2),color:t==="nono"&&nonoDayVariant(d)==="color"}};
  if((m=/^p:([a-z0-9]+)(?:\\.(\\d))?(c)?$/.exec(k)))return{k,e,practice:true,date:dstr(),type:m[1],lvl:+(m[2]||2),color:!!m[3]};return null}
 function resumeProgress(k){const e=progAll()[k],m=progressMeta(k,e);if(!m)return;if(!m.practice){load(m.type,false,false,m.date);return}RANDOM=false;if(LVN[m.type]){LV[m.type]=m.lvl;lsSet("pdlvl",JSON.stringify(LV))}if(m.type==="nono"){nonoVariant=m.color?"color":"classic";lsSet("pdnvar",nonoVariant)}load(m.type,true,false)}
 /* Gewoon een puzzelsoort openen: is de dagpuzzel van vandaag al klaar, dan meteen een verse vrije puzzel. De knop Dagpuzzel blijft de expliciete weg terug. */
@@ -2957,14 +2965,15 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  const rowsT=lastRows.filter(r=>r.date===td&&!isFree(r)&&(r.group||"").toLowerCase()===g);
  const pa=progAll(),busyEntry=t=>{const ks=Object.keys(pa).filter(k=>k.startsWith("d:"+td+":"+t)&&(k===("d:"+td+":"+t)||k.charAt(("d:"+td+":"+t).length)==="."));if(!ks.length)return null;return ks.map(k=>pa[k]).sort((a,b)=>(b.at||0)-(a.at||0))[0]},myBusy=t=>!!busyEntry(t);
  const progRing=(p,t)=>p==null?"":`<span class="pdonut" style="--p:${p};--ring:${TCOL[t]||"var(--pc)"}"><b>${p}%</b></span>`;
- const active=Object.entries(pa).map(([k,e])=>progressMeta(k,e)).filter(m=>m&&progressRelevant(m.k)&&!progressSolved(m.k,m.e)).sort((a,b)=>(b.e.at||0)-(a.e.at||0));
- const activeHtml=active.length?`<div class="hcard hcontinue"><div class="hh"><b>Verder puzzelen</b><span class="mut">${active.length} ${active.length===1?"puzzel":"puzzels"} bezig</span></div><div class="hcontlist">${active.map(m=>{const when=m.practice?"Vrij puzzelen":m.date===td?"Vandaag":dnl(m.date),sub=when+(LVN[m.type]?" · "+LVL[m.lvl]:"")+(m.type==="nono"&&m.color?" · kleur":"");return`<button class="hcont" data-pk="${m.k}" title="Ga verder met ${TYPES[m.type]||m.type}">${tIcon(m.type)}<span class="ctxt"><b>${TYPES[m.type]||m.type}</b><small>${sub}</small></span>${progRing(m.e.pc==null?0:m.e.pc,m.type)}</button>`}).join("")}</div></div>`:"";
+ const active=Object.entries(pa).map(([k,e])=>progressMeta(k,e)).filter(m=>m&&progressRelevant(m.k)&&!progressSolved(m.k,m.e)).sort((a,b)=>(b.e.at||0)-(a.e.at||0)),dayActive=active.filter(m=>!m.practice),freeActive=active.filter(m=>m.practice);
+ const contCard=(title,list,free)=>!list.length?"":`<div class="hcard hcontinue"><div class="hh"><b>${title}</b><span class="mut">${list.length} ${list.length===1?"bezig":"bezig"}</span></div><div class="hcontlist">${list.map(m=>{const when=free?"Vrij puzzelen":m.date===td?"Vandaag":dnl(m.date),variant=m.type==="nono"?(m.color?"Kleur":"Klassiek"):"",sub=[when,LVN[m.type]?LVL[m.lvl]:"",variant].filter(Boolean).join(" · ");return`<button class="hcont" data-pk="${m.k}" title="Ga verder met ${TYPES[m.type]||m.type}">${tIcon(m.type)}<span class="ctxt"><b>${TYPES[m.type]||m.type}</b><small>${sub}</small></span>${progRing(m.e.pc==null?0:m.e.pc,m.type)}</button>`}).join("")}</div></div>`;
+ const activeHtml=active.length?`<div class="hcontgrid">${contCard("Dagpuzzels",dayActive,false)}${contCard("Vrij puzzelen",freeActive,true)}</div>`:"";
  const tm=s=>TSHOW&&s?fmt(s):"";
  const st=(who,t)=>{if(who===uid){const k=myDone(td,t);if(k)return{c:"ok",x:tm(store[k])||"klaar",b:XS[k]?badges(XS[k],t):""};const e=busyEntry(t);if(e)return{c:"busy",x:e.pc!=null?"bezig":"bezig",pc:e.pc};return{c:"",x:"nog niet"}}
   const r=rowsT.find(r=>r.uid===who&&String(r.type).split(".")[0]===t);if(r){const mine=myDone(td,t);return{c:"ok",x:mine&&store[mine]?(tm(r.secs)||"klaar"):"klaar",b:badges(r,t)}}
   const q=STAT.find(x=>x.uid===who&&x.date===td&&String(x.type).split(".")[0]===t&&(x.group||"").toLowerCase()===g);if(q)return{c:"busy",x:Date.now()-q.at<6e5?"nu bezig":"begonnen"};return{c:"",x:"nog niet"}};
- const lijst=(who,naam)=>{const ts=Object.keys(TYPES);const n=ts.filter(t=>st(who,t).c==="ok").length;
-  return`<div class="hcard who"><div class="hh"><b>${naam}</b><span class="mut">${n} van ${ts.length} klaar${n===ts.length?" 🔥":""}</span></div>`+ts.map(t=>{const x=st(who,t);return`<button class="hrow ${x.c}" data-t="${t}" title="Open ${TYPES[t]}"><span class="dot"></span>${t===ft?"⭐ ":""}${TYPES[t]}<span class="hx2">${x.b?'<span class="hb">'+x.b+'</span>':""}${x.pc!=null?progRing(x.pc,t):""}${x.x}</span></button>`}).join("")+"</div>"};
+ const lijst=(who,naam)=>{const ts=Object.keys(TYPES);const n=ts.filter(t=>st(who,t).c==="ok").length,live=who===uid?null:liveOf(who),lh=live?`<span class="livebadge" title="${liveTitle(live)}"><i></i>online</span>`:`<span class="mut">${n} van ${ts.length} klaar${n===ts.length?" 🔥":""}</span>`;
+  return`<div class="hcard who"><div class="hh"><b>${naam}</b>${lh}</div>`+ts.map(t=>{const x=st(who,t);return`<button class="hrow ${x.c}" data-t="${t}" title="Open ${TYPES[t]}"><span class="dot"></span>${t===ft?"⭐ ":""}${TYPES[t]}<span class="hx2">${x.b?'<span class="hb">'+x.b+'</span>':""}${x.pc!=null?progRing(x.pc,t):""}${x.x}</span></button>`}).join("")+"</div>"};
  const allH=allRows().filter(r=>r.uid===uid&&TYPES[baseT(r)]&&r.date.slice(0,7)===td.slice(0,7)),hDay=allH.filter(r=>!isFree(r)).length,hFree=allH.length-hDay,hPer={};
  allH.forEach(r=>{const t=baseT(r);hPer[t]=(hPer[t]||0)+1});
  const fk=myDone(td,ft),fbe=busyEntry(ft),fb=!!fbe,allRowsN=allRows().filter(r=>!isFree(r)),strk=streakOf(allRowsN,uid);
