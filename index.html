@@ -42,7 +42,7 @@ main{display:flex;gap:20px;padding:8px 16px 24px;flex-wrap:wrap;align-items:flex
 #mpal,#mpal .pb,#macc button,.mc{touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 nav button .tfeat{font-style:normal;font-size:.8em;margin-left:3px}nav button .tfeat[hidden]{display:none}
 #board h2.feat{color:var(--pc,#c97a00)}
-.pw.busy{background:transparent!important;color:var(--mut)!important;border:1.5px dashed currentColor;box-sizing:border-box;opacity:.85}#lvl button.on .pw.busy{color:#fff!important}.pw.busy.now{opacity:1;animation:busyp 1.6s ease-in-out infinite}@keyframes busyp{50%{opacity:.45}}
+.pw.busy{background:transparent!important;color:var(--mut)!important;border:1.5px dashed currentColor;box-sizing:border-box;opacity:.85}.pw.busy.now{opacity:1;animation:busyp 1.6s ease-in-out infinite}@keyframes busyp{50%{opacity:.45}}
 #board .row.busy{color:var(--mut);font-style:italic}
 #potb.on{background:#6b6f78;color:#fff;border-color:#6b6f78}
 .c{position:relative}.c .nt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.52;transform:scale(.42)}.c .nt svg{width:100%;height:100%}
@@ -164,10 +164,6 @@ svg .shake{animation:shake .35s}
 .c.bad{background:#e5484d!important;color:#fff}
 .c.bad svg path{stroke:#fff}
 #theme{padding:6px 14px;font-weight:700}
-#lvl{display:none;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;margin-top:8px}
-#lvl button{box-shadow:none;background:transparent;border-color:transparent;border-radius:999px;padding:6px 16px;display:flex;flex-direction:column;align-items:center;line-height:1.15;font-size:15px}
-#lvl button small{font-size:11px;font-weight:500;opacity:.75}
-#lvl button.on{background:var(--pc);color:#fff}
 .mut.lv{font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin:6px 0 0}
 #streak{text-align:center;font-weight:700;font-size:14px;color:var(--mut)}
 #streak b{color:var(--pc);font-size:18px}
@@ -225,9 +221,6 @@ svg.ico{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.3;st
 #hintb:active:not(:disabled){box-shadow:0 2px 0 color-mix(in srgb,var(--pc) 55%,#000)}
 #stage{display:flex;flex-direction:column;align-items:center;min-width:0}
 #playbox{display:flex;flex-direction:column;align-items:center;max-width:100%;transform-origin:center center}
-#seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px;gap:4px}
-#seg button{box-shadow:none;background:transparent;border-color:transparent;border-radius:999px;padding:8px 20px}
-#seg button.on{background:var(--pc);color:#fff}
 #msg{min-height:28px;text-align:center;margin:6px 0}
 #grid{margin:0 auto}
 #pad{justify-content:center}
@@ -261,30 +254,25 @@ main{grid-template-columns:128px minmax(0,1fr);gap:14px;padding:4px 12px 16px;ma
 #hintb,#chk{padding:12px 8px;font-size:16px}
 #msg{text-align:center;font-weight:700;font-size:14px;line-height:1.25}
 #msg:empty{display:none}
-#segrow{margin-bottom:6px;gap:8px 12px}#lvl{margin:0}#lvl button{padding:4px 12px}
+#segrow{margin-bottom:6px;gap:8px 12px}
 #side{display:none;position:fixed;top:56px;right:10px;width:310px;max-height:calc(100vh - 70px);overflow:auto;z-index:45;box-shadow:0 18px 50px rgba(0,0,0,.35)}
 #side.open{display:block}
 @media(max-width:760px),(max-aspect-ratio:1/1){main{grid-template-columns:minmax(0,1fr)}header nav{order:5;flex-basis:100%}header{flex-wrap:wrap}}
 #time.hid{font-size:13px;font-weight:600;color:var(--mut);padding:8px 6px;cursor:pointer}
 @keyframes pl{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 #next.pulse{animation:pl 1.2s ease-in-out 3;background:var(--pc);color:#fff;border-color:var(--pc)}
-/* ===== rechterkolom met modus/niveau ===== */
+/* ===== rechterkolom met puzzelacties ===== */
 main{grid-template-columns:128px minmax(0,1fr) 150px}
 #rail2{position:sticky;top:6px;align-self:start}
 #rail2 #segrow{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0}
-#rail2 #seg{display:flex;flex-direction:column;border-radius:20px}
-#rail2 #seg button{border-radius:16px;padding:10px 6px;font-size:15px;text-align:center}
 #rail2 #next{padding:11px 6px;font-size:15px;border-radius:18px;line-height:1.2}
-#rail2 #lvl{flex-direction:column;border-radius:20px;margin:0}
-#rail2 #lvl button{border-radius:16px;padding:8px 6px;text-align:center}
 @media(max-width:760px),(max-aspect-ratio:1/1){main{grid-template-columns:minmax(0,1fr)}#rail{order:0}#rail2{order:1;position:static}#stage{order:2}
- #rail2 #segrow{flex-direction:row;flex-wrap:wrap;justify-content:center}#rail2 #seg{flex-direction:row}#rail2 #lvl{flex-direction:row}}
+ #rail2 #segrow{flex-direction:row;flex-wrap:wrap;justify-content:center}}
 @media(max-width:1100px) and (min-aspect-ratio:1/1){
 header{gap:6px;padding:6px 8px}header nav{gap:4px}header nav button{padding:6px 9px 6px 8px;font-size:14px;gap:5px}
 #theme,#sbtn{padding:6px 9px}#who{padding:6px 9px;font-size:14px}
 main{grid-template-columns:112px minmax(0,1fr) 126px;gap:8px;padding:4px 8px 12px}
-#tools button{padding:8px 4px;gap:5px}#tools button span{font-size:13px}
-#rail2 #seg button,#rail2 #next{font-size:14px;padding:9px 4px}#rail2 #lvl button{padding:7px 4px;font-size:14px}
+#tools button{padding:8px 4px;gap:5px}#tools button span{font-size:13px}#rail2 #next{font-size:14px;padding:9px 4px}
 #hintb,#chk,#helpb{font-size:14px;padding:11px 4px;white-space:nowrap}#streak{font-size:13px}}
 /* ===== hint als zwevende kaart + overzicht ===== */
 #hint{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);width:min(560px,92vw);max-width:none;z-index:40;box-shadow:0 12px 40px rgba(0,0,0,.4);border:2px solid var(--pc);font-size:15px;line-height:1.35}
@@ -318,10 +306,6 @@ main{grid-template-columns:112px minmax(0,1fr) 126px;gap:8px;padding:4px 8px 12p
 .hc h3{margin:4px 0 8px;font-size:18px}.hc h3 small{font-weight:400;color:var(--mut);font-size:14px}
 .hc ul{margin:0 0 14px;padding-left:20px;font-size:17px;line-height:1.45}.hc li{margin-bottom:6px}
 .hc button{padding:10px 22px;border-radius:14px;font-weight:700;background:var(--pc);border-color:var(--pc);color:#fff}
-
-#lvl button .lw{display:flex;gap:2px;margin-top:3px;justify-content:center}
-#lvl button .pw{font-style:normal;font-size:10px;font-weight:800;width:15px;height:15px;line-height:15px;border-radius:50%;background:var(--ok);color:#fff;text-align:center}
-#lvl button.on .pw{background:#fff;color:var(--pc)}
 nav button .tdone{font-size:13px;font-weight:800;color:var(--ok);margin-left:-2px}
 nav button.on .tdone{color:#fff}
 nav button .tdone[hidden]{display:none}
@@ -439,13 +423,6 @@ body.phone #sbtn{display:none}body.phone #pm{display:flex;position:absolute;righ
 body.phone main{display:block;padding:0 4px}
 body.phone #rail,body.phone #rail2{display:none}
 body.phone #prow{display:flex;align-items:center;gap:6px;padding:2px 2px 6px;flex-wrap:nowrap;min-height:34px}
-body.phone #seg{display:inline-flex;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px}
-body.phone #seg button{padding:4px 10px;font-size:13px;border-radius:999px;box-shadow:none;border-color:transparent;background:transparent}
-body.phone #seg button.on{background:var(--pc);color:#fff}
-body.phone #lvl{display:inline-flex;flex-direction:row;margin:0;padding:2px;gap:2px;border-radius:999px}
-body.phone #lvl button{padding:4px 8px;font-size:13px;border-radius:999px;flex-direction:row;gap:4px}
-body.phone #lvl button small{display:none}
-body.phone #lvl button .lw{margin:0}
 body.phone #next{padding:4px 10px;font-size:15px;border-radius:999px;box-shadow:0 2px 0 var(--line)}
 body.phone #msg{font-size:13px;margin-left:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 body.phone #hexstat{flex-direction:row;gap:4px;margin:0 0 0 auto}
@@ -468,20 +445,13 @@ body.phone #pmp button,body.phone #pmp #time{width:100%;text-align:left;padding:
 body.phone #pmp #streak{padding:4px 12px;font-size:14px}
 body.phone #pmp #reset b{font-size:16px}
 body.phone #side{top:calc(env(safe-area-inset-top) + 44px);left:6px;right:6px;width:auto;max-height:calc(100dvh - 120px)}
-body.phone #lvl{position:relative}
-body.phone #lvl .cur{white-space:nowrap;padding:4px 10px;font-size:13px;border-radius:999px;box-shadow:none;border-color:transparent;background:transparent;display:flex;align-items:center;gap:4px;font-weight:700}
-body.phone #lvl .lvp{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:56;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;flex-direction:column;gap:4px;min-width:180px;box-shadow:0 14px 40px rgba(0,0,0,.3)}
-body.phone #lvl .lvp.open{display:flex}
-body.phone #lvl .lvp button{display:flex;flex-direction:row;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;font-size:15px;box-shadow:none;justify-content:flex-start}
-body.phone #lvl .lvp button small{display:inline;font-size:12px;opacity:.7;margin-left:auto}
-body.phone #lvl .lvp button .lw{margin:0 0 0 4px}
 body[data-t=nono].phone #pbot #hintb span,body[data-t=nono].phone #pbot #chk span{display:none}
 body[data-t=nono].phone #pbot #hintb,body[data-t=nono].phone #pbot #chk{flex:0 0 50px}
 body.phone #hint{font-size:14px;padding:10px 44px 10px 12px;max-height:45vh}body.phone #hint button:not(.hx){padding:7px 14px}body.phone #hint .mut{font-size:12px}
 body.phone #fin{width:calc(100vw - 12px);padding:12px 12px;font-size:14px}
 body.phone #fin .fe{flex-wrap:nowrap;gap:4px}body.phone #fin .fe button{flex:1 1 0;min-width:0;padding:5px 0;font-size:11px}body.phone #fin .fe button b{font-size:23px}
 body.phone .hc{padding:16px 16px}
-@media(max-width:360px){body.phone #hexstat .st span{display:none}body.phone #seg button{padding:4px 7px}body.phone header nav{gap:3px}body.phone header nav button{padding:5px 5px;font-size:12.5px}body.phone #pbot{gap:4px;padding-left:5px;padding-right:5px}body.phone #pbot #undo,body.phone #pbot #redo{flex-basis:38px}body.phone #pbot #nmode,body.phone #pbot #pmode{gap:4px}body.phone #pbot #nmode button,body.phone #pbot #pmode button{font-size:13.5px;padding:11px 2px}body[data-t=plus].phone #pbot #hintb,body[data-t=plus].phone #pbot #chk,body[data-t=nono].phone #pbot #hintb,body[data-t=nono].phone #pbot #chk{flex-basis:42px}body.phone #pm{right:4px;width:34px;font-size:17px}body.phone header{padding:4px 43px 4px 3px}body.phone #prow{gap:4px}}
+@media(max-width:360px){body.phone #hexstat .st span{display:none}body.phone header nav{gap:3px}body.phone header nav button{padding:5px 5px;font-size:12.5px}body.phone #pbot{gap:4px;padding-left:5px;padding-right:5px}body.phone #pbot #undo,body.phone #pbot #redo{flex-basis:38px}body.phone #pbot #nmode,body.phone #pbot #pmode{gap:4px}body.phone #pbot #nmode button,body.phone #pbot #pmode button{font-size:13.5px;padding:11px 2px}body[data-t=plus].phone #pbot #hintb,body[data-t=plus].phone #pbot #chk,body[data-t=nono].phone #pbot #hintb,body[data-t=nono].phone #pbot #chk{flex-basis:42px}body.phone #pm{right:4px;width:34px;font-size:17px}body.phone header{padding:4px 43px 4px 3px}body.phone #prow{gap:4px}}
 body.phone .hc ul{font-size:15px}
 
 /* Net als bij Hexcells kleurt de achtergrond mee met de stand: vullen/wegstrepen = grijs, kruisje = oranje, omcirkelen = blauw. */
@@ -510,8 +480,6 @@ body.phone #pbot>button,body.phone #pbot #nmode button,body.phone #pbot #pmode b
 body.phone #shortcuts{display:none}
 body.phone #msg:not(:empty){padding:3px 8px;font-size:12px;max-width:92vw}
 @media(max-width:430px){.kgrid{grid-template-columns:1fr}}
-
-body.tablet #lvl button.fixed,body.phone #lvl button.fixed{cursor:default;opacity:1!important}
 /* ===== Kleur Nonogram ===== */
 :root{--nc1:#d9564f;--nc2:#347fcf;--nc3:#e5b72d;--nc4:#3f9968}
 #nmode .ncb{display:none;align-items:center;justify-content:center;gap:6px;min-width:46px}
@@ -681,10 +649,6 @@ body.tablet #pbot #undo b,body.tablet #pbot #redo b{width:auto}
 body.tablet #more.open{display:flex;flex-direction:column;gap:10px;z-index:54!important;position:fixed;top:58px;right:max(12px,env(safe-area-inset-right));width:310px;max-height:calc(100vh - 80px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;z-index:56;box-shadow:0 18px 50px rgba(0,0,0,.3)}
 #more .mh{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:6px 4px 0}
 #more .mh:first-child{margin-top:0}
-#more #seg,#more #lvl{display:flex;flex-direction:row;gap:3px;margin:0;width:100%;padding:3px;border:0;border-radius:12px;background:color-mix(in srgb,var(--line) 45%,transparent);box-shadow:none}
-#more #seg button,#more #lvl button{flex:1;min-width:0;text-align:center;justify-content:center;align-items:center;padding:8px 4px;border-radius:9px;border:0;background:transparent;box-shadow:none;font-size:14px;font-weight:700;color:var(--fg)}
-#more #lvl button small{font-size:11px;color:var(--mut);font-weight:600}
-#more #seg button.on,#more #lvl button.on{background:var(--card);box-shadow:0 1px 4px var(--sh)}
 #more .mlist{display:flex;flex-direction:column;gap:1px;margin:0 -4px}
 #more .mlist button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;justify-content:flex-start;padding:10px 10px;min-height:44px;border:0;border-radius:11px;background:transparent;box-shadow:none;font-size:16px;font-weight:600;color:var(--fg);white-space:nowrap}
 #more .mlist button:hover,#more .mlist button:active{background:color-mix(in srgb,var(--line) 35%,transparent)}
@@ -758,7 +722,7 @@ window.FIREBASE_CONFIG={
 <section id="stage"><div id="playbox">
 <div id="grid"></div><div id="pad"></div><div id="m24"></div><div id="mur"></div><div id="hexw"><div id="hexsvg"></div></div></div>
 <div id="npm" hidden role="region" aria-labelledby="npmt"><div class="hc npcard"><button id="npmx" class="npx" aria-label="Terug naar Home" title="Terug naar Home">←</button><h2 id="npmt">Nieuwe puzzel</h2><div id="npsub" class="mut"></div><div id="nplv"></div></div></div></section>
-<aside id="rail2"><div id="segrow"><div id="seg"><button id="today">Dagpuzzel</button><button id="prac">Vrij puzzelen</button></div><button id="next">Nog een puzzel ➜</button><div id="lvl"></div></div></aside>
+<aside id="rail2"><div id="segrow"><button id="next">Nog een puzzel ➜</button></div></aside>
 <div id="hm" hidden role="dialog" aria-modal="true" aria-labelledby="hmt"><div class="hc"><h2 id="hmt"></h2><ul id="hmp"></ul><h3 id="hmth">Zo los je het op <small>(gokken is nooit nodig)</small></h3><ul id="hmtips"></ul><div id="shortcuts"><h3>Handige sneltoetsen</h3><div class="kgrid"><span><kbd>Spatie</kbd> wissel stand</span><span><kbd>A</kbd> aantekeningen</span><span><kbd>H</kbd> hint</span><span><kbd>C</kbd> controle</span><span><kbd>⌘/Ctrl Z</kbd> ongedaan</span><span><kbd>⇧⌘/Ctrl Z</kbd> opnieuw</span><span><kbd>?</kbd> uitleg</span><span><kbd>Esc</kbd> sluiten</span></div></div><button id="hmx">Begrepen</button></div></div>
 <div id="cm" hidden role="dialog" aria-modal="true" aria-labelledby="cmt"><div class="hc"><h2 id="cmt">Bediening</h2><div id="cmp"></div><button id="cmx">Sluiten</button></div></div>
 
@@ -1592,7 +1556,7 @@ const LVN=PHONE?{bin:[4,5,6],star:[4,5,6],nono:[4,5,6],hex:[4,5,6],plus:[4,5,6],
 const lvLabel=l=>LVL[l]+(l>3?" · telefoon":"");
 const LVS={bin:{1:"10×8",2:"16×12",3:"18×14",4:"6×8",5:"8×10",6:"10×14"},star:{1:"8×8 · 1★",2:"9×9 · 2★",3:"10×10 · 2★",4:"7×7 · 1★",5:"8×8 · 2★",6:"9×9 · 2★"},nono:{1:"8×5",2:"15×10",3:"20×14",4:"5×8",5:"8×12",6:"10×15"},hex:{1:"klein",2:"middel",3:"pittig",4:"klein",5:"middel",6:"pittig"},plus:{1:"5×5",2:"6×6",3:"7×7 · vlakken",4:"5×5",5:"6×6",6:"6×7 · vlakken"},mur:{1:"6×6",2:"7×7",3:"8×8",4:"5×5",5:"6×6",6:"7×7"}};
 let LV={};try{LV=JSON.parse(lsGet("pdlvl")||"{}")}catch(e){}
-/* Wie heeft vandaag de dagpuzzel op dit niveau al af? Kleine letters onder de niveauknop. */
+/* Voorkeursniveau voor vrije puzzels; dagpuzzels kiezen hun niveau op basis van dag en apparaat. */
 
 const lvOf=t=>LVN[t]&&LVN[t].includes(LV[t])?LV[t]:(PHONE&&LVN[t]&&LVN[t].includes(5)?5:2),sfx=l=>l===2?"":"."+l;
 /* Vanaf 22 oktober 2026: per soort één dagpuzzel, doordeweeks Normaal en in het weekend Moeilijk. Andere niveaus blijven bij Vrij puzzelen. */
@@ -1600,7 +1564,6 @@ const DAGVANAF="2026-10-21",dagVast=ds=>ds>=DAGVANAF;
 const dagLv=(t,ds)=>{if(!dagVast(ds))return lvOf(t);const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay(),wk=w===0||w===6;return PHONE?(wk?6:5):(wk?3:2)};
 /* Nonogram-dagvariant: ma/wo/vr Klassiek, di/do Kleur. In het weekend wisselen za/zo per week om. */
 const nonoDayVariant=ds=>{const[y,m,d]=ds.split("-").map(Number),dt=new Date(y,m-1,d),w=dt.getDay();if(w>=1&&w<=5)return(w===2||w===4)?"color":"classic";const wn=Math.floor((Date.UTC(y,m-1,d)-Date.UTC(2026,0,5))/6048e5),even=((wn%2)+2)%2===0;return(w===6?even:!even)?"color":"classic"};
-function renderLvl(){const el=$("#lvl");el.innerHTML="";el.style.display="none"}
 
 let TSHOW=lsGet("pdtime")==="1",lastT="0:00";
 function setT(t){lastT=t;const e=$("#time");e.textContent=TSHOW?t:"⏱ tijd tonen";e.classList.toggle("hid",!TSHOW)}
@@ -1621,9 +1584,9 @@ const isWk=ds=>{const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDa
 /* Willekeurig puzzelen: na elke vrije puzzel komt een andere, willekeurige soort. Stopt zodra je zelf een dagpuzzel kiest. */
 let RANDOM=false;const rndType=not=>{const L=Object.keys(TYPES).filter(t=>t!==not);return L[Math.floor(Math.random()*L.length)]};
 function load(type,practice,fresh,date){pauseAndPersistActive(true);if(!practice)RANDOM=false;if(NIEUW&&HOMEREADY){if(document.body.classList.contains("home")||document.body.classList.contains("newpick"))window.scrollTo(0,0);document.body.classList.remove("home","newpick");const np=$("#npm");if(np)np.hidden=true}
- const dd=!practice&&date?date:dstr(),id=++loadId,lvl0=practice?lvOf(type):dagLv(type,dd),sf0=sfx(lvl0);lsSet("pdtab",type);{const fn=$("#fin");if(fn)fn.hidden=true}potlood=false;S={nt:{},type,practice,date:dd,hard:!practice&&isWk(dd)&&!dagVast(dd),arch:dd!==dstr(),start:0,done:false,secs:0,sel:-1,id,hist:[],redo:[],pen:0,mist:0,hints:0,flash:-1,hl:-1,lvl:lvl0,sf:sf0,nv:type==="nono"?(practice?nonoVariant:nonoDayVariant(dd)):"classic"};hideHint();ub();renderLvl();$("#next").classList.remove("pulse");
+ const dd=!practice&&date?date:dstr(),id=++loadId,lvl0=practice?lvOf(type):dagLv(type,dd),sf0=sfx(lvl0);lsSet("pdtab",type);{const fn=$("#fin");if(fn)fn.hidden=true}potlood=false;S={nt:{},type,practice,date:dd,hard:!practice&&isWk(dd)&&!dagVast(dd),arch:dd!==dstr(),start:0,done:false,secs:0,sel:-1,id,hist:[],redo:[],pen:0,mist:0,hints:0,flash:-1,hl:-1,lvl:lvl0,sf:sf0,nv:type==="nono"?(practice?nonoVariant:nonoDayVariant(dd)):"classic"};hideHint();ub();$("#next").classList.remove("pulse");
  const pk0=progKey(type,practice,S.date,sf0),sv0=fresh?null:progAll()[pk0];if(fresh)progDel(pk0);
- document.body.dataset.t=type;document.querySelectorAll("#tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.t===type);if(PHONE&&b.dataset.t===type)try{b.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"})}catch(e){}});$("#today").classList.toggle("on",!practice);$("#prac").classList.toggle("on",!!practice);dayLabel();{const nb=$("#next");if(nb.closest("#more"))nb.innerHTML='<span class="ic">🎲</span><span>Nieuwe puzzel</span>';else nb.textContent=PHONE?"🎲 Nieuwe puzzel":"Nieuwe puzzel ➜"}if(PHONE)$("#next").style.display="";$("#next").title="Nieuwe puzzel";
+ document.body.dataset.t=type;document.querySelectorAll("#tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.t===type);if(PHONE&&b.dataset.t===type)try{b.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"})}catch(e){}});updateArchiveVisibility();{const nb=$("#next");if(nb.closest("#more"))nb.innerHTML='<span class="ic">🎲</span><span>Nieuwe puzzel</span>';else nb.textContent=PHONE?"🎲 Nieuwe puzzel":"Nieuwe puzzel ➜"}if(PHONE)$("#next").style.display="";$("#next").title="Nieuwe puzzel";
  $("#help").textContent=helpOf(type);$("#grid").innerHTML="";$("#m24").innerHTML="";$("#mur").innerHTML="";$("#hexsvg").innerHTML="";$("#pad").style.display="none";$("#m24").style.display="none";
  $("#msg").textContent="Puzzel maken...";setT("0:00");$("#grid").classList.remove("nfin");
  setTimeout(()=>{if(id!==loadId)return;
@@ -2279,7 +2242,7 @@ $("#sbtn").onclick=()=>$("#side").classList.toggle("open");
 document.addEventListener("pointerdown",e=>{const sd=$("#side");if(sd.classList.contains("open")&&!e.target.closest("#side,#sbtn")){sd.classList.remove("open");e._closed=true}},true);
 /* Naast het veld tikken (vinger of Pencil) wisselt de stand. Alles wat zelf iets doet (knoppen, menu's, scorebord, hint) telt niet mee;
    de lege ruimte in de kolommen links en rechts wel. */
-const BGX="#topbar,#more,#home,#archp,#grid,#mgrid,#mclues,#mpal,#macc,#hexsvg,button,input,label,select,a,#side,#seg,#lvl,header,nav,#pick,#hint,#fin,#hm,#cm,#npm,#pbot,#prow,#pmp,#time,#streak,#hexstat,#sbtn";
+const BGX="#topbar,#more,#home,#archp,#grid,#mgrid,#mclues,#mpal,#macc,#hexsvg,button,input,label,select,a,#side,header,nav,#pick,#hint,#fin,#hm,#cm,#npm,#pbot,#prow,#pmp,#time,#streak,#hexstat,#sbtn";
 const twoMode=()=>["nono","plus","hex","mur"].includes(S.type)&&S.p&&!S.done;
 function pulseEl(el){if(!el)return;el.classList.remove("modeflash");void el.offsetWidth;el.classList.add("modeflash");setTimeout(()=>el.classList.remove("modeflash"),260)}
 function flashMode(){const el=S.type==="plus"?(plusMode==="x"?$("#pxb"):$("#pob")):S.type==="nono"?(nonoMode==="x"?$("#nx"):S.nv==="color"?$("#nc"+nonoColorMode):$("#nf")):S.type==="hex"?(hexMode==="b"?$("#mb"):$("#mz")):S.type==="mur"?$("#mgrid"):null;pulseEl(el)}
@@ -2638,7 +2601,7 @@ function resRow(r,td){if(r.uid===uid&&XS[r.date+r.type]){const x=XS[r.date+r.typ
 /* Puzzel van de dag: elke dag één vaste soort, voor iedereen dezelfde. De andere dagpuzzels kunnen, maar hoeven niet. */
 const FEATORD=["star","bin","mur","nono","plus","hex"];
 function featOf(ds){const L=FEATORD.filter(t=>TYPES[t]);const[y,m,d]=ds.split("-").map(Number),n=Math.round((Date.UTC(y,m-1,d)-Date.UTC(2026,0,5))/864e5);return L[((n%L.length)+L.length)%L.length]}
-function updTabs(){const td=dstr();if(S&&S.type)renderLvl();const ft=featOf(td);
+function updTabs(){const td=dstr(),ft=featOf(td);
  document.querySelectorAll("#tabs button").forEach(b=>{const t=b.dataset.t,ty=t+sfx(lvOf(t));
   let st=b.querySelector(".tfeat");if(!st){st=document.createElement("i");st.className="tfeat";st.textContent="⭐";st.title="Puzzel van de dag";b.append(st)}st.hidden=t!==ft;
   let ok=b.querySelector(".tdone");if(!ok){ok=document.createElement("span");ok.className="tdone";ok.textContent="✓";b.append(ok)}ok.hidden=!myDone(td,t)})}
@@ -2771,8 +2734,8 @@ function clearOnline(){try{lastOnline=0;if(window.PD_DB&&window.PD_DB.setStatus&
 function pingBusy(){pingOnline();try{if(!window.PD_DB||!window.PD_DB.setStatus||!S.p||S.practice||S.done||S.date!==dstr())return;const k=S.date+S.type+S.sf,now=Date.now();if(lastPing.k===k&&now-lastPing.t<90000)return;lastPing={k,t:now};
  window.PD_DB.setStatus({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",date:S.date,type:S.type+S.sf,at:now}).catch(()=>{})}catch(e){}}
 function busyOf(u,date,ty){const g=($("#group").value||"").trim().toLowerCase(),st=STAT.find(x=>x.uid===u&&(x.group||"").toLowerCase()===g);if(!st||st.date!==date||st.type!==ty)return 0;return Date.now()-st.at<10*60000?2:1}
-function startStatus(){if(!window.PD_DB||!window.PD_DB.listenStatus)return;if(unsubS)unsubS();try{unsubS=window.PD_DB.listenStatus($("#group").value.trim(),r=>{STAT=r;try{updatePeerLive();renderLvl();board(lastRows);if(document.body.classList.contains("home")&&typeof renderHome==="function"&&HVIEW==="")renderHome()}catch(e){}},()=>{clearTimeout(startStatus.t);startStatus.t=setTimeout(startStatus,30000)})}catch(e){}}
-setInterval(()=>{if(STAT.length&&S&&S.p){try{updatePeerLive();renderLvl()}catch(e){}}},15000);
+function startStatus(){if(!window.PD_DB||!window.PD_DB.listenStatus)return;if(unsubS)unsubS();try{unsubS=window.PD_DB.listenStatus($("#group").value.trim(),r=>{STAT=r;try{updatePeerLive();board(lastRows);if(document.body.classList.contains("home")&&typeof renderHome==="function"&&HVIEW==="")renderHome()}catch(e){}},()=>{clearTimeout(startStatus.t);startStatus.t=setTimeout(startStatus,30000)})}catch(e){}}
+setInterval(()=>{if(STAT.length&&S&&S.p){try{updatePeerLive()}catch(e){}}},15000);
 setInterval(()=>pingOnline(false),30000);
 document.addEventListener("visibilitychange",()=>{if(document.hidden)clearOnline();else setTimeout(()=>pingOnline(true),300)});
 addEventListener("pagehide",clearOnline);
@@ -2798,7 +2761,7 @@ addEventListener("pdnodb",e=>{$("#board").textContent=e.detail||"Scorebord nog n
 if(window.PD_DB)startBoard();
 /* Vangnet naast de live verbinding: elke 45 seconden (en bij terugkomen in de app) de nieuwste scores en "bezig" rechtstreeks ophalen. */
 function pollNu(){if(!window.PD_DB||!window.PD_DB.pollRecent||document.hidden)return;window.PD_DB.pollRecent(addDays(dstr(),-1),$("#group").value.trim()).then(o=>{
- const n0=lastRows.length,j0=JSON.stringify(STAT);lastRows=mergeRows(lastRows,o.rows);if(o.stat)STAT=o.stat;if(lastRows.length!==n0||JSON.stringify(STAT)!==j0){pullMine(lastRows);try{renderLvl()}catch(e){}board(lastRows)}}).catch(()=>{})}
+ const n0=lastRows.length,j0=JSON.stringify(STAT);lastRows=mergeRows(lastRows,o.rows);if(o.stat)STAT=o.stat;if(lastRows.length!==n0||JSON.stringify(STAT)!==j0){pullMine(lastRows);board(lastRows)}}).catch(()=>{})}
 setInterval(pollNu,45000);addEventListener("pdready",()=>setTimeout(pollNu,3000));
 /* Terug in de app (bijv. na de iPad op slot): verbindingen opnieuw opzetten, zodat "bezig" en scores direct kloppen. */
 let lastVis=0;document.addEventListener("visibilitychange",()=>{if(document.hidden||!window.PD_DB)return;setTimeout(pollNu,800);if(listenDate!==dstr()||Date.now()-lastVis>20000){lastVis=Date.now();startBoard()}});addEventListener("pageshow",e=>{if(e.persisted&&window.PD_DB)startBoard()});
@@ -2810,10 +2773,9 @@ $("#who").onclick=()=>$("#pick").classList.add("on");
 {const q=(new URLSearchParams(location.search).get("ik")||"").toLowerCase(),f=SET.players.find(p=>p.toLowerCase()===q),m=lsGet("pdme"),k=SET.players.includes(m)?m:"";
  if(f)setMe(f);else if(k)setMe(k);else{$("#who").textContent="👤 Kies speler";$("#pick").classList.add("on")}}
 for(const t in TYPES){const b=document.createElement("button");b.dataset.t=t;const sp=document.createElement("span");sp.textContent=TYPES[t];b.append(sp);b.onclick=()=>openType(t);$("#tabs").append(b)}
-$("#prac").onclick=()=>{if(!S.practice)showNewFree(S.type,false)};
-function dayLabel(){const wk=isWk(dstr());$("#today").textContent=PHONE?(wk?"Dag 💪":"Dag"):(wk?"Weekendpuzzel 💪":"Dagpuzzel");const a=$("#arch");if(a){a.style.display=S.practice?"none":"";a.classList.toggle("on",!!S.arch)}}
+function updateArchiveVisibility(){const a=$("#arch");if(a){a.style.display=S.practice?"none":"";a.classList.toggle("on",!!S.arch)}}
 /* Archief: de dagpuzzels van de afgelopen 7 dagen (met ✓ als jij hem al hebt, en de letter van wie hem nog meer heeft). */
-{const ab=document.createElement("button");ab.id="arch";ab.title="Dagpuzzels van de afgelopen week";ab.textContent=PHONE?"📅":"📅 Eerder";$("#seg").after(ab);
+{const ab=document.createElement("button");ab.id="arch";ab.title="Dagpuzzels van de afgelopen week";ab.textContent=PHONE?"📅":"📅 Eerder";$("#next").before(ab);
  const pop=document.createElement("div");pop.id="archp";document.body.append(pop);
  ab.onclick=e=>{e.stopPropagation();if(pop.classList.contains("open")){pop.classList.remove("open");return}pop.innerHTML="";const td=dstr(),g=($("#group").value||"").trim().toLowerCase(),t=S.type;
   const h=document.createElement("div");h.className="mut sm";h.textContent=TYPES[t];pop.append(h);
@@ -2822,7 +2784,7 @@ function dayLabel(){const wk=isWk(dstr());$("#today").textContent=PHONE?(wk?"Dag
    b.innerHTML="<span>"+(k===0?"Vandaag":k===1?"Gisteren":dnl(d))+(isWk(d)?" 💪":"")+(featOf(d)===t?" ⭐":"")+"</span>"+(who?'<span class="lw">'+who+"</span>":"");
    b.onclick=ev=>{ev.stopPropagation();pop.classList.remove("open");load(S.type,false,false,d)};pop.append(b)}
   const r=ab.getBoundingClientRect();pop.style.top=Math.round(r.bottom+6)+"px";pop.style.left=Math.round(Math.max(6,Math.min(innerWidth-236,r.left+r.width/2-115)))+"px";pop.classList.add("open")};
- document.addEventListener("pointerdown",e=>{if(pop.classList.contains("open")&&!e.target.closest("#archp,#arch")){pop.classList.remove("open");e._closed=true}},true)}$("#next").onclick=()=>showNewFree(RANDOM?rndType(S.type):S.type,RANDOM,true);$("#today").onclick=()=>load(S.type,false);
+ document.addEventListener("pointerdown",e=>{if(pop.classList.contains("open")&&!e.target.closest("#archp,#arch")){pop.classList.remove("open");e._closed=true}},true)}$("#next").onclick=()=>showNewFree(RANDOM?rndType(S.type):S.type,RANDOM,true);
 let LAYW=innerWidth,LAYH=innerHeight,LAYRT=0;
 function resetPuzzleFit(){if(!S)return;delete S._csFit;delete S._hexFit;delete S._murMS;MURMS=0}
 addEventListener("resize",()=>{clearTimeout(LAYRT);LAYRT=setTimeout(()=>{const w=innerWidth,h=innerHeight,dw=Math.abs(w-LAYW),dh=Math.abs(h-LAYH),turn=(w>h)!==(LAYW>LAYH);if(!turn&&dw<24&&dh<100)return;LAYW=w;LAYH=h;resetPuzzleFit();if(S.p)render()},140)});
@@ -2890,7 +2852,7 @@ function updTheme(redraw){const mode=themeMode(),root=document.documentElement;i
 function setThemeMode(mode){if(!["system","light","dark"].includes(mode))mode="system";if(mode==="system")document.documentElement.removeAttribute("data-theme");else document.documentElement.dataset.theme=mode;lsSet("pdtheme",mode);updTheme(true)}
 $("#theme").onclick=()=>{const m=themeMode(),next=m==="system"?"light":m==="light"?"dark":"system";setThemeMode(next)};
 updTheme(false);{const mq=matchMedia("(prefers-color-scheme: dark)"),fn=()=>{if(themeMode()==="system")updTheme(true)};if(mq.addEventListener)mq.addEventListener("change",fn);else if(mq.addListener)mq.addListener(fn)}
-/* ---- iPhone-indeling: bovenbalk (tabs, scorebord, menu), dunne regel (dag/vrij, niveau), knoppenbalk onderaan ---- */
+/* ---- iPhone-indeling: bovenbalk, compact menu en knoppenbalk onderaan ---- */
 function phoneLayout(){document.body.classList.add("phone");const hd=$("header"),main=$("main");
  const pm=document.createElement("button");pm.id="pm";pm.textContent="⋯";pm.title="Menu";hd.append(pm);
  const pmp=document.createElement("div");pmp.id="pmp";document.body.append(pmp);
@@ -2899,10 +2861,9 @@ function phoneLayout(){document.body.classList.add("phone");const hd=$("header")
  prow.append($("#arch"),$("#hexstat"),$("#msg"));
  pbot.append($("#undo"),$("#redo"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✏️";$("#notewipe").innerHTML="🧹";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
  pmp.append($("#next"),$("#sbtn"),$("#helpb"),$("#ctrlb"),$("#reset"),$("#time"),$("#streak"),$("#theme"),$("#who"));
- $("#chk").innerHTML="✓<span> Klopt?</span>";$("#hintb").innerHTML="💡<span> Hint</span>";$("#today").textContent="Dag";$("#prac").textContent="Vrij";
+ $("#chk").innerHTML="✓<span> Klopt?</span>";$("#hintb").innerHTML="💡<span> Hint</span>";
  pm.onclick=()=>pmp.classList.toggle("open");pmp.addEventListener("click",e=>{if(e.target.closest("button"))setTimeout(()=>pmp.classList.remove("open"),80)});
- document.addEventListener("pointerdown",e=>{if(pmp.classList.contains("open")&&!e.target.closest("#pmp,#pm")){pmp.classList.remove("open");e._closed=true}
-  const lp=document.querySelector("#lvl .lvp.open");if(lp&&!e.target.closest("#lvl")){lp.classList.remove("open");e._closed=true}},true);
+ document.addEventListener("pointerdown",e=>{if(pmp.classList.contains("open")&&!e.target.closest("#pmp,#pm")){pmp.classList.remove("open");e._closed=true}},true);
  const SH={bin:"Binair",star:"Star",nono:"Nono",hex:"Hex",plus:"Plus",mur:"Moord"};document.querySelectorAll("#tabs button").forEach(b=>{const sp=b.querySelector("span");if(sp&&SH[b.dataset.t])sp.textContent=SH[b.dataset.t]});
  updTheme()}
 if(PHONE)phoneLayout();
@@ -3088,7 +3049,7 @@ $("#hm").addEventListener("pointerdown",e=>{if(e.target===$("#hm"))$("#hm").hidd
 addEventListener("keydown",e=>{if(e.key==="Escape"){if(document.body.classList.contains("newpick")){showHome();return}$("#hm").hidden=true;$("#cm").hidden=true}});
 
 /* Sneltoetsen: handig op desktop en op een iPad met toetsenbord. */
-function closeOverlays(){clearHint();const f=$("#fin");if(f)f.hidden=true;const sd=$("#side");if(sd)sd.classList.remove("open");const ap=$("#archp");if(ap)ap.classList.remove("open");const pm=$("#pmp");if(pm)pm.classList.remove("open");const lp=document.querySelector("#lvl .lvp.open");if(lp)lp.classList.remove("open");$("#hm").hidden=true;$("#cm").hidden=true}
+function closeOverlays(){clearHint();const f=$("#fin");if(f)f.hidden=true;const sd=$("#side");if(sd)sd.classList.remove("open");const ap=$("#archp");if(ap)ap.classList.remove("open");const pm=$("#pmp");if(pm)pm.classList.remove("open");$("#hm").hidden=true;$("#cm").hidden=true}
 function overlayOpen(){const f=$("#fin"),h=$("#hint");return document.body.classList.contains("newpick")||!$("#hm").hidden||!$("#cm").hidden||(f&&!f.hidden)||(h&&getComputedStyle(h).display!=="none")||$("#side").classList.contains("open")||($("#archp")&&$("#archp").classList.contains("open"))||($("#pmp")&&$("#pmp").classList.contains("open"))||($("#pick")&&$("#pick").classList.contains("on"))}
 addEventListener("keydown",e=>{const a=document.activeElement,tag=(a&&a.tagName)||"",typing=/INPUT|TEXTAREA|SELECT/.test(tag)||(a&&a.isContentEditable);if(typing)return;if(document.body.classList.contains("newpick")){if(e.key==="Escape"){e.preventDefault();showHome()}return}const k=e.key.toLowerCase();
  if((e.ctrlKey||e.metaKey)&&k==="z"){e.preventDefault();e.shiftKey?redo():undo();return}
