@@ -1811,6 +1811,7 @@ function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;starEnd()}
 function starEnd(){const d=drag;drag=null;if(S.type!=="star")return;if(d.note){noteFinish(d,d.moved);return}commit();check()}
 addEventListener("pointerup",starUp);addEventListener("pointercancel",starUp);
 
+const mouseLR=e=>e.pointerType==="mouse"?(e.button===0?"l":e.button===2?"r":""):null;
 let nd=null,lastTap={t:0,i:-1};
 function nonoAt(x,y){if(!S.cells.length)return -1;if(!S.ng)S.ng=gridGeo(S.p.W);return gridHit(S.ng,x,y,S.p.W,S.p.H)}
 function nonoPaint(i,v){S.cur[i]=v;const d=S.cells[i];if(d){if(S.p.color){d.classList.remove("nc1","nc2","nc3","nc4","f");if(v>0)d.classList.add("nc"+v);d.textContent=v===-1?"✕":""}else{d.classList.toggle("f",v===1);d.textContent=v===2?"✕":""}popEl(d)}nonoClue(i)}
@@ -1844,10 +1845,10 @@ function nonoLine(id){const N=S.p.W,k=+id.slice(1),idx=[];for(let j=0;j<(id[0]==
  const emp=idx.filter(i=>S.cur[i]===0);if(!emp.length)return;begin();if(!S.start)S.start=Date.now();emp.forEach(i=>nonoPaint(i,S.p.color?-1:2));commit()}
 /* Nonogram: tik = de gekozen stand (vullen of kruisje), nog eens tikken = leeg. Slepen kleurt in dezelfde stand.
    Wisselen tussen vullen en kruisje: met de knoppen, of naast het veld tikken met vinger of Pencil (net als bij Hexcells). */
-function nonoDown(e){if(e.button>0||S.type!=="nono"||S.done||e._closed)return;e.preventDefault();if(nd&&nd.pid!==e.pointerId)nonoEnd();
- const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){nonoLine(ck.dataset.ln);return}
+function nonoDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="nono"||S.done||e._closed)return;e.preventDefault();if(nd&&nd.pid!==e.pointerId)nonoEnd();
+ const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){if(mb==="r")return;nonoLine(ck.dataset.ln);return}
  S.ng=gridGeo(S.p.W);const i=nonoAt(e.clientX,e.clientY);if(i<0)return;e._nono=true;
- if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],val=S.p.color?(nonoMode==="x"?-1:nonoColorMode):(nonoMode==="x"?2:1);
+ if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],val=mb==="r"?(S.p.color?-1:2):mb==="l"?(S.p.color?nonoColorMode:1):S.p.color?(nonoMode==="x"?-1:nonoColorMode):(nonoMode==="x"?2:1);
  nd={i0:i,last:i,moved:false,pid:e.pointerId,path:[i],prev:new Map(),old,val,mode:old===val?"del":"add"};
  const nv=old===val?0:val;nonoPaint(i,nv);if(nv!==old)nd.prev.set(i,old)}
 function nonoMove(e){if(!nd||S.type!=="nono"||e.pointerId!==nd.pid)return;const i=nonoAt(e.clientX,e.clientY);if(i<0||i===nd.last)return;const N=S.p.W;nd.moved=true;
@@ -2176,8 +2177,8 @@ function hexSync(a,b){if(a.nodeType!==b.nodeType||a.nodeName!==b.nodeName){a.rep
  for(let i=0;i<a.childNodes.length;i++)hexSync(a.childNodes[i],b.childNodes[i])}
 function hexAfter(){pingBusy();if(S.p.sol.every((v,i)=>!v||S.hx.rev.has(i))){finish();return}rHex()}
 function hexClue(k){if(!S.cs)S.cs={};const c=S.cs[k]||0;if(hexMode==="b"){if(c===1)delete S.cs[k];else S.cs[k]=1}else{if(c===2)delete S.cs[k];else S.cs[k]=2}rHex()}
-function hexTap(i){if(S.done)return;if(S.hx.rev.has(i)){if(hexZn(S.p,i))hexClue("z"+i);return}S.zh=-1;S.hl=-1;if(!S.start)S.start=Date.now();clearHint();
- if(S.p.sol[i]===(hexMode==="b"?1:0)){S.hx.rev.add(i);S.popH=i;hexAfter()}
+function hexTap(i,forcedMode){if(S.done)return;if(S.hx.rev.has(i)){if(hexZn(S.p,i))hexClue("z"+i);return}S.zh=-1;S.hl=-1;if(!S.start)S.start=Date.now();clearHint();const mode=forcedMode||hexMode;
+ if(S.p.sol[i]===(mode==="b"?1:0)){S.hx.rev.add(i);S.popH=i;hexAfter()}
  else{S.mist++;S.flash=i;rHex();setTimeout(()=>{S.flash=-1;if(S.type==="hex"&&!S.done)rHex()},450)}}
 function hexHint(){const P=S.p,rev=S.hx.rev,n=P.n,cons=[];
  rev.forEach(i=>{if(!P.sol[i]&&!hexQ(P,i))cons.push({c:P.ring[i],kind:"ring",id:i})});(P.zs||[]).concat((P.zh||[]).filter(i=>rev.has(i))).forEach(i=>cons.push({c:P.zone[i],kind:"zone",id:i}));const whyOf=o=>o.kind==="rest"?[]:o.kind==="line"?P.lines[o.id].idx:[o.id];P.lineShow.forEach(j=>cons.push({c:P.lines[j].clue,kind:"line",id:j}));
@@ -2253,17 +2254,17 @@ function hexHint(){const P=S.p,rev=S.hx.rev,n=P.n,cons=[];
   return res([i],`Hier moet je ${keep.length===2?"twee":"drie"} aanwijzingen samen bekijken: ${lst(names)} (paars omrand). Elk los kan nog op meer manieren, maar samen niet: als dit vakje ${col(1-f)} zou zijn, kunnen ze niet allemaal tegelijk kloppen. Probeer het maar: vul in gedachten de vakjes eromheen in. Dit vakje is dus ${col(f)}.`)}
  return null}
 let hexLast={t:0,x:-1,y:-1};
-function hexPress(cx,cy,pt0){if(S.type!=="hex"||!S.p)return;const sv=$("#hexsvg").firstElementChild,g=window._hg;if(!sv||!g)return;
+function hexPress(cx,cy,pt0,forcedMode,mouseButton){if(S.type!=="hex"||!S.p)return;const sv=$("#hexsvg").firstElementChild,g=window._hg;if(!sv||!g)return;
  const m=sv.getScreenCTM();if(!m)return;const pt=sv.createSVGPoint();pt.x=cx;pt.y=cy;const p=pt.matrixTransform(m.inverse());
  let bi=-1,bd=1e9;g.cells.forEach((c,i)=>{const d=Math.hypot(c[0]-p.x,c[1]-p.y);if(d<bd){bd=d;bi=i}});
  /* Een lijn kies je met zijn getal. Twee lijnen kunnen bij hetzelfde punt beginnen (bijvoorbeeld recht omhoog en schuin);
     hun getallen staan wel op verschillende plekken, dus het dichtstbijzijnde getal beslist. */
  let bl=-1,ld=1e9;g.lines.forEach(l=>{const d=Math.min(Math.hypot(l[0]-p.x,l[1]-p.y),Math.hypot(l[3]-p.x,l[4]-p.y)+g.sz*.35);if(d<ld){ld=d;bl=l[2]}});
- if(bl>=0&&ld<g.sz*1.05&&ld<bd){hexClue("l"+bl);return}
- if(bi>=0&&bd<g.sz*1.12){hexTap(bi);return}
- if(!S.done)setHexMode(hexMode==="b"?"z":"b")}
+ if(bl>=0&&ld<g.sz*1.05&&ld<bd){if(mouseButton==="r")return;hexClue("l"+bl);return}
+ if(bi>=0&&bd<g.sz*1.12){hexTap(bi,forcedMode);return}
+ if(mouseButton==null&&!S.done)setHexMode(hexMode==="b"?"z":"b")}
 /* Alleen pointer-events: vroeger reageerde ook touchstart, waardoor één tik soms twee keer telde (een lijn aan en meteen weer uit). */
-$("#hexsvg").addEventListener("pointerdown",e=>{e._hx=true;if(e.button>0)return;e.preventDefault();hexPress(e.clientX,e.clientY,e.pointerType)});
+$("#hexsvg").addEventListener("pointerdown",e=>{e._hx=true;const mb=mouseLR(e);if(mb==="")return;e.preventDefault();const forced=mb==="l"?"b":mb==="r"?"z":null;hexPress(e.clientX,e.clientY,e.pointerType,forced,mb)});
 $("#hexsvg").addEventListener("touchstart",e=>e.preventDefault(),{passive:false});
 $("#sbtn").onclick=()=>$("#side").classList.toggle("open");
 document.addEventListener("pointerdown",e=>{const sd=$("#side");if(sd.classList.contains("open")&&!e.target.closest("#side,#sbtn")){sd.classList.remove("open");e._closed=true}},true);
@@ -2274,7 +2275,7 @@ const twoMode=()=>["nono","plus","hex","mur"].includes(S.type)&&S.p&&!S.done;
 function pulseEl(el){if(!el)return;el.classList.remove("modeflash");void el.offsetWidth;el.classList.add("modeflash");setTimeout(()=>el.classList.remove("modeflash"),260)}
 function flashMode(){const el=S.type==="plus"?(plusMode==="x"?$("#pxb"):$("#pob")):S.type==="nono"?(nonoMode==="x"?$("#nx"):S.nv==="color"?$("#nc"+nonoColorMode):$("#nf")):S.type==="hex"?(hexMode==="b"?$("#mb"):$("#mz")):S.type==="mur"?$("#mgrid"):null;pulseEl(el)}
 function toggleTwoMode(){if(!twoMode())return false;if(S.type==="plus")setPlusMode(plusMode==="x"?"o":"x");else if(S.type==="nono"){if(S.nv==="color"){if(nonoMode==="x")setNonoColorMode(nonoColorMode);else setNonoMode("x")}else setNonoMode(nonoMode==="f"?"x":"f")}else if(S.type==="mur"){S.mxm=!S.mxm;paintMur();flashMode()}else setHexMode(hexMode==="b"?"z":"b");return true}
-document.addEventListener("pointerdown",e=>{if(e._closed||e._hx||!twoMode()||e.button>0||(e.target.closest&&e.target.closest(BGX)))return;e.preventDefault();tdAdd("→ wissel");toggleTwoMode()});
+document.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"||e._closed||e._hx||!twoMode()||e.button>0||(e.target.closest&&e.target.closest(BGX)))return;e.preventDefault();tdAdd("→ wissel");toggleTwoMode()});
 /* Zoals in het Hexcells-veld: iOS niet laten wachten op een mogelijk gebaar (scrollen, dubbeltik-zoom) bij een tik naast het veld.
    Alleen als de pagina niet hoeft te scrollen (anders kun je niet meer scrollen). */
 /* Een aanraking van de Apple Pencil (touchType "stylus") naast het veld houden we altijd tegen, ook als de pagina kan scrollen:
@@ -2283,6 +2284,7 @@ const isStylus=e=>[...(e.changedTouches||[])].some(t=>t.touchType==="stylus");
 const bgTouch=e=>{if(!twoMode())return;const t=e.target;if(t.closest&&t.closest(BGX))return;if(document.documentElement.classList.contains("tap")||isStylus(e))e.preventDefault()};
 document.addEventListener("touchstart",bgTouch,{passive:false,capture:true});document.addEventListener("touchend",e=>{if(isStylus(e))bgTouch(e)},{passive:false,capture:true});
 document.addEventListener("dblclick",e=>{if(twoMode())e.preventDefault()},{capture:true});
+document.addEventListener("contextmenu",e=>{if(!twoMode())return;const t=e.target;if(t&&t.closest&&t.closest("#grid,#hexsvg,#mgrid"))e.preventDefault()},{capture:true});
 /* Verborgen tik-meter (5 keer snel op het logo tikken): laat zien welke aanrakingen de iPad doorgeeft, met de tijd ertussen. */
 let TD=null,tdTaps=[];const tdLog=[];let tdLast=0;
 function tdAdd(s){if(!TD)return;const n=performance.now();tdLog.unshift(String(Math.round(n-tdLast)).padStart(5)+" ms  "+s);tdLast=n;tdLog.length=Math.min(tdLog.length,16);TD.textContent="Tik-meter (5x op logo = uit)\n"+tdLog.join("\n")}
@@ -2330,11 +2332,11 @@ function plusLab(k){const e=S.plab[k];if(!e||!S.pu||!S.pu[k])return;const u=S.pu
 function plusPaint(i,v){S.cur[i]=v;const d=S.cells[i];if(d){plusCls(d,i);popEl(d)}S.pof[i].forEach(plusLab)}
 function plusEnter(j){const k=pd.path.indexOf(j);if(k>=0){while(pd.path.length>k+1){const c=pd.path.pop();if(pd.prev.has(c)){plusPaint(c,pd.prev.get(c));pd.prev.delete(c)}}return}
  pd.path.push(j);const o=S.cur[j];if(pd.mode==="add"){if(o===0)plusPaint(j,pd.val)}else if(o===pd.val)plusPaint(j,0);if(S.cur[j]!==o)pd.prev.set(j,o)}
-function plusDown(e){if(e.button>0||S.type!=="plus"||S.done||e._closed)return;e.preventDefault();if(pd&&pd.pid!==e.pointerId)plusEnd();
- if(e.target.closest&&e.target.closest("#psum")){plusPeek(true);return}
- const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){plusLine(ck.dataset.ln);return}
+function plusDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="plus"||S.done||e._closed)return;e.preventDefault();if(pd&&pd.pid!==e.pointerId)plusEnd();
+ if(e.target.closest&&e.target.closest("#psum")){if(mb==="r")return;plusPeek(true);return}
+ const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){if(mb==="r")return;plusLine(ck.dataset.ln);return}
  S.ng=gridGeo(S.p.W);const i=gridHit(S.ng,e.clientX,e.clientY,S.p.W,S.p.H);if(i<0)return;e._nono=true;
- if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],val=plusMode==="o"?1:2;
+ if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],val=mb==="l"?1:mb==="r"?2:plusMode==="o"?1:2;
  pd={last:i,pid:e.pointerId,path:[i],prev:new Map(),val,mode:old===val?"del":"add"};
  const nv=old===val?0:val;plusPaint(i,nv);if(nv!==old)pd.prev.set(i,old)}
 function plusMove(e){if(!pd||S.type!=="plus"||e.pointerId!==pd.pid)return;const W=S.p.W,i=gridHit(S.ng,e.clientX,e.clientY,W,S.p.H);if(i<0||i===pd.last)return;
@@ -2538,8 +2540,10 @@ function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const 
  p.ppl.forEach((nm,s)=>{const li=document.createElement("li");li.dataset.c=s;const txt=s===p.V?"<b>Het slachtoffer.</b> Was alleen met de moordenaar.":p.cardTxt[s];
   li.innerHTML=`${murTok(p,s,dark)}<span><b>${nm}:</b> ${txt}</span>`;ol.append(li)});cl.append(ol);
  const acc=document.createElement("div");acc.id="macc";cl.append(acc);m.append(cl);
- g.onpointerdown=e=>{const d=e.target.closest&&e.target.closest("[data-i]");if(!d)return;e.preventDefault();const i=+d.dataset.i;
+ g.onpointerdown=e=>{const d=e.target.closest&&e.target.closest("[data-i]");if(!d)return;const mb=mouseLR(e);if(mb==="")return;e.preventDefault();const i=+d.dataset.i,oldMode=S.mxm;
+  if(mb==="l")S.mxm=false;else if(mb==="r")S.mxm=true;
   const snap={cur:S.cur.slice(),ms:S.ms,h:S.hist.length,r:S.redo.slice()};murTap(i);
+  if(mb!==null){S.mxm=oldMode;paintMur();return}
   if(!potlood&&!S.mxm&&!S.done)lpStart(e,()=>{if(S.done)return;S.cur=snap.cur;S.ms=snap.ms;S.hist.length=snap.h;S.redo=snap.r;ub();lpNote(i)})};
  pal.onpointerdown=e=>{const b=e.target.closest&&e.target.closest("[data-s]");if(!b||S.done)return;e.preventDefault();if(b.dataset.s==="x"){S.mxm=!S.mxm}else{const s=+b.dataset.s;S.mxm=false;S.ms=S.ms===s&&!S.mxm?-1:s}paintMur()};
  ol.onpointerdown=e=>{const li=e.target.closest&&e.target.closest("[data-c]");if(!li)return;e.preventDefault();const c=+li.dataset.c;if(S.str.has(c))S.str.delete(c);else S.str.add(c);paintMur();persist()};
