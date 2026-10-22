@@ -56,10 +56,7 @@ service cloud.firestore {
         && request.resource.data.uid.size() > 0
         && request.resource.data.uid.size() <= 80
         && request.resource.data.uid == myPlayer()
-        && (
-          id == request.resource.data.group + '_' + request.resource.data.date + '_' + request.resource.data.type + '_' + request.resource.data.uid
-          || id == request.resource.data.date + '_' + request.resource.data.type + '_' + request.resource.data.uid
-        )
+        && id == request.resource.data.group + '_' + request.resource.data.date + '_' + request.resource.data.type + '_' + request.resource.data.uid
         && request.resource.data.secs is int
         && request.resource.data.secs > 0
         && request.resource.data.get('mist', 0) is int
@@ -143,7 +140,8 @@ service cloud.firestore {
       allow list: if hasProfile()
         && resource.data.groupId == myGroup();
 
-      // De eenmalige Peter/Aart-migratie is afgerond.
+      // Alleen vooraf gekoppelde Google-accounts hebben een profiel.
+      // De app kan zelf geen nieuw spelerprofiel aanmaken.
       allow create: if false;
 
       allow update: if signedIn()
@@ -171,9 +169,6 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    match /profileClaims/{claimId} {
-      allow read, write: if false;
-    }
 
     match /groups/{groupId} {
       allow get: if signedIn()
