@@ -328,7 +328,7 @@ nav button .tdone[hidden]{display:none}
 #nmode button{font-weight:700;padding:10px 6px;border-radius:14px;white-space:nowrap}
 #nf.on{background:var(--fill);border-color:var(--fill);color:var(--bg);box-shadow:0 3px 0 color-mix(in srgb,var(--fill) 60%,#000)}
 #nx.on{background:#c2410c;border-color:#c2410c;color:#fff;box-shadow:0 3px 0 #7c2d12}
-#grid.nx{box-shadow:0 0 0 5px #c2410c,0 8px 24px var(--sh)}#grid.nf{box-shadow:0 0 0 5px var(--fill),0 8px 24px var(--sh)}
+#grid.nx{box-shadow:0 0 0 5px #c2410c,0 8px 24px var(--sh)}#grid.nf{box-shadow:0 0 0 5px var(--fill),0 8px 24px var(--sh)}#grid.binx{box-shadow:0 0 0 5px var(--fill),0 8px 24px var(--sh)}#grid.bino{box-shadow:0 0 0 5px var(--one),0 8px 24px var(--sh)}
 @media(max-width:760px),(max-aspect-ratio:1/1){#nmode{flex-direction:row}}
 /* ===== Opgelost-kaart met reactie ===== */
 #fin{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);width:min(520px,92vw);z-index:46;background:var(--card);border:2px solid var(--pc);border-radius:16px;padding:14px 16px;box-shadow:0 12px 40px rgba(0,0,0,.4);font-size:15px;line-height:1.35;max-height:80vh;overflow:auto}
@@ -1727,7 +1727,7 @@ function binCompare(){const W=S.p.W,H=S.p.H,pk=S.pick,rows=pk.t==="r",n=rows?H:W
  const at=pk.at,vis=Array(n).fill(-1);
  for(let x=0;x<n;x++)if(x!==at&&dupHint(lines[at],lines[x])){vis[x]=0;vis[at]=0}
  S.rd=rows?vis:null;S.cd=rows?null:vis}
-let drag2=null;
+let drag2=null,binMode=0,binLastTap={t:0,i:-1};
 let G2=null;
 function binCell(x,y){const g=G2;if(!g)return -1;const c=Math.floor((x-g.x)/g.cs),r=Math.floor((y-g.y)/g.cs);return c<0||r<0||c>=g.W||r>=g.H?-1:r*g.W+c}
 /* Terwijl de Pencil het scherm raakt, tellen aanrakingen van hand of duim op het speelveld niet mee. */
@@ -1746,15 +1746,16 @@ function binDown(e){const mb=mouseLR(e);if(S.done||S.type!=="bin"||e._closed||mb
   S.pick={t:drag2.line,at:ri>=0?ri:ci};binCompare();paintBin();return}
  const i=binCell(e.clientX,e.clientY);if(i<0)return;
  e.preventDefault();if(!S.start&&S.p.giv[i]<0)S.start=Date.now();clearHint();
- const N=S.p.W,r=i/N|0,c=i%N;
- if(potlood&&mb==null){
+ const N=S.p.W,r=i/N|0,c=i%N,dbl=mb!=="r"&&binLastTap.i===i&&e.timeStamp-binLastTap.t<380;
+ if(dbl)binLastTap={t:0,i:-1};else if(mb==="r")binLastTap={t:0,i:-1};
+ if(potlood&&mb==null&&!dbl){
   const old=noteVal(i),to=S.p.giv[i]<0&&S.cur[i]<0?(old===1?2:old===2?0:1):old;
   drag2={note:true,start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp,nchanges:new Map()};S.rd=S.cd=S.pick=null;
   noteDragWrite(drag2,i,to);return}
- begin();drag2={start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,old:S.cur[i],applied:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp,mouseDirect:mb!==null};S.rd=S.cd=S.pick=null;
- if(S.p.giv[i]<0){const o=S.cur[i];if(mb==="l")S.cur[i]=o===0?-1:0;else if(mb==="r")S.cur[i]=o===1?-1:1;else S.cur[i]=o<0?0:o===0?1:-1;drag2.applied=true}
+ begin();drag2={start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,old:S.cur[i],applied:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp,mouseDirect:mb!==null,dbl};S.rd=S.cd=S.pick=null;
+ if(S.p.giv[i]<0){const o=S.cur[i],target=(mb==="r"||dbl)?1:binMode;if(dbl)S.cur[i]=1;else S.cur[i]=o===target?-1:target;drag2.applied=true}
  paintBin();
- if(mb===null)lpStart(e,()=>{if(!drag2||drag2.moved||drag2.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag2=null;S.gs=null;paintBin();lpNote(i)})}
+ if(mb===null&&!dbl)lpStart(e,()=>{if(!drag2||drag2.moved||drag2.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag2=null;S.gs=null;paintBin();lpNote(i)})}
 function binMove(e){if(!drag2||S.type!=="bin"||e.pointerId!==drag2.pid)return;
  if(drag2.mouseDirect)return;
  if(drag2.line){const g=G2,rows=drag2.line==="r",n=rows?g.H:g.W,x=Math.max(0,Math.min(n-1,Math.floor(rows?(e.clientY-g.y)/g.cs:(e.clientX-g.x)/g.cs)));
@@ -1765,7 +1766,7 @@ function binMove(e){if(!drag2||S.type!=="bin"||e.pointerId!==drag2.pid)return;
  if(d.note){noteDragRestore(d,d.start);paintNotes()}else if(d.applied){S.cur[d.start]=d.old;d.applied=false}
  S.pick=(d.maxr-d.minr)>=(d.maxc-d.minc)?{t:"r",a:d.minr,b:d.maxr,at:r}:{t:"c",a:d.minc,b:d.maxc,at:c};
  binCompare();paintBin()}
-function binUp(e){if(!drag2||(e&&e.pointerId!==drag2.pid))return;binEnd()}
+function binUp(e){if(!drag2||(e&&e.pointerId!==drag2.pid))return;const d=drag2;if(!d.line&&!d.note&&!d.moved&&!d.dbl&&e&&e.button!==2)binLastTap={t:e.timeStamp,i:d.start};else if(d.dbl)binLastTap={t:0,i:-1};binEnd()}
 function binEnd(){const d=drag2;drag2=null;if(S.type!=="bin")return;
  if(d.note){if(d.moved){S.pick=null;paintBin();noteFinish(d,false);return}noteFinish(d,false);return}
  if(d.moved){S.gs=null;S.pick=null;paintBin();return}
@@ -1834,7 +1835,14 @@ function nonoEnter(j){const k=nd.path.indexOf(j);if(k>=0){while(nd.path.length>k
 function nonoApply(j){if(nd.mode==="add"){if(S.cur[j]===0)nonoPaint(j,nd.val)}else if(S.cur[j]===nd.val)nonoPaint(j,0)}
 /* Is een rij of kolom precies volgens de getallen gevuld? Dan worden de lege vakjes daarin vanzelf kruisjes. */
 function nonoAuto(changed){const W=S.p.W,H=S.p.H,rows=new Set(),cols=new Set();changed.forEach(i=>{rows.add(i/W|0);cols.add(i%W)});
- const fix=(idx,cl)=>{const v=idx.map(i=>S.cur[i]);if(!v.includes(0))return;if(S.p.color){if(cnEq(cnClue(v.map(x=>x>0?x:0)),cl))idx.forEach(i=>{if(S.cur[i]===0)nonoPaint(i,-1)});return}if(lc(v.map(x=>x===1?1:0)).join()===cl.join()){idx.forEach(i=>{if(S.cur[i]===0)nonoPaint(i,2)});return}
+ const fix=(idx,cl)=>{const v=idx.map(i=>S.cur[i]);if(!v.includes(0))return;if(S.p.color){if(cnEq(cnClue(v.map(x=>x>0?x:0)),cl)){idx.forEach(i=>{if(S.cur[i]===0)nonoPaint(i,-1)});return}
+   /* Kleur: hetzelfde principe als klassiek. Als een gekleurd blok aantoonbaar dit specifieke getal is
+      en op een vaste plek ligt, kruis alleen buurvakjes die in geen enkele geldige plaatsing nog gekleurd kunnen zijn. */
+   if(!cl.length)return;const A=cnLine(cl,v);if(!A.cnt||A.overflow)return;
+   cl.forEach((q,k)=>{if(A.mn[k]!==A.mx[k])return;const st=A.mn[k];if(!v.slice(st,st+q.n).every(x=>x===q.c))return;
+    for(const z of[st-1,st+q.n])if(z>=0&&z<idx.length&&S.cur[idx[z]]===0&&A.fix[z]===-1)nonoPaint(idx[z],-1)});
+   return}
+  if(lc(v.map(x=>x===1?1:0)).join()===cl.join()){idx.forEach(i=>{if(S.cur[i]===0)nonoPaint(i,2)});return}
   /* Een blok dat zeker af is (het getal wordt grijs): meteen kruisjes aan beide kanten. */
   if(!cl.length)return;const A=nonoArr(cl,v);if(!A.cnt||A.cnt>200000)return;
   cl.forEach((len,k)=>{if(A.mn[k]!==A.mx[k])return;const st=A.mn[k];if(!v.slice(st,st+len).every(x=>x===1))return;
@@ -1852,14 +1860,15 @@ function nonoLine(id){const N=S.p.W,k=+id.slice(1),idx=[];for(let j=0;j<(id[0]==
 function nonoDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="nono"||S.done||e._closed)return;e.preventDefault();if(nd&&nd.pid!==e.pointerId)nonoEnd();
  const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){if(mb==="r")return;nonoLine(ck.dataset.ln);return}
  S.ng=gridGeo(S.p.W);const i=nonoAt(e.clientX,e.clientY);if(i<0)return;e._nono=true;
- if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],val=mb==="r"?(S.p.color?-1:2):mb==="l"?(S.p.color?nonoColorMode:1):S.p.color?(nonoMode==="x"?-1:nonoColorMode):(nonoMode==="x"?2:1);
- nd={i0:i,last:i,moved:false,pid:e.pointerId,path:[i],prev:new Map(),old,val,mode:old===val?"del":"add"};
- const nv=old===val?0:val;nonoPaint(i,nv);if(nv!==old)nd.prev.set(i,old)}
+ const dbl=mb!=="r"&&lastTap.i===i&&e.timeStamp-lastTap.t<380;if(dbl)lastTap={t:0,i:-1};else if(mb==="r")lastTap={t:0,i:-1};
+ if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],cross=S.p.color?-1:2,active=S.p.color?(nonoMode==="x"?-1:nonoColorMode):(nonoMode==="x"?2:1),val=(mb==="r"||dbl)?cross:active;
+ nd={i0:i,last:i,moved:false,pid:e.pointerId,path:[i],prev:new Map(),old,val,mode:old===val?"del":"add",dbl};
+ const nv=dbl?val:(old===val?0:val);nonoPaint(i,nv);if(nv!==old)nd.prev.set(i,old)}
 function nonoMove(e){if(!nd||S.type!=="nono"||e.pointerId!==nd.pid)return;const i=nonoAt(e.clientX,e.clientY);if(i<0||i===nd.last)return;const N=S.p.W;nd.moved=true;
  const r0=nd.last/N|0,c0=nd.last%N,r1=i/N|0,c1=i%N,n=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));
  for(let k=1;k<=n;k++)nonoEnter(Math.round(r0+(r1-r0)*k/n)*N+Math.round(c0+(c1-c0)*k/n));
  nd.last=i}
-function nonoUp(e){if(!nd||e.pointerId!==nd.pid)return;nonoEnd()}
+function nonoUp(e){if(!nd||e.pointerId!==nd.pid)return;const d=nd;if(!d.moved&&!d.dbl&&e&&e.button!==2)lastTap={t:e.timeStamp,i:d.i0};else if(d.dbl)lastTap={t:0,i:-1};nonoEnd()}
 function nonoEnd(){const d=nd;nd=null;if(S.type!=="nono")return;const ch=[];if(S.gs)S.cur.forEach((v,i)=>{if(v!==S.gs[i])ch.push(i)});nonoAuto(ch);commit();check()}
 addEventListener("pointerup",nonoUp);addEventListener("pointercancel",nonoUp);
 function tap(i){if(S.done)return;const{type,p}=S;begin();
@@ -2268,18 +2277,18 @@ function hexPress(cx,cy,pt0,forcedMode,mouseButton){if(S.type!=="hex"||!S.p)retu
  if(bi>=0&&bd<g.sz*1.12){hexTap(bi,forcedMode);return}
  if(mouseButton==null&&!S.done)setHexMode(hexMode==="b"?"z":"b")}
 /* Alleen pointer-events: vroeger reageerde ook touchstart, waardoor één tik soms twee keer telde (een lijn aan en meteen weer uit). */
-$("#hexsvg").addEventListener("pointerdown",e=>{e._hx=true;const mb=mouseLR(e);if(mb==="")return;e.preventDefault();const forced=mb==="l"?"b":mb==="r"?"z":null;hexPress(e.clientX,e.clientY,e.pointerType,forced,mb)});
+$("#hexsvg").addEventListener("pointerdown",e=>{e._hx=true;const mb=mouseLR(e);if(mb==="")return;e.preventDefault();const forced=mb==="r"?"z":null;hexPress(e.clientX,e.clientY,e.pointerType,forced,mb)});
 $("#hexsvg").addEventListener("touchstart",e=>e.preventDefault(),{passive:false});
 $("#sbtn").onclick=()=>$("#side").classList.toggle("open");
 document.addEventListener("pointerdown",e=>{const sd=$("#side");if(sd.classList.contains("open")&&!e.target.closest("#side,#sbtn")){sd.classList.remove("open");e._closed=true}},true);
 /* Naast het veld tikken (vinger of Pencil) wisselt de stand. Alles wat zelf iets doet (knoppen, menu's, scorebord, hint) telt niet mee;
    de lege ruimte in de kolommen links en rechts wel. */
 const BGX="#topbar,#more,#home,#archp,#grid,#mgrid,#mclues,#mpal,#macc,#hexsvg,button,input,label,select,a,#side,#seg,#lvl,header,nav,#pick,#hint,#fin,#hm,#pbot,#prow,#pmp,#time,#streak,#hexstat,#sbtn";
-const twoMode=()=>["nono","plus","hex","mur"].includes(S.type)&&S.p&&!S.done;
+const twoMode=()=>["bin","nono","plus","hex","mur"].includes(S.type)&&S.p&&!S.done;
 function pulseEl(el){if(!el)return;el.classList.remove("modeflash");void el.offsetWidth;el.classList.add("modeflash");setTimeout(()=>el.classList.remove("modeflash"),260)}
-function flashMode(){const el=S.type==="plus"?(plusMode==="x"?$("#pxb"):$("#pob")):S.type==="nono"?(nonoMode==="x"?$("#nx"):S.nv==="color"?$("#nc"+nonoColorMode):$("#nf")):S.type==="hex"?(hexMode==="b"?$("#mb"):$("#mz")):S.type==="mur"?$("#mgrid"):null;pulseEl(el)}
-function toggleTwoMode(){if(!twoMode())return false;if(S.type==="plus")setPlusMode(plusMode==="x"?"o":"x");else if(S.type==="nono"){if(S.nv==="color"){if(nonoMode==="x")setNonoColorMode(nonoColorMode);else setNonoMode("x")}else setNonoMode(nonoMode==="f"?"x":"f")}else if(S.type==="mur"){S.mxm=!S.mxm;paintMur();flashMode()}else setHexMode(hexMode==="b"?"z":"b");return true}
-document.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"||e._closed||e._hx||!twoMode()||e.button>0||(e.target.closest&&e.target.closest(BGX)))return;e.preventDefault();tdAdd("→ wissel");toggleTwoMode()});
+function flashMode(){const el=S.type==="bin"?$("#grid"):S.type==="plus"?(plusMode==="x"?$("#pxb"):$("#pob")):S.type==="nono"?(nonoMode==="x"?$("#nx"):S.nv==="color"?$("#nc"+nonoColorMode):$("#nf")):S.type==="hex"?(hexMode==="b"?$("#mb"):$("#mz")):S.type==="mur"?$("#mgrid"):null;pulseEl(el)}
+function toggleTwoMode(){if(!twoMode())return false;if(S.type==="bin"){binMode=binMode?0:1;ub();flashMode()}else if(S.type==="plus")setPlusMode(plusMode==="x"?"o":"x");else if(S.type==="nono"){if(S.nv==="color"){if(nonoMode==="x")setNonoColorMode(nonoColorMode);else setNonoMode("x")}else setNonoMode(nonoMode==="f"?"x":"f")}else if(S.type==="mur"){S.mxm=!S.mxm;paintMur();flashMode()}else setHexMode(hexMode==="b"?"z":"b");return true}
+document.addEventListener("pointerdown",e=>{if(e._closed||e._hx||!twoMode()||e.button>0||(e.target.closest&&e.target.closest(BGX)))return;e.preventDefault();tdAdd("→ wissel");toggleTwoMode()});
 /* Zoals in het Hexcells-veld: iOS niet laten wachten op een mogelijk gebaar (scrollen, dubbeltik-zoom) bij een tik naast het veld.
    Alleen als de pagina niet hoeft te scrollen (anders kun je niet meer scrollen). */
 /* Een aanraking van de Apple Pencil (touchType "stylus") naast het veld houden we altijd tegen, ook als de pagina kan scrollen:
@@ -2287,7 +2296,7 @@ document.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"||e._close
 const isStylus=e=>[...(e.changedTouches||[])].some(t=>t.touchType==="stylus");
 const bgTouch=e=>{if(!twoMode())return;const t=e.target;if(t.closest&&t.closest(BGX))return;if(document.documentElement.classList.contains("tap")||isStylus(e))e.preventDefault()};
 document.addEventListener("touchstart",bgTouch,{passive:false,capture:true});document.addEventListener("touchend",e=>{if(isStylus(e))bgTouch(e)},{passive:false,capture:true});
-document.addEventListener("dblclick",e=>{if(twoMode())e.preventDefault()},{capture:true});
+document.addEventListener("dblclick",e=>{if(twoMode()||S&&S.type==="star")e.preventDefault()},{capture:true});
 document.addEventListener("contextmenu",e=>{if(!(twoMode()||S&&["star","bin"].includes(S.type)))return;const t=e.target;if(t&&t.closest&&t.closest("#grid,#hexsvg,#mgrid"))e.preventDefault()},{capture:true});
 /* Verborgen tik-meter (5 keer snel op het logo tikken): laat zien welke aanrakingen de iPad doorgeeft, met de tijd ertussen. */
 let TD=null,tdTaps=[];const tdLog=[];let tdLast=0;
@@ -2340,7 +2349,7 @@ function plusDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="plus"||S.done||e.
  if(e.target.closest&&e.target.closest("#psum")){if(mb==="r")return;plusPeek(true);return}
  const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){if(mb==="r")return;plusLine(ck.dataset.ln);return}
  S.ng=gridGeo(S.p.W);const i=gridHit(S.ng,e.clientX,e.clientY,S.p.W,S.p.H);if(i<0)return;e._nono=true;
- if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],val=mb==="l"?1:mb==="r"?2:plusMode==="o"?1:2;
+ if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],val=mb==="r"?2:plusMode==="o"?1:2;
  pd={last:i,pid:e.pointerId,path:[i],prev:new Map(),val,mode:old===val?"del":"add"};
  const nv=old===val?0:val;plusPaint(i,nv);if(nv!==old)pd.prev.set(i,old)}
 function plusMove(e){if(!pd||S.type!=="plus"||e.pointerId!==pd.pid)return;const W=S.p.W,i=gridHit(S.ng,e.clientX,e.clientY,W,S.p.H);if(i<0||i===pd.last)return;
@@ -2413,7 +2422,7 @@ function plusHint(){plusSetup();const p=S.p,cur=S.cur,num=p.num;
 /* ---- Ongedaan maken / opnieuw / reset ---- */
 function ub(){setTimeout(()=>{try{syncA11y()}catch(e){}},0);ub0()}
 function ub0(){const set=(id,v)=>{$(id).disabled=!!v};const off=!S.p||S.done;{const pb=$("#potb"),nw=$("#notewipe"),hasNotes=!!(S.nt&&Object.keys(S.nt).some(k=>S.nt[k]));if(pb){pb.style.display=NOTET.includes(S.type)?"":"none";pb.disabled=off;if(off&&potlood)setPotlood(false);pb.classList.toggle("on",potlood)}if(nw){nw.style.display=NOTET.includes(S.type)&&hasNotes?"":"none";nw.disabled=off}}
- const hx=S.type==="hex";$("#chk").style.display=["bin","star","nono","kak","mur","plus"].includes(S.type)?"":"none";set("#chk",off);$("#hintb").style.display=HINTT.includes(S.type)?"":"none";set("#hintb",off);for(const k of["#undo","#redo","#reset"])$(k).style.display=hx?"none":"";$("#tools").style.display=hx?"none":"";$("#mb").style.display=$("#mz").style.display=hx?"":"none";$("#hexbtns").style.display=hx?"":"none";$("#hexstat").style.display=hx?"":"none";$("#hexbtns").classList.toggle("mz",hexMode==="z");$("#hexstat").classList.toggle("mz",hexMode==="z");$("#nvariant").style.display=S.type==="nono"?"flex":"none";$("#nvclassic").classList.toggle("on",S.type==="nono"&&S.nv!=="color");$("#nvcolor").classList.toggle("on",S.type==="nono"&&S.nv==="color");const nvlock=S.type==="nono"&&!S.practice;$("#nvclassic").disabled=off||nvlock;$("#nvcolor").disabled=off||nvlock;$("#nvariant").classList.toggle("locked",nvlock);$("#nvariant").title=nvlock?"Deze variant hoort bij de dagpuzzel":"Kies Klassiek of Kleur";$("#nmode").style.display=S.type==="nono"?"":"none";const ncol=S.type==="nono"&&S.nv==="color";$("#nmode").classList.toggle("ncolor",ncol);$("#nf").style.display=ncol?"none":"";$("#nf").classList.toggle("on",!ncol&&nonoMode==="f");$("#nx").classList.toggle("on",nonoMode==="x");for(let q=1;q<=4;q++){const b=$("#nc"+q);b.style.display=ncol&&S.p&&q<=S.p.K?"flex":"none";b.classList.toggle("on",ncol&&nonoMode==="f"&&nonoColorMode===q)}$("#grid").classList.toggle("ncolor",ncol);$("#grid").classList.toggle("nx",S.type==="nono"&&nonoMode==="x");$("#grid").classList.toggle("nf",S.type==="nono"&&!ncol&&nonoMode==="f"&&!S.done);$("#pmode").style.display=S.type==="plus"?"":"none";$("#pxb").classList.toggle("on",plusMode==="x");$("#pob").classList.toggle("on",plusMode==="o");$("#grid").classList.toggle("pom",S.type==="plus"&&plusMode==="o"&&!S.done);$("#grid").classList.toggle("pxm",S.type==="plus"&&plusMode==="x"&&!S.done);$("#mb").classList.toggle("on",hexMode==="b");$("#mz").classList.toggle("on",hexMode==="z");$("#hexsvg").classList.toggle("mb",hexMode==="b");$("#hexw").classList.toggle("mz",hexMode==="z");$("#hexsvg").classList.toggle("mz",hexMode==="z");set("#undo",off||!S.hist||!S.hist.length);set("#redo",off||!S.redo||!S.redo.length);set("#reset",off)}
+ const hx=S.type==="hex";$("#chk").style.display=["bin","star","nono","kak","mur","plus"].includes(S.type)?"":"none";set("#chk",off);$("#hintb").style.display=HINTT.includes(S.type)?"":"none";set("#hintb",off);for(const k of["#undo","#redo","#reset"])$(k).style.display=hx?"none":"";$("#tools").style.display=hx?"none":"";$("#mb").style.display=$("#mz").style.display=hx?"":"none";$("#hexbtns").style.display=hx?"":"none";$("#hexstat").style.display=hx?"":"none";$("#hexbtns").classList.toggle("mz",hexMode==="z");$("#hexstat").classList.toggle("mz",hexMode==="z");$("#nvariant").style.display=S.type==="nono"?"flex":"none";$("#nvclassic").classList.toggle("on",S.type==="nono"&&S.nv!=="color");$("#nvcolor").classList.toggle("on",S.type==="nono"&&S.nv==="color");const nvlock=S.type==="nono"&&!S.practice;$("#nvclassic").disabled=off||nvlock;$("#nvcolor").disabled=off||nvlock;$("#nvariant").classList.toggle("locked",nvlock);$("#nvariant").title=nvlock?"Deze variant hoort bij de dagpuzzel":"Kies Klassiek of Kleur";$("#nmode").style.display=S.type==="nono"?"":"none";const ncol=S.type==="nono"&&S.nv==="color";$("#nmode").classList.toggle("ncolor",ncol);$("#nf").style.display=ncol?"none":"";$("#nf").classList.toggle("on",!ncol&&nonoMode==="f");$("#nx").classList.toggle("on",nonoMode==="x");for(let q=1;q<=4;q++){const b=$("#nc"+q);b.style.display=ncol&&S.p&&q<=S.p.K?"flex":"none";b.classList.toggle("on",ncol&&nonoMode==="f"&&nonoColorMode===q)}$("#grid").classList.toggle("ncolor",ncol);$("#grid").classList.toggle("nx",S.type==="nono"&&nonoMode==="x");$("#grid").classList.toggle("nf",S.type==="nono"&&!ncol&&nonoMode==="f"&&!S.done);$("#grid").classList.toggle("binx",S.type==="bin"&&binMode===0&&!S.done);$("#grid").classList.toggle("bino",S.type==="bin"&&binMode===1&&!S.done);$("#pmode").style.display=S.type==="plus"?"":"none";$("#pxb").classList.toggle("on",plusMode==="x");$("#pob").classList.toggle("on",plusMode==="o");$("#grid").classList.toggle("pom",S.type==="plus"&&plusMode==="o"&&!S.done);$("#grid").classList.toggle("pxm",S.type==="plus"&&plusMode==="x"&&!S.done);$("#mb").classList.toggle("on",hexMode==="b");$("#mz").classList.toggle("on",hexMode==="z");$("#hexsvg").classList.toggle("mb",hexMode==="b");$("#hexw").classList.toggle("mz",hexMode==="z");$("#hexsvg").classList.toggle("mz",hexMode==="z");set("#undo",off||!S.hist||!S.hist.length);set("#redo",off||!S.redo||!S.redo.length);set("#reset",off)}
 function begin(){S.gs=S.cur.slice()}
 function commit(){if(S.gs&&S.gs.join()!==S.cur.join()){S.hist.push(S.gs);S.redo=[];pingBusy()}S.gs=null;ub();paintNotes()}
 function initCur(){const p=S.p;return S.type==="bin"?p.giv.slice():Array(S.type==="kak"||S.type==="nono"||S.type==="plus"?p.W*p.H:p.N*p.N).fill(S.type==="mur"?-1:0)}
@@ -2545,7 +2554,7 @@ function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const 
   li.innerHTML=`${murTok(p,s,dark)}<span><b>${nm}:</b> ${txt}</span>`;ol.append(li)});cl.append(ol);
  const acc=document.createElement("div");acc.id="macc";cl.append(acc);m.append(cl);
  g.onpointerdown=e=>{const d=e.target.closest&&e.target.closest("[data-i]");if(!d)return;const mb=mouseLR(e);if(mb==="")return;e.preventDefault();const i=+d.dataset.i,oldMode=S.mxm;
-  if(mb==="l")S.mxm=false;else if(mb==="r")S.mxm=true;
+  if(mb==="r")S.mxm=true;
   const snap={cur:S.cur.slice(),ms:S.ms,h:S.hist.length,r:S.redo.slice()};murTap(i);
   if(mb!==null){S.mxm=oldMode;paintMur();return}
   if(!potlood&&!S.mxm&&!S.done)lpStart(e,()=>{if(S.done)return;S.cur=snap.cur;S.ms=snap.ms;S.hist.length=snap.h;S.redo=snap.r;ub();lpNote(i)})};
