@@ -1558,7 +1558,7 @@ const ALLTYPES={bin:"Binair",star:"Star Battle",nono:"Nonogram",kak:"Kakuro",hex
 const ACTIVE=["bin","star","nono","hex","plus","mur"];
 const TYPES=Object.fromEntries(ACTIVE.map(t=>[t,ALLTYPES[t]]));
 const HELP={
- bin:"Vul de vakjes met ✕ en ○. Nooit drie dezelfde naast elkaar, in elke rij en kolom evenveel ✕ als ○, en geen twee rijen of twee kolommen gelijk. Tik om te wisselen: ✕, ○, leeg. Sleep over een paar rijen (omlaag) of kolommen (opzij) om te zien of ze al gelijk zijn: lijnen waarvan de ingevulde ✕ en ○ overal gelijk zijn (lege vakjes tellen niet mee, minstens de helft van de lijn bij beide ingevuld) worden groen samen met de lijn waar je op dat moment overheen sleept. Laat je los terwijl ze groen zijn, dan blijven ze staan.",
+ bin:"Vul de vakjes met ✕ en ○. Nooit drie dezelfde naast elkaar, in elke rij en kolom evenveel ✕ als ○, en geen twee rijen of twee kolommen gelijk. Tik of linksklik voor ✕; dubbeltik, dubbelklik of rechtermuisklik voor ○. Nogmaals dezelfde actie maakt het vakje weer leeg. Sleep over een paar rijen (omlaag) of kolommen (opzij) om te zien of ze al gelijk zijn: lijnen waarvan de ingevulde ✕ en ○ overal gelijk zijn (lege vakjes tellen niet mee, minstens de helft van de lijn bij beide ingevuld) worden groen samen met de lijn waar je op dat moment overheen sleept. Laat je los terwijl ze groen zijn, dan blijven ze staan.",
  star:"Zet in elke rij, elke kolom en elk gekleurd gebied precies __K__ __S__. Sterren raken elkaar nooit, ook niet diagonaal. Tik: ✕ (geen ster), dan ★, dan leeg.",
  nono:"De getallen geven de lengtes van de blokken gevulde vakjes in die rij of kolom, in volgorde. Kies links ■ Vullen of ✕ Kruisje, of tik naast het veld (met je vinger of de Pencil) om te wisselen. Tik op een vakje om het te vullen of een kruisje te zetten, nog eens tikken maakt het weer leeg. Slepen werkt in dezelfde stand. Klopt een rij of kolom precies met de getallen, dan worden de lege vakjes daarin vanzelf kruisjes en wordt het getal lichter. Tik op een getal om alle lege vakjes in die rij of kolom kruisjes te maken.",
  kak:"Vul cijfers 1 t/m 9 in. De getallen in de zwarte vakjes zijn de som van het stuk rechts (bovenste getal) of eronder (onderste getal). Binnen één som komt elk cijfer maar één keer voor.",
@@ -1864,7 +1864,7 @@ function nonoDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="nono"||S.done||e.
  S.ng=gridGeo(S.p.W);const i=nonoAt(e.clientX,e.clientY);if(i<0)return;e._nono=true;
  const dbl=mb!=="r"&&lastTap.i===i&&e.timeStamp-lastTap.t<380;if(dbl)lastTap={t:0,i:-1};else if(mb==="r")lastTap={t:0,i:-1};
  if(dbl&&S.hist&&S.hist.length){const pre=S.hist[S.hist.length-1];if(Array.isArray(pre)&&pre.length===S.cur.length){const was=S.cur.slice();S.cur=S.hist.pop().slice();S.redo=[];was.forEach((v,j)=>{if(v!==S.cur[j])nonoPaint(j,S.cur[j])});ub()}}
- if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],cross=S.p.color?-1:2,active=S.p.color?(nonoMode==="x"?-1:nonoColorMode):(nonoMode==="x"?2:1),val=(mb==="r"||dbl)?cross:active;
+ if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],cross=S.p.color?-1:2,fill=S.p.color?nonoColorMode:1,active=S.p.color?(nonoMode==="x"?cross:fill):(nonoMode==="x"?cross:fill),val=dbl?cross:mb==="r"?(active===cross?fill:cross):active;
  nd={i0:i,last:i,moved:false,pid:e.pointerId,path:[i],prev:new Map(),old,val,mode:old===val?"del":"add",dbl};
  const nv=dbl?val:(old===val?0:val);nonoPaint(i,nv);if(nv!==old)nd.prev.set(i,old)}
 function nonoMove(e){if(!nd||S.type!=="nono"||e.pointerId!==nd.pid)return;const i=nonoAt(e.clientX,e.clientY);if(i<0||i===nd.last)return;const N=S.p.W;nd.moved=true;
@@ -2280,7 +2280,7 @@ function hexPress(cx,cy,pt0,forcedMode,mouseButton){if(S.type!=="hex"||!S.p)retu
  if(bi>=0&&bd<g.sz*1.12){hexTap(bi,forcedMode);return}
  if(mouseButton!=="r"&&!S.done)setHexMode(hexMode==="b"?"z":"b")}
 /* Alleen pointer-events: vroeger reageerde ook touchstart, waardoor één tik soms twee keer telde (een lijn aan en meteen weer uit). */
-$("#hexsvg").addEventListener("pointerdown",e=>{e._hx=true;const mb=mouseLR(e);if(mb==="")return;e.preventDefault();const forced=mb==="r"?"z":null;hexPress(e.clientX,e.clientY,e.pointerType,forced,mb)});
+$("#hexsvg").addEventListener("pointerdown",e=>{e._hx=true;const mb=mouseLR(e);if(mb==="")return;e.preventDefault();const forced=mb==="r"?(hexMode==="b"?"z":"b"):null;hexPress(e.clientX,e.clientY,e.pointerType,forced,mb)});
 $("#hexsvg").addEventListener("touchstart",e=>e.preventDefault(),{passive:false});
 $("#sbtn").onclick=()=>$("#side").classList.toggle("open");
 document.addEventListener("pointerdown",e=>{const sd=$("#side");if(sd.classList.contains("open")&&!e.target.closest("#side,#sbtn")){sd.classList.remove("open");e._closed=true}},true);
@@ -2352,7 +2352,7 @@ function plusDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="plus"||S.done||e.
  if(e.target.closest&&e.target.closest("#psum")){if(mb==="r")return;plusPeek(true);return}
  const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){if(mb==="r")return;plusLine(ck.dataset.ln);return}
  S.ng=gridGeo(S.p.W);const i=gridHit(S.ng,e.clientX,e.clientY,S.p.W,S.p.H);if(i<0)return;e._nono=true;
- if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],val=mb==="r"?2:plusMode==="o"?1:2;
+ if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],active=plusMode==="o"?1:2,val=mb==="r"?(active===1?2:1):active;
  pd={last:i,pid:e.pointerId,path:[i],prev:new Map(),val,mode:old===val?"del":"add"};
  const nv=old===val?0:val;plusPaint(i,nv);if(nv!==old)pd.prev.set(i,old)}
 function plusMove(e){if(!pd||S.type!=="plus"||e.pointerId!==pd.pid)return;const W=S.p.W,i=gridHit(S.ng,e.clientX,e.clientY,W,S.p.H);if(i<0||i===pd.last)return;
@@ -2557,7 +2557,7 @@ function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const 
   li.innerHTML=`${murTok(p,s,dark)}<span><b>${nm}:</b> ${txt}</span>`;ol.append(li)});cl.append(ol);
  const acc=document.createElement("div");acc.id="macc";cl.append(acc);m.append(cl);
  g.onpointerdown=e=>{const d=e.target.closest&&e.target.closest("[data-i]");if(!d)return;const mb=mouseLR(e);if(mb==="")return;e.preventDefault();const i=+d.dataset.i,oldMode=S.mxm;
-  if(mb==="r")S.mxm=true;
+  if(mb==="r")S.mxm=!oldMode;
   const snap={cur:S.cur.slice(),ms:S.ms,h:S.hist.length,r:S.redo.slice()};murTap(i);
   if(mb!==null){S.mxm=oldMode;paintMur();return}
   if(!potlood&&!S.mxm&&!S.done)lpStart(e,()=>{if(S.done)return;S.cur=snap.cur;S.ms=snap.ms;S.hist.length=snap.h;S.redo=snap.r;ub();lpNote(i)})};
@@ -3032,12 +3032,12 @@ if(NIEUW){showHome();HOMEREADY=true}
 
 /* ---- Bediening per puzzel ---- */
 function controlsOf(t){const common=[],rows=[];
- if(t==="nono"){rows.push(["Tik / linksklik","Gebruik de actieve vul-, kleur- of kruisstand"],["Dubbeltik / dubbelklik","Zet een kruisje zonder je actieve stand of kleur te veranderen"],["Rechtermuisknop","Zet direct een kruisje"],["Slepen","Vul of kruis meerdere vakjes in dezelfde stand"],["Naast het bord","Wissel tussen vullen/kleur en kruisjes"]);common.push(["Spatie","wissel stand"])}
- else if(t==="bin"){rows.push(["Tik / linksklik","Plaats 0"],["Dubbeltik / dubbelklik","Plaats 1"],["Rechtermuisknop","Plaats direct 1"],["Teller slepen","Vergelijk die rij of kolom met de andere"])}
+ if(t==="nono"){rows.push(["Tik / linksklik","Gebruik de actieve vul-, kleur- of kruisstand"],["Rechtermuisknop","Gebruik de andere stand: kruisje ↔ vullen/laatst gekozen kleur"],["Dubbeltik / dubbelklik","Zet altijd een kruisje zonder je actieve stand of kleur te veranderen"],["Slepen","Vul of kruis meerdere vakjes in dezelfde stand"],["Naast het bord","Wissel tussen vullen/kleur en kruisjes"]);common.push(["Spatie","wissel stand"])}
+ else if(t==="bin"){rows.push(["Tik / linksklik","Plaats ✕"],["Dubbeltik / dubbelklik","Plaats ○"],["Rechtermuisknop","Plaats direct ○"],["Teller slepen","Vergelijk die rij of kolom met de andere"])}
  else if(t==="star"){rows.push(["Touch","Tik om kruisje/ster te plaatsen; slepen zet snel kruisjes"],["Linkermuisknop","Plaats direct een ster"],["Rechtermuisknop","Plaats direct een kruisje"],["Slepen met muis","Plaats dezelfde markering in meerdere vakjes"])}
- else if(t==="plus"){rows.push(["Tik / linksklik","Gebruik de actieve stand: omcirkelen of wegstrepen"],["Rechtermuisknop","Streep direct weg"],["Slepen","Markeer meerdere getallen in dezelfde stand"],["Naast het bord","Wissel stand"]);common.push(["Spatie","wissel stand"])}
- else if(t==="hex"){rows.push(["Tik / linksklik","Gebruik de actieve stand: blauw of zwart"],["Rechtermuisknop","Maak direct zwart/grijs"],["Blauw/grijs vlak","Wissel tussen blauw en zwart"],["Rand- of blauw cijfer","Markeer het cijfer in de actieve stand; rechts maakt het grijs"]);common.push(["Spatie","wissel blauw/zwart"])}
- else if(t==="mur"){rows.push(["Tik / linksklik","Gebruik de actieve plaats- of kruisstand"],["Rechtermuisknop","Kruis direct een vakje weg"],["Naast het bord","Wissel tussen plaatsen en wegkruisen"]);common.push(["Spatie","wissel stand"])}
+ else if(t==="plus"){rows.push(["Tik / linksklik","Gebruik de actieve stand: omcirkelen of wegstrepen"],["Rechtermuisknop","Gebruik de andere stand: omcirkelen ↔ wegstrepen"],["Slepen","Markeer meerdere getallen in dezelfde stand"],["Naast het bord","Wissel stand"]);common.push(["Spatie","wissel stand"])}
+ else if(t==="hex"){rows.push(["Tik / linksklik","Gebruik de actieve stand: blauw of zwart"],["Rechtermuisknop","Gebruik de andere stand: blauw ↔ zwart"],["Blauw/grijs vlak","Wissel tussen blauw en zwart"],["Rand- of blauw cijfer","Links gebruikt de actieve stand; rechts de andere stand"]);common.push(["Spatie","wissel blauw/zwart"])}
+ else if(t==="mur"){rows.push(["Tik / linksklik","Gebruik de actieve plaats- of kruisstand"],["Rechtermuisknop","Gebruik de andere stand: plaatsen ↔ wegkruisen"],["Naast het bord","Wissel tussen plaatsen en wegkruisen"]);common.push(["Spatie","wissel stand"])}
  else if(t==="kak"){rows.push(["Tik / klik","Selecteer een wit vakje"],["Cijferknoppen","Vul het geselecteerde vakje in"],["Toetsen 1–9","Vul het cijfer direct in"],["Backspace / 0","Wis het geselecteerde vakje"])}
  else if(t==="m24"){rows.push(["Tik / klik","Kies een getal en daarna een bewerking"],["Ongedaan","Ga één rekenstap terug"])}
  else rows.push(["Tik / klik","Gebruik het gekozen vakje of de actieve actie"]);
