@@ -47,14 +47,16 @@ nav button .tfeat{font-style:normal;font-size:.8em;margin-left:3px}nav button .t
 #potb.on{background:#6b6f78;color:#fff;border-color:#6b6f78}
 .c{position:relative}.c .nt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.52;transform:scale(.42)}.c .nt svg{width:100%;height:100%}
 /* Potlood blijft bewust kleiner en zachter dan een definitieve zet. */
-body[data-t=bin] .c .nt{inset:auto;left:7%;top:6%;width:28%;height:28%;transform:none;opacity:.52}
-body[data-t=star] .c .nt{transform:none;opacity:.58;font-size:calc(var(--cs)*.34);font-weight:750;line-height:1;color:var(--mut)}
-body[data-t=star] .c .nt.nx::before{content:"×";font-size:calc(var(--cs)*.38);line-height:1;color:var(--mut);font-weight:700}
-body[data-t=star] .c .nt.ns::before{content:"★";font-size:calc(var(--cs)*.34);line-height:1;color:var(--pc);font-weight:700}
+body[data-t=bin] .c .nt{inset:auto;left:7%;top:6%;width:28%;height:28%;transform:none;opacity:.44}
+body[data-t=bin] .c .nt svg path{stroke-width:1.05}
+body[data-t=bin] .c .nt svg circle{stroke-width:1.2}
+body[data-t=star] .c .nt{transform:none;opacity:.48;font-size:calc(var(--cs)*.34);font-weight:500;line-height:1;color:var(--mut)}
+body[data-t=star] .c .nt.nx::before{content:"×";font-size:calc(var(--cs)*.38);line-height:1;color:var(--mut);font-weight:400}
+body[data-t=star] .c .nt.ns::before{content:"☆";font-size:calc(var(--cs)*.36);line-height:1;color:var(--pc);font-weight:500}
 body[data-t=star] .c.sv{color:#c97a00!important}
-.c .nt.dot{transform:none}.c .nt.dot::before{content:"";width:calc(var(--cs)*.2);height:calc(var(--cs)*.2);border-radius:50%;background:var(--mut);opacity:.9}
-.mc .mnt{position:absolute;left:3px;right:3px;bottom:2px;display:flex;flex-wrap:wrap;gap:0 3px;justify-content:center;font-size:calc(var(--ms)*.2);line-height:1.05;pointer-events:none;font-weight:800;opacity:.68}
-.mc .mnt.nxo{top:0;bottom:0;align-items:center;font-size:calc(var(--ms)*.42);font-weight:700}.mc .mnt .mnx{color:var(--mut);font-style:normal;opacity:.6}
+.c .nt.dot{transform:none}.c .nt.dot::before{content:"";width:calc(var(--cs)*.2);height:calc(var(--cs)*.2);border-radius:50%;background:var(--mut);opacity:.75}
+.mc .mnt{position:absolute;left:3px;right:3px;bottom:2px;display:flex;flex-wrap:wrap;gap:0 3px;justify-content:center;font-size:calc(var(--ms)*.2);line-height:1.05;pointer-events:none;font-weight:600;opacity:.56}
+.mc .mnt.nxo{top:0;bottom:0;align-items:center;font-size:calc(var(--ms)*.42);font-weight:500}.mc .mnt .mnx{color:var(--mut);font-style:normal;opacity:.5}
 body.potlood #grid,body.potlood #mgrid{outline:2px dashed #6b6f78;outline-offset:6px}
 body.phone #pbot #potb,body.phone #pbot #notewipe{flex:0 0 46px;font-size:18px;padding:11px 0}
 .c.sbad{color:#e5484d!important;box-shadow:inset 0 0 0 3px rgba(229,72,77,.75)}
@@ -769,11 +771,12 @@ window.FIREBASE_CONFIG={
 <aside id="rail2"><div id="segrow"><div id="seg"><button id="today">Dagpuzzel</button><button id="prac">Vrij puzzelen</button></div><button id="next">Nog een puzzel ➜</button><div id="lvl"></div></div></aside>
 <div id="hm" hidden role="dialog" aria-modal="true" aria-labelledby="hmt"><div class="hc"><h2 id="hmt"></h2><ul id="hmp"></ul><h3 id="hmth">Zo los je het op <small>(gokken is nooit nodig)</small></h3><ul id="hmtips"></ul><div id="shortcuts"><h3>Handige sneltoetsen</h3><div class="kgrid"><span><kbd>Spatie</kbd> wissel stand</span><span><kbd>A</kbd> aantekeningen</span><span><kbd>H</kbd> hint</span><span><kbd>C</kbd> controle</span><span><kbd>⌘/Ctrl Z</kbd> ongedaan</span><span><kbd>⇧⌘/Ctrl Z</kbd> opnieuw</span><span><kbd>?</kbd> uitleg</span><span><kbd>Esc</kbd> sluiten</span></div></div><button id="hmx">Begrepen</button></div></div>
 <div id="cm" hidden role="dialog" aria-modal="true" aria-labelledby="cmt"><div class="hc"><h2 id="cmt">Bediening</h2><div id="cmp"></div><button id="cmx">Sluiten</button></div></div>
-<div id="npm" hidden role="dialog" aria-modal="true" aria-labelledby="npmt"><div class="hc npcard"><button id="npmx" class="npx" aria-label="Sluiten">✕</button><h2 id="npmt">Nieuwe puzzel</h2><div id="npvar"></div><div id="nplv"></div></div></div>
+
 <div id="hint" role="note" aria-live="polite"></div><div id="fin" hidden role="dialog" aria-live="polite" aria-label="Puzzel opgelost"></div>
 <aside id="side"><div id="stabs"><button data-s="today" class="on">Vandaag</button><button data-s="over">Overzicht</button></div><div id="sv-today"><strong>Dagpuzzels vandaag</strong><div id="board" class="mut">Laden...</div><div id="week"></div></div><div id="sv-over" hidden></div>
 <details id="uit"><summary>Uitleg</summary><div id="help" class="mut"></div></details></aside>
 </main>
+<div id="npm" hidden role="dialog" aria-modal="true" aria-labelledby="npmt"><div class="hc npcard"><button id="npmx" class="npx" aria-label="Sluiten">✕</button><h2 id="npmt">Nieuwe puzzel</h2><div id="npvar"></div><div id="nplv"></div></div></div>
 <script>
 const hash=s=>{let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}return h>>>0};
 const rng=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
@@ -1785,7 +1788,7 @@ $("#mur").addEventListener("touchstart",e=>{const t=e.target;if(!t.closest)retur
 addEventListener("pointerup",binUp);addEventListener("pointercancel",binUp);
 
 /* ---- Star Battle: slepen ---- */
-let drag=null,starLastTap={t:0,i:-1};
+let drag=null,starLastTap={t:0,i:-1,h:0,note:false};
 const cellOf=el=>el&&el.dataset&&el.dataset.i!==undefined?+el.dataset.i:-1;
 const sym=v=>v===2?"★":v===1?"✕":"";
 function adjStar(i){const N=S.p.N,r=i/N|0,c=i%N;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const rr=r+dr,cc=c+dc;if(rr>=0&&rr<N&&cc>=0&&cc<N&&S.cur[rr*N+cc]===2)return true}return false}
@@ -1803,26 +1806,30 @@ const noteDisp=i=>noteVal(i)===2?2:(noteVal(i)===1||noteAdjStar(i))?1:0;
 function applyNoteDrag(i){if(disp(i)!==0)return;if(drag.mode==="add"){if(noteDisp(i)===0)noteDragWrite(drag,i,1)}else if(drag.mode==="del"){if(noteVal(i)===1)noteDragWrite(drag,i,0)}}
 function starDown(e){const mb=mouseLR(e);if(S.done||S.type!=="star"||e._closed||mb==="")return;if(drag&&drag.pid!==e.pointerId)starEnd();
  const N=S.p.N;S.sg=gridGeo(N);const i=gridHit(S.sg,e.clientX,e.clientY,N,N);if(i<0)return;
- const dbl=mb==="l"&&starLastTap.i===i&&e.timeStamp-starLastTap.t<380;if(dbl)starLastTap={t:0,i:-1};else if(mb==="r")starLastTap={t:0,i:-1};
+ const dbl=mb!=="r"&&starLastTap.i===i&&starLastTap.note===!!potlood&&e.timeStamp-starLastTap.t<380;let dblBase=null;
+ if(dbl&&starLastTap.h===S.hist.length&&S.hist.length){const h=S.hist[S.hist.length-1];
+  if(potlood&&h&&h.note&&h.i===i){S.hist.pop();noteRaw(i,h.from);S.redo=[]}
+  else if(!potlood&&Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.redo=[];S.cur=dblBase.slice();paintAll()}}
+ if(dbl)starLastTap={t:0,i:-1,h:0,note:false};else if(mb==="r")starLastTap={t:0,i:-1,h:0,note:false};
  e.preventDefault();if(!S.start)S.start=Date.now();clearHint();
- if(potlood){if(disp(i)!==0)return;const raw=noteVal(i),v=noteDisp(i);
-  if(mb!==null){const target=mb==="l"?2:1,mode=dbl?"add":raw===target?"del":"add";drag={note:true,directNote:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map(),dbl};noteDragWrite(drag,i,dbl?2:mode==="del"?0:target);return}
-  drag={note:true,pid:e.pointerId,mode:v===0?"add":v===1?"del":"none",start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map()};noteDragWrite(drag,i,v===0?1:v===1?2:0);return}
- begin();
- if(mb!==null){const target=mb==="l"?2:1,old=S.cur[i],mode=dbl?"add":old===target?"del":"add";drag={direct:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),dbl};drag.prev.set(i,old);setCell(i,dbl?2:mode==="del"?0:target);return}
- const v=disp(i);drag={pid:e.pointerId,mode:v===0?"add":v===1?"del":"none",start:i,last:i,moved:false,path:[i],prev:new Map()};
- setCell(i,v===0?1:v===1?2:0);
- lpStart(e,()=>{if(!drag||drag.moved||drag.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag=null;S.gs=null;paintAll();lpNote(i)})}
+ if(potlood){if(disp(i)!==0)return;const raw=noteVal(i),target=(mb==="r"||dbl)?2:1,mode=dbl?"add":raw===target?"del":"add";
+  drag={note:true,directNote:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map(),dbl};
+  noteDragWrite(drag,i,dbl?2:mode==="del"?0:target);return}
+ begin();if(dblBase)S.gs=dblBase;
+ const target=(mb==="r"||dbl)?2:1,old=S.cur[i],mode=dbl?"add":old===target?"del":"add";
+ drag={direct:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),dbl};drag.prev.set(i,old);
+ setCell(i,dbl?2:mode==="del"?0:target);
+ if(mb===null&&!dbl)lpStart(e,()=>{if(!drag||drag.moved||drag.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag=null;S.gs=null;paintAll();lpNote(i)})}
 function starEnter(j){const d=drag,k=d.path.indexOf(j);if(k>=0){while(d.path.length>k+1){const c=d.path.pop();if(d.prev.has(c)){if(d.note)noteDragWrite(d,c,d.prev.get(c));else S.cur[c]=d.prev.get(c);d.prev.delete(c)}}d.note?paintNotes():paintAll();return}
  d.path.push(j);if(d.note){const o=noteVal(j);if(d.directNote){if(disp(j)!==0)return;const nv=d.mode==="del"?(o===d.target?0:o):d.target;noteDragWrite(d,j,nv)}else applyNoteDrag(j);if(noteVal(j)!==o)d.prev.set(j,o);return}
  if(d.direct){const o=S.cur[j],nv=d.mode==="del"?(o===d.target?0:o):d.target;if(nv!==o){d.prev.set(j,o);S.cur[j]=nv;paintAll()}return}
  const o=S.cur[j];applyDrag(j);if(S.cur[j]!==o)d.prev.set(j,o)}
 function starMove(e){if(!drag||S.type!=="star"||e.pointerId!==drag.pid)return;const N=S.p.N,i=gridHit(S.sg,e.clientX,e.clientY,N,N);if(i<0||i===drag.last)return;
  const r0=drag.last/N|0,c0=drag.last%N,r1=i/N|0,c1=i%N,n=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));
- if(!drag.moved){drag.moved=true;if(!drag.direct&&!drag.directNote){if(drag.note){if(drag.mode==="del")noteDragWrite(drag,drag.start,0);else if(drag.mode==="none")noteDragWrite(drag,drag.start,2)}else{if(drag.mode==="del")setCell(drag.start,0);else if(drag.mode==="none")setCell(drag.start,2)}}}
+ if(!drag.moved){drag.moved=true}
  for(let k=1;k<=n;k++)starEnter(Math.round(r0+(r1-r0)*k/n)*N+Math.round(c0+(c1-c0)*k/n));
  drag.last=i}
-function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;const d=drag;if((d.direct||d.directNote)&&!d.moved&&!d.dbl&&e&&e.button===0)starLastTap={t:e.timeStamp,i:d.start};else if(d.dbl)starLastTap={t:0,i:-1};starEnd()}
+function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;const d=drag,acted=d.note?[...(d.nchanges||new Map()).values()].some(c=>c.from!==c.to):d.prev&&d.prev.size>0,remember=!d.moved&&!d.dbl&&acted&&e&&e.button!==2;starEnd();if(remember)starLastTap={t:e.timeStamp,i:d.start,h:S.hist.length,note:!!d.note};else if(d.dbl)starLastTap={t:0,i:-1,h:0,note:false}}
 function starEnd(){const d=drag;drag=null;if(S.type!=="star")return;if(d.note){noteFinish(d,d.moved);return}commit();check()}
 addEventListener("pointerup",starUp);addEventListener("pointercancel",starUp);
 
@@ -2960,8 +2967,9 @@ function showNewFree(t,random){if(!TYPES[t])return;const m=$("#npm"),varBox=$("#
   lvBox.innerHTML="";const levels=LVN[t]||[lvOf(t)];levels.forEach(l=>{const b=document.createElement("button");b.className="nplvb";const desc=t==="nono"&&nv==="color"?LVS[t][l]+" · "+nonoColorCount(l)+" kleuren":LVS[t]&&LVS[t][l]?LVS[t][l]:"";b.innerHTML="<b>"+LVL[l]+"</b><small>"+desc+"</small><span>›</span>";b.onclick=()=>{if(LVN[t]){LV[t]=l;lsSet("pdlvl",JSON.stringify(LV))}if(t==="nono"){nonoVariant=nv;lsSet("pdnvar",nv)}RANDOM=!!random;m.hidden=true;load(t,true,true)};lvBox.append(b)})};draw();m.hidden=false}
 $("#npmx").onclick=()=>{$("#npm").hidden=true};$("#npm").addEventListener("pointerdown",e=>{if(e.target===$("#npm"))$("#npm").hidden=true});
 
-/* Gewoon een puzzelsoort openen: is de dagpuzzel van vandaag al klaar, dan meteen een verse vrije puzzel. De knop Dagpuzzel blijft de expliciete weg terug. */
-function openType(t){const go=()=>myDone(dstr(),t)?(HOMEREADY?showNewFree(t,false):load(t,true,true)):load(t,false);if(!cloudProgOk()||navigator.onLine===false)return go();return Promise.race([pullCloudProgress(true),new Promise(r=>setTimeout(r,700))]).then(go,go)}
+/* Puzzelsoort openen: hervat eerst de meest recente onafgemaakte sessie van dit type. Een bewust nieuwe vrije puzzel loopt via showNewFree(). */
+function latestProgressForType(t){return Object.entries(progAll()).map(([k,e])=>progressMeta(k,e)).filter(m=>m&&m.type===t&&progressRelevant(m.k)&&!progressSolved(m.k,m.e)).sort((a,b)=>(b.e.at||0)-(a.e.at||0))[0]||null}
+function openType(t){const go=()=>{const m=latestProgressForType(t);if(m)return resumeProgress(m.k);return myDone(dstr(),t)?(HOMEREADY?showNewFree(t,false):load(t,true,true)):load(t,false)};if(!cloudProgOk()||navigator.onLine===false)return go();return Promise.race([pullCloudProgress(true),new Promise(r=>setTimeout(r,700))]).then(go,go)}
 let HVIEW="",SWK=0;
 function showScore(){HVIEW="score";SWK=0;renderHome();window.scrollTo(0,0)}
 function renderScore(h){const all=allRows(),rows=all.filter(r=>!isFree(r)),today=dstr(),dow=(new Date().getDay()+6)%7,mon0=addDays(today,-dow),TS=Object.keys(TYPES);
@@ -3048,7 +3056,7 @@ if(NIEUW){showHome();HOMEREADY=true}
 function controlsOf(t){const common=[],rows=[];
  if(t==="nono"){rows.push(["Tik / linksklik","Gebruik de actieve vul-, kleur- of kruisstand"],["Rechtermuisknop","Gebruik de andere stand: kruisje ↔ vullen/laatst gekozen kleur"],["Dubbeltik / dubbelklik","Zet altijd een kruisje zonder je actieve stand of kleur te veranderen"],["Slepen","Vul of kruis meerdere vakjes in dezelfde stand"],["Naast het bord","Wissel tussen vullen/kleur en kruisjes"]);common.push(["Spatie","wissel stand"])}
  else if(t==="bin"){rows.push(["Tik / linksklik","Plaats ✕"],["Dubbeltik / dubbelklik","Plaats ○"],["Rechtermuisknop","Plaats direct ○"],["Potlood","Zelfde bediening als normaal, maar met kleine ✕ en ○"],["Teller slepen","Vergelijk die rij of kolom met de andere"])}
- else if(t==="star"){rows.push(["Touch","Tik om kruisje/ster te plaatsen; slepen zet snel kruisjes"],["Linkermuisknop","Plaats direct een ster"],["Rechtermuisknop","Plaats direct een kruisje"],["Potlood","Zelfde bediening als normaal, maar met kleine ★ en ✕"],["Slepen met muis","Plaats dezelfde markering in meerdere vakjes"])}
+ else if(t==="star"){rows.push(["Tik / linksklik","Plaats een kruisje"],["Dubbeltik / dubbelklik","Plaats een ster"],["Rechtermuisknop","Plaats direct een ster"],["Potlood","Zelfde bediening als normaal, maar met dunne kleine ☆ en ×"],["Slepen","Plaats dezelfde markering in meerdere vakjes"])}
  else if(t==="plus"){rows.push(["Tik / linksklik","Gebruik de actieve stand: omcirkelen of wegstrepen"],["Rechtermuisknop","Gebruik de andere stand: omcirkelen ↔ wegstrepen"],["Slepen","Markeer meerdere getallen in dezelfde stand"],["Naast het bord","Wissel stand"]);common.push(["Spatie","wissel stand"])}
  else if(t==="hex"){rows.push(["Tik / linksklik","Gebruik de actieve stand: blauw of zwart"],["Rechtermuisknop","Gebruik de andere stand: blauw ↔ zwart"],["Blauw/grijs vlak","Wissel tussen blauw en zwart"],["Rand- of blauw cijfer","Links gebruikt de actieve stand; rechts de andere stand"]);common.push(["Spatie","wissel blauw/zwart"])}
  else if(t==="mur"){rows.push(["Tik / linksklik","Gebruik de actieve plaats- of kruisstand"],["Rechtermuisknop","Gebruik de andere stand: plaatsen ↔ wegkruisen"],["Naast het bord","Wissel tussen plaatsen en wegkruisen"]);common.push(["Spatie","wissel stand"])}
