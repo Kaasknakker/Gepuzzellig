@@ -726,6 +726,42 @@ body.nieuw:not(.home)[data-t=m24],body.nieuw:not(.home)[data-t=kak]{--page-tone:
 body.tablet.nieuw:not(.home):not(.newpick){height:100dvh;overflow:hidden}body.tablet.nieuw:not(.home):not(.newpick) main{height:calc(100dvh - 62px);overflow:auto;overscroll-behavior:contain;padding-bottom:10px}body.tablet.newpick{height:100dvh;overflow:hidden}body.tablet.newpick main{height:calc(100dvh - 62px);overflow:hidden;padding-bottom:0}body.tablet.newpick #stage{min-height:0;height:100%;overflow:hidden}body.tablet.newpick #npm{margin:clamp(12px,4vh,42px) auto 0;max-height:calc(100% - 16px);overflow:hidden}
 .dayitem.featured{margin:4px -7px 6px;padding:0 7px;border-radius:16px;background:color-mix(in srgb,var(--dayc) 6%,var(--card));box-shadow:inset 4px 0 0 var(--dayc);border-bottom-color:transparent}.dayitem.featured .hdrow{padding-top:12px;padding-bottom:12px}.featlabel{color:var(--dayc)!important;font-weight:850!important}.daypeer{display:flex;align-items:center;gap:4px;flex:none}.daypeer>span{display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:800;color:var(--mut);background:color-mix(in srgb,var(--line) 18%,transparent);white-space:nowrap}.daypeer>span.done{color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--card));border:1px solid color-mix(in srgb,var(--ok) 22%,var(--line))}.daypeer>span.busy{color:#c97a00;background:color-mix(in srgb,#c97a00 10%,var(--card))}.daypeer b{color:inherit}@media(max-width:700px){.daypeer b{display:none}.daypeer>span{padding:3px 6px}}
 
+
+/* Pagina's die daadwerkelijk in het iPad-venster passen hoeven niet te rubber-banden/scrollen. */
+html.pagefit,body.pagefit{height:100dvh;overflow:hidden!important;overscroll-behavior:none}
+.scontrols{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.scontrols .sviews,.scontrols .sper{align-self:auto}
+@media(min-width:901px){
+ #home .hwrap.sco{max-width:1180px;padding-top:10px;padding-bottom:18px;gap:9px}
+ .sco .stop{gap:9px}.sco #sBack{width:38px;height:38px;border-radius:12px;font-size:20px}
+ .sco .stop h2{font-size:23px}
+ .sviews button{padding:7px 14px}
+ .sper button{padding:6px 13px;font-size:13px}
+ .sco .hcard{padding:11px 13px;border-radius:17px}
+ .shero{border-top-width:5px}
+ .shero .snm{font-size:15px}
+ .shero .sbig{font-size:34px;margin:3px 0 6px}
+ .shero .sbig span{font-size:12px}
+ .schips{gap:4px}.schips span{font-size:11px;padding:3px 7px}
+ .shd{margin-bottom:7px}.shd b{font-size:15px}.snav{width:34px;height:34px}
+ .shd1{margin-bottom:6px}.shd1 b{font-size:15px}
+ .scal{gap:4px}.scell{padding:4px;border-radius:9px}.slg{margin-top:7px;gap:4px 10px;font-size:10px}
+ .sbr{padding:4px 0}.sbt{font-size:12px}.strk{height:8px}
+ .shm{gap:7px}.shp .srn{margin-bottom:3px}.shg{gap:2px}.slg2{margin-top:5px}
+ .personview .smetrics{grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
+ .personview .smetric{padding:9px 10px;gap:8px}
+ .personview .smetric .smic{width:34px;height:34px;border-radius:10px;font-size:17px}
+ .personview .smetric small{font-size:9px}
+ .personview .smetric b{font-size:19px}
+ .personview .smetric div>span{font-size:9px}
+ .personview .hgrid2.sh2{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)!important;gap:9px}
+ .personview .spuzzle{padding:6px 0}
+ .personview .sphead>span{font-size:12px}.personview .spbar{margin:4px 0;height:5px}
+ .personview .spmeta{font-size:9.5px;gap:3px 8px}
+ .personview .srecent{padding:5px 0}
+ .personview .srecent small{font-size:9px}.personview .srecent>span{font-size:10px}
+}
+
 /* Compactere Home op tablet/desktop: dezelfde informatie, minder lege hoogte. */
 @media(min-width:761px){
  #home .hwrap{max-width:1040px;padding-top:10px;padding-bottom:28px;gap:9px}
@@ -754,7 +790,8 @@ body.tablet.nieuw:not(.home):not(.newpick){height:100dvh;overflow:hidden}body.ta
  .dresult{justify-content:flex-end}
  .dname{line-height:1.12}
  .dname small{margin-top:1px;font-size:10px}
- .dayitem.featured{margin-top:2px;margin-bottom:3px}
+ .dayitem.featured{margin:2px 0 3px;padding-left:0;padding-right:0}
+ .daypeer{justify-self:stretch}
  .hraad{padding:9px 13px;gap:10px;border-left-width:5px;border-radius:17px}
  .hraad .ticon.big{width:38px;height:38px;border-radius:11px;font-size:18px}
  .hraad b{font-size:15px}
@@ -1683,7 +1720,7 @@ function genCached(type,seed,lv,hard,nv){const vk=type==="nono"&&nv==="color"?"|
 const isWk=ds=>{const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay();return w===0||w===6};
 /* Willekeurig puzzelen: na elke vrije puzzel komt een andere, willekeurige soort. Stopt zodra je zelf een dagpuzzel kiest. */
 let RANDOM=false;const rndType=not=>{const L=Object.keys(TYPES).filter(t=>t!==not);return L[Math.floor(Math.random()*L.length)]};
-function load(type,practice,fresh,date){pauseAndPersistActive(true);if(!practice)RANDOM=false;if(NIEUW&&HOMEREADY){if(document.body.classList.contains("home")||document.body.classList.contains("newpick"))window.scrollTo(0,0);document.body.classList.remove("home","newpick");const np=$("#npm");if(np)np.hidden=true}
+function load(type,practice,fresh,date){document.documentElement.classList.remove("pagefit");document.body.classList.remove("pagefit");pauseAndPersistActive(true);if(!practice)RANDOM=false;if(NIEUW&&HOMEREADY){if(document.body.classList.contains("home")||document.body.classList.contains("newpick"))window.scrollTo(0,0);document.body.classList.remove("home","newpick");const np=$("#npm");if(np)np.hidden=true}
  const dd=!practice&&date?date:dstr(),id=++loadId,lvl0=practice?lvOf(type):dagLv(type,dd),sf0=sfx(lvl0);lsSet("pdtab",type);{const fn=$("#fin");if(fn)fn.hidden=true}potlood=false;S={nt:{},type,practice,date:dd,hard:!practice&&isWk(dd)&&!dagVast(dd),arch:dd!==dstr(),start:0,done:false,secs:0,sel:-1,id,hist:[],redo:[],pen:0,mist:0,hints:0,flash:-1,hl:-1,lvl:lvl0,sf:sf0,nv:type==="nono"?(practice?nonoVariant:nonoDayVariant(dd)):"classic"};hideHint();ub();$("#next").classList.remove("pulse");
  const pk0=progKey(type,practice,S.date,sf0),sv0=fresh?null:progAll()[pk0];if(fresh)progDel(pk0);
  document.body.dataset.t=type;pageIn($("#stage"));document.querySelectorAll("#tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.t===type);if(PHONE&&b.dataset.t===type)try{b.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"})}catch(e){}});updateArchiveVisibility();{const nb=$("#next");if(nb.closest("#more"))nb.innerHTML='<span class="ic">🎲</span><span>Nieuwe puzzel</span>';else nb.textContent=PHONE?"🎲 Nieuwe puzzel":"Nieuwe puzzel ➜"}if(PHONE)$("#next").style.display="";$("#next").title="Nieuwe puzzel";
@@ -1716,7 +1753,7 @@ function celebrate(){if(matchMedia("(prefers-reduced-motion: reduce)").matches)r
 /* Bij puzzels met twee standen moet een tik naast het veld meteen tellen, ook met de Pencil. Dan zeggen we tegen de browser
    dat aanrakingen op de pagina geen scrollen of zoomen zijn (net als in het Hexcells-veld). Alleen als de pagina niet hoeft te scrollen. */
 function tapMode(){const de=document.documentElement,on=["nono","plus","hex","mur"].includes(S.type);de.classList.remove("tap");if(document.body.classList.contains("home"))return;if(on&&(PHONE||(de.scrollHeight<=innerHeight+60&&de.scrollWidth<=innerWidth+20)))de.classList.add("tap")}
-addEventListener("resize",()=>setTimeout(tapMode,60));
+addEventListener("resize",()=>{setTimeout(tapMode,60);setTimeout(fitHomePage,80)});
 function render(){render0();paintNotes();if(NIEUW)updTop()}
 function render0(){const t=S.type;ub();setTimeout(tapMode,0);if(!S.p)return;
  const pk=S.id+t,prev=S.pk===pk?[...document.querySelectorAll("#grid .c")].map(d=>d.classList.contains("gx")?"":d.textContent):null;S.pk=pk;
@@ -3043,6 +3080,7 @@ function openType(t){return withFreshProgress(()=>{const m=latestProgressForType
 let HVIEW="",SWK=0,SCOREWHO="all",HDOPEN="";
 function setHomeSkin(skin){document.body.classList.remove("skin-shared","skin-peter","skin-aart");document.body.classList.add("skin-"+(skin||"shared"))}
 function pageIn(el){if(!el||matchMedia("(prefers-reduced-motion: reduce)").matches)return;el.classList.remove("pagein");void el.offsetWidth;el.classList.add("pagein");setTimeout(()=>el.classList.remove("pagein"),260)}
+function fitHomePage(){document.documentElement.classList.remove("pagefit");document.body.classList.remove("pagefit");requestAnimationFrame(()=>{if(!document.body.classList.contains("home")||innerWidth<761)return;const h=$("#home");if(h&&h.scrollHeight<=innerHeight+2){document.documentElement.classList.add("pagefit");document.body.classList.add("pagefit")}})}
 function showScore(who="all"){HVIEW="score";SCOREWHO=who||"all";SWK=0;renderHome();pageIn($("#home"));window.scrollTo(0,0)}
 function renderScore(h){const all=allRows(),rows=all.filter(r=>!isFree(r)),today=dstr(),dow=(new Date().getDay()+6)%7,mon0=addDays(today,-dow),TS=Object.keys(TYPES);
  const pl=new Map();SET.players.forEach(p=>pl.set(uidOf(p),p));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});const us=[...pl.keys()];
@@ -3067,7 +3105,7 @@ function renderScore(h){const all=allRows(),rows=all.filter(r=>!isFree(r)),today
   const recentHtml=recent.length?recent.map(r=>{const t=baseT(r),z=q(r),sec=statSecs(r);return`<div class="srecent">${tIcon(t,false)}<div><b>${TYPES[t]}</b><small>${isFree(r)?"Vrij puzzelen":"Dagpuzzel"} · ${dnl(r.date)}</small></div><span>${sec?"⏱ "+fmt(sec):"⏱ —"} ${quickBadges(z,t)}</span></div>`}).join(""):`<div class="mut">Nog geen puzzels in deze periode.</div>`;
   const perMax=Math.max(1,...TS.map(t=>x&&x.per[t]||0));
   const puzzleHtml=TS.map(t=>{const rr=mine.filter(r=>baseT(r)===t),n=rr.length,times=rr.map(statSecs).filter(Boolean);let km=0,fl=0,kh=0,nh=0;rr.forEach(r=>{const z=q(r);if(z.mist!=null){km++;if(z.mist===0)fl++}if(HINTT.includes(t)&&z.hints!=null){kh++;if(z.hints===0)nh++}});const avg=times.length?Math.round(times.reduce((a,b)=>a+b,0)/times.length):0,best=times.length?Math.min(...times):0;return`<div class="spuzzle"><div class="sphead"><span>${tIcon(t,false)}<b>${TYPES[t]}</b></span><strong>${n}×</strong></div><div class="spbar"><i style="width:${100*n/perMax}%;background:${TCOL[t]}"></i></div><div class="spmeta">${avg?`<span>⏱ gem. ${fmt(avg)}</span>`:""}${best?`<span>🏆 ${fmt(best)}</span>`:""}${km?`<span>🎯 ${pc(fl,km)}</span>`:""}${kh?`<span>💡 ${pc(nh,kh)}</span>`:""}${!n?`<span class="mut">Nog niet gespeeld</span>`:""}</div></div>`}).join("");
-  h.innerHTML=`<div class="hwrap sco personview">${head(x.nm,"Puzzels en prestaties · "+PN)}${views}${period}
+  h.innerHTML=`<div class="hwrap sco personview">${head(x.nm,"Puzzels en prestaties · "+PN)}<div class="scontrols">${views}${period}</div>
    <div class="smetrics">${metric("🧩","Totaal opgelost",x.d+x.v,x.d+" dag · "+x.v+" vrij","green")}${metric("🎯","Foutloos",x.km?pc(x.fl,x.km):"–",x.km?x.fl+" van "+x.km:"Nog geen meting","pink")}${metric("💡","Zonder hint",x.kh?pc(x.nh,x.kh):"–",x.kh?x.nh+" van "+x.kh:"Nog geen meting","yellow")}${metric("⏱","Totale speeltijd",fmt(total),mine.length?(mine.length+" puzzels"+(badTimes?` · ${badTimes} oude ${badTimes===1?"tijd":"tijden"} genegeerd`:"")):"Nog geen puzzels","blue")}${metric("🔥","Huidige reeks",x.streak+" "+(x.streak===1?"dag":"dagen"),"Langste reeks: "+x.best,"peach")}${metric("★","Favoriete puzzel",x.fav?TYPES[x.fav]:"–",x.fav?(x.per[x.fav]||0)+" keer gespeeld":"Nog geen favoriet","purple")}</div>
    <div class="hgrid2 sh2"><div class="hcard"><div class="shd1"><b>Per puzzel</b><span class="mut">${PN}</span></div>${puzzleHtml}</div><div class="hcard"><div class="shd1"><b>Recente puzzels</b><span class="mut">${PN}</span></div><div class="srecentlist">${recentHtml}</div></div></div></div>`;
  }else{
@@ -3078,12 +3116,12 @@ function renderScore(h){const all=allRows(),rows=all.filter(r=>!isFree(r)),today
   const bars=`<div class="hcard"><div class="shd1"><b>Per puzzel</b><span class="mut">${PN}</span></div>${TS.map(t=>`<div class="sbr"><div class="sbt"><i style="background:${TCOL[t]}"></i>${TYPES[t]}</div><div class="sbb">${st.map(x=>{const n=x.per[t]||0;return`<div class="sbl p${x.i%2}"><span class="si">${x.nm[0]}</span><div class="strk"><div style="width:${Math.max(n?3:0,100*n/mx)}%;background:${TCOL[t]}"></div></div><span class="sn">${n}</span></div>`}).join("")}</div></div>`).join("")}</div>`;
   const W=16,start=addDays(mon0,-7*(W-1));
   const heat=`<div class="hcard"><div class="shd1"><b>Laatste ${W} weken</b><span class="mut">dagpuzzels per dag</span></div><div class="shm">${st.map(x=>{const cnt={};rows.forEach(r=>{if(r.uid===x.u&&r.date>=start)cnt[r.date]=(cnt[r.date]||0)+1});let o=`<div class="shp"><div class="srn">${x.nm}</div><div class="shg">`;for(let w=0;w<W;w++)for(let i=0;i<7;i++){const d=addDays(start,7*w+i),n=Math.min(TS.length,cnt[d]||0);o+=`<i class="${d>today?"fut":""}${d===today?" td":""}" style="${n?"background:color-mix(in srgb,var(--pc) "+Math.round(25+75*n/TS.length)+"%,transparent)":""}" title="${dnl(d)}: ${n}"></i>`}return o+"</div></div>"}).join("")}</div><div class="slg2 mut sm">minder <i></i><i style="background:color-mix(in srgb,var(--pc) 40%,transparent)"></i><i style="background:color-mix(in srgb,var(--pc) 70%,transparent)"></i><i style="background:var(--pc)"></i> meer</div></div>`;
-  h.innerHTML=`<div class="hwrap sco">${head("Overzicht","Samen "+together+" "+(together===1?"puzzel":"puzzels")+" opgelost "+PN)}${views}${period}<div class="hgrid2 sh2">${hero}</div>${cal}<div class="hgrid2 sh2">${bars}${heat}</div><div class="mut sm">Geen wedstrijd: gewoon kijken hoeveel jullie samen oplossen. 🎯 = foutloos, 💡 = zonder hint.</div></div>`;
+  h.innerHTML=`<div class="hwrap sco">${head("Overzicht","Samen "+together+" "+(together===1?"puzzel":"puzzels")+" opgelost "+PN)}<div class="scontrols">${views}${period}</div><div class="hgrid2 sh2">${hero}</div>${cal}<div class="hgrid2 sh2">${bars}${heat}</div><div class="mut sm">Geen wedstrijd: gewoon kijken hoeveel jullie samen oplossen. 🎯 = foutloos, 💡 = zonder hint.</div></div>`;
  }
  $("#sBack").onclick=showHome;
  h.querySelectorAll(".sviews button").forEach(b=>b.onclick=()=>{SCOREWHO=b.dataset.who;SWK=0;renderHome();pageIn($("#home"))});
  h.querySelectorAll(".sper button").forEach(b=>b.onclick=()=>{OPER=b.dataset.p;lsSet("pdper",OPER);renderHome()});
- h.querySelectorAll(".snav").forEach(b=>b.onclick=()=>{SWK=Math.min(0,SWK+ +b.dataset.w);renderHome()})}
+ h.querySelectorAll(".snav").forEach(b=>b.onclick=()=>{SWK=Math.min(0,SWK+ +b.dataset.w);renderHome()});fitHomePage()}
 function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return renderScore(h);setHomeSkin("shared");Object.keys(TYPES).forEach(latestFreeProgress);const td=dstr(),ft=featOf(td),now=new Date(),hr=now.getHours();
  const groet=hr<6?"Goedenacht":hr<12?"Goedemorgen":hr<18?"Goedemiddag":"Goedenavond",me=($("#name").value||"").trim()||"puzzelaar";
  const datum=now.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}),g=($("#group").value||"").trim().toLowerCase(),others=SET.players.filter(p=>uidOf(p)!==uid),types=Object.keys(TYPES);
@@ -3123,7 +3161,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  h.querySelectorAll(".tile.free[data-free-t]").forEach(b=>b.onclick=()=>showNewFree(b.dataset.freeT,false,false,b.dataset.freeNv||null));
  h.querySelectorAll(".hhomeviews [data-home-who]").forEach(b=>b.onclick=()=>showScore(b.dataset.homeWho));
  h.querySelectorAll(".htheme [data-theme-mode]").forEach(b=>b.onclick=()=>setThemeMode(b.dataset.themeMode));updTheme(false);
- $("#hFree").onclick=()=>showNewFree(rndType(""),true)}
+ $("#hFree").onclick=()=>showNewFree(rndType(""),true);fitHomePage()}
 if(NIEUW)nieuwLayout();
 {const td=dstr(),ft=featOf(td),first=lsGet("pdfeat")!==td;lsSet("pdfeat",td);
  const t=first&&!myDone(td,ft)?ft:TYPES[lsGet("pdtab")]?lsGet("pdtab"):ft;first&&!myDone(td,ft)?load(t,false):openType(t)}
