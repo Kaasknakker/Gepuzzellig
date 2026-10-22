@@ -154,11 +154,11 @@ service cloud.firestore {
         && request.auth.token.email_verified == true
         && request.resource.data.keys().hasOnly([
           'authUid','playerId','displayName','groupId','role',
-          'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode'
+          'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent'
         ])
         && request.resource.data.keys().hasAll([
           'authUid','playerId','displayName','groupId','role',
-          'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode'
+          'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent'
         ])
         && request.resource.data.authUid == request.auth.uid
         && request.resource.data.playerId == 'p_' + request.auth.uid
@@ -176,6 +176,8 @@ service cloud.firestore {
         && request.resource.data.inviteCode.size() <= 12
         && request.resource.data.invitedByAuthUid is string
         && request.resource.data.groupJoinCode == ''
+        && request.resource.data.theme in ['shared','peter','aart','stars','nature','retro','minimal']
+        && request.resource.data.accent in ['blue','purple','teal','green','orange','pink','red']
         && exists(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode))
         && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.email == request.auth.token.email
         && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.createdByAuthUid == request.resource.data.invitedByAuthUid
@@ -189,7 +191,7 @@ service cloud.firestore {
           && request.auth.uid == authUid
           && request.resource.data.keys().hasOnly([
             'authUid','playerId','displayName','groupId','role',
-            'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode'
+            'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent'
           ])
           && request.resource.data.authUid == resource.data.authUid
           && request.resource.data.playerId == resource.data.playerId
@@ -200,6 +202,8 @@ service cloud.firestore {
           && request.resource.data.displayName is string
           && request.resource.data.displayName.size() > 0
           && request.resource.data.displayName.size() <= 30
+          && request.resource.data.get('theme','shared') in ['shared','peter','aart','stars','nature','retro','minimal']
+          && request.resource.data.get('accent','blue') in ['blue','purple','teal','green','orange','pink','red']
           && request.resource.data.groupId is string
           && (
             request.resource.data.groupId == resource.data.groupId
@@ -236,6 +240,8 @@ service cloud.firestore {
           && request.resource.data.get('inviteCode','') == resource.data.get('inviteCode','')
           && request.resource.data.get('invitedByAuthUid','') == resource.data.get('invitedByAuthUid','')
           && request.resource.data.get('groupJoinCode','') == resource.data.get('groupJoinCode','')
+          && request.resource.data.get('theme','shared') == resource.data.get('theme','shared')
+          && request.resource.data.get('accent','blue') == resource.data.get('accent','blue')
           && request.resource.data.role in ['user','admin']
           && request.resource.data.updatedAt is int
           && request.resource.data.updatedAt >= 0
@@ -252,10 +258,10 @@ service cloud.firestore {
 
       allow create: if hasProfile()
         && request.resource.data.keys().hasOnly([
-          'name','ownerAuthUid','inviteCode','createdAt','updatedAt'
+          'name','ownerAuthUid','inviteCode','theme','accent','createdAt','updatedAt'
         ])
         && request.resource.data.keys().hasAll([
-          'name','ownerAuthUid','inviteCode','createdAt','updatedAt'
+          'name','ownerAuthUid','inviteCode','theme','accent','createdAt','updatedAt'
         ])
         && request.resource.data.ownerAuthUid == request.auth.uid
         && request.resource.data.name is string
@@ -264,6 +270,8 @@ service cloud.firestore {
         && request.resource.data.inviteCode is string
         && request.resource.data.inviteCode.size() >= 6
         && request.resource.data.inviteCode.size() <= 12
+        && request.resource.data.theme in ['shared','peter','aart','stars','nature','retro','minimal']
+        && request.resource.data.accent in ['blue','purple','teal','green','orange','pink','red']
         && request.resource.data.createdAt is int
         && request.resource.data.createdAt >= 0
         && request.resource.data.updatedAt is int
@@ -272,7 +280,7 @@ service cloud.firestore {
       allow update: if signedIn()
         && resource.data.get('ownerAuthUid', '') == request.auth.uid
         && request.resource.data.keys().hasOnly([
-          'name','ownerAuthUid','inviteCode','createdAt','updatedAt'
+          'name','ownerAuthUid','inviteCode','theme','accent','createdAt','updatedAt'
         ])
         && request.resource.data.ownerAuthUid == resource.data.ownerAuthUid
         && request.resource.data.inviteCode == resource.data.inviteCode
@@ -280,6 +288,8 @@ service cloud.firestore {
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 40
+        && request.resource.data.get('theme','shared') in ['shared','peter','aart','stars','nature','retro','minimal']
+        && request.resource.data.get('accent','orange') in ['blue','purple','teal','green','orange','pink','red']
         && request.resource.data.updatedAt is int
         && request.resource.data.updatedAt >= 0;
 
