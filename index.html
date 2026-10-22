@@ -412,6 +412,9 @@ body[data-t=plus].phone #pbot #hintb,body[data-t=plus].phone #pbot #chk{flex:0 0
 /* ===== iPhone ===== */
 #prow,#pbot,#pmp,#pm{display:none}
 body.phone{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);overflow:hidden;overscroll-behavior:none}
+/* ios-scroll-edge-guard: iOS 26 geeft scrollende webapps standaard een zachte blur/fade aan de bovenrand.
+   Een viewport-vast element tegen die rand laat WebKit daar een egale appkleur gebruiken in plaats van de scroll-edge blur. */
+body.phone::before{content:"";position:fixed;top:0;left:0;right:0;height:1px;background:var(--bg);pointer-events:none;z-index:1000}
 body.phone header{position:relative;display:flex;align-items:center;flex-wrap:nowrap;gap:0;padding:4px 46px 4px 4px;min-height:40px;box-sizing:border-box}
 body.phone header h1{display:none}
 body.phone header nav{order:0;flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;align-items:center;gap:5px;padding:2px 5px 4px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:18px;overscroll-behavior-x:contain}
