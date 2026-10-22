@@ -9,31 +9,41 @@ service cloud.firestore {
 
     function hasProfile() {
       return signedIn()
-        && exists(
-          /databases/$(database)/documents/profiles/$(request.auth.uid)
-        );
+        && exists(/databases/$(database)/documents/profiles/$(request.auth.uid));
+    }
+
+    function myProfile() {
+      return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data;
     }
 
     function myPlayer() {
-      return get(
-        /databases/$(database)/documents/profiles/$(request.auth.uid)
-      ).data.playerId;
+      return myProfile().playerId;
     }
 
     function myGroup() {
-      return get(
-        /databases/$(database)/documents/profiles/$(request.auth.uid)
-      ).data.groupId;
+      return myProfile().groupId;
+    }
+
+    // Peter is de beschermde eigenaar. Nieuwe accounts krijgen altijd een p_<authUid>-id
+    // en kunnen deze identiteit dus nooit verkrijgen.
+    function isOwner() {
+      return hasProfile() && myPlayer() == 'u-peter';
+    }
+
+    function isAdmin() {
+      return hasProfile()
+        && (isOwner() || myProfile().get('role', 'user') == 'admin');
     }
 
     function groupExists(groupId) {
-      return exists(
-        /databases/$(database)/documents/groups/$(groupId)
-      );
+      return groupId is string
+        && groupId.size() > 0
+        && exists(/databases/$(database)/documents/groups/$(groupId));
     }
 
     function validResult(id) {
       return hasProfile()
+        && myGroup().size() > 0
         && request.resource.data.keys().hasOnly([
           'name','group','date','type','secs','uid','mist','hints','emo','note'
         ])
@@ -44,8 +54,6 @@ service cloud.firestore {
         && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 30
         && request.resource.data.group is string
-        && request.resource.data.group.size() > 0
-        && request.resource.data.group.size() <= 80
         && request.resource.data.group == myGroup()
         && request.resource.data.date is string
         && request.resource.data.date.size() <= 10
@@ -53,8 +61,6 @@ service cloud.firestore {
         && request.resource.data.type.size() > 0
         && request.resource.data.type.size() <= 80
         && request.resource.data.uid is string
-        && request.resource.data.uid.size() > 0
-        && request.resource.data.uid.size() <= 80
         && request.resource.data.uid == myPlayer()
         && id == request.resource.data.group + '_' + request.resource.data.date + '_' + request.resource.data.type + '_' + request.resource.data.uid
         && request.resource.data.secs is int
@@ -71,6 +77,7 @@ service cloud.firestore {
 
     function validStatus(id) {
       return hasProfile()
+        && myGroup().size() > 0
         && request.resource.data.keys().hasOnly([
           'uid','group','name','date','type','at','progress','onlineAt',
           'onlineType','onlinePractice','onlineLvl','onlineNono'
@@ -105,8 +112,8 @@ service cloud.firestore {
     }
 
     match /results/{id} {
-      allow read: if hasProfile()
-        && resource.data.group == myGroup();
+      allow read: if isAdmin()
+        || (hasProfile() && resource.data.group == myGroup());
       allow create: if validResult(id);
       allow update: if validResult(id)
         && resource.data.uid == myPlayer()
@@ -119,8 +126,8 @@ service cloud.firestore {
     }
 
     match /status/{id} {
-      allow read: if hasProfile()
-        && resource.data.group == myGroup();
+      allow read: if isAdmin()
+        || (hasProfile() && resource.data.group == myGroup());
       allow create: if validStatus(id);
       allow update: if validStatus(id)
         && resource.data.uid == myPlayer()
@@ -134,50 +141,96 @@ service cloud.firestore {
       allow get: if signedIn()
         && (
           request.auth.uid == authUid
-          || (hasProfile() && resource.data.groupId == myGroup())
+          || isAdmin()
+          || (hasProfile() && myGroup().size() > 0 && resource.data.groupId == myGroup())
         );
 
-      allow list: if hasProfile()
-        && resource.data.groupId == myGroup();
+      allow list: if isAdmin()
+        || (hasProfile() && myGroup().size() > 0 && resource.data.groupId == myGroup());
 
-      // Alleen vooraf gekoppelde Google-accounts hebben een profiel.
-      // De app kan zelf geen nieuw spelerprofiel aanmaken.
-      allow create: if false;
-
-      allow update: if signedIn()
+      // Een nieuw profiel kan alleen ontstaan uit een geldige, e-mailgebonden uitnodiging.
+      allow create: if signedIn()
         && request.auth.uid == authUid
+        && request.auth.token.email_verified == true
         && request.resource.data.keys().hasOnly([
-          'authUid','playerId','displayName','groupId','updatedAt'
+          'authUid','playerId','displayName','groupId','role',
+          'createdAt','updatedAt','inviteCode','invitedByAuthUid'
         ])
         && request.resource.data.keys().hasAll([
-          'authUid','playerId','displayName','groupId','updatedAt'
+          'authUid','playerId','displayName','groupId','role',
+          'createdAt','updatedAt','inviteCode','invitedByAuthUid'
         ])
         && request.resource.data.authUid == request.auth.uid
-        && request.resource.data.authUid == resource.data.authUid
-        && request.resource.data.playerId == resource.data.playerId
+        && request.resource.data.playerId == 'p_' + request.auth.uid
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() > 0
         && request.resource.data.displayName.size() <= 30
-        && request.resource.data.groupId is string
-        && (
-          request.resource.data.groupId == resource.data.groupId
-          || groupExists(request.resource.data.groupId)
-        )
+        && request.resource.data.groupId == ''
+        && request.resource.data.role == 'user'
+        && request.resource.data.createdAt is int
+        && request.resource.data.createdAt > 0
         && request.resource.data.updatedAt is int
-        && request.resource.data.updatedAt >= 0;
+        && request.resource.data.updatedAt >= request.resource.data.createdAt
+        && request.resource.data.inviteCode is string
+        && request.resource.data.inviteCode.size() >= 8
+        && request.resource.data.inviteCode.size() <= 12
+        && request.resource.data.invitedByAuthUid is string
+        && exists(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode))
+        && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.email == request.auth.token.email
+        && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.createdByAuthUid == request.resource.data.invitedByAuthUid
+        && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.usedByAuthUid == ''
+        && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.revoked == false
+        && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.expiresAt > request.time;
+
+      // Gebruikers kunnen alleen hun eigen naam/groep wijzigen; rol en identiteit blijven vast.
+      allow update: if (
+          signedIn()
+          && request.auth.uid == authUid
+          && request.resource.data.keys().hasOnly([
+            'authUid','playerId','displayName','groupId','role',
+            'createdAt','updatedAt','inviteCode','invitedByAuthUid'
+          ])
+          && request.resource.data.authUid == resource.data.authUid
+          && request.resource.data.playerId == resource.data.playerId
+          && request.resource.data.get('role','user') == resource.data.get('role','user')
+          && request.resource.data.get('createdAt',0) == resource.data.get('createdAt',0)
+          && request.resource.data.get('inviteCode','') == resource.data.get('inviteCode','')
+          && request.resource.data.get('invitedByAuthUid','') == resource.data.get('invitedByAuthUid','')
+          && request.resource.data.displayName is string
+          && request.resource.data.displayName.size() > 0
+          && request.resource.data.displayName.size() <= 30
+          && request.resource.data.groupId is string
+          && (
+            request.resource.data.groupId == resource.data.groupId
+            || groupExists(request.resource.data.groupId)
+          )
+          && request.resource.data.updatedAt is int
+          && request.resource.data.updatedAt >= 0
+        )
+        // Alleen de eigenaar mag een ander user/admin maken. De eigenaar zelf is immuun.
+        || (
+          isOwner()
+          && resource.data.playerId != 'u-peter'
+          && request.resource.data.authUid == resource.data.authUid
+          && request.resource.data.playerId == resource.data.playerId
+          && request.resource.data.displayName == resource.data.displayName
+          && request.resource.data.groupId == resource.data.groupId
+          && request.resource.data.get('createdAt',0) == resource.data.get('createdAt',0)
+          && request.resource.data.get('inviteCode','') == resource.data.get('inviteCode','')
+          && request.resource.data.get('invitedByAuthUid','') == resource.data.get('invitedByAuthUid','')
+          && request.resource.data.role in ['user','admin']
+          && request.resource.data.updatedAt is int
+          && request.resource.data.updatedAt >= 0
+        );
 
       allow delete: if false;
     }
 
-
     match /groups/{groupId} {
-      allow get: if signedIn()
-        && (
-          (hasProfile() && myGroup() == groupId)
-          || resource.data.get('ownerAuthUid', '') == request.auth.uid
-        );
-
-      allow list: if false;
+      allow get: if isAdmin()
+        || (hasProfile() && myGroup() == groupId)
+        || (signedIn() && resource.data.get('ownerAuthUid','') == request.auth.uid);
+      allow list: if isAdmin();
 
       allow create: if hasProfile()
         && request.resource.data.keys().hasOnly([
@@ -199,13 +252,10 @@ service cloud.firestore {
         && request.resource.data.updatedAt >= 0;
 
       allow update: if signedIn()
+        && resource.data.get('ownerAuthUid', '') == request.auth.uid
         && request.resource.data.keys().hasOnly([
           'name','ownerAuthUid','inviteCode','createdAt','updatedAt'
         ])
-        && request.resource.data.keys().hasAll([
-          'name','ownerAuthUid','inviteCode','createdAt','updatedAt'
-        ])
-        && resource.data.get('ownerAuthUid', '') == request.auth.uid
         && request.resource.data.ownerAuthUid == resource.data.ownerAuthUid
         && request.resource.data.inviteCode == resource.data.inviteCode
         && request.resource.data.createdAt == resource.data.createdAt
@@ -218,9 +268,10 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Codes waarmee een bestaand Gepuzzellig-account naar een groep kan overstappen.
     match /groupInvites/{code} {
       allow get: if signedIn();
-      allow list: if false;
+      allow list: if isAdmin();
 
       allow create: if hasProfile()
         && request.resource.data.keys().hasOnly([
@@ -232,14 +283,82 @@ service cloud.firestore {
         && request.resource.data.ownerAuthUid == request.auth.uid
         && request.resource.data.createdAt is int
         && request.resource.data.createdAt >= 0
-        && get(
-          /databases/$(database)/documents/groups/$(request.resource.data.groupId)
-        ).data.ownerAuthUid == request.auth.uid
-        && get(
-          /databases/$(database)/documents/groups/$(request.resource.data.groupId)
-        ).data.inviteCode == code;
+        && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.ownerAuthUid == request.auth.uid
+        && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.inviteCode == code;
 
       allow update, delete: if false;
+    }
+
+    // Uitnodigingen die toegang geven tot Gepuzzellig zelf.
+    match /accessInvites/{code} {
+      allow get: if signedIn();
+      allow list: if isAdmin();
+
+      allow create: if hasProfile()
+        && myGroup().size() > 0
+        && code == request.resource.data.code
+        && request.resource.data.keys().hasOnly([
+          'code','email','createdByAuthUid','createdByPlayerId','createdByName',
+          'suggestedGroupId','suggestedGroupName','createdAt','expiresAt',
+          'usedByAuthUid','usedAt','revoked'
+        ])
+        && request.resource.data.keys().hasAll([
+          'code','email','createdByAuthUid','createdByPlayerId','createdByName',
+          'suggestedGroupId','suggestedGroupName','createdAt','expiresAt',
+          'usedByAuthUid','usedAt','revoked'
+        ])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() >= 5
+        && request.resource.data.email.size() <= 120
+        && request.resource.data.createdByAuthUid == request.auth.uid
+        && request.resource.data.createdByPlayerId == myPlayer()
+        && request.resource.data.createdByName is string
+        && request.resource.data.createdByName.size() > 0
+        && request.resource.data.createdByName.size() <= 30
+        && request.resource.data.suggestedGroupId == myGroup()
+        && request.resource.data.suggestedGroupName is string
+        && request.resource.data.suggestedGroupName.size() <= 40
+        && request.resource.data.createdAt is int
+        && request.resource.data.createdAt > 0
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.expiresAt > request.time
+        && request.resource.data.usedByAuthUid == ''
+        && request.resource.data.usedAt == 0
+        && request.resource.data.revoked == false;
+
+      allow update: if signedIn()
+        && request.resource.data.code == resource.data.code
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.createdByAuthUid == resource.data.createdByAuthUid
+        && request.resource.data.createdByPlayerId == resource.data.createdByPlayerId
+        && request.resource.data.createdByName == resource.data.createdByName
+        && request.resource.data.suggestedGroupId == resource.data.suggestedGroupId
+        && request.resource.data.suggestedGroupName == resource.data.suggestedGroupName
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.expiresAt == resource.data.expiresAt
+        && (
+          (
+            resource.data.createdByAuthUid == request.auth.uid
+            && resource.data.usedByAuthUid == ''
+            && request.resource.data.usedByAuthUid == resource.data.usedByAuthUid
+            && request.resource.data.usedAt == resource.data.usedAt
+            && resource.data.revoked == false
+            && request.resource.data.revoked == true
+          )
+          || (
+            request.auth.token.email_verified == true
+            && request.auth.token.email == resource.data.email
+            && resource.data.usedByAuthUid == ''
+            && resource.data.revoked == false
+            && resource.data.expiresAt > request.time
+            && request.resource.data.usedByAuthUid == request.auth.uid
+            && request.resource.data.usedAt is int
+            && request.resource.data.usedAt > 0
+            && request.resource.data.revoked == false
+          )
+        );
+
+      allow delete: if false;
     }
   }
 }
