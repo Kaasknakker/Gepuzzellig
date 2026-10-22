@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl"><head><meta charset="utf-8">
+<html lang="nl" data-auth-pending><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1004,7 +1004,7 @@ window.FIREBASE_CONFIG={
 <div id="iosPwaStatusStrip" aria-hidden="true"></div>
 <header><h1><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="ttl">Gepuzzellig</span></h1><nav id="tabs" aria-label="Puzzelsoorten"></nav>
 <button id="theme" title="Donkere of lichte weergave" aria-label="Donkere of lichte weergave"></button><button id="sbtn" title="Overzicht en statistieken" aria-label="Overzicht en statistieken">📊</button><button id="authbtn" title="Google-account" aria-label="Google-account">Account</button><input id="name" type="hidden"><input id="group" type="hidden"></header>
-<div id="authgate" class="authcover" role="dialog" aria-modal="true" aria-labelledby="authgt">
+<div id="authgate" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="authgt">
  <div class="authcard"><span class="authlogo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><h2 id="authgt">Welkom bij Gepuzzellig</h2><p>Log in met Google om je gekoppelde profiel en groep te gebruiken.</p><button id="authgoogle" class="authgoogle"><span class="g">G</span> Doorgaan met Google</button><p id="authmsg" class="authmsg"></p></div>
 </div>
 <div id="authaccount" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="authat">
@@ -3471,7 +3471,7 @@ syncA11y();
 <script type="module">
 const cfg=window.FIREBASE_CONFIG;
 const no=m=>window.dispatchEvent(new CustomEvent("pdnodb",{detail:m}));
-if(!cfg||cfg.apiKey==="PLAK_HIER"){no("Scorebord nog niet ingesteld (zie stappenplan). Tijden worden nu alleen op dit apparaat bewaard.")}
+if(!cfg||cfg.apiKey==="PLAK_HIER"){document.documentElement.removeAttribute("data-auth-pending");no("Scorebord nog niet ingesteld (zie stappenplan). Tijden worden nu alleen op dit apparaat bewaard.")}
 else{try{
  const[a,f,fa]=await Promise.all([import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js")]);
  const app=a.initializeApp(cfg);let db;const auth=fa.getAuth(app);
@@ -3479,22 +3479,30 @@ else{try{
 
  const gate=document.getElementById("authgate"),acct=document.getElementById("authaccount"),gacct=document.getElementById("groupaccount"),gb=document.getElementById("authgoogle"),msg=document.getElementById("authmsg"),ab=document.getElementById("authbtn"),who=document.getElementById("authwho"),out=document.getElementById("authout"),ax=document.getElementById("authx"),gx=document.getElementById("groupx"),pn=document.getElementById("profname"),ps=document.getElementById("profsave"),pmsg=document.getElementById("profmsg"),pgn=document.getElementById("profgroupname"),pgm=document.getElementById("profgroupmanage"),gcn=document.getElementById("groupcurrentname"),grole=document.getElementById("grouprole"),gowner=document.getElementById("groupownerbox"),gne=document.getElementById("groupnameedit"),gns=document.getElementById("groupnamesave"),gcode=document.getElementById("groupcode"),gcopy=document.getElementById("groupcopy"),gmembers=document.getElementById("groupmembers"),gjc=document.getElementById("groupjoincode"),gj=document.getElementById("groupjoin"),gnn=document.getElementById("groupnewname"),gc=document.getElementById("groupcreate"),gmsg=document.getElementById("groupmsg");
  let currentProfile=null,currentMembers=[],currentGroupName=(window.PD_SETUP&&window.PD_SETUP.groupName)||"Puzzelsukkels",currentGroup={},unsubMembers=null,unsubGroup=null,unsubProfile=null;
+ const PROFILE_CACHE_KEY="pdprofilecache2";
+ const baseGroupName=()=>window.PD_SETUP&&window.PD_SETUP.groupName||"Puzzelsukkels";
+ const authReady=()=>document.documentElement.removeAttribute("data-auth-pending");
+ const plainProfile=pr=>pr&&typeof pr.playerId==="string"&&pr.playerId&&typeof pr.groupId==="string"&&pr.groupId?{authUid:String(pr.authUid||""),playerId:pr.playerId,displayName:String(pr.displayName||"Speler").slice(0,30),groupId:pr.groupId,updatedAt:Number(pr.updatedAt)||0}:null;
+ const readProfileCache=uid=>{try{const all=JSON.parse(localStorage.getItem(PROFILE_CACHE_KEY)||"{}"),c=all&&all[uid],pr=c&&plainProfile(c.profile);if(!pr||pr.authUid!==uid)return null;const ms=(Array.isArray(c.members)?c.members:[]).map(plainProfile).filter(x=>x&&x.groupId===pr.groupId);return{profile:pr,members:ms.length?ms:[pr],groupName:typeof c.groupName==="string"&&c.groupName?c.groupName:baseGroupName()}}catch(e){return null}};
+ const writeProfileCache=()=>{try{const u=auth.currentUser,pr=plainProfile(currentProfile);if(!u||!pr||pr.authUid!==u.uid)return;const all=JSON.parse(localStorage.getItem(PROFILE_CACHE_KEY)||"{}"),ms=(currentMembers||[]).map(plainProfile).filter(x=>x&&x.groupId===pr.groupId);all[u.uid]={profile:pr,members:ms.length?ms:[pr],groupName:currentGroupName||baseGroupName(),savedAt:Date.now()};localStorage.setItem(PROFILE_CACHE_KEY,JSON.stringify(all))}catch(e){}};
+ const dropProfileCache=uid=>{try{const all=JSON.parse(localStorage.getItem(PROFILE_CACHE_KEY)||"{}");if(uid in all){delete all[uid];localStorage.setItem(PROFILE_CACHE_KEY,JSON.stringify(all))}}catch(e){}};
  const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
  const authLabel=u=>u?(u.displayName||u.email||"Google-account"):"Google-login";
  const cleanCode=s=>String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,12);
  const randomCode=(n=8)=>{const abc="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",a=new Uint8Array(n);crypto.getRandomValues(a);return[...a].map(x=>abc[x%abc.length]).join("")};
  const randomGroupId=()=>{const a=new Uint8Array(9);crypto.getRandomValues(a);return"g_"+[...a].map(x=>x.toString(36)).join("").slice(0,14)};
  const drawAccountButton=()=>{const u=auth.currentUser,n=currentProfile&&currentProfile.displayName;if(ab)ab.innerHTML=u?'<span class="authdot"></span>'+(n?esc(n):authLabel(u)):"Google-login"};
- const dispatchProfile=()=>{if(!currentProfile)return;window.dispatchEvent(new CustomEvent("pdprofile",{detail:{profile:currentProfile,members:currentMembers,groupName:currentGroupName,group:currentGroup}}));drawAccountButton()};
+ const dispatchProfile=()=>{if(!currentProfile)return;writeProfileCache();window.dispatchEvent(new CustomEvent("pdprofile",{detail:{profile:currentProfile,members:currentMembers,groupName:currentGroupName,group:currentGroup}}));drawAccountButton()};
  const stopGroupWatches=()=>{if(unsubMembers){unsubMembers();unsubMembers=null}if(unsubGroup){unsubGroup();unsubGroup=null}};
  const stopWatches=()=>{stopGroupWatches();if(unsubProfile){unsubProfile();unsubProfile=null}};
  const bindGroup=gid=>{stopGroupWatches();
-  unsubMembers=f.onSnapshot(f.query(f.collection(db,"profiles"),f.where("groupId","==",gid)),s=>{currentMembers=s.docs.map(d=>d.data());dispatchProfile()},()=>{currentMembers=currentProfile?[currentProfile]:[];dispatchProfile()});
+  unsubMembers=f.onSnapshot(f.query(f.collection(db,"profiles"),f.where("groupId","==",gid)),s=>{currentMembers=s.docs.map(d=>d.data());dispatchProfile()},()=>{if(!currentMembers.length)currentMembers=currentProfile?[currentProfile]:[];dispatchProfile()});
   unsubGroup=f.onSnapshot(f.doc(db,"groups",gid),d=>{currentGroup=d.exists()?d.data():{};currentGroupName=currentGroup.name||(gid===(window.PD_SETUP&&window.PD_SETUP.group)?(window.PD_SETUP.groupName||"Puzzelsukkels"):"Groep");dispatchProfile()},()=>dispatchProfile());
  };
- const watchProfile=pr=>{stopWatches();currentProfile=pr;bindGroup(pr.groupId);unsubProfile=f.onSnapshot(f.doc(db,"profiles",auth.currentUser.uid),d=>{if(!d.exists())return;const nx=d.data(),changed=!currentProfile||nx.groupId!==currentProfile.groupId;scrubPrivateProfile(nx);currentProfile=nx;if(changed)bindGroup(nx.groupId);else dispatchProfile()},()=>{})};
+ const watchProfile=pr=>{stopWatches();currentProfile=pr;if(!currentMembers.length)currentMembers=[pr];dispatchProfile();bindGroup(pr.groupId);unsubProfile=f.onSnapshot(f.doc(db,"profiles",auth.currentUser.uid),d=>{if(!d.exists())return;const nx=d.data(),changed=!currentProfile||nx.groupId!==currentProfile.groupId;scrubPrivateProfile(nx);currentProfile=nx;if(changed){currentMembers=[nx];currentGroupName=baseGroupName();bindGroup(nx.groupId)}else dispatchProfile()},()=>{})};
  const scrubPrivateProfile=pr=>{if(!pr||!auth.currentUser||(!("email" in pr)&&!("photoURL" in pr)))return;f.updateDoc(f.doc(db,"profiles",auth.currentUser.uid),{email:f.deleteField(),photoURL:f.deleteField()}).catch(()=>{})};
- const getProfile=u=>f.getDoc(f.doc(db,"profiles",u.uid)).then(d=>{const pr=d.exists()?d.data():null;if(pr)scrubPrivateProfile(pr);return pr});
+ const getProfile=u=>f.getDocFromServer(f.doc(db,"profiles",u.uid)).then(d=>{const pr=d.exists()?d.data():null;if(pr)scrubPrivateProfile(pr);return pr});
+ const applyCachedProfile=c=>{if(!c||!c.profile)return false;currentProfile=c.profile;currentMembers=c.members&&c.members.length?c.members:[c.profile];currentGroupName=c.groupName||baseGroupName();currentGroup={};dispatchProfile();return true};
  const openProfile=()=>{const u=auth.currentUser;if(!u){gate.hidden=false;return}if(!currentProfile){if(msg)msg.textContent="Dit Google-account heeft geen gekoppeld Gepuzzellig-profiel. Kies hieronder het account dat al gekoppeld is.";gate.hidden=false;return}const photo=u.photoURL?'<img class="authavatar" alt="" src="'+esc(u.photoURL)+'">':'<span class="authavatar">'+esc((currentProfile.displayName||authLabel(u))[0]||"?")+'</span>';who.innerHTML=photo+'<div><b>'+esc(currentProfile.displayName)+'</b><small>'+esc(u.email||"")+'</small></div>';pn.value=currentProfile.displayName||"";if(pgn)pgn.textContent=currentGroupName||"Groep";pmsg.textContent="";acct.hidden=false};
  const openGroup=()=>{if(!currentProfile||!auth.currentUser){openProfile();return}if(gcn)gcn.textContent=currentGroupName||"Groep";const owner=currentGroup.ownerAuthUid===auth.currentUser.uid;if(grole)grole.textContent=owner?"Beheerder":"Lid";if(gowner)gowner.hidden=!owner;if(gne)gne.value=currentGroupName||"";if(gcode)gcode.textContent=currentGroup.inviteCode||"Wordt aangemaakt…";if(gmembers)gmembers.innerHTML=(currentMembers.length?currentMembers:[currentProfile]).map(x=>'<span class="groupmember">'+esc(x.displayName||"Speler")+(x.authUid===currentGroup.ownerAuthUid?" · beheerder":"")+"</span>").join("");if(gjc)gjc.value="";if(gnn)gnn.value="";if(gmsg)gmsg.textContent="";acct.hidden=true;gacct.hidden=false};
  const saveProfile=async()=>{if(!currentProfile||!auth.currentUser)return;const n=pn.value.trim();if(!n){pmsg.textContent="Naam mag niet leeg zijn.";return}pmsg.textContent="Opslaan…";try{await f.setDoc(f.doc(db,"profiles",auth.currentUser.uid),{displayName:n,updatedAt:Date.now()},{merge:true});pmsg.textContent="Opgeslagen ✓"}catch(e){pmsg.textContent=e&&e.code==="permission-denied"?"Firebase-regels laten profielwijzigingen nog niet toe.":"Opslaan lukt niet: "+(e.code||e.message||"onbekende fout")}};
@@ -3510,7 +3518,7 @@ else{try{
  if(ax)ax.onclick=()=>acct.hidden=true;if(gx)gx.onclick=()=>gacct.hidden=true;if(out)out.onclick=()=>window.PD_AUTH.signOut();
  acct&&acct.addEventListener("pointerdown",e=>{if(e.target===acct)acct.hidden=true});gacct&&gacct.addEventListener("pointerdown",e=>{if(e.target===gacct)gacct.hidden=true});
  fa.getRedirectResult(auth).catch(e=>{if(msg)msg.textContent="Inloggen lukt niet: "+(e.code||"onbekende fout")});
- fa.onAuthStateChanged(auth,async u=>{stopWatches();currentProfile=null;currentMembers=[];currentGroup={};window.PD_AUTH_USER=u||null;if(!u){drawAccountButton();acct.hidden=true;gacct.hidden=true;gate.hidden=false;if(msg)msg.textContent="";window.dispatchEvent(new Event("pdauthout"));return}gate.hidden=true;if(msg)msg.textContent="";try{const pr=await getProfile(u);if(pr)watchProfile(pr);else{gate.hidden=false;if(msg)msg.textContent="Dit Google-account heeft nog geen gekoppeld Gepuzzellig-profiel. Kies met de knop hierboven het account dat je eerder hebt gekoppeld."}}catch(e){if(msg)msg.textContent=e.code==="permission-denied"?"Inloggen is gelukt, maar dit account mag het profiel niet lezen.":"Profiel laden lukt niet.";gate.hidden=false}});
+ fa.onAuthStateChanged(auth,async u=>{stopWatches();currentProfile=null;currentMembers=[];currentGroup={};currentGroupName=baseGroupName();window.PD_AUTH_USER=u||null;if(!u){authReady();drawAccountButton();acct.hidden=true;gacct.hidden=true;gate.hidden=false;if(msg)msg.textContent="";window.dispatchEvent(new Event("pdauthout"));return}gate.hidden=true;if(msg)msg.textContent="";const cached=readProfileCache(u.uid);if(cached){applyCachedProfile(cached);authReady()}try{const pr=await getProfile(u);if(pr){watchProfile(pr);authReady();gate.hidden=true}else{dropProfileCache(u.uid);currentProfile=null;currentMembers=[];authReady();gate.hidden=false;if(msg)msg.textContent="Dit Google-account heeft nog geen gekoppeld Gepuzzellig-profiel. Kies met de knop hierboven het account dat je eerder hebt gekoppeld."}}catch(e){if(cached){gate.hidden=true;authReady();return}authReady();if(msg)msg.textContent=e.code==="permission-denied"?"Inloggen is gelukt, maar dit account mag het profiel niet lezen.":navigator.onLine?"Profiel laden lukt niet. Probeer het opnieuw.":"Je bent offline. Open Gepuzzellig één keer online met dit gekoppelde account; daarna kun je ook volledig offline starten.";gate.hidden=false}});
  
  window.PD_DB={
   save:row=>currentProfile&&row&&row.uid===currentProfile.playerId&&row.group===currentProfile.groupId?f.setDoc(f.doc(db,"results",row.group+"_"+row.date+"_"+row.type+"_"+row.uid),row):Promise.reject(new Error("Profiel niet gereed")),
@@ -3523,6 +3531,6 @@ else{try{
   getProgress:(g,u)=>currentProfile&&g===currentProfile.groupId&&u===currentProfile.playerId?f.getDocFromServer(f.doc(db,"status",g+"_"+u)).then(d=>d.exists()?(d.data().progress||{}):{}):Promise.resolve({}),
   pollRecent:(from,g)=>currentProfile&&g===currentProfile.groupId?Promise.all([f.getDocsFromServer(f.query(f.collection(db,"results"),f.where("group","==",g))),f.getDocsFromServer(f.query(f.collection(db,"status"),f.where("group","==",g)))]).then(([a,b])=>({rows:a.docs.map(d=>d.data()).filter(x=>x.date>=from),stat:b.docs.map(d=>d.data())})):Promise.reject(new Error("Profiel niet gereed"))};
  window.dispatchEvent(new Event("pdready"));
-}catch(e){no("Scorebord niet bereikbaar (internet?).");const g=document.getElementById("authgate"),m=document.getElementById("authmsg");if(m)m.textContent="Google-login kon niet worden geladen. Controleer je verbinding en probeer het opnieuw.";if(g)g.hidden=false}}
+}catch(e){document.documentElement.removeAttribute("data-auth-pending");no("Scorebord niet bereikbaar (internet?).");const g=document.getElementById("authgate"),m=document.getElementById("authmsg");if(m)m.textContent="Google-login kon niet worden geladen. Controleer je verbinding en probeer het opnieuw.";if(g)g.hidden=false}}
 </script>
 </body></html>
