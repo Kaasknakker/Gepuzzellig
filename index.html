@@ -977,6 +977,23 @@ body.tablet.home #home .hwrap:not(.sco) .hhomeviews b{font-size:15px}
 body.tablet.home #home .hwrap:not(.sco) .hhomeviews small{font-size:11px}
 body.tablet.home #home .hwrap:not(.sco) .hsname{font-size:17px}
 body.tablet.home #home .hwrap:not(.sco) .hscount b{font-size:17px}
+
+/* Google-login: fase 1. Identiteit staat nog los van Peter/Aart; dat koppelen we pas na de praktijktest. */
+.authcover{position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;padding:20px;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.authcover[hidden]{display:none}
+.authcard{width:min(390px,100%);padding:26px;border-radius:24px;border:1px solid var(--line);background:var(--card);box-shadow:0 18px 60px color-mix(in srgb,#000 24%,transparent);text-align:center}
+.authlogo{display:inline-grid;grid-template-columns:repeat(2,9px);gap:3px;margin-bottom:12px}.authlogo i{width:9px;height:9px;border-radius:3px;background:var(--pc)}.authlogo i:nth-child(2){opacity:.7}.authlogo i:nth-child(3){opacity:.45}.authlogo i:nth-child(4){opacity:.85}
+.authcard h2{margin:0 0 7px;font-size:25px}.authcard p{margin:0 0 18px;color:var(--mut);font-size:13px;line-height:1.45}
+.authgoogle{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 15px;border-radius:14px;background:#fff;color:#202124;border:1px solid #dadce0;box-shadow:0 1px 2px rgba(0,0,0,.12);font-weight:800}
+.authgoogle .g{font:900 18px/1 Arial,sans-serif;color:#4285f4}
+.authskip{margin-top:9px;border:0;box-shadow:none;background:transparent;color:var(--mut);font-size:12px;padding:8px}
+.authmsg{min-height:18px;margin-top:10px!important;font-size:11px!important}
+.authwho{display:flex;align-items:center;gap:10px;text-align:left;margin:14px 0;padding:11px;border-radius:14px;background:color-mix(in srgb,var(--line) 20%,transparent)}
+.authavatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:color-mix(in srgb,var(--pc) 10%,var(--card));display:grid;place-items:center;font-weight:900}
+.authwho div{min-width:0;flex:1}.authwho b,.authwho small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.authwho small{color:var(--mut);font-size:11px;margin-top:2px}
+.authactions{display:flex;gap:8px}.authactions button{flex:1}.authsecondary{background:var(--card);color:var(--fg);border:1px solid var(--line)}
+#authbtn .authdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#28a745}
+body.phone #authbtn{width:100%;text-align:left}
 </style>
 <script>
 /* ===== STAP 4 van het stappenplan: plak hier jouw Firebase-gegevens ===== */
@@ -991,8 +1008,14 @@ window.FIREBASE_CONFIG={
 </head><body>
 <div id="iosPwaStatusStrip" aria-hidden="true"></div>
 <header><h1><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="ttl">Gepuzzellig</span></h1><nav id="tabs" aria-label="Puzzelsoorten"></nav>
-<button id="theme" title="Donkere of lichte weergave" aria-label="Donkere of lichte weergave"></button><button id="sbtn" title="Overzicht en statistieken" aria-label="Overzicht en statistieken">📊</button><button id="who" title="Wissel van speler" aria-label="Wissel van speler"></button><input id="name" type="hidden"><input id="group" type="hidden"></header>
+<button id="theme" title="Donkere of lichte weergave" aria-label="Donkere of lichte weergave"></button><button id="sbtn" title="Overzicht en statistieken" aria-label="Overzicht en statistieken">📊</button><button id="who" title="Wissel van speler" aria-label="Wissel van speler"></button><button id="authbtn" title="Google-account" aria-label="Google-account">Account</button><input id="name" type="hidden"><input id="group" type="hidden"></header>
 <div id="pick"><div class="pc"><h2>Wie ben jij?</h2><div id="pickb"></div><p class="mut">Je kiest dit één keer. Daarna onthoudt de app het.</p></div></div>
+<div id="authgate" class="authcover" role="dialog" aria-modal="true" aria-labelledby="authgt">
+ <div class="authcard"><span class="authlogo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><h2 id="authgt">Welkom bij Gepuzzellig</h2><p>Log in met Google. Je bestaande puzzels en spelerkeuze blijven in deze testfase gewoon zoals ze zijn.</p><button id="authgoogle" class="authgoogle"><span class="g">G</span> Doorgaan met Google</button><button id="authskip" class="authskip">Voor nu overslaan</button><p id="authmsg" class="authmsg"></p></div>
+</div>
+<div id="authaccount" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="authat">
+ <div class="authcard"><h2 id="authat">Google-account</h2><div id="authwho" class="authwho"></div><p>Deze login is nog niet aan Peter of Aart gekoppeld. Dat doen we in de volgende stap.</p><div class="authactions"><button id="authclose" class="authsecondary">Sluiten</button><button id="authout">Uitloggen</button></div></div>
+</div>
 
 <main>
 <aside id="rail" aria-label="Puzzelgereedschap"><div id="time" role="button" tabindex="0" aria-label="Tijd tonen of verbergen">0:00</div><div id="streak">🔥 <b>0</b> dagen reeks</div><div id="msg" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -3192,7 +3215,7 @@ function phoneLayout(){document.body.classList.add("phone");const hd=$("header")
  const pbot=document.createElement("div");pbot.id="pbot";document.body.append(pbot);
  prow.append($("#arch"),$("#hexstat"),$("#msg"));
  pbot.append($("#undo"),$("#redo"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✏️";$("#notewipe").innerHTML="🧹";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
- pmp.append($("#next"),$("#sbtn"),$("#helpb"),$("#ctrlb"),$("#reset"),$("#time"),$("#streak"),makeThemeSeg(),$("#who"));$("#theme").hidden=true;
+ pmp.append($("#next"),$("#sbtn"),$("#helpb"),$("#ctrlb"),$("#reset"),$("#time"),$("#streak"),makeThemeSeg(),$("#who"),$("#authbtn"));$("#theme").hidden=true;
  $("#chk").innerHTML="✓<span> Klopt?</span>";$("#hintb").innerHTML="💡<span> Hint</span>";
  pm.onclick=()=>pmp.classList.toggle("open");pmp.addEventListener("click",e=>{if(e.target.closest("button"))setTimeout(()=>pmp.classList.remove("open"),80)});
  document.addEventListener("pointerdown",e=>{if(pmp.classList.contains("open")&&!e.target.closest("#pmp,#pm")){pmp.classList.remove("open");e._closed=true}},true);
@@ -3220,7 +3243,7 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
   const sec=(t)=>{const h=document.createElement("div");h.className="mh";h.textContent=t;more.append(h)};
   const lst=(...ids)=>{const d=document.createElement("div");d.className="mlist";ids.forEach(i=>d.append($(i)));more.append(d)};
   const ic=(b,i,t)=>{b.innerHTML='<span class="ic">'+i+'</span><span>'+t+'</span>'};
-  sec("Puzzel");lst("#arch","#next");sec("Weergave");more.append(makeThemeSeg());sec("Overig");lst("#sbtn","#helpb","#ctrlb","#reset","#who");more.append($("#streak"));$("#theme").hidden=true;
+  sec("Puzzel");lst("#arch","#next");sec("Weergave");more.append(makeThemeSeg());sec("Overig");lst("#sbtn","#helpb","#ctrlb","#reset","#who","#authbtn");more.append($("#streak"));$("#theme").hidden=true;
   ic($("#arch"),"📅","Eerdere dagpuzzels");ic($("#next"),"🎲","Nog een puzzel");ic($("#sbtn"),"📊","Overzicht en statistieken");ic($("#helpb"),"❓","Uitleg van deze puzzel");ic($("#ctrlb"),"⌨️","Bediening");
   {const r=$("#reset");r.innerHTML='<b class="ic">⟲</b><span>Reset</span>'}updTheme();{const n=$("#name").value;if(n)ic($("#who"),"👤","Speler: "+n)}
   $("#tbHome").onclick=showHome;$("#tbMore").onclick=e=>{e.stopPropagation();more.classList.toggle("open")};
@@ -3425,11 +3448,30 @@ const cfg=window.FIREBASE_CONFIG;
 const no=m=>window.dispatchEvent(new CustomEvent("pdnodb",{detail:m}));
 if(!cfg||cfg.apiKey==="PLAK_HIER"){no("Scorebord nog niet ingesteld (zie stappenplan). Tijden worden nu alleen op dit apparaat bewaard.")}
 else{try{
- const[a,f]=await Promise.all([import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")]);
- const app=a.initializeApp(cfg);let db;
+ const[a,f,fa]=await Promise.all([import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js")]);
+ const app=a.initializeApp(cfg);let db;const auth=fa.getAuth(app);
  /* Bewaar de scores ook op het apparaat: zonder internet zie je dan de laatste stand, en je eigen tijden worden later vanzelf verstuurd. */
  /* experimentalAutoDetectLongPolling: op iPad/iPhone (vooral als beginscherm-app) valt de live verbinding soms stil; dit kiest dan vanzelf een methode die wel werkt. */
  try{db=f.initializeFirestore(app,{experimentalAutoDetectLongPolling:true})}catch(e2){db=f.getFirestore(app)}
+ /* Fase 1 Google-login: sessie testen zonder bestaande speler-ID's of score-opslag te wijzigen. */
+ const gate=document.getElementById("authgate"),acct=document.getElementById("authaccount"),gb=document.getElementById("authgoogle"),skip=document.getElementById("authskip"),msg=document.getElementById("authmsg"),ab=document.getElementById("authbtn"),who=document.getElementById("authwho"),close=document.getElementById("authclose"),out=document.getElementById("authout");
+ const authLabel=u=>u?(u.displayName||u.email||"Google-account"):"Google-login";
+ const authDraw=u=>{window.PD_AUTH_USER=u||null;if(u){localStorage.removeItem("pdauthskip");if(gate)gate.hidden=true;if(ab)ab.innerHTML='<span class="authdot"></span>'+authLabel(u)}else{if(ab)ab.textContent="Google-login";if(gate)gate.hidden=localStorage.getItem("pdauthskip")==="1"}};
+ const authErr=e=>{if(msg)msg.textContent=e&&e.code?("Inloggen lukt niet: "+e.code):"Inloggen lukt niet. Probeer het opnieuw."};
+ await fa.setPersistence(auth,fa.browserLocalPersistence).catch(()=>{});
+ window.PD_AUTH={
+  user:()=>auth.currentUser,
+  signIn:async()=>{if(msg)msg.textContent="";const p=new fa.GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});try{return await fa.signInWithPopup(auth,p)}catch(e){if(["auth/popup-blocked","auth/operation-not-supported-in-this-environment"].includes(e&&e.code)){await fa.signInWithRedirect(auth,p);return}authErr(e);throw e}},
+  signOut:()=>fa.signOut(auth)
+ };
+ if(gb)gb.onclick=()=>window.PD_AUTH.signIn().catch(()=>{});
+ if(skip)skip.onclick=()=>{localStorage.setItem("pdauthskip","1");gate.hidden=true};
+ if(ab)ab.onclick=()=>{const u=auth.currentUser;if(!u){localStorage.removeItem("pdauthskip");gate.hidden=false;return}if(who){const photo=u.photoURL?'<img class="authavatar" alt="" src="'+u.photoURL.replace(/"/g,"&quot;")+'">':'<span class="authavatar">'+(authLabel(u)[0]||"?")+'</span>';who.innerHTML=photo+'<div><b>'+authLabel(u).replace(/</g,"&lt;")+'</b><small>'+(u.email||"").replace(/</g,"&lt;")+'</small></div>'}acct.hidden=false};
+ if(close)close.onclick=()=>acct.hidden=true;
+ if(out)out.onclick=()=>window.PD_AUTH.signOut().then(()=>{acct.hidden=true;localStorage.removeItem("pdauthskip");gate.hidden=false});
+ acct&&acct.addEventListener("pointerdown",e=>{if(e.target===acct)acct.hidden=true});
+ fa.getRedirectResult(auth).catch(authErr);
+ fa.onAuthStateChanged(auth,authDraw);
  window.PD_DB={
   save:row=>f.setDoc(f.doc(db,"results",row.date+"_"+row.type+"_"+row.uid),row),
   listenFrom:(from,cb,err)=>f.onSnapshot(f.query(f.collection(db,"results"),f.where("date",">=",from)),s=>cb(s.docs.map(d=>d.data())),err),
@@ -3442,6 +3484,6 @@ else{try{
   /* Extra zekerheid: rechtstreeks bij de server ophalen (alleen de laatste twee dagen, dus weinig gegevens). */
   pollRecent:(from,g)=>Promise.all([f.getDocsFromServer(f.query(f.collection(db,"results"),f.where("date",">=",from))),f.getDocsFromServer(f.query(f.collection(db,"status"),f.where("group","==",g)))]).then(([a,b])=>({rows:a.docs.map(d=>d.data()),stat:b.docs.map(d=>d.data())}))};
  window.dispatchEvent(new Event("pdready"));
-}catch(e){no("Scorebord niet bereikbaar (internet?).")}}
+}catch(e){no("Scorebord niet bereikbaar (internet?).");const g=document.getElementById("authgate"),m=document.getElementById("authmsg");if(m)m.textContent="Google-login kon niet worden geladen. Je kunt voor nu overslaan.";if(g)g.hidden=false}}
 </script>
 </body></html>
