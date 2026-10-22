@@ -994,10 +994,13 @@ body.tablet.home #home .hwrap:not(.sco) .hscount b{font-size:17px}
 .authactions{display:flex;gap:8px}.authactions button{flex:1}.authsecondary{background:var(--card);color:var(--fg);border:1px solid var(--line)}
 #authbtn .authdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#28a745}
 body.phone #authbtn{width:100%;text-align:left}
+.authform{position:relative;text-align:left}.authform h2,.authform>p{text-align:center}.authform label{display:block;margin:11px 0 0;font-size:12px;font-weight:850;color:var(--mut)}.authform input{display:block;width:100%;margin-top:5px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:700 15px inherit;font-family:inherit;outline:none}.authform input:focus{border-color:var(--pc);box-shadow:0 0 0 3px color-mix(in srgb,var(--pc) 15%,transparent)}.authform>button:not(.authx){width:100%;margin-top:14px}.authx{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:11px;padding:0;border:1px solid var(--line);background:var(--card);color:var(--mut);box-shadow:none}.authplayers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0 4px}.authplayers button{padding:12px 8px;background:var(--card);color:var(--fg);border:1px solid var(--line);box-shadow:none}.authplayers button.on{border-color:var(--pc);background:color-mix(in srgb,var(--pc) 9%,var(--card));box-shadow:0 0 0 2px color-mix(in srgb,var(--pc) 16%,transparent)}
+.hactions{display:flex;align-items:center;gap:7px;flex:none}.hprofile{width:39px;height:39px;display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--fg);box-shadow:0 2px 8px var(--sh);font-weight:900;font-size:14px;overflow:hidden}.hprofile img{width:100%;height:100%;object-fit:cover}.hprofile:hover{transform:none;background:color-mix(in srgb,var(--pc) 6%,var(--card))}
+@media(max-width:560px){.hactions{gap:5px}.hprofile{width:36px;height:36px}.authcard{padding:22px 18px}.authplayers{gap:6px}}
 </style>
 <script>
 /* ===== STAP 4 van het stappenplan: plak hier jouw Firebase-gegevens ===== */
-window.PD_SETUP={players:["Peter","Aart"],group:"peter-aart-jk4hv92t"};
+window.PD_SETUP={players:["Peter","Aart"],group:"peter-aart-jk4hv92t",groupName:"Puzzelsukkels"};
 window.FIREBASE_CONFIG={
  apiKey:"AIzaSyCaGDJRqSyCE1PZgFYcHiYP2Sobc3RuC_w",
  authDomain:"gepuzzelig.firebaseapp.com",
@@ -1011,10 +1014,23 @@ window.FIREBASE_CONFIG={
 <button id="theme" title="Donkere of lichte weergave" aria-label="Donkere of lichte weergave"></button><button id="sbtn" title="Overzicht en statistieken" aria-label="Overzicht en statistieken">📊</button><button id="who" title="Wissel van speler" aria-label="Wissel van speler"></button><button id="authbtn" title="Google-account" aria-label="Google-account">Account</button><input id="name" type="hidden"><input id="group" type="hidden"></header>
 <div id="pick"><div class="pc"><h2>Wie ben jij?</h2><div id="pickb"></div><p class="mut">Je kiest dit één keer. Daarna onthoudt de app het.</p></div></div>
 <div id="authgate" class="authcover" role="dialog" aria-modal="true" aria-labelledby="authgt">
- <div class="authcard"><span class="authlogo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><h2 id="authgt">Welkom bij Gepuzzellig</h2><p>Log in met Google. Je bestaande puzzels en spelerkeuze blijven in deze testfase gewoon zoals ze zijn.</p><button id="authgoogle" class="authgoogle"><span class="g">G</span> Doorgaan met Google</button><button id="authskip" class="authskip">Voor nu overslaan</button><p id="authmsg" class="authmsg"></p></div>
+ <div class="authcard"><span class="authlogo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><h2 id="authgt">Welkom bij Gepuzzellig</h2><p>Log in met Google om je eigen profiel op al je apparaten te gebruiken.</p><button id="authgoogle" class="authgoogle"><span class="g">G</span> Doorgaan met Google</button><button id="authskip" class="authskip">Voor nu als gast verder</button><p id="authmsg" class="authmsg"></p></div>
+</div>
+<div id="authsetup" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="authst">
+ <div class="authcard authform"><h2 id="authst">Maak je profiel af</h2><p>Welke bestaande puzzelgeschiedenis is van jou? Dit koppelen we één keer; je zichtbare naam kun je later altijd wijzigen.</p>
+  <div id="authplayers" class="authplayers"></div>
+  <label>Jouw naam in Gepuzzellig<input id="authname" maxlength="30" autocomplete="nickname"></label>
+  <label>Groepsnaam<input id="authgroupname" maxlength="40" value="Puzzelsukkels"></label>
+  <button id="authsave">Profiel koppelen</button><p id="authsetmsg" class="authmsg"></p>
+ </div>
 </div>
 <div id="authaccount" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="authat">
- <div class="authcard"><h2 id="authat">Google-account</h2><div id="authwho" class="authwho"></div><p>Deze login is nog niet aan Peter of Aart gekoppeld. Dat doen we in de volgende stap.</p><div class="authactions"><button id="authclose" class="authsecondary">Sluiten</button><button id="authout">Uitloggen</button></div></div>
+ <div class="authcard authform"><button id="authx" class="authx" aria-label="Sluiten">✕</button><h2 id="authat">Profiel</h2><div id="authwho" class="authwho"></div>
+  <label>Naam<input id="profname" maxlength="30" autocomplete="nickname"></label>
+  <label>Groep<input id="profgroup" maxlength="40"></label>
+  <div class="authactions"><button id="profsave">Opslaan</button><button id="authout" class="authsecondary">Uitloggen</button></div>
+  <p id="profmsg" class="authmsg"></p>
+ </div>
 </div>
 
 <main>
@@ -2916,8 +2932,11 @@ let XS={};try{XS=JSON.parse(lsGet("pdx")||"{}")}catch(e){XS={}}
 const xsSave=()=>lsSet("pdx",JSON.stringify(XS));
 let OLDRULES=false;
 const uidOf=p=>"u-"+p.toLowerCase().replace(/[^a-z0-9]/g,"");
+let PROFILE_NAMES={},GROUP_NAME=(window.PD_SETUP&&window.PD_SETUP.groupName)||"Puzzelsukkels";
+const playerName=p=>PROFILE_NAMES[uidOf(p)]||p;
+const playerNameUid=(u,fallback)=>PROFILE_NAMES[u]||fallback||SET.players.find(p=>uidOf(p)===u)||"Speler";
 const pIdx=r=>{const k=SET.players.findIndex(p=>uidOf(p)===r.uid);return k<0?99:k};
-const othersTxt=()=>{const o=SET.players.filter(p=>uidOf(p)!==uid);return o.length===1?o[0]:"de anderen"};
+const othersTxt=()=>{const o=SET.players.filter(p=>uidOf(p)!==uid).map(playerName);return o.length===1?o[0]:"de anderen"};
 const badges=(r,t)=>{t=String(t).split(".")[0];const a=[];if(r.mist===0)a.push("🎯");if(HINTT.includes(t)&&r.hints===0)a.push("💡");return a.join(" ")};
 const badgeLong=(r,t)=>{t=String(t).split(".")[0];const a=[];if(r.mist===0)a.push("🎯 foutloos");else if(r.mist>0)a.push(r.mist===1?"1 fout gezien":r.mist+" fouten gezien");
  if(HINTT.includes(t)){if(r.hints===0)a.push("💡 zonder hint");else if(r.hints>0)a.push(r.hints===1?"1 hint":r.hints+" hints")}return a.join(" · ")};
@@ -2928,7 +2947,7 @@ function myRow(date,type){const x=XS[date+type]||{},r={name:$("#name").value.tri
 function dbSave(row){if(!window.PD_DB)return Promise.resolve();
  return window.PD_DB.save(row).catch(e=>{const b={};BASEF.forEach(k=>b[k]=row[k]);OLDRULES=true;board(lastRows);return window.PD_DB.save(b)})}
 function resRow(r,td){if(r.uid===uid&&XS[r.date+r.type]){const x=XS[r.date+r.type];r=Object.assign({},r,{mist:x.mist!=null?x.mist:r.mist,hints:x.hints!=null?x.hints:r.hints})}
- const d=document.createElement("div");d.className="row";const a=document.createElement("span"),b=document.createElement("span");a.textContent=r.name+" ✓ "+badges(r,r.type);b.className="mut";b.textContent=TSHOW?fmt(r.secs):"";d.append(a,b);return d}
+ const d=document.createElement("div");d.className="row";const a=document.createElement("span"),b=document.createElement("span");a.textContent=playerNameUid(r.uid,r.name)+" ✓ "+badges(r,r.type);b.className="mut";b.textContent=TSHOW?fmt(r.secs):"";d.append(a,b);return d}
 /* Puzzel van de dag: elke dag één vaste soort, voor iedereen dezelfde. De andere dagpuzzels kunnen, maar hoeven niet. */
 const FEATORD=["star","bin","mur","nono","plus","hex"];
 function featOf(ds){const L=FEATORD.filter(t=>TYPES[t]);const[y,m,d]=ds.split("-").map(Number),n=Math.round((Date.UTC(y,m-1,d)-Date.UTC(2026,0,5))/864e5);return L[((n%L.length)+L.length)%L.length]}
@@ -2987,7 +3006,7 @@ function allRows(){const g=$("#group").value.trim().toLowerCase(),seen=new Set()
  return out}
 function streakOf(rows,u){const ds=new Set(rows.filter(r=>r.uid===u).map(r=>r.date));let d=dstr();if(!ds.has(d))d=addDays(d,-1);let n=0;while(ds.has(d)){n++;d=addDays(d,-1)}return n}
 function renderStats(){const raw=allRows(),all=statsRows(raw),rows=all.filter(r=>!isFree(r)),frs=all.filter(isFree),today=dstr(),dow=(new Date().getDay()+6)%7,mon=addDays(today,-dow),sun=addDays(mon,6);
- const pl=new Map();SET.players.forEach(p=>pl.set("u-"+p.toLowerCase().replace(/[^a-z0-9]/g,""),p));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});
+ const pl=new Map();SET.players.forEach(p=>pl.set(uidOf(p),playerName(p)));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});
  const sc=new Map([...pl.keys()].map(u=>[u,{pts:0,n:0,w:0,fw:0,ft:0}])),grp=new Map();
  rows.filter(r=>r.date>=mon&&r.date<=sun).forEach(r=>{const k=r.date+"|"+r.type;if(!grp.has(k))grp.set(k,[]);grp.get(k).push(r)});
  grp.forEach(a=>a.forEach(r=>{const x=sc.get(r.uid);if(!x)return;x.n++;x.pts++;const q=r.uid===uid&&XS[r.date+r.type]?XS[r.date+r.type]:r;if(q.mist===0)x.fl=(x.fl||0)+1;if(HINTT.includes(baseT(r))&&q.hints===0)x.nh=(x.nh||0)+1}));
@@ -3115,10 +3134,12 @@ setInterval(pollNu,45000);addEventListener("pdready",()=>setTimeout(pollNu,3000)
 /* Terug in de app (bijv. na de iPad op slot): verbindingen opnieuw opzetten, zodat "bezig" en scores direct kloppen. */
 let lastVis=0;document.addEventListener("visibilitychange",()=>{if(document.hidden||!window.PD_DB)return;setTimeout(pollNu,800);if(listenDate!==dstr()||Date.now()-lastVis>20000){lastVis=Date.now();startBoard()}});addEventListener("pageshow",e=>{if(e.persisted&&window.PD_DB)startBoard()});
 
-const SET=window.PD_SETUP||{players:["Speler"],group:"lokaal"};$("#group").value=SET.group;
-function setMe(p){lsSet("pdme",p);uid="u-"+p.toLowerCase().replace(/[^a-z0-9]/g,"");$("#name").value=p;{const w=$("#who");if(w.closest("#more"))w.innerHTML='<span class="ic">👤</span><span>Speler: '+p+'</span>';else w.textContent="👤 "+p}$("#pick").classList.remove("on");board(lastRows);setTimeout(()=>pullCloudProgress(true),0)}
+const SET=window.PD_SETUP||{players:["Speler"],group:"lokaal",groupName:"Groep"};$("#group").value=SET.group;
+function setMe(p,displayName){lsSet("pdme",p);uid=uidOf(p);const nm=(displayName||playerName(p)||p).trim()||p;$("#name").value=nm;{const w=$("#who");if(w.closest("#more"))w.innerHTML='<span class="ic">👤</span><span>Speler: '+nm+'</span>';else w.textContent="👤 "+nm}$("#pick").classList.remove("on");board(lastRows);setTimeout(()=>pullCloudProgress(true),0)}
 SET.players.forEach(p=>{const b=document.createElement("button");b.textContent=p;b.onclick=()=>setMe(p);$("#pickb").append(b)});
-$("#who").onclick=()=>$("#pick").classList.add("on");
+$("#who").onclick=()=>{if(window.PD_PROFILE_LINKED){window.dispatchEvent(new Event("pdopenprofile"));return}$("#pick").classList.add("on")};
+addEventListener("pdprofile",e=>{const d=e.detail||{},pr=d.profile||{};PROFILE_NAMES={};(d.members||[]).forEach(x=>{if(x&&x.playerId&&x.displayName)PROFILE_NAMES[x.playerId]=x.displayName});if(pr.playerId&&pr.displayName)PROFILE_NAMES[pr.playerId]=pr.displayName;GROUP_NAME=d.groupName||SET.groupName||"Puzzelsukkels";const p=SET.players.find(x=>uidOf(x)===pr.playerId);if(p){window.PD_PROFILE_LINKED=true;setMe(p,pr.displayName);$("#who").style.display="none";if(document.body.classList.contains("home")&&typeof renderHome==="function")renderHome()}});
+addEventListener("pdauthout",()=>{window.PD_PROFILE_LINKED=false;$("#who").style.display="";PROFILE_NAMES={};GROUP_NAME=SET.groupName||"Puzzelsukkels"});
 {const q=(new URLSearchParams(location.search).get("ik")||"").toLowerCase(),f=SET.players.find(p=>p.toLowerCase()===q),m=lsGet("pdme"),k=SET.players.includes(m)?m:"";
  if(f)setMe(f);else if(k)setMe(k);else{$("#who").textContent="👤 Kies speler";$("#pick").classList.add("on")}}
 for(const t in TYPES){const b=document.createElement("button");b.dataset.t=t;const sp=document.createElement("span");sp.textContent=TYPES[t];b.append(sp);b.onclick=()=>openType(t);$("#tabs").append(b)}
@@ -3129,7 +3150,7 @@ function updateArchiveVisibility(){const a=$("#arch");if(a){a.style.display=S.pr
  ab.onclick=e=>{e.stopPropagation();if(pop.classList.contains("open")){pop.classList.remove("open");return}pop.innerHTML="";const td=dstr(),g=($("#group").value||"").trim().toLowerCase(),t=S.type;
   const h=document.createElement("div");h.className="mut sm";h.textContent=TYPES[t];pop.append(h);
   for(let k=0;k<=7;k++){const d=addDays(td,-k),ty=t+sfx(dagLv(t,d)),b=document.createElement("button");b.className=d===S.date?"on":"";
-   const who=SET.players.filter(pl=>{const u=uidOf(pl);return(u===uid&&store[d+ty])||lastRows.some(r=>r.uid===u&&r.date===d&&r.type===ty&&(r.group||"").toLowerCase()===g)}).map(pl=>'<i class="pw'+(uidOf(pl)===uid?" me":"")+'">'+pl[0]+"</i>").join("");
+   const who=SET.players.filter(pl=>{const u=uidOf(pl);return(u===uid&&store[d+ty])||lastRows.some(r=>r.uid===u&&r.date===d&&r.type===ty&&(r.group||"").toLowerCase()===g)}).map(pl=>'<i class="pw'+(uidOf(pl)===uid?" me":"")+'">'+playerName(pl)[0]+"</i>").join("");
    b.innerHTML="<span>"+(k===0?"Vandaag":k===1?"Gisteren":dnl(d))+(isWk(d)?" 💪":"")+(featOf(d)===t?" ⭐":"")+"</span>"+(who?'<span class="lw">'+who+"</span>":"");
    b.onclick=ev=>{ev.stopPropagation();pop.classList.remove("open");load(S.type,false,false,d)};pop.append(b)}
   const r=ab.getBoundingClientRect();pop.style.top=Math.round(r.bottom+6)+"px";pop.style.left=Math.round(Math.max(6,Math.min(innerWidth-236,r.left+r.width/2-115)))+"px";pop.classList.add("open")};
@@ -3301,7 +3322,7 @@ function pageIn(el){if(!el||matchMedia("(prefers-reduced-motion: reduce)").match
 function fitHomePage(){document.documentElement.classList.remove("pagefit");document.body.classList.remove("pagefit");requestAnimationFrame(()=>{if(!document.body.classList.contains("home")||HVIEW==="score"||innerWidth<761)return;const h=$("#home");if(h&&h.scrollHeight<=innerHeight+2){document.documentElement.classList.add("pagefit");document.body.classList.add("pagefit")}})}
 function showScore(who="all"){HVIEW="score";SCOREWHO=who||"all";SWK=0;renderHome();pageIn($("#home"));window.scrollTo(0,0)}
 function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r=>!isFree(r)),today=dstr(),dow=(new Date().getDay()+6)%7,mon0=addDays(today,-dow),TS=Object.keys(TYPES);
- const pl=new Map();SET.players.forEach(p=>pl.set(uidOf(p),p));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});const us=[...pl.keys()];
+ const pl=new Map();SET.players.forEach(p=>pl.set(uidOf(p),playerName(p)));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});const us=[...pl.keys()];
  if(SCOREWHO!=="all"&&!pl.has(SCOREWHO))SCOREWHO="all";
  setHomeSkin(SCOREWHO==="all"?"shared":String(pl.get(SCOREWHO)||"").toLowerCase()==="aart"?"aart":"peter");
  const inP=d=>OPER==="week"?d>=mon0&&d<=addDays(mon0,6):OPER==="maand"?d.slice(0,7)===today.slice(0,7):OPER==="jaar"?d.slice(0,4)===today.slice(0,4):true;
@@ -3352,8 +3373,8 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  const otherLabel=PHONE?"Groot scherm":"Telefoon",otherIcon=PHONE?"🖥️":"📱";
  const dayExact=(name,t,phone)=>{const u=uidOf(name),ty=dayTypeDevice(t,td,phone),sync=homeRaw.find(x=>!isFree(x)&&x.uid===u&&x.date===td&&x.type===ty);if(u!==uid)return sync||null;const loc=store[td+ty]?myRow(td,ty):null;return loc?Object.assign({},sync||{},loc):sync||null};
  const dayResultFor=(name,t)=>dayExact(name,t,PHONE),dayOtherResultFor=(name,t)=>dagVast(td)?dayExact(name,t,!PHONE):null;
- const dayPeopleDetail=t=>`<div class="ddpeople">${SET.players.map(name=>{const r=dayResultFor(name,t),o=dayOtherResultFor(name,t);return`<span class="ddperson ${r?"done":o?"otherdone":""}"><b>${name}</b>${r?`<i>✓</i><span>⏱ ${fmt(r.secs||0)}</span>${quickBadges(r,t)}`:"<span>Deze variant nog niet</span>"}${o?`<span class="ddother">${otherIcon} ${otherLabel} ✓</span>`:""}</span>`}).join("")}</div>`;
- const dayPeerCompact=t=>{const peers=SET.players.filter(name=>uidOf(name)!==uid);return peers.length?`<span class="daypeer">${peers.map(name=>{const u=uidOf(name),r=dayResultFor(name,t),o=dayOtherResultFor(name,t),ty=dayTypeDevice(t,td,PHONE),busy=!r&&!!busyOf(u,td,ty),cls=r?"done":busy?"busy":o?"otherdone":"";return`<span class="${cls}" title="${name}: ${r?"deze variant klaar":busy?"bezig met deze variant":o?otherLabel+"-variant klaar":"nog niet klaar"}${r&&o?" · "+otherLabel+" ook klaar":""}"><b>${name}</b> ${r?`✓${r.mist===0?' <i class="peerico">🎯</i>':""}${HINTT.includes(t)&&r.hints===0?' <i class="peerico">💡</i>':""}`:busy?"…":o?`<i class="peerdev">${otherIcon}✓</i>`:"—"}</span>`}).join("")}</span>`:""};
+ const dayPeopleDetail=t=>`<div class="ddpeople">${SET.players.map(name=>{const r=dayResultFor(name,t),o=dayOtherResultFor(name,t);return`<span class="ddperson ${r?"done":o?"otherdone":""}"><b>${playerName(name)}</b>${r?`<i>✓</i><span>⏱ ${fmt(r.secs||0)}</span>${quickBadges(r,t)}`:"<span>Deze variant nog niet</span>"}${o?`<span class="ddother">${otherIcon} ${otherLabel} ✓</span>`:""}</span>`}).join("")}</div>`;
+ const dayPeerCompact=t=>{const peers=SET.players.filter(name=>uidOf(name)!==uid);return peers.length?`<span class="daypeer">${peers.map(name=>{const u=uidOf(name),r=dayResultFor(name,t),o=dayOtherResultFor(name,t),ty=dayTypeDevice(t,td,PHONE),busy=!r&&!!busyOf(u,td,ty),cls=r?"done":busy?"busy":o?"otherdone":"";return`<span class="${cls}" title="${playerName(name)}: ${r?"deze variant klaar":busy?"bezig met deze variant":o?otherLabel+"-variant klaar":"nog niet klaar"}${r&&o?" · "+otherLabel+" ook klaar":""}"><b>${playerName(name)}</b> ${r?`✓${r.mist===0?' <i class="peerico">🎯</i>':""}${HINTT.includes(t)&&r.hints===0?' <i class="peerico">💡</i>':""}`:busy?"…":o?`<i class="peerdev">${otherIcon}✓</i>`:"—"}</span>`}).join("")}</span>`:""};
  const dayMistBadge=r=>!r||r.mist==null?"":r.mist===0?`<span class="rq good" title="Foutloos">🎯</span>`:`<span class="rq" title="${r.mist} ${r.mist===1?"fout":"fouten"}">❌ ${r.mist}</span>`;
  const dayHintBadge=(r,t)=>!r||!HINTT.includes(t)||r.hints==null?"":r.hints===0?`<span class="rq good" title="Zonder hint">💡</span>`:`<span class="rq" title="${r.hints} ${r.hints===1?"hint":"hints"}">💡 ${r.hints}</span>`;
  const detailMetric=(ic,lab,val,good)=>`<div class="ddmetric ${good?"good":""}"><span>${ic}</span><b>${val}</b><small>${lab}</small></div>`;
@@ -3361,11 +3382,11 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  const doneToday=t=>myDone(td,t),dayRow=t=>{const k=doneToday(t),m=busyMeta(t),pc=m&&m.e.pc!=null?m.e.pc:null,r=k?ownDayResult(td,t):null,o=dayOtherResultFor(me,t),sub=t==="nono"?(nonoDayVariant(td)==="color"?"Kleur":"Klassiek"):"",other=o?`<small class="otherday">${otherIcon} ${otherLabel} ✓</small>`:"";
   return`<div class="dayitem ${t===ft?"featured ":""}${HDOPEN===t?"open":""}" style="--dayc:${TCOL[t]||"var(--pc)"}"><button class="hdrow ${k?"ok":m?"busy":""}" data-day-t="${t}"${m?` data-pk="${m.k}"`:""}><span class="dot"></span>${tIcon(t,false)}<span class="dname">${TYPES[t]}${t===ft?`<small class="featlabel">⭐ Puzzel van de dag${sub?" · "+sub:""}</small>`:sub?`<small>${sub}</small>`:""}${other}</span>${dayPeerCompact(t)}<span class="dstate ${k?"done":"pending"}">${k?`<span class="dtime">⏱ ${fmt((r&&r.secs)||store[k]||0)}</span><span class="dmist">${dayMistBadge(r)}</span><span class="dhint">${dayHintBadge(r,t)}</span>`:`<span class="dpending">${pc!=null?progRing(pc,t):""}<b>${m?"Verder":"Start"}${pc!=null?" · "+pc+"%":""}</b></span>`}<span class="darrow">${k&&HDOPEN===t?"⌃":"›"}</span></span></button>${k&&HDOPEN===t?dayDetail(t,r):""}</div>`};
  const freeTiles=types.flatMap(t=>t==="nono"?[{t,nv:"classic",name:"Nonogram"},{t,nv:"color",name:"Kleurnonogram"}]:[{t,nv:"",name:TYPES[t]}]),freeTile=x=>{const t=x.t,nv=x.nv,sub=LVN[t]?"Kies niveau":"Nieuwe puzzel";return`<button class="tile free" data-free-t="${t}" data-free-nv="${nv}" style="--tc:${TCOL[t]}">${tIcon(t,1,nv)}<span>${x.name}</span><small class="tcount">${sub}</small></button>`};
- const homeRows=statsRows(homeRaw),countOf=(who,period)=>homeRows.filter(r=>r.uid===who&&TYPES[baseT(r)]&&(period==="today"?r.date===td:r.date.slice(0,7)===td.slice(0,7))).length,livePeers=others.map(name=>({name,st:liveOf(uidOf(name))})).filter(x=>x.st),liveTop=livePeers.map(x=>{const st=x.st,bits=[TYPES[st.onlineType]||"Puzzel",st.onlinePractice?"Vrij puzzelen":"Dagpuzzel",st.onlineType==="nono"&&st.onlineNono?(st.onlineNono==="color"?"Kleur":"Klassiek"):"",st.onlineLvl&&LVL[st.onlineLvl]?LVL[st.onlineLvl]:""].filter(Boolean);return `<div class="hlivebar" title="${liveTitle(st)}"><i></i><b>${x.name} is online</b><span>${bits.join(" · ")}</span></div>`}).join("");
- const personCard=(name,who)=>{const mc=countOf(who,"month"),tc=countOf(who,"today");return`<button data-home-who="${who}"><span class="hvicon">👤</span><b>${name}${who===uid?' <i>(jij)</i>':""}</b><small>🧩 ${mc} deze maand · ${tc} vandaag</small></button>`};
+ const homeRows=statsRows(homeRaw),countOf=(who,period)=>homeRows.filter(r=>r.uid===who&&TYPES[baseT(r)]&&(period==="today"?r.date===td:r.date.slice(0,7)===td.slice(0,7))).length,livePeers=others.map(name=>({name,st:liveOf(uidOf(name))})).filter(x=>x.st),liveTop=livePeers.map(x=>{const st=x.st,bits=[TYPES[st.onlineType]||"Puzzel",st.onlinePractice?"Vrij puzzelen":"Dagpuzzel",st.onlineType==="nono"&&st.onlineNono?(st.onlineNono==="color"?"Kleur":"Klassiek"):"",st.onlineLvl&&LVL[st.onlineLvl]?LVL[st.onlineLvl]:""].filter(Boolean);return `<div class="hlivebar" title="${liveTitle(st)}"><i></i><b>${playerName(x.name)} is online</b><span>${bits.join(" · ")}</span></div>`}).join("");
+ const personCard=(name,who)=>{const mc=countOf(who,"month"),tc=countOf(who,"today");return`<button data-home-who="${who}"><span class="hvicon">👤</span><b>${playerName(name)}${who===uid?' <i>(jij)</i>':""}</b><small>🧩 ${mc} deze maand · ${tc} vandaag</small></button>`};
  const monthTogether=SET.players.reduce((n,p)=>n+countOf(uidOf(p),"month"),0),todayTogether=SET.players.reduce((n,p)=>n+countOf(uidOf(p),"today"),0);
  const allRowsN=homeRows.filter(r=>!isFree(r)),strk=streakOf(allRowsN,uid);
- h.innerHTML=`<div class="hwrap"><div class="hbrand"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Gepuzzellig</span></div><div class="htop"><div><h2>${groet} ${me}</h2><div class="mut">${datum[0].toUpperCase()+datum.slice(1)}</div></div><div class="htheme" role="group" aria-label="Weergave"><button data-theme-mode="system" title="Volg systeem"><span class="thi">◐</span><span class="thtxt">Systeem</span></button><button data-theme-mode="light" title="Lichte weergave"><span class="thi">☀️</span><span class="thtxt">Licht</span></button><button data-theme-mode="dark" title="Donkere weergave"><span class="thi">🌙</span><span class="thtxt">Donker</span></button></div></div>${liveTop}
+ h.innerHTML=`<div class="hwrap"><div class="hbrand"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Gepuzzellig</span></div><div class="htop"><div><h2>${groet} ${me}</h2><div class="mut">${datum[0].toUpperCase()+datum.slice(1)} · ${GROUP_NAME}</div></div><div class="hactions"><div class="htheme" role="group" aria-label="Weergave"><button data-theme-mode="system" title="Volg systeem"><span class="thi">◐</span><span class="thtxt">Systeem</span></button><button data-theme-mode="light" title="Lichte weergave"><span class="thi">☀️</span><span class="thtxt">Licht</span></button><button data-theme-mode="dark" title="Donkere weergave"><span class="thi">🌙</span><span class="thtxt">Donker</span></button></div><button id="hProfile" class="hprofile" title="Profiel" aria-label="Profiel">${(me[0]||"P").toUpperCase()}</button></div></div>${liveTop}
 
  <section class="hsection hdaily"><div class="hsecthead"><div><h3>📅 Dagelijkse puzzels</h3><span class="mut">Vandaag · ${types.filter(doneToday).length} van ${types.length} klaar</span></div><span class="hstreak">🔥 ${strk} ${strk===1?"dag":"dagen"}</span></div>
   <div class="hcard hdlist">${[ft,...types.filter(t=>t!==ft)].map(dayRow).join("")}</div>
@@ -3384,6 +3405,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  h.querySelectorAll(".hcont[data-pk]").forEach(b=>b.onclick=()=>withFreshProgress(()=>resumeProgress(b.dataset.pk)));
  h.querySelectorAll(".tile.free[data-free-t]").forEach(b=>b.onclick=()=>showNewFree(b.dataset.freeT,false,false,b.dataset.freeNv||null));
  h.querySelectorAll(".hhomeviews [data-home-who]").forEach(b=>b.onclick=()=>showScore(b.dataset.homeWho));
+ {const hp=$("#hProfile");if(hp)hp.onclick=()=>window.dispatchEvent(new Event("pdopenprofile"))}
  h.querySelectorAll(".htheme [data-theme-mode]").forEach(b=>b.onclick=()=>setThemeMode(b.dataset.themeMode));updTheme(false);
  $("#hFree").onclick=()=>startRandomFree("");fitHomePage()}
 if(NIEUW)nieuwLayout();
@@ -3450,28 +3472,41 @@ if(!cfg||cfg.apiKey==="PLAK_HIER"){no("Scorebord nog niet ingesteld (zie stappen
 else{try{
  const[a,f,fa]=await Promise.all([import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js")]);
  const app=a.initializeApp(cfg);let db;const auth=fa.getAuth(app);
- /* Bewaar de scores ook op het apparaat: zonder internet zie je dan de laatste stand, en je eigen tijden worden later vanzelf verstuurd. */
- /* experimentalAutoDetectLongPolling: op iPad/iPhone (vooral als beginscherm-app) valt de live verbinding soms stil; dit kiest dan vanzelf een methode die wel werkt. */
  try{db=f.initializeFirestore(app,{experimentalAutoDetectLongPolling:true})}catch(e2){db=f.getFirestore(app)}
- /* Fase 1 Google-login: sessie testen zonder bestaande speler-ID's of score-opslag te wijzigen. */
- const gate=document.getElementById("authgate"),acct=document.getElementById("authaccount"),gb=document.getElementById("authgoogle"),skip=document.getElementById("authskip"),msg=document.getElementById("authmsg"),ab=document.getElementById("authbtn"),who=document.getElementById("authwho"),close=document.getElementById("authclose"),out=document.getElementById("authout");
+
+ const gate=document.getElementById("authgate"),setup=document.getElementById("authsetup"),acct=document.getElementById("authaccount"),gb=document.getElementById("authgoogle"),skip=document.getElementById("authskip"),msg=document.getElementById("authmsg"),ab=document.getElementById("authbtn"),who=document.getElementById("authwho"),out=document.getElementById("authout"),ax=document.getElementById("authx"),ap=document.getElementById("authplayers"),an=document.getElementById("authname"),agn=document.getElementById("authgroupname"),asave=document.getElementById("authsave"),asetmsg=document.getElementById("authsetmsg"),pn=document.getElementById("profname"),pg=document.getElementById("profgroup"),ps=document.getElementById("profsave"),pmsg=document.getElementById("profmsg");
+ let currentProfile=null,currentMembers=[],currentGroupName=(window.PD_SETUP&&window.PD_SETUP.groupName)||"Puzzelsukkels",unsubMembers=null,unsubGroup=null,chosenPlayer="";
+ const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
  const authLabel=u=>u?(u.displayName||u.email||"Google-account"):"Google-login";
- const authDraw=u=>{window.PD_AUTH_USER=u||null;if(u){localStorage.removeItem("pdauthskip");if(gate)gate.hidden=true;if(ab)ab.innerHTML='<span class="authdot"></span>'+authLabel(u)}else{if(ab)ab.textContent="Google-login";if(gate)gate.hidden=localStorage.getItem("pdauthskip")==="1"}};
- const authErr=e=>{if(msg)msg.textContent=e&&e.code?("Inloggen lukt niet: "+e.code):"Inloggen lukt niet. Probeer het opnieuw."};
- await fa.setPersistence(auth,fa.browserLocalPersistence).catch(()=>{});
- window.PD_AUTH={
-  user:()=>auth.currentUser,
-  signIn:async()=>{if(msg)msg.textContent="";const p=new fa.GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});try{return await fa.signInWithPopup(auth,p)}catch(e){if(["auth/popup-blocked","auth/operation-not-supported-in-this-environment"].includes(e&&e.code)){await fa.signInWithRedirect(auth,p);return}authErr(e);throw e}},
-  signOut:()=>fa.signOut(auth)
+ const drawAccountButton=()=>{const u=auth.currentUser,n=currentProfile&&currentProfile.displayName;if(ab)ab.innerHTML=u?'<span class="authdot"></span>'+(n?esc(n):authLabel(u)):"Google-login"};
+ const dispatchProfile=()=>{if(!currentProfile)return;window.dispatchEvent(new CustomEvent("pdprofile",{detail:{profile:currentProfile,members:currentMembers,groupName:currentGroupName}}));drawAccountButton()};
+ const stopWatches=()=>{if(unsubMembers){unsubMembers();unsubMembers=null}if(unsubGroup){unsubGroup();unsubGroup=null}};
+ const watchProfile=pr=>{stopWatches();currentProfile=pr;const gid=pr.groupId;
+  unsubMembers=f.onSnapshot(f.query(f.collection(db,"profiles"),f.where("groupId","==",gid)),s=>{currentMembers=s.docs.map(d=>d.data());const me=currentMembers.find(x=>x.authUid===auth.currentUser?.uid);if(me)currentProfile=me;dispatchProfile()},()=>{currentMembers=[pr];dispatchProfile()});
+  unsubGroup=f.onSnapshot(f.doc(db,"groups",gid),d=>{if(d.exists()&&d.data().name)currentGroupName=d.data().name;dispatchProfile()},()=>dispatchProfile());
  };
+ const getProfile=u=>f.getDoc(f.doc(db,"profiles",u.uid)).then(d=>d.exists()?d.data():null);
+ const choose=p=>{chosenPlayer=p;[...ap.querySelectorAll("button")].forEach(b=>b.classList.toggle("on",b.dataset.p===p));if(!an.value.trim())an.value=p};
+ const showSetup=u=>{chosenPlayer="";ap.innerHTML="";const players=(window.PD_SETUP&&window.PD_SETUP.players)||["Speler"],local=localStorage.getItem("pdme")||"",def=players.includes(local)?local:players[0];players.forEach(p=>{const b=document.createElement("button");b.type="button";b.dataset.p=p;b.textContent=p;b.onclick=()=>choose(p);ap.append(b)});an.value=local||u.displayName||def;agn.value=(window.PD_SETUP&&window.PD_SETUP.groupName)||"Puzzelsukkels";choose(def);asetmsg.textContent="";setup.hidden=false;gate.hidden=true};
+ const openProfile=()=>{const u=auth.currentUser;if(!u){localStorage.removeItem("pdauthskip");gate.hidden=false;return}if(!currentProfile){showSetup(u);return}const photo=u.photoURL?'<img class="authavatar" alt="" src="'+esc(u.photoURL)+'">':'<span class="authavatar">'+esc((currentProfile.displayName||authLabel(u))[0]||"?")+'</span>';who.innerHTML=photo+'<div><b>'+esc(currentProfile.displayName)+'</b><small>'+esc(u.email||"")+'</small></div>';pn.value=currentProfile.displayName||"";pg.value=currentGroupName||"";pmsg.textContent="";acct.hidden=false};
+ const claimProfile=async u=>{const p=chosenPlayer,n=an.value.trim(),gn=agn.value.trim()||"Puzzelsukkels",gid=window.PD_SETUP.group,pid="u-"+p.toLowerCase().replace(/[^a-z0-9]/g,"");if(!p||!n)throw new Error("Vul een naam in.");const claim=f.doc(db,"profileClaims",gid+"_"+pid),prof=f.doc(db,"profiles",u.uid),grp=f.doc(db,"groups",gid);
+  await f.runTransaction(db,async tx=>{const c=await tx.get(claim);if(c.exists()&&c.data().authUid!==u.uid){const e=new Error("Dit bestaande profiel is al aan een ander Google-account gekoppeld.");e.code="profile/already-claimed";throw e}tx.set(claim,{authUid:u.uid,playerId:pid,groupId:gid,claimedAt:Date.now()},{merge:true});tx.set(prof,{authUid:u.uid,playerId:pid,displayName:n,groupId:gid,email:u.email||"",photoURL:u.photoURL||"",updatedAt:Date.now()},{merge:true});tx.set(grp,{name:gn,updatedAt:Date.now()},{merge:true})});return getProfile(u)};
+ const saveProfile=async()=>{if(!currentProfile||!auth.currentUser)return;const n=pn.value.trim(),gn=pg.value.trim();if(!n||!gn){pmsg.textContent="Naam en groep mogen niet leeg zijn.";return}pmsg.textContent="Opslaan…";try{await Promise.all([f.setDoc(f.doc(db,"profiles",auth.currentUser.uid),{displayName:n,updatedAt:Date.now()},{merge:true}),f.setDoc(f.doc(db,"groups",currentProfile.groupId),{name:gn,updatedAt:Date.now()},{merge:true})]);pmsg.textContent="Opgeslagen ✓"}catch(e){pmsg.textContent=e&&e.code==="permission-denied"?"Firebase-regels laten profielwijzigingen nog niet toe.":"Opslaan lukt niet: "+(e.code||e.message||"onbekende fout")}};
+ await fa.setPersistence(auth,fa.browserLocalPersistence).catch(()=>{});
+ window.PD_AUTH={user:()=>auth.currentUser,signIn:async()=>{if(msg)msg.textContent="";const p=new fa.GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});try{return await fa.signInWithPopup(auth,p)}catch(e){if(["auth/popup-blocked","auth/operation-not-supported-in-this-environment"].includes(e&&e.code)){await fa.signInWithRedirect(auth,p);return}if(msg)msg.textContent="Inloggen lukt niet: "+(e.code||"onbekende fout");throw e}},signOut:()=>fa.signOut(auth)};
  if(gb)gb.onclick=()=>window.PD_AUTH.signIn().catch(()=>{});
  if(skip)skip.onclick=()=>{localStorage.setItem("pdauthskip","1");gate.hidden=true};
- if(ab)ab.onclick=()=>{const u=auth.currentUser;if(!u){localStorage.removeItem("pdauthskip");gate.hidden=false;return}if(who){const photo=u.photoURL?'<img class="authavatar" alt="" src="'+u.photoURL.replace(/"/g,"&quot;")+'">':'<span class="authavatar">'+(authLabel(u)[0]||"?")+'</span>';who.innerHTML=photo+'<div><b>'+authLabel(u).replace(/</g,"&lt;")+'</b><small>'+(u.email||"").replace(/</g,"&lt;")+'</small></div>'}acct.hidden=false};
- if(close)close.onclick=()=>acct.hidden=true;
- if(out)out.onclick=()=>window.PD_AUTH.signOut().then(()=>{acct.hidden=true;localStorage.removeItem("pdauthskip");gate.hidden=false});
+ if(asave)asave.onclick=async()=>{asetmsg.textContent="Koppelen…";asave.disabled=true;try{const pr=await claimProfile(auth.currentUser);setup.hidden=true;localStorage.removeItem("pdauthskip");watchProfile(pr)}catch(e){asetmsg.textContent=e.code==="profile/already-claimed"?e.message:e.code==="permission-denied"?"Firebase-regels laten profielen nog niet toe.":e.message||"Koppelen lukt niet."}finally{asave.disabled=false}};
+ if(ps)ps.onclick=saveProfile;
+ if(ab)ab.onclick=openProfile;
+ addEventListener("pdopenprofile",openProfile);
+ if(ax)ax.onclick=()=>acct.hidden=true;
+ if(out)out.onclick=()=>window.PD_AUTH.signOut();
  acct&&acct.addEventListener("pointerdown",e=>{if(e.target===acct)acct.hidden=true});
- fa.getRedirectResult(auth).catch(authErr);
- fa.onAuthStateChanged(auth,authDraw);
+ setup&&setup.addEventListener("pointerdown",e=>{if(e.target===setup&&currentProfile)setup.hidden=true});
+ fa.getRedirectResult(auth).catch(e=>{if(msg)msg.textContent="Inloggen lukt niet: "+(e.code||"onbekende fout")});
+ fa.onAuthStateChanged(auth,async u=>{stopWatches();currentProfile=null;currentMembers=[];window.PD_AUTH_USER=u||null;if(!u){drawAccountButton();acct.hidden=true;setup.hidden=true;gate.hidden=localStorage.getItem("pdauthskip")==="1";window.dispatchEvent(new Event("pdauthout"));return}gate.hidden=true;try{const pr=await getProfile(u);if(pr)watchProfile(pr);else showSetup(u)}catch(e){if(msg)msg.textContent=e.code==="permission-denied"?"Inloggen is gelukt, maar Firebase-regels laten profielen nog niet toe.":"Profiel laden lukt niet.";gate.hidden=false}});
+ 
  window.PD_DB={
   save:row=>f.setDoc(f.doc(db,"results",row.date+"_"+row.type+"_"+row.uid),row),
   listenFrom:(from,cb,err)=>f.onSnapshot(f.query(f.collection(db,"results"),f.where("date",">=",from)),s=>cb(s.docs.map(d=>d.data())),err),
@@ -3481,9 +3516,8 @@ else{try{
   saveProgress:o=>f.setDoc(f.doc(db,"status",o.group+"_"+o.uid),{uid:o.uid,group:o.group,name:o.name,progress:{[o.ck]:o.entry}},{merge:true}),
   clearProgress:o=>f.setDoc(f.doc(db,"status",o.group+"_"+o.uid),{progress:{[o.ck]:f.deleteField()}},{merge:true}),
   getProgress:(g,u)=>f.getDocFromServer(f.doc(db,"status",g+"_"+u)).then(d=>d.exists()?(d.data().progress||{}):{}),
-  /* Extra zekerheid: rechtstreeks bij de server ophalen (alleen de laatste twee dagen, dus weinig gegevens). */
   pollRecent:(from,g)=>Promise.all([f.getDocsFromServer(f.query(f.collection(db,"results"),f.where("date",">=",from))),f.getDocsFromServer(f.query(f.collection(db,"status"),f.where("group","==",g)))]).then(([a,b])=>({rows:a.docs.map(d=>d.data()),stat:b.docs.map(d=>d.data())}))};
  window.dispatchEvent(new Event("pdready"));
-}catch(e){no("Scorebord niet bereikbaar (internet?).");const g=document.getElementById("authgate"),m=document.getElementById("authmsg");if(m)m.textContent="Google-login kon niet worden geladen. Je kunt voor nu overslaan.";if(g)g.hidden=false}}
+}catch(e){no("Scorebord niet bereikbaar (internet?).");const g=document.getElementById("authgate"),m=document.getElementById("authmsg");if(m)m.textContent="Google-login kon niet worden geladen. Je kunt voor nu als gast verder.";if(g)g.hidden=false}}
 </script>
 </body></html>
