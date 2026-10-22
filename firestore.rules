@@ -7,22 +7,17 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function validPlayer(playerId) {
-      return playerId in [
-        'u-peter',
-        'u-aart'
-      ];
-    }
-
-    function legacyGroup(groupId) {
-      return groupId == 'peter-aart-jk4hv92t';
-    }
-
     function hasProfile() {
       return signedIn()
         && exists(
           /databases/$(database)/documents/profiles/$(request.auth.uid)
         );
+    }
+
+    function myPlayer() {
+      return get(
+        /databases/$(database)/documents/profiles/$(request.auth.uid)
+      ).data.playerId;
     }
 
     function myGroup() {
@@ -37,24 +32,34 @@ service cloud.firestore {
       );
     }
 
-    match /results/{id} {
-      allow read: if true;
-
-      allow create, update: if
-        request.resource.data.keys().hasOnly([
-          'name',
-          'group',
-          'date',
-          'type',
-          'secs',
-          'uid',
-          'mist',
-          'hints',
-          'emo',
-          'note'
+    function validResult(id) {
+      return hasProfile()
+        && request.resource.data.keys().hasOnly([
+          'name','group','date','type','secs','uid','mist','hints','emo','note'
+        ])
+        && request.resource.data.keys().hasAll([
+          'name','group','date','type','secs','uid'
         ])
         && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 30
+        && request.resource.data.group is string
+        && request.resource.data.group.size() > 0
+        && request.resource.data.group.size() <= 80
+        && request.resource.data.group == myGroup()
+        && request.resource.data.date is string
+        && request.resource.data.date.size() <= 10
+        && request.resource.data.type is string
+        && request.resource.data.type.size() > 0
+        && request.resource.data.type.size() <= 80
+        && request.resource.data.uid is string
+        && request.resource.data.uid.size() > 0
+        && request.resource.data.uid.size() <= 80
+        && request.resource.data.uid == myPlayer()
+        && (
+          id == request.resource.data.group + '_' + request.resource.data.date + '_' + request.resource.data.type + '_' + request.resource.data.uid
+          || id == request.resource.data.date + '_' + request.resource.data.type + '_' + request.resource.data.uid
+        )
         && request.resource.data.secs is int
         && request.resource.data.secs > 0
         && request.resource.data.get('mist', 0) is int
@@ -65,32 +70,20 @@ service cloud.firestore {
         && request.resource.data.get('emo', '').size() <= 8
         && request.resource.data.get('note', '') is string
         && request.resource.data.get('note', '').size() <= 80;
-
-      allow delete: if false;
     }
 
-    match /status/{id} {
-      allow read: if true;
-
-      allow create, update: if
-        request.resource.data.keys().hasOnly([
-          'uid',
-          'group',
-          'name',
-          'date',
-          'type',
-          'at',
-          'progress',
-          'onlineAt',
-          'onlineType',
-          'onlinePractice',
-          'onlineLvl',
-          'onlineNono'
+    function validStatus(id) {
+      return hasProfile()
+        && request.resource.data.keys().hasOnly([
+          'uid','group','name','date','type','at','progress','onlineAt',
+          'onlineType','onlinePractice','onlineLvl','onlineNono'
         ])
+        && request.resource.data.keys().hasAll(['uid','group'])
         && request.resource.data.uid is string
-        && request.resource.data.uid.size() <= 40
+        && request.resource.data.uid == myPlayer()
         && request.resource.data.group is string
-        && request.resource.data.group.size() <= 40
+        && request.resource.data.group == myGroup()
+        && id == request.resource.data.group + '_' + request.resource.data.uid
         && request.resource.data.get('name', '') is string
         && request.resource.data.get('name', '').size() <= 30
         && request.resource.data.get('date', '') is string
@@ -103,28 +96,38 @@ service cloud.firestore {
         && request.resource.data.get('onlineAt', 0) >= 0
         && request.resource.data.get('onlineType', '') is string
         && request.resource.data.get('onlineType', '') in [
-          '',
-          'bin',
-          'star',
-          'nono',
-          'kak',
-          'hex',
-          'plus',
-          'mur',
-          'm24'
+          '','bin','star','nono','kak','hex','plus','mur','m24'
         ]
         && request.resource.data.get('onlinePractice', false) is bool
         && request.resource.data.get('onlineLvl', 0) is int
         && request.resource.data.get('onlineLvl', 0) >= 0
         && request.resource.data.get('onlineLvl', 0) <= 6
         && request.resource.data.get('onlineNono', '') is string
-        && request.resource.data.get('onlineNono', '') in [
-          '',
-          'classic',
-          'color'
-        ]
+        && request.resource.data.get('onlineNono', '') in ['','classic','color']
         && request.resource.data.get('progress', {}) is map;
+    }
 
+    match /results/{id} {
+      allow read: if true;
+      allow create: if validResult(id);
+      allow update: if validResult(id)
+        && resource.data.uid == myPlayer()
+        && resource.data.group == myGroup()
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.group == resource.data.group
+        && request.resource.data.date == resource.data.date
+        && request.resource.data.type == resource.data.type;
+      allow delete: if false;
+    }
+
+    match /status/{id} {
+      allow read: if true;
+      allow create: if validStatus(id);
+      allow update: if validStatus(id)
+        && resource.data.uid == myPlayer()
+        && resource.data.group == myGroup()
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.group == resource.data.group;
       allow delete: if false;
     }
 
@@ -132,56 +135,24 @@ service cloud.firestore {
       allow get: if signedIn()
         && (
           request.auth.uid == authUid
-          || (
-            hasProfile()
-            && resource.data.groupId == myGroup()
-          )
+          || (hasProfile() && resource.data.groupId == myGroup())
         );
 
       allow list: if hasProfile()
         && resource.data.groupId == myGroup();
 
-      allow create: if signedIn()
-        && request.auth.uid == authUid
-        && request.resource.data.keys().hasOnly([
-          'authUid',
-          'playerId',
-          'displayName',
-          'groupId',
-          'updatedAt'
-        ])
-        && request.resource.data.keys().hasAll([
-          'authUid',
-          'playerId',
-          'displayName',
-          'groupId',
-          'updatedAt'
-        ])
-        && request.resource.data.authUid == request.auth.uid
-        && validPlayer(request.resource.data.playerId)
-        && legacyGroup(request.resource.data.groupId)
-        && request.resource.data.displayName is string
-        && request.resource.data.displayName.size() > 0
-        && request.resource.data.displayName.size() <= 30
-        && request.resource.data.updatedAt is int
-        && request.resource.data.updatedAt >= 0;
+      // De eenmalige Peter/Aart-migratie is afgerond.
+      allow create: if false;
 
       allow update: if signedIn()
         && request.auth.uid == authUid
         && request.resource.data.keys().hasOnly([
-          'authUid',
-          'playerId',
-          'displayName',
-          'groupId',
-          'updatedAt'
+          'authUid','playerId','displayName','groupId','updatedAt'
         ])
         && request.resource.data.keys().hasAll([
-          'authUid',
-          'playerId',
-          'displayName',
-          'groupId',
-          'updatedAt'
+          'authUid','playerId','displayName','groupId','updatedAt'
         ])
+        && request.resource.data.authUid == request.auth.uid
         && request.resource.data.authUid == resource.data.authUid
         && request.resource.data.playerId == resource.data.playerId
         && request.resource.data.displayName is string
@@ -199,69 +170,24 @@ service cloud.firestore {
     }
 
     match /profileClaims/{claimId} {
-      allow get: if signedIn()
-        && claimId in [
-          'peter-aart-jk4hv92t_u-peter',
-          'peter-aart-jk4hv92t_u-aart'
-        ];
-
-      allow create: if signedIn()
-        && request.resource.data.keys().hasOnly([
-          'authUid',
-          'playerId',
-          'groupId',
-          'claimedAt'
-        ])
-        && request.resource.data.keys().hasAll([
-          'authUid',
-          'playerId',
-          'groupId',
-          'claimedAt'
-        ])
-        && request.resource.data.authUid == request.auth.uid
-        && validPlayer(request.resource.data.playerId)
-        && legacyGroup(request.resource.data.groupId)
-        && claimId ==
-          request.resource.data.groupId + '_' +
-          request.resource.data.playerId
-        && request.resource.data.claimedAt is int
-        && request.resource.data.claimedAt >= 0;
-
-      allow update: if signedIn()
-        && resource.data.authUid == request.auth.uid
-        && request.resource.data.authUid == resource.data.authUid
-        && request.resource.data.playerId == resource.data.playerId
-        && request.resource.data.groupId == resource.data.groupId;
-
-      allow delete: if false;
+      allow read, write: if false;
     }
 
     match /groups/{groupId} {
       allow get: if signedIn()
         && (
-          (
-            hasProfile()
-            && myGroup() == groupId
-          )
+          (hasProfile() && myGroup() == groupId)
           || resource.data.get('ownerAuthUid', '') == request.auth.uid
         );
 
       allow list: if false;
 
-      allow create: if signedIn()
+      allow create: if hasProfile()
         && request.resource.data.keys().hasOnly([
-          'name',
-          'ownerAuthUid',
-          'inviteCode',
-          'createdAt',
-          'updatedAt'
+          'name','ownerAuthUid','inviteCode','createdAt','updatedAt'
         ])
         && request.resource.data.keys().hasAll([
-          'name',
-          'ownerAuthUid',
-          'inviteCode',
-          'createdAt',
-          'updatedAt'
+          'name','ownerAuthUid','inviteCode','createdAt','updatedAt'
         ])
         && request.resource.data.ownerAuthUid == request.auth.uid
         && request.resource.data.name is string
@@ -277,44 +203,20 @@ service cloud.firestore {
 
       allow update: if signedIn()
         && request.resource.data.keys().hasOnly([
-          'name',
-          'ownerAuthUid',
-          'inviteCode',
-          'createdAt',
-          'updatedAt'
+          'name','ownerAuthUid','inviteCode','createdAt','updatedAt'
         ])
+        && request.resource.data.keys().hasAll([
+          'name','ownerAuthUid','inviteCode','createdAt','updatedAt'
+        ])
+        && resource.data.get('ownerAuthUid', '') == request.auth.uid
+        && request.resource.data.ownerAuthUid == resource.data.ownerAuthUid
+        && request.resource.data.inviteCode == resource.data.inviteCode
+        && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 40
         && request.resource.data.updatedAt is int
-        && request.resource.data.updatedAt >= 0
-        && (
-          (
-            resource.data.get('ownerAuthUid', '') == request.auth.uid
-            && request.resource.data.ownerAuthUid
-              == resource.data.ownerAuthUid
-            && request.resource.data.inviteCode
-              == resource.data.inviteCode
-            && request.resource.data.createdAt
-              == resource.data.createdAt
-          )
-
-          ||
-
-          (
-            resource.data.get('ownerAuthUid', '') == ''
-            && legacyGroup(groupId)
-            && hasProfile()
-            && get(
-              /databases/$(database)/documents/profiles/$(request.auth.uid)
-            ).data.playerId == 'u-peter'
-            && request.resource.data.ownerAuthUid
-              == request.auth.uid
-            && request.resource.data.inviteCode == 'PUZZEL6'
-            && request.resource.data.createdAt is int
-            && request.resource.data.createdAt >= 0
-          )
-        );
+        && request.resource.data.updatedAt >= 0;
 
       allow delete: if false;
     }
@@ -323,16 +225,12 @@ service cloud.firestore {
       allow get: if signedIn();
       allow list: if false;
 
-      allow create: if signedIn()
+      allow create: if hasProfile()
         && request.resource.data.keys().hasOnly([
-          'groupId',
-          'ownerAuthUid',
-          'createdAt'
+          'groupId','ownerAuthUid','createdAt'
         ])
         && request.resource.data.keys().hasAll([
-          'groupId',
-          'ownerAuthUid',
-          'createdAt'
+          'groupId','ownerAuthUid','createdAt'
         ])
         && request.resource.data.ownerAuthUid == request.auth.uid
         && request.resource.data.createdAt is int
