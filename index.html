@@ -1903,7 +1903,7 @@ function load(type,practice,fresh,date){document.documentElement.classList.remov
    if(sv0.cur&&S.cur&&sv0.cur.length===S.cur.length)S.cur=sv0.cur.slice();
    if(sv0.rev&&S.hx)S.hx.rev=new Set(sv0.rev);if(sv0.cs&&S.hx)S.cs=sv0.cs;
    if(type==="m24"&&sv0.r){S.r=sv0.r;setRound()}
-   if(sv0.str&&S.str)S.str=new Set(sv0.str);if(sv0.nt)S.nt=Object.assign({},sv0.nt);S.pen=0;S.mist=sv0.mist||0;S.hints=sv0.hints||0;S._saveAt=sv0.at||0;{const oldEl=+sv0.el||0,safeEl=oldEl>=0&&oldEl<=MAX_REASONABLE_MS?oldEl:0;S.start=Date.now()-safeEl}S.pauseAt=0;S.resumed=true}catch(e){}}
+   if(sv0.str&&S.str)S.str=new Set(sv0.str);if(sv0.nt)S.nt=Object.assign({},sv0.nt);if(type!=="m24"){S.hist=Array.isArray(sv0.hist)?sv0.hist.slice(-60):[];S.redo=Array.isArray(sv0.redo)?sv0.redo.slice(-30):[]}S.pen=0;S.mist=sv0.mist||0;S.hints=sv0.hints||0;S._saveAt=sv0.at||0;{const oldEl=+sv0.el||0,safeEl=oldEl>=0&&oldEl<=MAX_REASONABLE_MS?oldEl:0;S.start=Date.now()-safeEl}S.pauseAt=0;S.resumed=true}catch(e){}}
   $("#msg").textContent=S.done?(S.arch?"Al klaar in ":"Vandaag al klaar in ")+fmt(S.secs):S.resumed?"Verder waar je was gebleven":(!practice&&type===featOf(S.date))?(PHONE?"⭐ Van de dag":"⭐ Puzzel van de dag"+(S.hard?" (weekend 💪)":"")):S.arch?"Dagpuzzel van "+dnl(S.date)+(S.hard?" 💪":""):S.hard?"Weekendpuzzel: wat pittiger 💪":"";setT(S.resumed?fmt(Math.round(playMs()/1000)):fmt(S.secs));
   try{updTabs()}catch(e){}render();ub();setTimeout(()=>pingOnline(true),0)},30)}
 
@@ -2691,13 +2691,13 @@ function undo(){if(S.done||!S.p||!S.hist.length)return;clearHint();
  const h=S.hist.pop();
  if(h&&h.notes){S.redo.push(h);noteApplyChanges(h.changes,false);paintNotes();persist();ub();return}
  if(h&&h.note){S.redo.push(h);noteApplyChanges([h],false);paintNotes();persist();ub();return}
- S.redo.push(S.cur.slice());S.cur=h;S.rd=S.cd=S.pick=null;render()}
+ S.redo.push(S.cur.slice());S.cur=h;S.rd=S.cd=S.pick=null;render();persist()}
 function redo(){if(S.done||!S.p||!S.redo.length)return;clearHint();
  if(S.type==="m24"){S.hist.push(S.tiles);S.tiles=S.redo.pop();S.a=-1;S.op="";rM24();return}
  const h=S.redo.pop();
  if(h&&h.notes){S.hist.push(h);noteApplyChanges(h.changes,true);paintNotes();persist();ub();return}
  if(h&&h.note){S.hist.push(h);noteApplyChanges([h],true);paintNotes();persist();ub();return}
- S.hist.push(S.cur.slice());S.cur=h;S.rd=S.cd=S.pick=null;render();check()}
+ S.hist.push(S.cur.slice());S.cur=h;S.rd=S.cd=S.pick=null;render();check();persist()}
 function reset(){if(S.done||!S.p)return;clearHint();
  if(S.type==="m24"){setRound();rM24();return}
  const z=initCur();if(z.join()===S.cur.join())return;
@@ -3141,6 +3141,9 @@ function persist(forceCloud){if(!S.p||S.done||!S.start||!S.seed)return;const a=p
  if(pc<=0){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;return}
  const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,pc};
  if(S.hx){e.rev=[...S.hx.rev];e.cs=S.cs||{}}else if(S.type==="m24")e.r=S.r;else if(S.cur)e.cur=S.cur;if(S.str)e.str=[...S.str];if(S.nt&&Object.keys(S.nt).length)e.nt=S.nt;
+ /* Hervatten moet ook echt hervatten: bewaar een begrensde undo/redo-geschiedenis.
+    Maak 24 heeft een eigen ronde-state en laten we hier bewust buiten. */
+ if(S.type!=="m24"){if(S.hist&&S.hist.length)e.hist=S.hist.slice(-60);if(S.redo&&S.redo.length)e.redo=S.redo.slice(-30)}
  const prev=a[k],plain=x=>{if(!x)return"";const q=Object.assign({},x);delete q.at;return JSON.stringify(q)},changed=!prev||plain(prev)!==plain(e);
  e.at=changed?Date.now():(prev.at||Date.now());a[k]=e;S._saveAt=e.at;lsSet(PKEY,JSON.stringify(a));if(changed||forceCloud)cloudPushProgress(k,e,!!forceCloud)}
 setInterval(persist,3000);
