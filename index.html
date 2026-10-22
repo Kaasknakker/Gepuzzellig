@@ -1858,8 +1858,14 @@ const lvOf=t=>LVN[t]&&LVN[t].includes(LV[t])?LV[t]:(PHONE&&LVN[t]&&LVN[t].includ
 /* Vanaf 22 oktober 2026: per soort één dagpuzzel, doordeweeks Normaal en in het weekend Moeilijk. Andere niveaus blijven bij Vrij puzzelen. */
 const DAGVANAF="2026-10-21",dagVast=ds=>ds>=DAGVANAF;
 const dagLv=(t,ds)=>{if(!dagVast(ds))return lvOf(t);const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay(),wk=w===0||w===6;return PHONE?(wk?6:5):(wk?3:2)};
-/* Nonogram-dagvariant: ma/wo/vr Klassiek, di/do Kleur. In het weekend wisselen za/zo per week om. */
-const nonoDayVariant=ds=>{const[y,m,d]=ds.split("-").map(Number),dt=new Date(y,m-1,d),w=dt.getDay();if(w>=1&&w<=5)return(w===2||w===4)?"color":"classic";const wn=Math.floor((Date.UTC(y,m-1,d)-Date.UTC(2026,0,5))/6048e5),even=((wn%2)+2)%2===0;return(w===6?even:!even)?"color":"classic"};
+/* Nonogram-dagvariant: vanaf 23 oktober 2026 datum-gebaseerd willekeurig.
+   Dezelfde datum geeft voor iedereen en op ieder apparaat dezelfde variant; nooit meer dan twee keer dezelfde achter elkaar.
+   Oudere dagen behouden hun bestaande Klassiek/Kleur-keuze, zodat reeds gemaakte archiefpuzzels niet veranderen. */
+const NONORANDOMVANAF="2026-10-23";
+const nonoLegacyVariant=ds=>{const[y,m,d]=ds.split("-").map(Number),dt=new Date(y,m-1,d),w=dt.getDay();if(w>=1&&w<=5)return(w===2||w===4)?"color":"classic";const wn=Math.floor((Date.UTC(y,m-1,d)-Date.UTC(2026,0,5))/6048e5),even=((wn%2)+2)%2===0;return(w===6?even:!even)?"color":"classic"};
+const nonoDayVariant=ds=>{if(ds<NONORANDOMVANAF)return nonoLegacyVariant(ds);const[y,m,d]=ds.split("-").map(Number),end=Date.UTC(y,m-1,d),start=Date.UTC(2026,9,23);let a=nonoLegacyVariant("2026-10-21"),b=nonoLegacyVariant("2026-10-22");
+ for(let ms=start;ms<=end;ms+=864e5){const dt=new Date(ms),key=dt.toISOString().slice(0,10);let v=(hash("nono-day|"+key)&1)?"color":"classic";if(v===a&&v===b)v=v==="color"?"classic":"color";a=b;b=v}
+ return b};
 
 let TSHOW=lsGet("pdtime")==="1",lastT="0:00";
 function setT(t){lastT=t;const e=$("#time");e.textContent=TSHOW?t:"⏱ tijd tonen";e.classList.toggle("hid",!TSHOW)}
