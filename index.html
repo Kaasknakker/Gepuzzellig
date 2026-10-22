@@ -737,7 +737,7 @@ window.FIREBASE_CONFIG={
 </script>
 </head><body>
 <header><h1><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="ttl">Gepuzzellig</span></h1><nav id="tabs" aria-label="Puzzelsoorten"></nav>
-<button id="theme" title="Donkere of lichte weergave" aria-label="Donkere of lichte weergave"></button><button id="sbtn" title="Scorebord, weekstand en uitleg" aria-label="Scorebord, weekstand en overzicht">📊</button><button id="who" title="Wissel van speler" aria-label="Wissel van speler"></button><input id="name" type="hidden"><input id="group" type="hidden"></header>
+<button id="theme" title="Donkere of lichte weergave" aria-label="Donkere of lichte weergave"></button><button id="sbtn" title="Overzicht en statistieken" aria-label="Overzicht en statistieken">📊</button><button id="who" title="Wissel van speler" aria-label="Wissel van speler"></button><input id="name" type="hidden"><input id="group" type="hidden"></header>
 <div id="pick"><div class="pc"><h2>Wie ben jij?</h2><div id="pickb"></div><p class="mut">Je kiest dit één keer. Daarna onthoudt de app het.</p></div></div>
 
 <main>
@@ -2914,7 +2914,7 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
   const lst=(...ids)=>{const d=document.createElement("div");d.className="mlist";ids.forEach(i=>d.append($(i)));more.append(d)};
   const ic=(b,i,t)=>{b.innerHTML='<span class="ic">'+i+'</span><span>'+t+'</span>'};
   sec("Puzzel");lst("#arch","#next");sec("Overig");lst("#sbtn","#helpb","#ctrlb","#reset","#theme","#who");more.append($("#streak"));
-  ic($("#arch"),"📅","Eerdere dagpuzzels");ic($("#next"),"🎲","Nog een puzzel");ic($("#sbtn"),"📊","Scorebord en weekoverzicht");ic($("#helpb"),"❓","Uitleg van deze puzzel");ic($("#ctrlb"),"⌨️","Bediening");
+  ic($("#arch"),"📅","Eerdere dagpuzzels");ic($("#next"),"🎲","Nog een puzzel");ic($("#sbtn"),"📊","Overzicht en statistieken");ic($("#helpb"),"❓","Uitleg van deze puzzel");ic($("#ctrlb"),"⌨️","Bediening");
   {const r=$("#reset");r.innerHTML='<b class="ic">⟲</b><span>Reset</span>'}updTheme();{const n=$("#name").value;if(n)ic($("#who"),"👤","Speler: "+n)}
   $("#tbHome").onclick=showHome;$("#tbMore").onclick=e=>{e.stopPropagation();more.classList.toggle("open")};
   /* Het menu blijft open; alleen bij "Nog een puzzel" gaat het dicht. */
@@ -2947,7 +2947,7 @@ function showNewFree(t,random,fromCurrent,nvForced){if(!TYPES[t])return;
  pauseAndPersistActive(true)
  clearOnline();document.body.classList.remove("home");document.body.classList.add("newpick");toggleSide(false);
  const m=$("#npm"),lvBox=$("#nplv"),sub=$("#npsub");let nv=t==="nono"?(nvForced||(random?(Math.random()<.5?"classic":"color"):(origin&&origin.type==="nono"&&origin.nv?origin.nv:nonoVariant))):"classic";
- const titleName=()=>FREE_NAME(t,nv);document.body.dataset.t=t;pageIn(m.querySelector(".npcard"));document.documentElement.style.setProperty("--tc",TCOL[t]||"var(--pc)");document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));const ti=$("#tbTitle");if(ti)ti.innerHTML=tIcon(t,false,t==="nono"?nv:"")+`<div><b>${titleName()}</b><small>Vrij puzzelen · Nieuwe puzzel</small></div>`;m.hidden=false;window.scrollTo(0,0);
+ const titleName=()=>FREE_NAME(t,nv);document.body.dataset.t=t;document.documentElement.style.setProperty("--tc",TCOL[t]||"var(--pc)");document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));const ti=$("#tbTitle");if(ti)ti.innerHTML=tIcon(t,false,t==="nono"?nv:"")+`<div><b>${titleName()}</b><small>Vrij puzzelen · Nieuwe puzzel</small></div>`;m.hidden=false;pageIn(m.querySelector(".npcard"));window.scrollTo(0,0);
  const meta=old=>[old&&LVN[old.type]?LVL[old.lvl]:"",old&&old.e.pc!=null?old.e.pc+"% klaar":""].filter(Boolean).join(" · ");
  const sameOrigin=old=>!!(fromCurrent&&origin&&origin.practice&&old&&old.k===origin.key);
  const backToOrigin=()=>{if(!origin){showHome();return}if(origin.practice)setFreePreferences(origin.type,origin.lvl,origin.nv);else if(origin.type==="nono"&&origin.nv){nonoVariant=origin.nv;lsSet("pdnvar",nonoVariant)}document.body.classList.remove("newpick");m.hidden=true;load(origin.type,origin.practice,false,origin.date)};
@@ -2989,7 +2989,7 @@ function renderScore(h){const all=allRows(),rows=all.filter(r=>!isFree(r)),today
   const recentHtml=recent.length?recent.map(r=>{const t=baseT(r),z=q(r);return`<div class="srecent">${tIcon(t,false)}<div><b>${TYPES[t]}</b><small>${isFree(r)?"Vrij puzzelen":"Dagpuzzel"} · ${dnl(r.date)}</small></div><span>⏱ ${fmt(r.secs||0)} ${quickBadges(z,t)}</span></div>`}).join(""):`<div class="mut">Nog geen puzzels in deze periode.</div>`;
   const perMax=Math.max(1,...TS.map(t=>x&&x.per[t]||0));
   const puzzleHtml=TS.map(t=>{const n=x&&x.per[t]||0;return`<div class="sonebar"><span>${tIcon(t,false)}<b>${TYPES[t]}</b></span><div><i style="width:${100*n/perMax}%;background:${TCOL[t]}"></i></div><strong>${n}</strong></div>`}).join("");
-  h.innerHTML=`<div class="hwrap sco personview">${head(x.nm,"Jouw puzzels en prestaties · "+PN)}${views}${period}
+  h.innerHTML=`<div class="hwrap sco personview">${head(x.nm,"Puzzels en prestaties · "+PN)}${views}${period}
    <div class="smetrics">${metric("🧩","Dagpuzzels opgelost",x.d,PN,"green")}${metric("🎯","Foutloos",x.km?pc(x.fl,x.km):"–",x.km?x.fl+" van "+x.km:"Nog geen meting","pink")}${metric("💡","Zonder hint",x.kh?pc(x.nh,x.kh):"–",x.kh?x.nh+" van "+x.kh:"Nog geen meting","yellow")}${metric("⏱","Totale speeltijd",fmt(total),mine.length?mine.length+" puzzels":"Nog geen puzzels","blue")}${metric("🔥","Huidige reeks",x.streak+" "+(x.streak===1?"dag":"dagen"),"Langste reeks: "+x.best,"peach")}${metric("★","Favoriete puzzel",x.fav?TYPES[x.fav]:"–",x.fav?(x.per[x.fav]||0)+" keer gespeeld":"Nog geen favoriet","purple")}</div>
    <div class="hgrid2 sh2"><div class="hcard"><div class="shd1"><b>Per puzzel</b><span class="mut">${PN}</span></div>${puzzleHtml}</div><div class="hcard"><div class="shd1"><b>Recente puzzels</b><span class="mut">${PN}</span></div><div class="srecentlist">${recentHtml}</div></div></div></div>`;
  }else{
@@ -3037,7 +3037,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  </section>
 
  <section class="hsection htogether"><div class="hsecthead"><div><h3>👥 Samen</h3><span class="mut">Wat jullie aan het puzzelen zijn</span></div></div><div class="hcard hsamen">${SET.players.map(p=>personCard(p,uidOf(p))).join("")}</div></section>
- <div class="hlinks"><button id="hScore">📊 Scorebord en weekoverzicht</button><span class="mut">Jij: 🧩 ${allH.length} puzzels deze maand</span></div></div>`;
+ <div class="hlinks"><button id="hScore">📊 Overzicht en statistieken</button><span class="mut">Jij: 🧩 ${allH.length} puzzels deze maand</span></div></div>`;
  h.querySelectorAll(".hdrow[data-day-t]").forEach(b=>b.onclick=()=>{const t=b.dataset.dayT;if(myDone(td,t)){HDOPEN=HDOPEN===t?"":t;renderHome()}else if(b.dataset.pk)resumeProgress(b.dataset.pk);else load(t,false)});
  h.querySelectorAll(".dayview[data-view-t]").forEach(b=>b.onclick=()=>load(b.dataset.viewT,false,false,td));
  h.querySelectorAll(".hcont[data-pk]").forEach(b=>b.onclick=()=>withFreshProgress(()=>resumeProgress(b.dataset.pk)));
