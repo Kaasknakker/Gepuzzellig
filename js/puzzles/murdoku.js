@@ -86,7 +86,7 @@ function genMur0(R,lv,hard){lv=lv||2;const N=MLV[lv]||6,V=N-1,easy=(lv===1||lv==
   let nb=Math.round(N*N*.17),ns=Math.round(N*.7);
   const lab=new Set();reg.forEach((k,i)=>{if(![...lab].some(j=>reg[j]===k))lab.add(i)});
   for(const i of shuf([...Array(N*N).keys()].filter(i=>!occ.has(i)&&!lab.has(i)),R)){if(nb>0){obj[i]={t:pk(blocks)};nb--}else if(ns>0){obj[i]={t:pk(seats)};ns--}else break}
-  const M={N,V,reg,obj},ppl=(()=>{const seen=new Set(),o=[];for(const x of shuf(murNamePool().slice(),R)){const k=x[0].toLocaleLowerCase("nl");if(seen.has(k))continue;seen.add(k);o.push(x);if(o.length===V)break}return o})().sort((a,b)=>a[0]<b[0]?-1:1).concat([pk(MVICT)]);
+  const M={N,V,reg,obj},nameR=rng(hash(sol.join(",")+"|mur-names")),ppl=(()=>{const seen=new Set(),o=[];for(const x of shuf(murNamePool().slice(),nameR)){const k=x[0].toLocaleLowerCase("nl");if(seen.has(k))continue;seen.add(k);o.push(x);if(o.length===V)break}return o})().sort((a,b)=>a[0]<b[0]?-1:1).concat([MVICT[Math.floor(nameR()*MVICT.length)]]);
   const rooms=shuf([...Array(MROOM.length).keys()],R).slice(0,K).map(k=>MROOM[k]);
   const pool=[],add=(c,w)=>{if(murE(c,sol,M))pool.push({c,w})};
   for(let p=0;p<V;p++){
