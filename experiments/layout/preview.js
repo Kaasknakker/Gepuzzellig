@@ -2,7 +2,7 @@
 document.body.classList.add('layout-proef');
 document.documentElement.removeAttribute('data-auth-pending');
 const testBar=document.createElement('div');testBar.id='layoutBar';
-testBar.innerHTML='<strong>Layoutproef 3.1</strong><select id="testSize" aria-label="Proefformaat"><option value="1">Klein</option><option value="2" selected>Normaal</option><option value="3">Groot</option></select><button id="testNew">Andere</button><button id="testCompare" aria-pressed="false">Origineel</button><a href="./">App</a>';
+testBar.innerHTML='<strong>Layoutproef 3.2</strong><select id="testSize" aria-label="Proefformaat"><option value="1">Klein</option><option value="2" selected>Normaal</option><option value="3">Groot</option></select><button id="testNew">Andere</button><button id="testCompare" aria-pressed="false">Origineel</button><a href="./">App</a>';
 document.body.prepend(testBar);
 let testOriginal=false,testRenderPass=false,testFrameId=0;
 const testRect=el=>el&&el.getBoundingClientRect();
@@ -53,6 +53,16 @@ rMur=function(){
   S._murMS=Math.max(28,Math.min(88,Math.floor((innerWidth-2*(clue+20))/S.p.N),Math.floor((area.height-130)/S.p.N)));
  }
  testBaseRMur();
+ // Namen en uitleg kunnen anders afbreken door lettertype, tekstgrootte of schermbreedte.
+ // Meet het hele blok; de rasterrand heeft rondom nog 8 px nodig.
+ if(!PHONE&&!testOriginal&&innerWidth>=740){
+  const height=testAvailableRect().height-16;
+  for(let n=0;n<6;n++){
+   const overflow=testRect($('#playbox')).height-height;if(overflow<=0)break;
+   const ms=Math.max(24,S._murMS-Math.ceil(overflow/S.p.N)-1);if(ms>=S._murMS)break;
+   S._murMS=ms;testBaseRMur();
+  }
+ }
 };
 const testBaseRender=render;
 render=function(){
