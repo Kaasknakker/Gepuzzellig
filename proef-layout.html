@@ -1203,17 +1203,6 @@ body.hintside[data-t=hex] #hexw,body.hintdock[data-t=hex] #hexw{padding:10px}
 #layoutBar a{color:var(--fg)}
 #layoutIntro{padding:10px 0;color:var(--mut);font-size:13px;line-height:1.5}
 body.layout-proef #authbtn,body.layout-proef #hProfile{display:none!important}
-body.layout-proef:not(.home):not(.newpick) main{height:auto!important;overflow:visible!important;padding-top:4px!important}
-body.layout-proef:not(.home):not(.newpick) #stage{position:fixed;top:var(--test-top);left:var(--test-left);width:var(--test-width);height:var(--test-height);margin:0!important;padding:0!important;max-height:none!important;overflow:auto;overscroll-behavior:contain;justify-content:flex-start;align-items:center}
-body.layout-proef #playbox{width:max-content;max-width:none;flex-shrink:0}
-body.layout-proef.phone #pbot{flex-wrap:wrap;align-content:center;min-height:112px;gap:6px;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
-body.layout-proef.phone #pbot>button{min-height:44px;max-height:44px;padding:7px 5px}
-body.layout-proef.phone #pbot #nmode,body.layout-proef.phone #pbot #pmode{flex:2 1 120px}
-body.layout-proef.phone #pbot #potb,body.layout-proef.phone #pbot #notewipe{flex:0 1 44px}
-body.layout-proef.phone #pbot #undo,body.layout-proef.phone #pbot #redo{flex:0 1 40px}
-body.layout-proef.phone #pbot #hintb,body.layout-proef.phone #pbot #chk{flex:1 1 64px}
-body.layout-proef.phone #stage{touch-action:pan-x pan-y!important}
-body.layout-proef.phone #mur{width:var(--test-width);gap:8px}
 body.layout-proef.phone #mclues{touch-action:pan-y!important;overscroll-behavior:contain;font-size:15px;padding:8px 10px}
 body.layout-proef:not(.phone) #mclues{max-height:none!important;overflow:visible}
 body.layout-proef.phone #home .hwrap{padding:12px 10px 24px!important}
@@ -1245,13 +1234,27 @@ body.layout-proef #hint.layout-tray .layout-actions .hintback{flex:none;width:10
 body.layout-proef.layout-tray-open #pbot{visibility:hidden}
 @media(max-width:500px){#layoutBar{gap:5px;padding:5px 7px;font-size:12px}#layoutBar strong{font-size:12px}#layoutBar select{max-width:92px}#layoutBar a{font-size:11px}}
 
-body.layout-proef.phone[data-t=bin] #grid .c,body.layout-proef.phone[data-t=nono] #grid .c{height:var(--test-cell-height,var(--cs))}
 body.layout-proef[data-t=mur] #playbox{width:100%}
 
 body.layout-proef #stage{animation:none!important;transform:none!important}
 body.layout-proef #grid .ncl{min-width:min(21px,var(--cs));height:min(21px,var(--cs));padding:0 3px;font-size:clamp(10px,calc(var(--cs)*.5),12px)}
 body.layout-proef #grid .ncv{gap:1px}
 html.tap body.layout-proef,html.tap body.layout-proef main,html.tap body.layout-proef #stage{touch-action:pan-y}
+
+/* Beide vergelijkstanden houden exact dezelfde lage proefbalk. */
+#layoutBar{height:36px;min-height:36px;flex-wrap:nowrap;white-space:nowrap;gap:6px;padding:3px 8px}
+#layoutBar strong{font-size:12px;flex:1;min-width:0}
+#layoutBar button,#layoutBar select{font-size:12px;white-space:nowrap;min-height:28px;padding:3px 6px;flex:none}
+#testCompare{width:78px}
+body.layout-proef #stage{animation:none!important;transform:none!important}
+/* De hint vervangt de bestaande knoppenstrook; deze wordt niet vooraf verhoogd. */
+body.layout-proef #hint.layout-tray{grid-template-rows:18px minmax(0,1fr);padding:5px 7px;gap:2px 8px}
+body.layout-proef #hint.layout-tray .hht{font-size:12px;line-height:18px;margin-right:26px}
+body.layout-proef #hint.layout-tray .hx{grid-column:1;grid-row:1;width:24px;min-width:24px;height:18px;min-height:18px;font-size:12px}
+body.layout-proef #hint.layout-tray .layout-actions{grid-column:2;grid-row:1/3;flex-direction:row;align-items:center;overflow:visible}
+body.layout-proef #hint.layout-tray .layout-actions .hintnext{flex:1;min-width:0;font-size:12px}
+body.layout-proef #hint.layout-tray .layout-actions .hintback{flex:0 0 26px;width:26px;min-height:40px;padding:3px}
+@media(max-width:350px){#layoutBar{gap:3px;padding-inline:4px}#layoutBar strong{font-size:11px}#layoutBar select{max-width:69px}#testCompare{width:72px}}
 </style></head><body>
 <div id="iosPwaStatusStrip" aria-hidden="true"></div>
 <div id="bootveil" aria-hidden="true"><div class="bootinner"><i></i><i></i><i></i></div></div>
@@ -2801,7 +2804,7 @@ function load(type,practice,fresh,date,skipPersist){clearHomeSkinAccent();docume
 
 const LANDQ=matchMedia("(orientation:landscape) and (min-aspect-ratio:23/20)");
 const availBot=()=>{const b=$("#pbot");if(b&&!PHONE&&document.body.classList.contains("tablet")&&LANDQ.matches)return innerHeight+(window.scrollY||0)-14-HINTPAD;return b?b.getBoundingClientRect().top+(window.scrollY||0)-(PHONE?8:18)-HINTPAD:innerHeight-14};
-function sizeCs(cols,rows,extraH){const key=cols+"|"+rows+"|"+(extraH||0);if(S&&S._csFit&&S._csFit.key===key){CS=S._csFit.v;document.documentElement.style.setProperty("--cs",CS+"px");return}const top=$("#grid").getBoundingClientRect().top+(window.scrollY||0);CS=Math.max(window.LAYOUT_ORIGINAL?24:PHONE?18:24,Math.min(window.LAYOUT_ORIGINAL?96:S.type==="plus"?56:S.type==="nono"?40:S.type==="bin"?48:64,Math.floor((availBot()-top-(extraH||0))/rows),Math.floor(($("#stage").clientWidth-6)/cols)));if(S)S._csFit={key,v:CS};document.documentElement.style.setProperty("--cs",CS+"px")}
+function sizeCs(cols,rows,extraH){const key=cols+"|"+rows+"|"+(extraH||0);if(S&&S._csFit&&S._csFit.key===key){CS=S._csFit.v;document.documentElement.style.setProperty("--cs",CS+"px");return}const top=$("#grid").getBoundingClientRect().top+(window.scrollY||0);CS=Math.max(24,Math.min(window.LAYOUT_ORIGINAL?96:S.type==="plus"?56:innerWidth>2000?(S.type==="nono"?56:72):96,Math.floor((availBot()-top-(extraH||0))/rows),Math.floor(($("#stage").clientWidth-6)/cols)));if(S)S._csFit={key,v:CS};document.documentElement.style.setProperty("--cs",CS+"px")}
 function popEl(d){d.classList.remove("pop");void d.offsetWidth;d.classList.add("pop")}
 function celebrate(){if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;const cv=document.createElement("canvas");cv.className="cf";cv.width=innerWidth;cv.height=innerHeight;document.body.append(cv);const x=cv.getContext("2d"),cols=["#7a52d6","#f2a000","#12b5a2","#ee5d7a","#2b9be6","#3cb958"],ps=[];
  for(let i=0;i<140;i++){const a=-Math.PI/2+(Math.random()-.5)*1.6,v=9+Math.random()*11;ps.push({x:innerWidth/2,y:innerHeight*.45,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:4+Math.random()*5,c:cols[i%6],rot:Math.random()*6,vr:(Math.random()-.5)*.4})}
@@ -3304,7 +3307,7 @@ function rHex(){if(!S.p||S.type!=="hex"||!S.hx)return;{const hs=$("#hexstat");if
  const LP={},VC={};P.lineShow.forEach(j=>{const l=P.lines[j],k=l.vq+","+l.vr;VC[k]=(VC[k]||0)+1});const shared=j=>VC[P.lines[j].vq+","+P.lines[j].vr]>1;{const used=[];P.lineShow.forEach(j=>{const l=P.lines[j],[x,y]=px(l.vq,l.vr),ang0=l.d===0?-90:l.d===1?30:-30,ang=TR?90-ang0:ang0,sg=l.d!==1?1:-1,rad=ang*Math.PI/180,ux=Math.cos(rad)*sg,uy=Math.sin(rad)*sg;let k=shared(j)?1.2:.5,tp;for(let t=0;t<6;t++){tp=[x-ux*sz*k,y-uy*sz*k];if(!used.some(q=>Math.hypot(q[0]-tp[0],q[1]-tp[1])<sz*.9))break;k+=.45}used.push(tp);LP[j]=tp})}
  const ext=[...pts.map(p=>[p[0],p[1],sz*1.2]),...Object.values(LP).map(p=>[p[0],p[1],sz*.85])];
  const x0=Math.min(...ext.map(p=>p[0]-p[2])),x1=Math.max(...ext.map(p=>p[0]+p[2])),y0=Math.min(...ext.map(p=>p[1]-p[2])),y1=Math.max(...ext.map(p=>p[1]+p[2]));
- const asp=(x1-x0)/(y1-y0);let h,wd;if(S._hexFit){h=S._hexFit.h;wd=S._hexFit.wd}else{const top=w.getBoundingClientRect().top+(window.scrollY||0),fit=Math.min((availBot()-top-(window.LAYOUT_ORIGINAL?(S.hint?10:0):22))/(y1-y0),(document.body.classList.contains("hintdock")?parseFloat(getComputedStyle($("#stage")).getPropertyValue("--hint-board-height"))-32:Infinity)/(y1-y0),($("#stage").clientWidth-(S.hint?28:PHONE?2:10))/(x1-x0));h=(y1-y0)*Math.max(window.LAYOUT_ORIGINAL?.4:.1,Math.min(window.LAYOUT_ORIGINAL?2.45:1.15,fit));wd=h*asp;S._hexFit={h,wd}};
+ const asp=(x1-x0)/(y1-y0);let h,wd;if(S._hexFit){h=S._hexFit.h;wd=S._hexFit.wd}else{const top=w.getBoundingClientRect().top+(window.scrollY||0),fit=Math.min((availBot()-top-(S.hint?10:0))/(y1-y0),(document.body.classList.contains("hintdock")?parseFloat(getComputedStyle($("#stage")).getPropertyValue("--hint-board-height"))-32:Infinity)/(y1-y0),($("#stage").clientWidth-(S.hint?28:PHONE?2:10))/(x1-x0));h=(y1-y0)*Math.max(.4,Math.min(window.LAYOUT_ORIGINAL||innerWidth<=2000?2.45:1.7,fit));wd=h*asp;S._hexFit={h,wd}};
  window._hg={sz,cells:pts.slice(0,P.cells.length),lines:P.lineShow.map((j,k)=>shared(j)?[LP[j][0],LP[j][1],j,LP[j][0],LP[j][1]]:[LP[j][0],LP[j][1],j,pts[P.cells.length+k][0],pts[P.cells.length+k][1]])};
  const hp=(x,y,r)=>[0,1,2,3,4,5].map(k=>{const a=Math.PI/3*k+(TR?Math.PI/6:0);return(x+r*Math.cos(a)).toFixed(1)+","+(y+r*Math.sin(a)).toFixed(1)}).join(" ");
  let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x0} ${y0} ${x1-x0} ${y1-y0}" width="${wd}" height="${h}" style="max-width:none;touch-action:none">`;const H=S.hint;
@@ -3693,7 +3696,7 @@ function rMur(){if(S._murMS){MURFIX=0;MURMS=S._murMS;rMur0();return}MURFIX=0;MUR
 function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const dark=isDark();
  const top=m.getBoundingClientRect().top+(window.scrollY||0),sw=$("#stage").clientWidth,wide=sw>=640;
  const pbh=$("#pbot")?$("#pbot").offsetHeight:0,availH=innerHeight-(m.getBoundingClientRect().top)-pbh-HINTPAD;
- const ms=MURMS|| (PHONE?Math.max(HINTPAD?20:30,Math.min(Math.floor((sw-8)/N),Math.floor(HINTPAD?(availH-14)/N:availH*.46/N))):Math.max(40,Math.min(window.LAYOUT_ORIGINAL?100:76,wide?Math.min(Math.floor((availBot()+14-top-(NIEUW?165:150))/N)-MURFIX,Math.floor((sw-330)/N)):Math.floor((sw-8)/N))));MURMS=ms;
+ const ms=MURMS|| (PHONE?Math.max(HINTPAD?20:30,Math.min(Math.floor((sw-8)/N),Math.floor(HINTPAD?(availH-14)/N:availH*.55/N))):Math.max(40,Math.min(100,wide?Math.min(Math.floor((availBot()+14-top-(NIEUW?165:150))/N)-MURFIX,Math.floor((sw-330)/N)):Math.floor((sw-8)/N))));MURMS=ms;
  const main=document.createElement("div");main.id="mmain";const g=document.createElement("div");g.id="mgrid";g.style.gridTemplateColumns=`repeat(${N},${ms}px)`;g.style.setProperty("--ms",ms+"px");
  const first=[];{/* Naam van de ruimte op een plek waar hij past: het eerste vakje met genoeg ruimte naar rechts (anders het breedste stuk). */
   const fs=Math.max(10,ms*.16),runOf=i=>{let n=1;while(i%N+n<N&&p.reg[i+n]===p.reg[i])n++;return n},best=[];
@@ -4411,42 +4414,59 @@ UX.init();
 document.body.classList.add('layout-proef');
 document.documentElement.removeAttribute('data-auth-pending');
 const testBar=document.createElement('div');testBar.id='layoutBar';
-testBar.innerHTML='<strong>Layoutproef</strong><select id="testSize" aria-label="Proefformaat"><option value="1">Klein</option><option value="2" selected>Normaal</option><option value="3">Groot</option></select><button id="testNew">Andere</button><button id="testCompare" aria-pressed="false">Vergelijk</button><a href="./">Gewone app</a>';
+testBar.innerHTML='<strong>Layoutproef 2</strong><select id="testSize" aria-label="Proefformaat"><option value="1">Klein</option><option value="2" selected>Normaal</option><option value="3">Groot</option></select><button id="testNew">Andere</button><button id="testCompare" aria-pressed="false">Origineel</button><a href="./">App</a>';
 document.body.prepend(testBar);
 let testOriginal=false,testRenderPass=false,testFrameId=0;
 const testRect=el=>el&&el.getBoundingClientRect();
-function testFrame(){
- if(testOriginal||document.body.classList.contains('home')||document.body.classList.contains('newpick'))return;
- const top=Math.max(...['header','#topbar','#prow','#layoutBar'].map(sel=>testRect($(sel))?.bottom||0))+4;
- const pb=testRect($('#pbot')),side=pb&&pb.width<innerWidth*.45&&pb.height>pb.width;
- let left=side?pb.right+10:4,right=innerWidth-4;
- if(side)right=Math.min(right,left+1000);else if(!PHONE&&right-left>1080){left+=(right-left-1080)/2;right=left+1080}
- const bottom=side?innerHeight-10:pb?.top||innerHeight-10,st=$('#stage').style;
- for(const [k,v]of Object.entries({top,left,width:right-left,height:Math.max(80,bottom-top-4)}))st.setProperty('--test-'+k,Math.floor(v)+'px');
+// De bestaande DOM/CSS bepaalt de ruimte. Geen vaste speelbreedte of extra footerhoogte.
+function testAvailableRect(){
+ const r=testRect($('#stage')),pb=testRect($('#pbot'));
+ const side=pb&&pb.width<innerWidth*.45&&pb.height>pb.width;
+ const left=Math.max(4,r.left),right=Math.min(innerWidth-4,r.right);
+ const top=Math.max(r.top,testRect($('#layoutBar')).bottom);
+ const bottom=side?innerHeight-8:pb?.top-4||innerHeight-8;
+ return {left,right,top,bottom,width:Math.max(0,right-left),height:Math.max(0,bottom-top)};
 }
+function testFrame(){}
 const testBaseRender=render;
 render=function(){
- testFrame();testBaseRender();testRefit();testCellShape();if(S.p)$('#testSize').value=String((S.lvl-1)%3+1);
- if(!testOriginal&&!testRenderPass&&S.p&&testFrameId!==S.id){testFrameId=S.id;requestAnimationFrame(()=>{testRenderPass=true;testFrame();resetPuzzleFit();testBaseRender();testRefit();testCellShape();testRenderPass=false;if(S.hint)testHintPosition(S.hint)})}
+ testBaseRender();testRefit();if(S.p)$('#testSize').value=String((S.lvl-1)%3+1);
+ if(!testOriginal&&!testRenderPass&&S.p&&testFrameId!==S.id){testFrameId=S.id;requestAnimationFrame(()=>{testRenderPass=true;resetPuzzleFit();testBaseRender();testRefit();testRenderPass=false;if(S.hint)testHintPosition(S.hint)})}
 };
 function testRefit(){
- if(!testOriginal&&PHONE&&S.type==='mur'){const cl=$('#mclues');if(cl)cl.style.maxHeight=Math.max(60,$('#stage').getBoundingClientRect().bottom-cl.getBoundingClientRect().top)+'px';return}
- if(testOriginal||!S.p||!['bin','star','nono','plus'].includes(S.type)||!S._csFit)return;
- const area=$('#stage');$('#grid').style.removeProperty('--test-cell-height');
+ if(testOriginal||!S.p||document.body.classList.contains('home')||document.body.classList.contains('newpick'))return;
+ const area=testAvailableRect();
+ if(PHONE&&S.type==='mur'){const cl=$('#mclues');if(cl)cl.style.maxHeight=Math.max(60,area.bottom-testRect(cl).top)+'px';return}
+ if(S.type==='hex'&&S._hexFit){
+  const r=testRect($('#hexsvg')),ratio=Math.min((area.width-2)/r.width,(area.height-2)/r.height);
+  if(ratio<1){S._hexFit.h=Math.max(20,(S._hexFit.h)*ratio-2);S._hexFit.wd=Math.max(20,S._hexFit.wd*ratio-2);rHex()}
+  return;
+ }
+ if(!['bin','star','nono','plus'].includes(S.type)||!S._csFit)return;
  for(let n=0;n<4;n++){
-  const r=$('#grid').getBoundingClientRect(),ratio=Math.min((area.clientWidth-4)/r.width,(area.clientHeight-4)/r.height);
+  const r=testRect($('#grid')),ratio=Math.min((area.width-2)/r.width,(area.height-2)/r.height);
   if(ratio>=1)break;
   const v=Math.max(12,Math.floor(CS*ratio));if(v>=CS)break;S._csFit.v=v;testBaseRender();
  }
 }
-function testCellShape(){
- if(!PHONE||testOriginal||!S.p||!['bin','nono'].includes(S.type))return;
- const g=$('#grid'),rows=S.p.H;g.style.setProperty('--test-cell-height',CS+'px');
- const extra=g.getBoundingClientRect().height-CS*rows,available=$('#stage').clientHeight-extra;
- g.style.setProperty('--test-cell-height',Math.floor(Math.min(CS*1.35,available/rows))+'px');
+// Gebruik dezelfde aanwijzingen als de hint; alleen het kijkgebied wordt ruimer.
+function testHexClues(h,all=false){
+ const clues=h.move.proof?.clues||[];
+ if(all||h.level>1||clues.length>2)return clues;
+ const anchors=new Set(h.why||[]),lines=new Set(h.hexLines||[]);
+ return clues.filter(o=>o.kind==='line'?lines.has(o.id):o.kind==='rest'?h.rest:anchors.has(o.id));
+}
+function testHexCells(h,all=false){
+ const m=h.move,ids=new Set(all?[...(h.scope||[]),...(h.reasonScope||[]),...(m.cells||[]),...(m.why||[]),...(m.ghost||[])]:[...(h.why||[]),...(h.cells||[]),...(h.ghost||[])]);
+ for(const o of testHexClues(h,all)){
+  const positions=o.kind==='line'?S.p.lines[o.id]?.idx:o.c?.pos;
+  for(const i of positions||[])if(i>=0&&i<S.p.n)ids.add(i);
+  if((o.kind==='zone'||o.kind==='ring')&&o.id>=0)ids.add(o.id);
+ }
+ return [...ids];
 }
 function testHintElements(h,all=false){
- const m=h.move,ids=all?[...(h.scope||[]),...(h.reasonScope||[]),...(m.cells||[]),...(m.why||[]),...(m.ghost||[])]:[...(h.why||[]),...(h.cells||[]),...(h.ghost||[])],els=new Set();
+ const m=h.move,ids=S.type==='hex'?testHexCells(h,all):all?[...(h.scope||[]),...(h.reasonScope||[]),...(m.cells||[]),...(m.why||[]),...(m.ghost||[])]:[...(h.why||[]),...(h.cells||[]),...(h.ghost||[])],els=new Set();
  for(const i of ids){const e=S.type==='mur'?S.mcells?.[i]:S.type==='hex'?$('#hexsvg').querySelector('g[data-i="'+i+'"]'):S.cells?.[i];if(e){els.add(e);if(S.type==='hex')for(const txt of $('#hexsvg').querySelectorAll('text')){const er=e.getBBox();const x=+txt.getAttribute('x'),y=+txt.getAttribute('y');if(x>=er.x&&x<=er.x+er.width&&y>=er.y&&y<=er.y+er.height)els.add(txt)}}}
  if(S.type==='mur')for(const c of all?[...(h.lookCards||[]),...(h.reasonCards||[]),...(m.cards||[])]:h.cards||[]){const e=$('#mclues').querySelector('[data-c="'+c+'"]');if(e)els.add(e)}
  if(S.type==='bin'){
@@ -4459,16 +4479,16 @@ function testHintElements(h,all=false){
   for(const el of $('#grid').querySelectorAll('.k[data-ln]')){const ln=el.dataset.ln;if((ln[0]==='r'&&rows.has(+ln.slice(1)))||(ln[0]==='c'&&cols.has(+ln.slice(1))))els.add(el)}
  }
  if(S.type==='plus')for(const u of all?[h.unit,m.unit]:[h.unit])if(u!=null&&S.plab?.[u])els.add(S.plab[u]);
- if(S.type==='hex')for(const j of all?[...(h.lookHexLines||[]),...(h.reasonHexLines||[])]:h.hexLines||[]){const e=$('#hexsvg').querySelector('[data-line="'+j+'"],[data-l="'+j+'"]');if(e)els.add(e)}
+ if(S.type==='hex')for(const j of testHexClues(h,all).filter(o=>o.kind==='line').map(o=>o.id)){const e=$('#hexsvg').querySelector('[data-line="'+j+'"],[data-l="'+j+'"]');if(e)els.add(e)}
  return [...els].map(el=>{
-  const r=testRect(el),area=testRect($('#stage')),cl=PHONE&&el.closest('#mclues'),c=cl?testRect(cl):area;
+  const r=testRect(el),area=testAvailableRect(),cl=PHONE&&el.closest('#mclues'),c=cl?testRect(cl):area;
   const left=Math.max(area.left,c.left,r.left),top=Math.max(area.top,c.top,r.top),right=Math.min(area.right,c.right,r.right),bottom=Math.min(area.bottom,c.bottom,r.bottom);
   return {left,top,right,bottom,width:Math.max(0,right-left),height:Math.max(0,bottom-top)};
  }).filter(r=>r&&r.width&&r.height);
 }
 const testOverlap=(a,b,gap=8)=>a.left<b.right+gap&&a.right>b.left-gap&&a.top<b.bottom+gap&&a.bottom>b.top-gap;
 function testChooseCard(h){
- const area=testRect($('#stage')),needed=testHintElements(h,true),w=Math.min(PHONE?270:330,area.width-12),height=Math.min(PHONE?248:320,area.height-12);
+ const area=testAvailableRect(),needed=testHintElements(h,true),w=Math.min(PHONE?270:330,area.width-12),height=Math.min(PHONE?248:320,area.height-12);
  if(PHONE&&S.type==='mur'){const pb=testRect($('#pbot'));return {left:4,top:pb.top,width:innerWidth-8,height:innerHeight-pb.top,tray:true}}
  const make=(left,top)=>({left,top,width:w,height,right:left+w,bottom:top+height,tray:false});
  const board=testRect($('#playbox'));
@@ -4487,7 +4507,16 @@ function testPaintShade(h){
  const area=testRect($('#playbox')),defs=document.createElementNS(testNS,'defs'),mask=document.createElementNS(testNS,'mask');mask.id='layoutMask';mask.setAttribute('maskUnits','userSpaceOnUse');mask.setAttribute('x','0');mask.setAttribute('y','0');mask.setAttribute('width',innerWidth);mask.setAttribute('height',innerHeight);
  const rect=(r,color)=>{const el=document.createElementNS(testNS,'rect');for(const [k,v]of Object.entries({x:r.left,y:r.top,width:r.width,height:r.height,fill:color}))el.setAttribute(k,v);return el};
  mask.append(rect(area,'white'));
- for(const r of testHintElements(h)){const left=Math.max(area.left,r.left-3),top=Math.max(area.top,r.top-3),right=Math.min(area.right,r.right+3),bottom=Math.min(area.bottom,r.bottom+3);if(right>left&&bottom>top)mask.append(rect({left,top,width:right-left,height:bottom-top},'black'))}
+ const hole=r=>{const left=Math.max(area.left,r.left-2),top=Math.max(area.top,r.top-2),right=Math.min(area.right,r.right+2),bottom=Math.min(area.bottom,r.bottom+2);if(right>left&&bottom>top)mask.append(rect({left,top,width:right-left,height:bottom-top},'black'))};
+ if(S.type==='hex'){
+  // Volg de echte zeshoeken: rechthoekige gaten zouden halve buurvakjes onthullen.
+  for(const i of testHexCells(h)){
+   const polygon=$('#hexsvg').querySelector('g[data-i="'+i+'"] polygon');if(!polygon)continue;
+   const matrix=polygon.getScreenCTM(),points=[...polygon.points].map(p=>new DOMPoint(p.x,p.y).matrixTransform(matrix));
+   const cutout=document.createElementNS(testNS,'polygon');cutout.setAttribute('points',points.map(p=>p.x+','+p.y).join(' '));cutout.setAttribute('fill','black');mask.append(cutout);
+  }
+  for(const o of testHexClues(h).filter(o=>o.kind==='line')){const label=$('#hexsvg').querySelector('[data-l="'+o.id+'"]');if(label)hole(testRect(label))}
+ }else for(const r of testHintElements(h))hole(r);
  defs.append(mask);testShade.append(defs);const shade=rect(area,getComputedStyle(document.documentElement).getPropertyValue('--bg').trim());shade.setAttribute('fill-opacity','.78');shade.setAttribute('mask','url(#layoutMask)');testShade.append(shade);
 }
 function testHintPosition(h){
@@ -4500,7 +4529,7 @@ function testHintPosition(h){
  b.style.display='block';
  if(!b.querySelector('.layout-copy')){
   const copy=document.createElement('div');copy.className='layout-copy';const actions=document.createElement('div');actions.className='layout-actions';
-  for(const e of [...b.children])if(e.matches('.hintnext,.hintback'))actions.append(e);else if(!e.matches('.hx,.hht'))copy.append(e);
+  for(const e of [...b.children])if(e.matches('.hintnext,.hintback')){if(c.tray&&e.matches('.hintback')){e.setAttribute('aria-label',e.textContent);e.textContent='←'}actions.append(e)}else if(!e.matches('.hx,.hht'))copy.append(e);
   b.append(copy,actions);
  }
  testPaintShade(h);
@@ -4510,13 +4539,13 @@ layoutHintCard=function(h){if(testOriginal)return testBaseLayoutHint(h);repaintH
 const testBaseHide=hideHint;
 hideHint=function(){testShade.setAttribute('hidden','');document.body.classList.remove('layout-tray-open');$('#hint').classList.remove('layout-hint','layout-tray');testBaseHide()};
 const testBaseInvalidate=invalidateHint;
-invalidateHint=function(){testBaseInvalidate();testPaintShade(S.hint)};
-$('#stage').addEventListener('scroll',()=>{if(S.hint&&!testOriginal)testPaintShade(S.hint)},{passive:true});
+invalidateHint=function(){testBaseInvalidate();if(!testOriginal)testPaintShade(S.hint)};
+document.addEventListener('scroll',()=>{if(S.hint&&!testOriginal)testPaintShade(S.hint)},{passive:true,capture:true});
 addEventListener('resize',()=>{requestAnimationFrame(()=>{testFrame();if(S.p){resetPuzzleFit();render()}if(S.hint&&!testOriginal){delete S.hint.testCard;testHintPosition(S.hint)}})});
 $('#testSize').onchange=()=>{if(S.p){setFreePreferences(S.type,+$('#testSize').value+(PHONE?3:0),S.nv);load(S.type,true,true)}};
 $('#testNew').onclick=()=>{const t=S.type||'bin';setFreePreferences(t,+$('#testSize').value+(PHONE?3:0),S.nv);load(t,true,true)};
-$('#testCompare').onclick=()=>{clearHint();testOriginal=!testOriginal;window.LAYOUT_ORIGINAL=testOriginal;document.body.classList.toggle('layout-proef',!testOriginal);$('#testCompare').setAttribute('aria-pressed',String(testOriginal));$('#testCompare').textContent=testOriginal?'Terug naar proef':'Vergelijk';resetPuzzleFit();if(S.p)render()};
-const intro=document.createElement('p');intro.id='layoutIntro';intro.textContent='Proefversie: probeer de verschillende puzzels en de drie hintstappen. “Vergelijk” toont de bestaande indeling van hetzelfde bord. Je echte scores en voortgang worden hier niet gebruikt.';
+$('#testCompare').onclick=()=>{clearHint();testOriginal=!testOriginal;window.LAYOUT_ORIGINAL=testOriginal;document.body.classList.toggle('layout-proef',!testOriginal);$('#testCompare').setAttribute('aria-pressed',String(testOriginal));$('#testCompare').textContent=testOriginal?'Proefversie':'Origineel';resetPuzzleFit();if(S.p)render()};
+const intro=document.createElement('p');intro.id='layoutIntro';intro.textContent='Proefversie: probeer de verschillende puzzels en de drie hintstappen. “Origineel” toont de bestaande indeling van hetzelfde bord. Je echte scores en voortgang worden hier niet gebruikt.';
 const testHomeObserver=new MutationObserver(()=>{const wrap=$('#home .hwrap');if(wrap&&!wrap.querySelector('#layoutIntro'))wrap.prepend(intro)});testHomeObserver.observe($('#home'),{childList:true,subtree:true});
 setMe('layout-tester','Testspeler');testFrame();setFreePreferences('bin',PHONE?5:2);load('bin',true,true);
 </script></body></html>

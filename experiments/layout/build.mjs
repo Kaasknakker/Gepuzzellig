@@ -15,14 +15,10 @@ html=html.replace(/<script([^>]*)src="([^"?]+)[^"]*"[^>]*><\/script>/g,(_,attrs,
  let code=read(p).replace(/\blocalStorage\b/g,'window.LAYOUT_STORAGE');
  if(p==='js/core.js'){
   code=code.replace('if("serviceWorker"in navigator&&','if(false&&"serviceWorker"in navigator&&');
-  // Houd de bruikbare celgrootte begrensd, ook op een 4K-scherm.
-  code=code.replace('Math.min(96,Math.floor((availBot()', 'Math.min(window.LAYOUT_ORIGINAL?96:S.type==="plus"?56:S.type==="nono"?40:S.type==="bin"?48:64,Math.floor((availBot()');
-  code=code.replace('CS=Math.max(24,','CS=Math.max(window.LAYOUT_ORIGINAL?24:PHONE?18:24,');
-  code=code.replace('(availBot()-top-(S.hint?10:0))','(availBot()-top-(window.LAYOUT_ORIGINAL?(S.hint?10:0):22))');
-  code=code.replace('Math.max(.4,Math.min','Math.max(window.LAYOUT_ORIGINAL?.4:.1,Math.min');
-  code=code.replace('Math.min(2.45,fit)','Math.min(window.LAYOUT_ORIGINAL?2.45:1.15,fit)');
-  code=code.replace('availH*.55/N','availH*.46/N');
-  code=code.replace('Math.min(100,wide?', 'Math.min(window.LAYOUT_ORIGINAL?100:76,wide?');
+  // Behoud de oorspronkelijke maatvoering op telefoon/tablet. Alleen zeer
+  // ruime desktops en kleine Pluszle-borden krijgen een leesbaar maximum.
+  code=code.replace('Math.min(96,Math.floor((availBot()', 'Math.min(window.LAYOUT_ORIGINAL?96:S.type==="plus"?56:innerWidth>2000?(S.type==="nono"?56:72):96,Math.floor((availBot()');
+  code=code.replace('Math.min(2.45,fit)','Math.min(window.LAYOUT_ORIGINAL||innerWidth<=2000?2.45:1.7,fit)');
   const from='ol.onpointerdown=e=>{const li=e.target.closest&&e.target.closest("[data-c]");if(!li)return;e.preventDefault();';
   code=code.replace(from,'ol.onclick=e=>{const li=e.target.closest&&e.target.closest("[data-c]");if(!li)return;');
  }
