@@ -50,3 +50,26 @@ Dit secret bevat de JSON-sleutel van een aparte Google Cloud service account met
 de rol **Firebase Rules Admin** (`roles/firebaserules.admin`).
 
 Na deze inrichting is handmatig `firebase deploy` normaal niet meer nodig.
+
+## Automatische uitnodigingsmail
+
+De webapp maakt uitnodigingen ook zonder mailfunctie; de persoonlijke link blijft altijd als fallback beschikbaar.
+
+De servercode staat in `functions/index.js` en gebruikt een callable Firebase Function in `europe-west1`. De functie controleert zelf de ingelogde afzender en de Firestore-uitnodiging voordat er een e-mail naar het gekoppelde adres wordt verstuurd.
+
+Voor echte verzending zijn twee Firebase Functions secrets nodig:
+
+- `POSTMARK_SERVER_TOKEN` — de Server API Token van de Postmark-server.
+- `POSTMARK_FROM` — een bij Postmark geverifieerde afzender, bijvoorbeeld `Gepuzzellig <uitnodigen@voorbeeld.nl>`.
+
+Instellen met Firebase CLI:
+
+```bash
+firebase functions:secrets:set POSTMARK_SERVER_TOKEN --project gepuzzelig
+firebase functions:secrets:set POSTMARK_FROM --project gepuzzelig
+```
+
+Daarna kan de GitHub Action **Deploy Firebase Functions** handmatig worden gestart. Zonder deze secrets blijft uitnodigen gewoon werken via de kopieerbare link; de app toont dan dat automatische e-mail nog niet actief is.
+
+De Postmark-token hoort nooit in `index.html`, JavaScript voor de browser, Firestore of GitHub-broncode.
+
