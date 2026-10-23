@@ -997,8 +997,7 @@ function lpNote(i){const t=S.type;
  else if(t==="mur"){paintMur();if(S.cur[i]!==-1||murBlocked(S.p,i))return;if(!(S.ms>=0)){const m=$("#msg");m.textContent="Kies eerst iemand onderaan voor een aantekening.";setTimeout(()=>{if(m.textContent.startsWith("Kies eerst"))m.textContent=""},2000);return}noteSet(i,(S.nt[i]||0)^(1<<S.ms))}
  const d=t==="mur"?S.mcells&&S.mcells[i]:S.cells&&S.cells[i];if(d)popEl(d)}
 function setPotlood(on){potlood=!!on;setTimeout(()=>{try{syncA11y()}catch(e){}},0);const b=$("#potb");if(b)b.classList.toggle("on",potlood);document.body.classList.toggle("potlood",potlood)}
-/* ---- Murdoku ---- */
-const MHUE=[350,28,140,205,265,48,175];
+/* ---- Murdoku ---- */const MHUE=[350,28,140,205,265,48,175];
 const solCur=p=>{const c=Array(p.N*p.N).fill(-1);p.sol.forEach((cell,s)=>{c[cell]=s});return c};
 const murM=p=>({N:p.N,V:p.V,reg:p.reg,obj:p.obj.map(t=>t?{t}:null)});
 const murTok=(p,s,dark)=>s===p.V?`<span class="tok vt">${murTag(p,s)}</span>`:`<span class="tok" style="background:hsl(${MHUE[s]},62%,${dark?"50%":"45%"})">${murTag(p,s)}</span>`;
@@ -1293,9 +1292,13 @@ addEventListener("pdready",startBoard);addEventListener("pdready",()=>setTimeout
 if("serviceWorker"in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){
  /* iOS kan een beginscherm-app lang in het geheugen houden. Controleer daarom ook bij terugkeer naar de app op een nieuwe worker. */
  const swHadController=!!navigator.serviceWorker.controller;let swPending=false,swReloading=false;
- const swApply=()=>{if(!swPending||swReloading||!document.body.classList.contains("home"))return false;swReloading=true;location.reload();return true};
- window.PD_APPLY_SW_UPDATE=swApply;
- navigator.serviceWorker.addEventListener("controllerchange",()=>{if(!swHadController)return;swPending=true;swApply()});
+ /* Een nieuwe versie wordt NIET toegepast terwijl je de app gebruikt (dan gaan tikken verloren tijdens het herladen).
+    De worker serveert per versie precies de juiste bestanden, dus de huidige pagina blijft gewoon goed werken.
+    We herladen pas als je de app verlaat terwijl je op Home staat; als je terugkomt draait de nieuwe versie. */
+ const swApply=()=>{if(!swPending||swReloading||!document.body.classList.contains("home"))return false;swReloading=true;try{pauseAndPersistActive(true)}catch(e){}location.reload();return true};
+ window.PD_APPLY_SW_UPDATE=()=>false;
+ navigator.serviceWorker.addEventListener("controllerchange",()=>{if(!swHadController)return;swPending=true});
+ document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")swApply()});
  const swCheck=()=>navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{});
  addEventListener("load",async()=>{try{let r;try{r=await navigator.serviceWorker.register("sw.js",{updateViaCache:"none"})}catch(e){r=await navigator.serviceWorker.register("sw.js")}r.update().catch(()=>{})}catch(e){}});
  addEventListener("pageshow",swCheck);
