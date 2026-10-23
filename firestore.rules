@@ -372,6 +372,7 @@ service cloud.firestore {
         && request.resource.data.suggestedGroupName == resource.data.suggestedGroupName
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.expiresAt == resource.data.expiresAt
+        && request.resource.data.get('mailSentAt',0) == resource.data.get('mailSentAt',0)
         && (
           (
             resource.data.createdByAuthUid == request.auth.uid
