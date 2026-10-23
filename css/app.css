@@ -1137,7 +1137,7 @@ body.nieuw{min-height:100vh;min-height:100dvh;background-repeat:repeat}
 #tbHome{display:inline-flex;align-items:center;justify-content:center;line-height:1}
 #tbHome svg{display:block;width:22px;height:22px;flex:none}
 /* Brede desktop: bediening en bord beginnen samen, binnen dezelfde speelruimte. */
-@media(min-width:1200px) and (min-aspect-ratio:23/20){
+@media(min-width:1200px) and (min-aspect-ratio:23/20) and (hover:hover) and (pointer:fine){
  body.tablet.nieuw:not(.home):not(.newpick) main{max-width:1120px;margin-inline:auto;padding:24px 24px 24px 176px}
  body.tablet.nieuw:not(.home):not(.newpick) #stage{margin-left:0}
  body.tablet.nieuw:not(.home):not(.newpick) #pbot{left:max(24px,calc((100vw - 1120px)/2 + 24px));top:86px;bottom:auto;transform:none;max-height:calc(100dvh - 110px)}
