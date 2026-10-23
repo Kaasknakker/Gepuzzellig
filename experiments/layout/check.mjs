@@ -23,6 +23,8 @@ try{
     return {type:S.type,left:r.left,right:r.right,top:r.top,bottom:r.bottom,stage:area,cs:CS,murOverflow:S.type==='mur'&&!PHONE?getComputedStyle($('#mclues')).overflow:null};
    });
    assert(geometry.left>=-1&&geometry.right<=width+1,`${name}/${t}: bord buiten breedte: ${JSON.stringify(geometry)}`);
+   if(phone)assert(await page.evaluate(()=>{const p=$('#prow').getBoundingClientRect(),b=$('#playbox').getBoundingClientRect();return b.top-p.bottom>=12}),`${name}/${t}: onvoldoende ruimte boven bord`);
+   if(phone)assert(await page.evaluate(()=>{const a=testAvailableRect(),b=$('#playbox').getBoundingClientRect();return b.height>a.height||Math.abs((b.top+b.bottom)/2-(a.top+a.bottom)/2)<1}),`${name}/${t}: niet verticaal gecentreerd`);
    if(t!=='mur')assert(geometry.bottom<=geometry.stage.bottom+2,`${name}/${t}: bord buiten speelruimte: ${JSON.stringify(geometry)}`);
    if(t==='plus'&&!phone)assert(geometry.cs>56&&geometry.cs<=96,'Pluszle passend en groter');
    if(!phone)assert(Math.abs((geometry.left+geometry.right)/2-width/2)<2,`${name}/${t}: bord niet gecentreerd`);
@@ -34,7 +36,9 @@ try{
    const restored=await page.evaluate(()=>({footer:$('#pbot').getBoundingClientRect().height,board:$(S.type==='hex'?'#hexsvg':S.type==='mur'?'#mgrid':'#grid').getBoundingClientRect().toJSON()}));
    if(phone)assert(Math.abs(restored.footer-original.footer)<1,`${name}/${t}: verhoogde lege knoppenstrook`);
    const originalFits=original.left>=0&&original.right<=width&&original.bottom<=(original.side?height:original.footerTop)+1;
-   if(phone&&t!=='mur'&&originalFits){assert(restored.board.width>=original.width*.97,`${name}/${t}: kleiner dan passend origineel`);assert(restored.board.height>=original.height*.97,`${name}/${t}: onnodig lagere puzzel`)}
+   // Alleen de nieuwe tussenruimte (12 px) en afronding mogen maat kosten.
+   const fitRatio=Math.max(0,1-12/original.height)*.97;
+   if(phone&&t!=='mur'&&originalFits){assert(restored.board.width>=original.width*fitRatio,`${name}/${t}: kleiner dan passend origineel`);assert(restored.board.height>=original.height*fitRatio,`${name}/${t}: onnodig lagere puzzel`)}
    if(!phone)assert(await page.evaluate(()=>{const b=$(S.type==='mur'&&document.body.classList.contains('layout-rail')?'#mgrid':'#playbox').getBoundingClientRect(),p=$('#pbot').getBoundingClientRect();return !testOverlap(b,p,0)&&(document.body.classList.contains('layout-rail')?Math.abs(b.left-p.right-12)<2:p.top>=b.bottom&&p.top-b.bottom<16)}),`${name}/${t}: bediening niet naast/onder bord`);
    assert(await page.evaluate(()=>{
     const make=(extra={})=>({level:1,scope:[],why:[],cells:[],cards:[],move:{cells:[]},...extra});

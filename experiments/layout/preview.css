@@ -8,6 +8,9 @@ body.layout-proef.phone #mclues{touch-action:pan-y!important;overscroll-behavior
 body.layout-proef:not(.phone) #mclues{max-height:none!important;overflow:visible}
 body.layout-proef.phone #home .hwrap{padding:12px 10px 24px!important}
 body.layout-proef.phone #home .hsection{margin-top:12px}
+/* Ook de buitenrand van het bord blijft los van de bovenste knoppen. */
+body.layout-proef.phone:not(.home):not(.newpick) #stage{margin-top:12px}
+body.layout-proef.phone #playbox{transform:translateY(var(--phone-y,0px))!important}
 body.layout-proef.phone .sper{flex-wrap:wrap;gap:3px}
 body.layout-proef.phone .sper button{min-height:40px;padding:6px 11px}
 body.layout-proef.phone .sco .stop{flex-wrap:wrap}
