@@ -1531,7 +1531,14 @@ function showNewFree(t,random,fromCurrent,nvForced){if(!TYPES[t])return;
  const meta=old=>[old&&LVN[old.type]?LVL[old.lvl]:"",old&&old.e.pc!=null?old.e.pc+"% ingevuld":""].filter(Boolean).join(" · ");
  const levelScreen=()=>{$("#npmt").textContent="Nieuwe "+titleName();sub.textContent=LVN[t]?"Kies de moeilijkheid.":"Klaar voor een nieuwe puzzel?";lvBox.innerHTML="";const old=latestFreeProgress(t,t==="nono"?nv:undefined),levels=LVN[t]||[2];levels.forEach(l=>{const b=document.createElement("button");b.className="nplvb";const desc=t==="nono"&&nv==="color"?(LVS[t][l]||"")+" · "+nonoColorCount(l)+" kleuren":LVS[t]&&LVS[t][l]?LVS[t][l]:"";b.innerHTML="<b>"+(LVN[t]?LVL[l]:"Starten")+"</b><small>"+desc+"</small><span>›</span>";b.onclick=()=>startChosenFree(t,l,nv,random,!!old);lvBox.append(b)})};
  const existing=old=>{$("#npmt").textContent=titleName();sub.textContent="Je hebt nog een onafgemaakte vrije puzzel.";lvBox.innerHTML='<div class="npwarn"><b>Wat wil je doen?</b><p>'+meta(old)+'</p><div class="npactions"><button id="npcontinue">Verder puzzelen</button><button id="npreplace" class="secondary">Vervangen</button></div></div>';$("#npcontinue").onclick=()=>resumeProgress(old.k);$("#npreplace").onclick=levelScreen};
- const old=latestFreeProgress(t,t==="nono"?nv:undefined);if(old)existing(old);else levelScreen()}
+ const old=latestFreeProgress(t,t==="nono"?nv:undefined);
+ if(fromCurrent&&old){
+  $("#npmt").textContent="Nieuwe "+titleName()+" starten?";
+  sub.textContent="Je onafgemaakte vrije puzzel wordt vervangen zodra je een nieuwe moeilijkheid kiest.";
+  lvBox.innerHTML='<div class="npwarn"><p>'+meta(old)+'</p><div class="npactions"><button id="npnew">Kies moeilijkheid</button><button id="npcancel" class="secondary">Annuleren</button></div></div>';
+  $("#npnew").onclick=levelScreen;
+  $("#npcancel").onclick=()=>origin?load(origin.type,origin.practice,false,origin.date):showHome();
+ }else if(old)existing(old);else levelScreen()}
 
 $("#npmx").onclick=showHome;
 

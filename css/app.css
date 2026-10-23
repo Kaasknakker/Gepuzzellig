@@ -1145,8 +1145,8 @@ body.nieuw{min-height:100vh;min-height:100dvh;background-repeat:repeat}
 
 /* Ruimte voor de 7px-rand van Hexcells binnen het scrollende hintgebied. */
 body.hintside[data-t=hex] #hexw,body.hintdock[data-t=hex] #hexw{padding:10px}
-.hcontrow{display:flex;align-items:stretch;gap:6px;min-width:0}
-.hcontrow>.hcont{flex:1;min-width:0}
+.hcontrow{display:flex;align-items:stretch;gap:0;min-width:0;border:1px solid var(--line);border-radius:16px;background:var(--card);overflow:hidden}
+.hcontrow>.hcont{flex:1;min-width:0;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none}.hcontrow>.hdelete{align-self:stretch;margin:8px 0;padding:10px;border:0;border-left:1px solid var(--line);border-radius:0;background:transparent;color:var(--mut)}.hcontrow>.hdelete:hover{color:#b5483a}
 .hdelete{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:44px;min-height:44px;padding:10px;border-radius:12px;box-shadow:none;color:#b5483a}
 .hdelete svg{width:20px;height:20px;display:block}
 .hdelete:hover{background:color-mix(in srgb,#b5483a 10%,var(--card))}
