@@ -24,3 +24,5 @@ jobs:
         run: node .github/scripts/check-autocross.mjs
       - name: Stapsgewijze hints controleren
         run: node .github/scripts/check-hints.mjs
+      - name: Puzzelspecifieke hintafleidingen controleren
+        run: node .github/scripts/check-hint-guidance.mjs

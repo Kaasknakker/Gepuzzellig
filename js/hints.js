@@ -96,62 +96,22 @@ function murGuidance(move){
  return {direction,reason:[...new Set(parts)].join(" "),lookCards:owners.length?[...new Set(primary.map(c=>c.p))]:[person],reasonCards:[...new Set([person,...used.map(c=>c.p)])]};
 }
 function prepareHint(move){
- const p=S.p,t=S.type,i=move.cells[0],W=p.W||p.N;
- const all=Array.from({length:S.cur?S.cur.length:p.n},(_,j)=>j);
- let scope=[],direction="",reason="",cards=[],unit,lookCards,reasonCards;
- const row=()=>all.filter(j=>(j/W|0)===(i/W|0));
- if(t==="hex"){
-  // Alleen reeds zichtbare aanwijzingen, nooit de nog te openen doelvakjes.
-  scope=(move.why||[]).filter(j=>S.hx.rev.has(j));
-  direction=move.rest?'Kijk naar de teller “nog te vinden” en de zichtbare aanwijzingen.':scope.length?"Bekijk de gestippeld omrande aanwijzingen en tel wat al bekend is.":"Vergelijk de zichtbare aanwijzingen rond de onbekende vakjes.";
-  reason="Een getal legt vast hoeveel blauwe vakjes bij de aanwijzing horen. Trek de gevonden blauwe vakjes daarvan af en vergelijk dat met het aantal onbekende vakjes.";
-  if(move.nk>1||move.kind==="deduce")reason+=" Combineer de aanwijzingen die vakjes delen: een verdeling moet bij alle betrokken getallen passen. Dezelfde blauwe vakjes tellen in het totaal maar één keer.";
- }else if(t==="mur"){
-  // Een rij van de oplossing zou hier de plaats al verraden: gebruik kaartjes.
+ const t=S.type;
+ let scope=[],reasonScope,direction="",reason="",cards=[],unit,lookCards,reasonCards,lookHexLines,reasonHexLines;
+ if(t==="mur"){
   const guide=murGuidance(move);({direction,reason,lookCards,reasonCards}=guide);cards=lookCards;
   if(move.kind!=="fix")move.cards=reasonCards;
+  if(!move.steps&&move.kind==="set")reason+=" Voor deze stap is geen korte, controleerbare uitleg beschikbaar. De volgende stap toont de uitkomst van de oplosser.";
  }else{
-  const why=move.why||[];
-  // Een volledige lijn of regio houdt ook bij één doelvakje de zet verborgen.
-  scope=why.length>1?[...new Set(why)]:row();
-  if(t==="plus"&&move.unit!=null){scope=S.pu[move.unit].cells.slice();unit=move.unit}
-  if(t==="star"&&why.length<=1&&p.reg)scope=all.filter(j=>p.reg[j]===p.reg[i]);
-  if(t==="nono"||t==="bin"){
-   const anchor=scope[0];
-   if(scope.every(j=>(j/W|0)===(anchor/W|0)))scope=all.filter(j=>(j/W|0)===(anchor/W|0));
-   else if(scope.every(j=>j%W===anchor%W))scope=all.filter(j=>j%W===anchor%W);
-  }
-  const rows=[...new Set(scope.map(j=>j/W|0))],cols=[...new Set(scope.map(j=>j%W))];
-  const name=rows.length===1?"rij "+(rows[0]+1):cols.length===1?"kolom "+(cols[0]+1):t==="star"&&scope.every(j=>p.reg[j]===p.reg[i])?"het gemarkeerde gebied":"de gemarkeerde rijen of kolommen";
-  direction="Kijk naar "+name+". Vergelijk wat er al staat met de regels van deze puzzel.";
-  if(t==="bin"){
-   reason=/twee keer.*naast elkaar|vakje ertussen/.test(move.text)?"Drie gelijke tekens achter elkaar mogen niet. Zoek een paar gelijke tekens of twee gelijke tekens met een opening ertussen en bekijk hoe je een drietal voorkomt.":/gelijk|Vergelijk/.test(move.text)?"Elke rij en kolom heeft evenveel kruisjes als rondjes, nooit drie dezelfde achter elkaar, en mag niet gelijk zijn aan een andere volledige lijn. Vergelijk de mogelijkheden met die drie regels.":"Tel kruisjes en rondjes in de gemarkeerde lijn: van elk moet precies de helft voorkomen. Zodra één soort compleet is, volgt de andere soort voor de resterende vakjes.";
-  }else if(t==="nono"){
-   reason=p.color?"Schuif de gekleurde blokken zo ver mogelijk naar beide kanten, rekening houdend met ingevulde vakjes. Vakjes die in elke geldige plaatsing dezelfde kleur hebben, staan vast. Blokken van dezelfde kleur hebben een leeg vakje ertussen; verschillende kleuren mogen elkaar raken.":"Schuif de blokken zo ver mogelijk naar beide kanten, rekening houdend met ingevulde vakjes en minstens één leeg vakje tussen blokken. Overlap is zeker gevuld; een vakje dat geen enkel blok kan bereiken blijft leeg.";
-   if(rows.length===1||cols.length===1){const cl=rows.length===1?p.rc[rows[0]]:p.cc[cols[0]];reason="De aanwijzing is "+(p.color?cnText(cl):cl.join(", ")||"0")+". "+reason}
-  }else if(t==="plus"){
-   const u=unit==null?null:S.pu[unit],kept=u?u.cells.reduce((a,j)=>a+(S.cur[j]===1?p.num[j]:0),0):0;
-   reason=u?"De lijn moet samen "+u.t+" zijn. Omcirkelde getallen tellen al voor "+kept+" mee; er ontbreekt dus "+(u.t-kept)+". Vergelijk de combinaties van de overige getallen. Getallen die in elke passende combinatie voorkomen blijven staan; getallen die in geen enkele voorkomen vallen af.":"Trek de omcirkelde getallen af van het lijntotaal. Vergelijk welke combinaties van de overige getallen precies het ontbrekende totaal maken.";
-  }else if(t==="star"){
-   const k=p.K||2;
-   reason="Elke rij, kolom en regio bevat "+k+(k===1?" ster":" sterren")+". Sterren raken elkaar ook schuin niet. Tel de beschikbare plekken en vergelijk hoeveel sterren de gemarkeerde lijnen en gebieden samen nodig hebben.";
-   if(move.kind==="contra"||move.kind==="deep"||/Stel dat/.test(move.text))reason+=" Probeer een mogelijkheid in gedachten en volg de gevolgen: als er elders te weinig ruimte overblijft, valt die mogelijkheid af.";
-  }
+  ({scope,reasonScope,direction,reason,unit,lookHexLines,reasonHexLines}=puzzleGuidance(move));
  }
- if(move.kind==="fix"&&t!=="mur")reason="Er staat invoer in dit kijkgebied die niet met een geldige oplossing samengaat. Controleer de ingevulde keuzes opnieuw met de puzzelregels. In de volgende stap wijs ik aan welke invoer je kunt wissen; een correctie is nog geen nieuwe oplossingszet.";
- // Een veilige, concrete aanleiding uit de bestaande redenering toevoegen.
- // Zinnen over een doelvakje of een uitkomst horen pas bij de concrete zet.
- if(move.kind!=="fix"&&t!=="mur"){
-  const first=(move.text||"").match(/^(?:Kijk naar (?:rij|kolom) \d+\. )?((?:In (?:rij|kolom) \d+|Het (?:eerste|tweede|derde|vierde|vijfde|zesde|zevende|achtste) blok)[^.]+\.)/);
-  if(first&&!/dit vakje|deze vakjes|hier|dus|wordt|worden|blijven|ster:|kruisje:/i.test(first[1]))reason=first[1]+" "+reason;
- }
- if(move.kind==="reveal"||move.kind==="deep"||(t==="mur"&&!move.steps&&move.kind==="set"))reason+=" Voor deze stap is geen korte, controleerbare uitleg beschikbaar. De volgende stap toont de uitkomst van de oplosser.";
  const key=JSON.stringify([t,move.kind||"tech",move.set==null?null:move.set,move.cells,move.kind==="fix"?move.cells.map(j=>S.cur[j]):null]);
- return {move,key,level:1,scope,direction,reason,cards,unit,lookCards,reasonCards,cells:[],why:scope};
+ return {move,key,level:1,scope,direction,reason,cards,unit,lookCards,reasonCards,reasonScope:reasonScope||scope,lookHexLines,reasonHexLines,cells:[],why:scope};
 }
 function projectHint(h){
  const full=h.level===3,m=h.move;
- h.cells=full?m.cells:[];h.why=full?(m.why||[]):h.scope;
+ h.cells=full?m.cells:[];h.why=full?(m.why||[]):h.level===1?h.scope:h.reasonScope;
+ h.hexLines=h.level===1?h.lookHexLines:h.reasonHexLines;
  h.ghost=full?m.ghost:null;h.cards=full?m.cards:h.level===1?h.lookCards||h.cards:h.reasonCards||h.cards;
  h.rest=m.rest;h.unit=full?m.unit:h.unit;
 }

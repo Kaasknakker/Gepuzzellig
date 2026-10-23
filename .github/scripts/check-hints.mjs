@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 
 const context=vm.createContext({assert,console});
 vm.runInContext('let S={};',context);
+vm.runInContext(fs.readFileSync('js/hint-guidance.js','utf8'),context);
 vm.runInContext(fs.readFileSync('js/hints.js','utf8'),context);
 vm.runInContext(`
 const move={kind:'tech',cells:[1],why:[0,1,2,3],set:1,text:'In rij 1 staan twee keer ○ naast elkaar.',btn:'Invullen'};
@@ -50,6 +51,7 @@ console.log('OK: hintniveaus, diepste registratie, heropenen/hervatten, oude aan
 const murContext=vm.createContext({assert,console});
 vm.runInContext(`let S={};const GROUP_INFO={},window={PD_SETUP:{group:'live'}};const $=()=>({value:'test'});`,murContext);
 for(const name of ['shared','murdoku'])vm.runInContext(fs.readFileSync('js/puzzles/'+name+'.js','utf8'),murContext);
+vm.runInContext(fs.readFileSync('js/hint-guidance.js','utf8'),murContext);
 vm.runInContext(fs.readFileSync('js/hints.js','utf8'),murContext);
 const core=fs.readFileSync('js/core.js','utf8');
 vm.runInContext(core.slice(core.indexOf('const murM='),core.indexOf('\n',core.indexOf('const murM='))),murContext);

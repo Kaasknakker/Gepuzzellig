@@ -42,6 +42,7 @@ Home, overzicht en puzzel/hintschermen zijn lokaal in de browser bekeken. Profie
 
 - `#hint` en `#hintb`: de hintkaart en hintknop in alle zes actieve puzzelsoorten.
 - `.c.ht/.hr`, `.mc.ht/.hr`, `#mclues li.hr` en Hexcells-SVG: uitsluitend actieve hintmarkeringen; functionele vulling, muren, cijfers, symbolen en klikvlakken blijven behouden.
+- Bij Hexcells kan ook het gebruikte lijngetal een dunne gestippelde markering krijgen. De markering groeit mee met de aanwijzingen die de geopende hintstap bespreekt.
 - De ruimteberekening van het speelgebied wanneer een hint openstaat. Op brede schermen een zijpaneel; op smalle schermen een kaart boven de bestaande bediening. Een te groot bord kan binnen zijn eigen gebied scrollen in plaats van onder de hint te vallen.
 - Resultaatkaarten en het dagdetail tonen de hulpverdeling. De bestaande compacte badges blijven aantallen tonen; hun toelichting vermeldt de verdeling. Tekst in dagmetingen mag afbreken.
 - Resultaten en voortgang bewaren hulpgegevens. De Firestore-regels ondersteunen de nieuwe verdeling; oude resultaten blijven geldig. Een oudere serverregel krijgt tijdelijk het bestaande totaalaantal zonder verdeling aangeboden.

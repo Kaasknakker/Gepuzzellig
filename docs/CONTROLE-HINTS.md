@@ -4,7 +4,7 @@ Datum: 23 oktober 2026. Uitgangspunt: nieuwste main `26b5852acfd0e1401fadb5b72cc
 
 ## Automatische controles
 
-- `node .github/scripts/check-app.mjs`: geslaagd; scripts, gezamenlijke laadvolgorde, serviceworker-syntax en consistente bestandsversie 88.
+- `node .github/scripts/check-app.mjs`: geslaagd; scripts, gezamenlijke laadvolgorde, serviceworker-syntax en consistente bestandsversie 89.
 - `node .github/scripts/check-autocross.mjs`: geslaagd; bestaande automatische kruisjes, handmatige markeringen en voorkeuren behouden.
 - `node .github/scripts/check-hints.mjs`: geslaagd; diepste geopende niveau, één hint bij doorstappen, heropenen, hervatten, oude aantallen, samenvatting en correcties zonder dubbeltelling. Controle op verborgen doelcellen bij Murdoku en Hexcells.
 - De nieuwe hintcontrole is toegevoegd aan de bestaande GitHub-check.
@@ -31,6 +31,20 @@ De eerste schermcontrole vond overlap op de staande iPad bij kleurnonogram en Mu
 De eerste versie toonde te algemene spelregels bij kijkrichting en redenering. Deze teksten gebruiken nu de echte aanwijzingen en afleidingsredenen uit de bestaande Murdoku-oplosser. Stap 1 noemt de relevante kaartjes en het soort aanwijzing; stap 2 citeert de gebruikte aanwijzingen en legt de toepasselijke uitsluitingen uit. De markering groeit van de belangrijkste kaartjes naar de aanvullende kaartjes. Alleen stap 3 markeert de doelcel.
 
 De automatische controle doorloopt opeenvolgende plaatsingen op alle zes Murdoku-niveaus. Daarbij worden verschillende eerste hints, verborgen doelcoördinaten en het voorkomen van een cirkelredenering gecontroleerd. Voorwaarden uit een hulpafleiding worden niet als uitsluiting voor een andere persoon gepresenteerd. De aangepaste kijkrichting en redenering zijn ook in de lokale webversie bekeken met een hervatte dagpuzzel.
+
+### Aanscherping van de overige puzzels
+
+Ook Binair, Star Battle, Nonogram, Kleurnonogram, Hexcells en Pluszle gebruiken nu gegevens van de daadwerkelijk gekozen techniek. Hiervoor bewaren de bestaande hintoplossers onder meer de betrokken lijn, aantallen, blokgrenzen, combinaties of gebruikte aanwijzingen. De presentatie zoekt deze informatie niet meer op via trefwoorden in de uiteindelijke hinttekst.
+
+- Binair: concrete paren, aantallen per teken, vergelijking met een andere lijn of het aantal geldige aanvullingen.
+- Star Battle: geplaatste/ontbrekende sterren, beschikbare plekken, capaciteit van lijnen en gebieden of de tegenspraak uit de afleiding.
+- Nonogram/Kleurnonogram: de betreffende lijn en het blok, ruimte om te schuiven, overlap en het aantal passende plaatsingen.
+- Pluszle: de betreffende som, reeds omcirkeld totaal, open getallen en de werkelijk toegepaste rekenregel.
+- Hexcells: de gebruikte zichtbare aanwijzingen, gevonden en ontbrekende aantallen en beperkingen in hun gedeelde plekken. Een lijngetal krijgt een gestippelde markering. Verborgen doelvakjes blijven in de eerste twee stappen ongemarkeerd. Als de volledige oplosser nodig is, wordt geen korte lokale afleiding verzonnen.
+
+`node .github/scripts/check-hint-guidance.mjs` controleert 288 opeenvolgende hintzetten: acht per puzzelvariant op alle zes niveaus. Gecontroleerd zijn de juistheid van de zetten, tussentellingen, gekozen blokgrenzen, verborgen doelmarkeringen en eenmalige registratie bij doorstappen/heropenen. Aanvullende voorbeelden controleren balans, een lijnvergelijking, groeiende context en het niet uitlezen van onbekende Hexcells-kleuren. Deze controle is toegevoegd aan GitHub Actions.
+
+Een lokale vergelijking met de voorgaande commit bevestigt dat dezelfde 288 zetten worden gekozen. De bestaande zetkeuze en bediening blijven behouden. De volledige browsercontrole met 42 combinaties van puzzelvariant, licht/donker en desktop/iPad/iPhone is opnieuw doorlopen, inclusief uitvoeren, heropenen, hervatten, correcties en gesimuleerde Pencil-klikken. Alle controles slagen. Dit blijft een steekproef en geen bewijs voor elke mogelijke generatoruitkomst.
 
 ## Afbakening en openstaande controles
 

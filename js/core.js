@@ -437,12 +437,12 @@ function starTech(st,N,U,maxK){const units=[];
  const room=(cs,need)=>{if(need<=0)return true;if(!cs.length)return false;if(need<2)return true;for(let x=0;x<cs.length;x++)for(let y=x+1;y<cs.length;y++)if(!near(cs[x],cs[y]))return true;return false};
  const SW=n=>n===1?"ster":"sterren";
  for(const u of units){const stars=u.cells.filter(i=>st[i]===2),unk=u.cells.filter(i=>st[i]===0);if(!unk.length)continue;const nm=unitName(u.kind,u.k);
-  if(stars.length===STK)return{set:1,cells:unk,why:u.cells,kind:"tech",btn:"Zet de kruisjes voor me",text:`In ${nm} ${STK>1?"staan al "+STK+" sterren":"staat al een ster"}. Dan kunnen alle andere vakjes daarin geen ster meer zijn: zet er kruisjes.`};
+  if(stars.length===STK)return{set:1,cells:unk,why:u.cells,proof:{rule:"complete",unit:u,stars:stars.length,open:unk.length},kind:"tech",btn:"Zet de kruisjes voor me",text:`In ${nm} ${STK>1?"staan al "+STK+" sterren":"staat al een ster"}. Dan kunnen alle andere vakjes daarin geen ster meer zijn: zet er kruisjes.`};
   const need=STK-stars.length;
-  if(unk.length===need)return{set:2,cells:unk,why:u.cells,kind:"tech",btn:"Zet de "+(need===1?"ster":"sterren")+" voor me",text:`In ${nm} ${need===1?"moet":"moeten"} nog ${need} ${SW(need)} komen en er ${unk.length===1?"is":"zijn"} nog maar ${unk.length} vakje${unk.length===1?"":"s"} over. ${need===1?"Dat vakje is":"Die vakjes zijn"} dus ${need===1?"een ster":"sterren"}.`}}
+  if(unk.length===need)return{set:2,cells:unk,why:u.cells,proof:{rule:"remaining",unit:u,stars:stars.length,open:unk.length},kind:"tech",btn:"Zet de "+(need===1?"ster":"sterren")+" voor me",text:`In ${nm} ${need===1?"moet":"moeten"} nog ${need} ${SW(need)} komen en er ${unk.length===1?"is":"zijn"} nog maar ${unk.length} vakje${unk.length===1?"":"s"} over. ${need===1?"Dat vakje is":"Die vakjes zijn"} dus ${need===1?"een ster":"sterren"}.`}}
  for(const u of units){const stars=u.cells.filter(i=>st[i]===2),unk=u.cells.filter(i=>st[i]===0);if(STK-stars.length!==2||unk.length<3)continue;
   for(const x of unk)if(!room(unk.filter(j=>j!==x),2)){const nm=unitName(u.kind,u.k);
-   return{set:2,cells:[x],why:u.cells,kind:"tech",btn:"Zet de ster voor me",text:`In ${nm} moeten nog twee sterren komen. Kijk naar de vrije vakjes zonder dit vakje: die raken elkaar allemaal, dus daar past maar één ster in. De tweede ster moet dus hier staan.`}}}
+   return{set:2,cells:[x],why:u.cells,proof:{rule:"separate",unit:u,stars:stars.length,open:unk.length},kind:"tech",btn:"Zet de ster voor me",text:`In ${nm} moeten nog twee sterren komen. Kijk naar de vrije vakjes zonder dit vakje: die raken elkaar allemaal, dus daar past maar één ster in. De tweede ster moet dus hier staan.`}}}
  function conf(k){for(const kind of["r","c"]){const lines=kind==="r"?U.rows:U.cols;
   for(const comb of combos(N,k)){const inL=new Set();comb.forEach(x=>lines[x].forEach(i=>inL.add(i)));
    const cand=[...inL].filter(i=>st[i]!==1),touched=new Set(cand.map(i=>U.regOf[i])),inside=[];
@@ -450,10 +450,10 @@ function starTech(st,N,U,maxK){const units=[];
    const ln=lineNames(kind,comb),per=kind==="r"?"rij":"kolom",why=[...inL];
    if(inside.length===k){const tg=cand.filter(i=>st[i]===0&&!inside.includes(U.regOf[i]));
     if(tg.length){const rn=regNames(inside),one=k===1,txt=one?(STK===1?`Alle vrije vakjes van ${rn} liggen in ${ln}. De ster van dat gebied komt dus in ${ln}, en dat is meteen de enige ster van ${ln}.`:`Alle vrije vakjes van ${rn} liggen in ${ln}. De twee sterren van dat gebied komen dus in ${ln}, en meer dan twee sterren mag ${ln} niet hebben.`):`Alle vrije vakjes van ${rn} liggen in ${ln}. Samen hebben die gebieden ${STK*k} sterren nodig, en ${ln} hebben er samen ook precies ${STK*k}.`;
-     return{set:1,cells:tg,why,kind:"tech",btn:"Zet de kruisjes voor me",text:txt+` Alle andere vakjes in ${ln} worden dus kruisjes.`}}}
+     return{set:1,cells:tg,why,proof:{rule:"regionsInLines",kind,lines:comb,regions:inside},kind:"tech",btn:"Zet de kruisjes voor me",text:txt+` Alle andere vakjes in ${ln} worden dus kruisjes.`}}}
    if(touched.size===k){const tg=[];touched.forEach(g=>U.regs[g].forEach(i=>{if(st[i]===0&&!inL.has(i))tg.push(i)}));
     if(tg.length){const rn=regNames([...touched]),one=k===1,txt=one?(STK===1?`In ${ln} kan alleen nog een ster komen in ${rn}. De ster van ${ln} ligt dus in dat gebied, en dat is meteen de enige ster van dat gebied.`:`In ${ln} kunnen alleen nog sterren komen in ${rn}. De twee sterren van ${ln} liggen dus allebei in dat gebied, en meer dan twee sterren heeft dat gebied niet.`):`In ${ln} kunnen alleen nog sterren komen in ${rn}. Die ${kind==="r"?"rijen":"kolommen"} hebben samen ${STK*k} sterren nodig, en die gebieden hebben er samen ook precies ${STK*k}.`;
-     return{set:1,cells:tg,why,kind:"tech",btn:"Zet de kruisjes voor me",text:txt+` De vakjes van ${one?"dat gebied":"die gebieden"} buiten ${ln} worden dus kruisjes.`}}}}}
+     return{set:1,cells:tg,why,proof:{rule:"linesInRegions",kind,lines:comb,regions:[...touched]},kind:"tech",btn:"Zet de kruisjes voor me",text:txt+` De vakjes van ${one?"dat gebied":"die gebieden"} buiten ${ln} worden dus kruisjes.`}}}}}
   return null}
  function look(pass){for(let x=0;x<N*N;x++){if(st[x]!==0)continue;const t=st.slice();t[x]=2;crossAround(t,N,x);
    const own=units.filter(u=>u.cells.includes(x)),full=[];
@@ -466,7 +466,7 @@ function starTech(st,N,U,maxK){const units=[];
     else why=`Maar ${nm} heeft nog ${nw(need)} ${SW(need)} nodig, en dan is daar geen enkel vrij vakje meer over.`;
     const fn=full.map(f=>unitName(f.kind,f.k)),ext=full.length?` Bovendien ${full.length>1?"hebben":"heeft"} ${lst(fn)} dan al ${STK} sterren, dus worden ook ${full.length>1?"hun":"de"} andere vakjes${full.length>1?"":" van "+fn[0]} kruisjes.`:"";
     const ghost=[];for(let j=0;j<N*N;j++)if(st[j]===0&&t[j]===1)ghost.push(j);
-    return{set:1,cells:[x],why:u.cells,ghost,kind:"tech",btn:"Zet het kruisje voor me",text:`Stel dat hier een ster komt. Dan worden alle vakjes eromheen kruisjes (de lichte oranje kruisjes).${ext} ${why} Hier kan dus geen ster: zet een kruisje.`}}}
+    return{set:1,cells:[x],why:u.cells,ghost,proof:{rule:"trial",unit:u,need,available:rest.length,full:full.map(f=>({kind:f.kind,k:f.k}))},kind:"tech",btn:"Zet het kruisje voor me",text:`Stel dat hier een ster komt. Dan worden alle vakjes eromheen kruisjes (de lichte oranje kruisjes).${ext} ${why} Hier kan dus geen ster: zet een kruisje.`}}}
   return null}
  /* Tellen over 1, 2 of 3 rijen/kolommen gaat voor: dat is de mooiste stap. Daarna pas "stel dat hier een ster komt". */
  for(let k=1;k<=maxK;k++){const r=conf(k);if(r){r.k=k;return r}}
@@ -485,9 +485,9 @@ function starHint(){const p=S.p,N=p.N;if(!S.U)S.U=starUnits(p);const U=S.U;
  let best=null;
  for(let i=0;i<N*N&&!(best&&best.n<=2);i++){if(st[i]!==0)continue;
   for(const v of[2,1]){const t=st.slice();t[i]=v;if(v===2)crossAround(t,N,i);const r=starProp(t,N,U);if(r&&(!best||r.n<best.n))best={n:r.n,w:r.w,steps:r.steps,i,v}}}
- if(best){const star=best.v===1,wy=starWhy(!star,best);return{set:star?2:1,cells:[best.i],why:[],kind:"contra",btn:star?"Zet de ster voor me":"Zet het kruisje voor me",intro:wy.intro,steps:wy.steps,outro:wy.outro,text:wy.intro+" "+wy.steps.join(" ")+" "+wy.outro}}
+ if(best){const star=best.v===1,wy=starWhy(!star,best);return{set:star?2:1,cells:[best.i],why:[],proof:{rule:"chain",conflict:best.w,count:best.steps.length},kind:"contra",btn:star?"Zet de ster voor me":"Zet het kruisje voor me",intro:wy.intro,steps:wy.steps,outro:wy.outro,text:wy.intro+" "+wy.steps.join(" ")+" "+wy.outro}}
  {const t0=Date.now();for(let i=0;i<N*N&&Date.now()-t0<1500;i++){if(st[i]!==0)continue;
-   for(const v of[2,1]){const t=st.slice();t[i]=v;if(v===2)crossAround(t,N,i);const r=starProp(t,N,U,4);if(r){const star=v===1,wy=starWhy(!star,r);return{set:star?2:1,cells:[i],why:[],kind:"contra",btn:star?"Zet de ster voor me":"Zet het kruisje voor me",intro:wy.intro,steps:wy.steps,outro:wy.outro,text:wy.intro+" "+wy.steps.join(" ")+" "+wy.outro}}}}}
+   for(const v of[2,1]){const t=st.slice();t[i]=v;if(v===2)crossAround(t,N,i);const r=starProp(t,N,U,4);if(r){const star=v===1,wy=starWhy(!star,r);return{set:star?2:1,cells:[i],why:[],proof:{rule:"chain",conflict:r.w,count:r.steps.length},kind:"contra",btn:star?"Zet de ster voor me":"Zet het kruisje voor me",intro:wy.intro,steps:wy.steps,outro:wy.outro,text:wy.intro+" "+wy.steps.join(" ")+" "+wy.outro}}}}}
  {const pick=[];for(let i=0;i<N*N;i++)if(st[i]===0)pick.push(i);
   for(const i of pick){const isStar=p.sol[i]===1,bad=isStar?1:2;const t=st.slice();t[i]=bad;if(bad===2)crossAround(t,N,i);
    if(!starSolveFrom(t,p)){return{set:isStar?2:1,cells:[i],why:[],kind:"deep",btn:isStar?"Zet de ster voor me":"Zet het kruisje voor me",
@@ -499,16 +499,16 @@ const sy=v=>v?"○":"✕";
 function binHint(){const W=S.p.W,H=S.p.H,cur=S.cur,sol=S.p.sol;
  for(let i=0;i<W*H;i++)if(cur[i]>=0&&cur[i]!==sol[i])return{cells:[i],why:[],set:-1,kind:"fix",btn:"Wis dit vakje",text:`Let op: dit vakje klopt niet. De ${sy(cur[i])} die hier staat zorgt ergens voor een tegenspraak. Wis hem en kijk opnieuw.`};
  const lines=[];for(let o=0;o<2;o++){const nl=o?W:H,len=o?H:W;for(let x=0;x<nl;x++){const ci=[];for(let k=0;k<len;k++)ci.push(o?k*W+x:x*W+k);lines.push({o,x,ci,len,v:ci.map(i=>cur[i])})}}
- const nm=l=>(l.o?"kolom ":"rij ")+(l.x+1),mk=(l,ks,val,text)=>({cells:ks.map(k=>l.ci[k]),why:l.ci,set:val,kind:"tech",btn:"Vul het voor me in",text});
+ const nm=l=>(l.o?"kolom ":"rij ")+(l.x+1),mk=(l,ks,val,text,proof)=>({cells:ks.map(k=>l.ci[k]),why:l.ci,set:val,kind:"tech",btn:"Vul het voor me in",text,proof:{...proof,line:l}});
  for(const l of lines)for(let k=0;k<l.len-1;k++){const a=l.v[k];if(a<0||l.v[k+1]!==a)continue;const t=[];if(k>0&&l.v[k-1]<0)t.push(k-1);if(k+2<l.len&&l.v[k+2]<0)t.push(k+2);
-  if(t.length)return mk(l,t,1-a,`In ${nm(l)} staan twee keer ${sy(a)} naast elkaar. Een derde ${sy(a)} erbij mag niet, dus direct ${l.o?"boven of onder":"links of rechts van"} dit paar komt ${sy(1-a)}.`)} for(const l of lines)for(let k=0;k<l.len-2;k++){const a=l.v[k];if(a>=0&&l.v[k+2]===a&&l.v[k+1]<0)return mk(l,[k+1],1-a,`In ${nm(l)} staat twee keer ${sy(a)} met één vakje ertussen. Staat daar ook ${sy(a)}, dan zijn het er drie op een rij. Dat vakje wordt dus ${sy(1-a)}.`)}
+  if(t.length)return mk(l,t,1-a,`In ${nm(l)} staan twee keer ${sy(a)} naast elkaar. Een derde ${sy(a)} erbij mag niet, dus direct ${l.o?"boven of onder":"links of rechts van"} dit paar komt ${sy(1-a)}.`,{rule:"pair",symbol:a})} for(const l of lines)for(let k=0;k<l.len-2;k++){const a=l.v[k];if(a>=0&&l.v[k+2]===a&&l.v[k+1]<0)return mk(l,[k+1],1-a,`In ${nm(l)} staat twee keer ${sy(a)} met één vakje ertussen. Staat daar ook ${sy(a)}, dan zijn het er drie op een rij. Dat vakje wordt dus ${sy(1-a)}.`,{rule:"gap",symbol:a})}
  for(const l of lines)for(const a of[0,1]){const c=l.v.filter(x=>x===a).length,e=l.v.map((x,k)=>x<0?k:-1).filter(k=>k>=0);
-  if(c===l.len/2&&e.length)return mk(l,e,1-a,`In ${nm(l)} staan al ${l.len/2} keer ${sy(a)}. Meer mogen het er niet zijn, dus alle lege vakjes in deze ${l.o?"kolom":"rij"} worden ${sy(1-a)}.`)}
+  if(c===l.len/2&&e.length)return mk(l,e,1-a,`In ${nm(l)} staan al ${l.len/2} keer ${sy(a)}. Meer mogen het er niet zijn, dus alle lege vakjes in deze ${l.o?"kolom":"rij"} worden ${sy(1-a)}.`,{rule:"balance",symbol:a})}
  for(const l of lines){const h=l.len/2,w=l.o?"kolom":"rij";for(let e=0;e<l.len;e++){if(l.v[e]>=0)continue;for(const a of[0,1]){const c=l.v.filter(x=>x===a).length;if(c+1!==h)continue;const t=l.v.map((x,j)=>j===e?a:x<0?1-a:x);let k3=-1;for(let k=0;k+2<t.length;k++)if(t[k]===t[k+1]&&t[k]===t[k+2]){k3=k;break}
-   if(k3>=0)return mk(l,[e],1-a,`In ${nm(l)} staan al ${c} keer ${sy(a)}. Er mogen er ${h} zijn, dus er kan nog maar één ${sy(a)} bij. Stel dat die hier komt: dan worden alle andere lege vakjes ${sy(1-a)}, en dan staan er drie keer ${sy(t[k3])} naast elkaar. Dat mag niet. Hier komt dus ${sy(1-a)}.`)}}}
+   if(k3>=0)return mk(l,[e],1-a,`In ${nm(l)} staan al ${c} keer ${sy(a)}. Er mogen er ${h} zijn, dus er kan nog maar één ${sy(a)} bij. Stel dat die hier komt: dan worden alle andere lege vakjes ${sy(1-a)}, en dan staan er drie keer ${sy(t[k3])} naast elkaar. Dat mag niet. Hier komt dus ${sy(1-a)}.`,{rule:"balanceConflict",symbol:a})}}}
  for(const l of lines){const E=[];l.v.forEach((x,j)=>{if(x<0)E.push(j)});if(E.length!==2)continue;
   for(const m of lines){if(m===l||m.o!==l.o||m.v.includes(-1))continue;if(l.v.every((x,j)=>x<0||x===m.v[j])&&m.v[E[0]]!==m.v[E[1]]){const w=l.o?"kolom":"rij";
-   return{cells:[l.ci[E[0]]],why:[...l.ci,...m.ci],set:1-m.v[E[0]],kind:"tech",btn:"Vul het voor me in",text:`Vergelijk ${nm(l)} met ${nm(m)}: alle ingevulde vakjes zijn gelijk en ${nm(l)} heeft nog 2 lege vakjes. Twee ${l.o?"kolommen":"rijen"} mogen nooit precies hetzelfde zijn. Vul je de lege vakjes in zoals in ${nm(m)}, dan zijn ze gelijk. Daarom komt hier ${sy(1-m.v[E[0]])} (en in het andere lege vakje ${sy(1-m.v[E[1]])}).`}}}}
+   return{cells:[l.ci[E[0]]],why:[...l.ci,...m.ci],proof:{rule:"different",line:l,other:m},set:1-m.v[E[0]],kind:"tech",btn:"Vul het voor me in",text:`Vergelijk ${nm(l)} met ${nm(m)}: alle ingevulde vakjes zijn gelijk en ${nm(l)} heeft nog 2 lege vakjes. Twee ${l.o?"kolommen":"rijen"} mogen nooit precies hetzelfde zijn. Vul je de lege vakjes in zoals in ${nm(m)}, dan zijn ze gelijk. Daarom komt hier ${sy(1-m.v[E[0]])} (en in het andere lege vakje ${sy(1-m.v[E[1]])}).`}}}}
  let best=null;
  for(const l of lines){const BL=BLof(l.len),FULL=(1<<l.len)-1;let km=0,vm=0;l.v.forEach((x,k)=>{if(x>=0){km|=1<<k;if(x)vm|=1<<k}});if(km===FULL)continue;
   const full=new Set();lines.filter(m=>m.o===l.o&&m!==l&&!m.v.includes(-1)).forEach(m=>{let q=0;m.v.forEach((x,k)=>{if(x)q|=1<<k});full.add(q)});
@@ -516,7 +516,7 @@ function binHint(){const W=S.p.W,H=S.p.H,cur=S.cur,sol=S.p.sol;
   if(!n)continue;
   for(let k=0;k<l.len;k++){if(km>>k&1)continue;const f=(and>>k&1)?1:!(or>>k&1)?0:-1;if(f<0)continue;if(!best||n<best.n)best={n,l,k,f}}}
  if(best){const{n,l,k,f}=best,w=l.o?"kolom":"rij";
-  return mk(l,[k],f,`Kijk naar ${nm(l)}. ${n===1?"Er is nog maar 1 geldige manier":"Er zijn nog maar "+n+" geldige manieren"} om deze ${w} in te vullen (nooit drie dezelfde naast elkaar, evenveel ✕ als ○ en niet gelijk aan een andere volledige ${w}). ${n===1?"Daarin":"In alle "+n}${n===1?" staat":" staat"} op dit vakje ${sy(f)}.`)}
+  return mk(l,[k],f,`Kijk naar ${nm(l)}. ${n===1?"Er is nog maar 1 geldige manier":"Er zijn nog maar "+n+" geldige manieren"} om deze ${w} in te vullen (nooit drie dezelfde naast elkaar, evenveel ✕ als ○ en niet gelijk aan een andere volledige ${w}). ${n===1?"Daarin":"In alle "+n}${n===1?" staat":" staat"} op dit vakje ${sy(f)}.`,{rule:"options",count:n})}
  const j=sol.findIndex((v,i)=>cur[i]<0);
  return j>=0?{cells:[j],why:[],set:sol[j],kind:"reveal",btn:"Vul het voor me in",text:"Hier kan ik geen korte redenering voor vinden. Dit vakje wordt een "+sy(sol[j])+"."}:null}
 
@@ -533,15 +533,15 @@ function colorNonoHint(){const p=S.p,W=p.W,H=p.H,cur=S.cur,sol=p.sol;
  const lines=[];for(let r=0;r<H;r++)lines.push({nm:"rij "+(r+1),cl:p.rc[r],ci:Array.from({length:W},(_,x)=>r*W+x)});for(let x=0;x<W;x++)lines.push({nm:"kolom "+(x+1),cl:p.cc[x],ci:Array.from({length:H},(_,r)=>r*W+x)});
  let best=null;const take=h=>{if(!best||h.pr<best.pr||(h.pr===best.pr&&h.cells.length>best.cells.length))best=h};
  for(const l of lines){const v=l.ci.map(i=>cur[i]);if(!v.includes(0))continue;const A=cnLine(l.cl,v);if(!A.cnt||A.overflow)continue;const groups=new Map();A.fix.forEach((z,k)=>{if(v[k]===0&&z!==0){if(!groups.has(z))groups.set(z,[]);groups.get(z).push(k)}});
-  for(const [set,ks] of groups){const cl=cnText(l.cl),one=ks.length===1;let text="",pr=A.cnt===1?0:set>0?3:4,cells=ks.map(k=>l.ci[k]);
+  for(const [set,ks] of groups){const cl=cnText(l.cl),one=ks.length===1;let proof={rule:"options",line:l,count:A.cnt},text="",pr=A.cnt===1?0:set>0?3:4,cells=ks.map(k=>l.ci[k]);
    /* Overlap: markeer alleen vakjes die aantoonbaar door hetzelfde gekleurde blok bedekt worden. */
    if(set>0){for(let j=0;j<l.cl.length&&!text;j++){const q=l.cl[j];if(q.c!==set)continue;const lo=A.mx[j],hi=A.mn[j]+q.n-1,sub=ks.filter(k=>k>=lo&&k<=hi);if(!sub.length)continue;
      cells=sub.map(k=>l.ci[k]);const één=cells.length===1,ord=l.cl.length>1?(ORD[j]||(j+1)+"e")+" blok":"blok";
-     text="Kijk naar "+l.nm+" ("+cl+"). Het "+ord+" ("+q.n+" "+NCN[set]+") kan beginnen tussen vak "+(A.mn[j]+1)+" en "+(A.mx[j]+1)+". Hoe je het ook schuift, "+(één?"dit vakje blijft":"deze vakjes blijven")+" binnen dat blok. "+(één?"Kleur het ":"Kleur ze ")+NCN[set]+".";pr=1}}
-   else if(set===-1){const sub=ks.filter(k=>l.cl.every((q,j)=>k<A.mn[j]||k>A.mx[j]+q.n-1));if(sub.length){cells=sub.map(k=>l.ci[k]);const één=cells.length===1;text="Kijk naar "+l.nm+" ("+cl+"). Geen enkel gekleurd blok kan "+(één?"dit vakje":"deze vakjes")+" bereiken. "+(één?"Hier komt dus een kruisje.":"Hier komen dus kruisjes.");pr=2}}
+     text="Kijk naar "+l.nm+" ("+cl+"). Het "+ord+" ("+q.n+" "+NCN[set]+") kan beginnen tussen vak "+(A.mn[j]+1)+" en "+(A.mx[j]+1)+". Hoe je het ook schuift, "+(één?"dit vakje blijft":"deze vakjes blijven")+" binnen dat blok. "+(één?"Kleur het ":"Kleur ze ")+NCN[set]+".";pr=1;proof={rule:"overlap",line:l,count:A.cnt,block:j,length:q.n,min:A.mn[j],max:A.mx[j],color:q.c}}}
+   else if(set===-1){const sub=ks.filter(k=>l.cl.every((q,j)=>k<A.mn[j]||k>A.mx[j]+q.n-1));if(sub.length){cells=sub.map(k=>l.ci[k]);const één=cells.length===1;text="Kijk naar "+l.nm+" ("+cl+"). Geen enkel gekleurd blok kan "+(één?"dit vakje":"deze vakjes")+" bereiken. "+(één?"Hier komt dus een kruisje.":"Hier komen dus kruisjes.");pr=2;proof={rule:"outside",line:l,count:A.cnt}}}
    if(!text){if(A.cnt===1)text="Kijk naar "+l.nm+" ("+cl+"). Met wat er al staat, passen de gekleurde blokken nog maar op één manier. ";else text="Kijk naar "+l.nm+" ("+cl+"). Er zijn nog "+A.cnt+" geldige manieren om de blokken te plaatsen. In al die manieren ";
     if(set===-1)text+=(one?"blijft dit vakje leeg. Zet hier dus een kruisje.":"blijven deze vakjes leeg. Zet hier dus kruisjes.");else text+=(one?"is dit vakje altijd ":"zijn deze vakjes altijd ")+NCN[set]+". "+(one?"Kleur het ":"Kleur ze ")+NCN[set]+"."}
-   take({pr,set,cells,why:l.ci,text})}}
+   take({pr,set,cells,why:l.ci,text,proof})}}
  if(!best)return null;best.kind="tech";best.btn=best.set===-1?"Zet het kruisje voor me":"Kleur het "+NCN[best.set]+" voor me";return best}
 function nonoHint(){if(S.p.color)return colorNonoHint();const p=S.p,W=p.W,H=p.H,cur=S.cur,sol=p.sol;
  for(let i=0;i<W*H;i++)if((cur[i]===1&&!sol[i])||(cur[i]===2&&sol[i]))return{cells:[i],why:[],set:0,kind:"fix",btn:"Wis dit vakje",text:`Let op: dit vakje klopt niet. ${cur[i]===1?"Het hoort leeg te blijven":"Hier hoort juist een gevuld vakje"}, dus hiermee loopt de puzzel vast. Wis het en kijk opnieuw.`};
@@ -550,17 +550,17 @@ function nonoHint(){if(S.p.color)return colorNonoHint();const p=S.p,W=p.W,H=p.H,
  let best=null;const consider=h=>{if(!best||h.pr<best.pr||(h.pr===best.pr&&h.cells.length>best.cells.length))best=h};
  for(const l of lines){const v=l.ci.map(i=>cur[i]);if(!v.includes(0))continue;const res=ls(l.cl,v),nf=[],nx=[];res.forEach((x,k)=>{if(v[k]===0&&x===1)nf.push(k);if(v[k]===0&&x===2)nx.push(k)});if(!nf.length&&!nx.length)continue;
   const cs=l.cl.length?l.cl.join(" "):"0",nm=l.nm+" ("+cs+")";
-  if(!l.cl.length){consider({pr:0,set:2,cells:nx.map(k=>l.ci[k]),why:l.ci,text:`${cap(l.nm)} heeft een 0: daar komt geen enkel gevuld vakje. Alles wordt een kruisje.`});continue}
-  if(lc(v.map(x=>x===1?1:0)).join()===l.cl.join()&&nx.length){consider({pr:0,set:2,cells:nx.map(k=>l.ci[k]),why:l.ci,text:`In ${nm} staan alle blokken al compleet. De andere vakjes in deze ${l.w} worden dus kruisjes.`});continue}
+  if(!l.cl.length){consider({pr:0,set:2,cells:nx.map(k=>l.ci[k]),why:l.ci,proof:{rule:"empty",line:l},text:`${cap(l.nm)} heeft een 0: daar komt geen enkel gevuld vakje. Alles wordt een kruisje.`});continue}
+  if(lc(v.map(x=>x===1?1:0)).join()===l.cl.join()&&nx.length){consider({pr:0,set:2,cells:nx.map(k=>l.ci[k]),why:l.ci,proof:{rule:"complete",line:l},text:`In ${nm} staan alle blokken al compleet. De andere vakjes in deze ${l.w} worden dus kruisjes.`});continue}
   const A=nonoArr(l.cl,v),okA=A.cnt>0&&A.cnt<=200000;
   if(nf.length&&okA)for(let k=0;k<l.cl.length;k++){const L=A.mn[k],R=A.mx[k],len=l.cl[k],a=R,b=L+len-1;if(a>b)continue;const t=nf.filter(x=>x>=a&&x<=b);if(!t.length)continue;
    const span=[];for(let x=L;x<R+len;x++)span.push(l.ci[x]);const bn=l.cl.filter(x=>x===len).length>1?`het ${ORD[k]||(k+1)+"e"} blok (${len})`:`het blok van ${len}`,nt=b-a+1;
-   consider({pr:1,set:1,cells:t.map(x=>l.ci[x]),why:span,text:L===R?`Kijk naar ${nm}. Gezien wat er al staat, past ${bn} maar op één plek: het blauw omrande stuk. Vul het helemaal.`
+   consider({pr:1,set:1,cells:t.map(x=>l.ci[x]),why:span,proof:{rule:"overlap",line:l,block:k,length:len,min:L,max:R,count:A.cnt},text:L===R?`Kijk naar ${nm}. Gezien wat er al staat, past ${bn} maar op één plek: het blauw omrande stuk. Vul het helemaal.`
     :`Kijk naar ${nm}. ${cap(bn)} ligt ergens in het blauw omrande stuk van ${R-L+len} vakjes. Schuif je het helemaal naar het begin of helemaal naar het eind, dan bedekt het altijd ${nt===1?"dit vakje":"deze "+nt+" vakjes"}. ${t.length===nt?(nt===1?"Dat vakje is dus gevuld.":"Die zijn dus gevuld."):(t.length===1?"Het vakje daarvan dat nog leeg is, is dus gevuld.":"De vakjes daarvan die nog leeg zijn, zijn dus gevuld.")}`})}
   if(nx.length&&okA){const reach=new Set();for(let k=0;k<l.cl.length;k++)for(let x=A.mn[k];x<A.mx[k]+l.cl[k];x++)reach.add(x);const t=nx.filter(x=>!reach.has(x));
-   if(t.length)consider({pr:2,set:2,cells:t.map(x=>l.ci[x]),why:l.ci,text:`Kijk naar ${nm}. Hoe ver je de blokken ook schuift (passend bij wat er al staat), ${t.length===1?"dit vakje bereikt":"deze vakjes bereikt"} geen enkel blok. ${t.length===1?"Het wordt een kruisje":"Ze worden kruisjes"}.`})}
+   if(t.length)consider({pr:2,set:2,cells:t.map(x=>l.ci[x]),why:l.ci,proof:{rule:"outside",line:l,count:A.cnt},text:`Kijk naar ${nm}. Hoe ver je de blokken ook schuift (passend bij wat er al staat), ${t.length===1?"dit vakje bereikt":"deze vakjes bereikt"} geen enkel blok. ${t.length===1?"Het wordt een kruisje":"Ze worden kruisjes"}.`})}
   const set=nf.length?1:2,ks=nf.length?nf:nx;
-  consider({pr:3,set,cells:[l.ci[ks[0]]],why:l.ci,text:`Kijk naar ${nm}. Probeer alle manieren om de blokken ${cs} in deze ${l.w} te leggen die passen bij wat er al staat${okA&&A.cnt<=30?` (dat zijn er ${A.cnt})`:""}. In elke manier is dit vakje ${set===1?"gevuld":"leeg"}.`})}
+  consider({pr:3,set,cells:[l.ci[ks[0]]],why:l.ci,proof:{rule:"options",line:l,count:okA?A.cnt:null},text:`Kijk naar ${nm}. Probeer alle manieren om de blokken ${cs} in deze ${l.w} te leggen die passen bij wat er al staat${okA&&A.cnt<=30?` (dat zijn er ${A.cnt})`:""}. In elke manier is dit vakje ${set===1?"gevuld":"leeg"}.`})}
  if(!best)return null;return Object.assign({kind:"tech",btn:best.set===1?"Vul het voor me in":"Zet de kruisjes voor me"},best)}
 function paintNonoHint(){const h=S.hint;S.cells.forEach((d,i)=>{if(!d)return;d.classList.toggle("ht",!!(h&&h.cells.includes(i)));d.classList.toggle("hr",!!(h&&!h.cells.includes(i)&&h.why.includes(i)))})}
 function repaintHint(){if(S.type==="plus")paintPlusHint();else if(S.type==="bin")paintBin();else if(S.type==="star")render();else if(S.type==="hex")rHex();else if(S.type==="nono")paintNonoHint();else if(S.type==="mur")paintMur()}
@@ -651,7 +651,7 @@ function rHex(){if(!S.p||S.type!=="hex"||!S.hx)return;{const hs=$("#hexstat");if
  if(zp)zv+=`<path d="${zp}" stroke="rgba(20,30,50,${D?.5:.28})" stroke-width="${(sz*.17).toFixed(1)}" stroke-linecap="round" fill="none" pointer-events="none"/><path d="${zp}" stroke="#fff" stroke-width="${(sz*.08).toFixed(1)}" stroke-linecap="round" fill="none" pointer-events="none"/>`;
  s+=`<g class="ovl">${zv}${ov}</g><g class="txl">${tx}</g>`;
  window._tp=[];P.lineShow.forEach(j=>{const l=P.lines[j],[x,y]=px(l.vq,l.vr),ang0=l.d===0?-90:l.d===1?30:-30,ang=TR?90-ang0:ang0,fwd=l.d!==1,sg=fwd?1:-1,rad=ang*Math.PI/180,ux=Math.cos(rad)*sg,uy=Math.sin(rad)*sg,a0=sz*.1*sg,a1=sz*.7*sg,hd=sz*.17;const tp=LP[j];window._tp.push(tp);
-  s+=`<g data-l="${j}" style="cursor:pointer"><circle cx="${tp[0].toFixed(1)}" cy="${tp[1].toFixed(1)}" r="${sz*.6}" fill="transparent"/><text x="${tp[0].toFixed(1)}" y="${(tp[1]+sz*.22).toFixed(1)}" text-anchor="middle" font-size="${sz*.6}" font-weight="700" fill-opacity="${cs["l"+j]===2?.35:1}" style="fill:${K.lab}">${clueTxt(l.clue)}</text>${(()=>{const sh=shared(j),b0=sh?.5:.4,sx=tp[0]+ux*sz*b0,sy=tp[1]+uy*sz*b0,ex=x+ux*sz*.85,ey=y+uy*sz*.85,h=sz*.17,px2=-uy,py2=ux;return`<path d="M${sx.toFixed(1)} ${sy.toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} M${(ex-ux*h+px2*h).toFixed(1)} ${(ey-uy*h+py2*h).toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${(ex-ux*h-px2*h).toFixed(1)} ${(ey-uy*h-py2*h).toFixed(1)}" style="stroke:${K.arr};fill:none" stroke-width="2.5" stroke-opacity="${cs["l"+j]===2?.35:1}" stroke-linecap="round" stroke-linejoin="round"/>`})()}</g>`});
+  s+=`<g data-l="${j}" style="cursor:pointer">${H&&H.hexLines&&H.hexLines.includes(j)?`<ellipse class="hint-line" cx="${tp[0].toFixed(1)}" cy="${tp[1].toFixed(1)}" rx="${sz*.75}" ry="${sz*.5}" fill="none" stroke="${D?"#e2d4b5":"#685637"}" stroke-width="2" stroke-dasharray="3 3" pointer-events="none"/>`:""}<circle cx="${tp[0].toFixed(1)}" cy="${tp[1].toFixed(1)}" r="${sz*.6}" fill="transparent"/><text x="${tp[0].toFixed(1)}" y="${(tp[1]+sz*.22).toFixed(1)}" text-anchor="middle" font-size="${sz*.6}" font-weight="700" fill-opacity="${cs["l"+j]===2?.35:1}" style="fill:${K.lab}">${clueTxt(l.clue)}</text>${(()=>{const sh=shared(j),b0=sh?.5:.4,sx=tp[0]+ux*sz*b0,sy=tp[1]+uy*sz*b0,ex=x+ux*sz*.85,ey=y+uy*sz*.85,h=sz*.17,px2=-uy,py2=ux;return`<path d="M${sx.toFixed(1)} ${sy.toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} M${(ex-ux*h+px2*h).toFixed(1)} ${(ey-uy*h+py2*h).toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${(ex-ux*h-px2*h).toFixed(1)} ${(ey-uy*h-py2*h).toFixed(1)}" style="stroke:${K.arr};fill:none" stroke-width="2.5" stroke-opacity="${cs["l"+j]===2?.35:1}" stroke-linecap="round" stroke-linejoin="round"/>`})()}</g>`});
  const ph=S.popH;S.popH=-1;const tp2=document.createElement("template");tp2.innerHTML=s+`<rect class="hit" x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" fill="transparent"/></svg>`;const nw=tp2.content.firstElementChild,old=w.firstElementChild;
  if(old&&old.nodeName===nw.nodeName)hexSync(old,nw);else{w.textContent="";w.append(nw)}
  const oldSh=w.querySelector(".shards");if(oldSh)oldSh.remove();
@@ -678,13 +678,13 @@ function hexHint(){const P=S.p,rev=S.hx.rev,n=P.n,cons=[];
  const GC={pos:P.sol.map((_,i)=>i),cyc:false,cnt:P.sol.reduce((x,y)=>x+y,0),type:0};cons.push({c:GC,kind:"rest",id:-1});
  for(const o of cons){const c=o.c,hid=[];let k=0;for(const p of c.pos){if(p<0)continue;if(rev.has(p)){if(P.sol[p])k++}else hid.push(p)}
   if(!hid.length||(k!==c.cnt&&k+hid.length!==c.cnt))continue;
-  if(o.kind==="rest"){const r=c.cnt-k;return{cells:hid,why:[],rest:true,kind:"tech",btn:"Doe de stap voor me",text:`Kijk naar de teller "nog te vinden": er ${r===1?"moet nog 1 blauw vakje":"moeten nog "+r+" blauwe vakjes"} gevonden worden, en er ${hid.length===1?"is":"zijn"} nog precies ${hid.length} onbekend${hid.length===1?" vakje":"e vakjes"} over. ${hid.length===1?"Dat vakje is dus blauw.":"Ze zijn dus allemaal blauw."}`}}
+  if(o.kind==="rest"){const r=c.cnt-k;return{cells:hid,why:[],rest:true,proof:{rule:"count",clues:[o]},kind:"tech",btn:"Doe de stap voor me",text:`Kijk naar de teller "nog te vinden": er ${r===1?"moet nog 1 blauw vakje":"moeten nog "+r+" blauwe vakjes"} gevonden worden, en er ${hid.length===1?"is":"zijn"} nog precies ${hid.length} onbekend${hid.length===1?" vakje":"e vakjes"} over. ${hid.length===1?"Dat vakje is dus blauw.":"Ze zijn dus allemaal blauw."}`}}
   const black=k===c.cnt,t=clueTxt(c),ring=o.kind==="ring",many=hid.length>1,
    why=o.kind==="line"?P.lines[o.id].idx.filter(p=>rev.has(p)):[o.id],zn=o.kind==="zone",
    intro=zn?`Het getal ${t} bij dit blauwe vakje zegt hoeveel vakjes in het gebied eromheen (tot twee vakjes ver, het vakje zelf telt niet mee) blauw zijn.`:`Het getal ${t} bij ${ring?"dit zwarte vakje":"deze lijn"} zegt hoeveel ${ring?"van de buren":"vakjes in de lijn"} blauw zijn.`,
    body=black?` Daarvan ${k===1?"is er":"zijn er"} al ${k} gevonden, dus ${many?"de overige "+hid.length+" vakjes zijn":"het laatste onbekende vakje is"} zwart.`
     :` Er ${k===1?"is":"zijn"} al ${k} gevonden, er ${hid.length===1?"is":"zijn"} nog ${hid.length} onbekend${hid.length===1?" vakje":"e vakjes"} over en er moeten er nog ${hid.length} blauw zijn. ${many?"Ze zijn dus allemaal blauw.":"Dat vakje is dus blauw."}`;
-  return{cells:hid,why,kind:"tech",btn:"Doe de stap voor me",text:intro+body}}
+  return{cells:hid,why,proof:{rule:"count",clues:[o]},kind:"tech",btn:"Doe de stap voor me",text:intro+body}}
  /* Lokaal zoeken: eerst één aanwijzing, dan twee die vakjes delen, dan drie. Zo vinden we snel de kleinste uitleg. */
  const a=Array(n).fill(-1);rev.forEach(i=>{a[i]=P.sol[i]});
  const act=cons.filter(o=>o.c.pos.some(p=>p>=0&&a[p]<0)),cof=new Map();act.forEach(o=>o.c.pos.forEach(p=>{if(p>=0&&a[p]<0){if(!cof.has(p))cof.set(p,[]);if(!cof.get(p).includes(o))cof.get(p).push(o)}}));
@@ -695,12 +695,13 @@ function hexHint(){const P=S.p,rev=S.hx.rev,n=P.n,cons=[];
  for(const[i,cs0]of cof){for(const o of cs0)if(bad(i,[o])){best={i,f:P.sol[i],keep:[o]};break}if(best)break}
  if(!best){let sc=-1e9;for(const[i,cs0]of cof){for(const o1 of ordK(cs0)){for(const o2 of nb(o1))if(bad(i,[o1,o2])){const v=zlk(o1)+zlk(o2);if(v>sc){sc=v;best={i,f:P.sol[i],keep:[o1,o2]}}break}}if(sc>=2)break}}
  if(!best)outer:for(const[i,cs0]of cof)for(const o1 of ordK(cs0)){const n1=nb(o1);for(let x=0;x<n1.length;x++){const o2=n1[x],n3=new Set(n1.slice(x+1));nb(o2).forEach(o=>{if(o!==o1)n3.add(o)});for(const o3 of n3)if(bad(i,[o1,o2,o3])){best={i,f:P.sol[i],keep:[o1,o2,o3]};break outer}}}
- if(!best){const cs=cons.map(o=>o.c);for(let i=0;i<n&&!best;i++){if(rev.has(i))continue;const t=a.slice();t[i]=1-P.sol[i];if(!hexSat(t,cs))best={i,f:P.sol[i],keep:cons.slice(0,4)}}}
+ if(!best){const cs=cons.map(o=>o.c);for(let i=0;i<n&&!best;i++){if(rev.has(i))continue;const t=a.slice();t[i]=1-P.sol[i];if(!hexSat(t,cs))best={i,f:P.sol[i],keep:cons.slice(0,4),global:true}}}
  if(best){const{i,f,keep}=best;
-  const why=[...new Set(keep.flatMap(whyOf))].filter(p=>p!==i),col=v=>v?"blauw":"zwart",Col=v=>v?"Blauw":"Zwart";
+  const why=[...new Set((best.global?cons:keep).flatMap(whyOf))].filter(p=>p!==i),col=v=>v?"blauw":"zwart",Col=v=>v?"Blauw":"Zwart";
   const nmC=o=>{const t=clueTxt(o.c);if(o.kind==="rest")return'de teller "nog te vinden"';return o.kind==="line"?`de lijn met ${t}`:o.kind==="zone"?`het getal ${t} op het blauwe vakje`:`het getal ${t} op het zwarte vakje`};
   const unk=o=>o.c.pos.filter(p=>p>=0&&!rev.has(p)),need=o=>o.c.cnt-o.c.pos.filter(p=>p>=0&&rev.has(p)&&P.sol[p]).length;
-  const res=(cells,text,ex)=>({cells,f,nk:keep.length,rest:keep.some(o=>o.kind==="rest"),why:[...new Set([...why,...(ex||[])])].filter(p=>!cells.includes(p)),kind:"deduce",btn:"Doe de stap voor me",text:text+` Kies ${Col(f)} en tik erop.`});
+  const res=(cells,text,ex)=>({cells,f,proof:{rule:best.global?"global":"constraints",clues:best.global?cons:keep},nk:keep.length,rest:best.global||keep.some(o=>o.kind==="rest"),why:[...new Set([...why,...(ex||[])])].filter(p=>!cells.includes(p)),kind:"deduce",btn:"Doe de stap voor me",text:text+` Kies ${Col(f)} en tik erop.`});
+  if(best.global)return res([i],`Deze stap volgt uit de combinatie van alle zichtbare aanwijzingen en de teller "nog te vinden". Er is geen korte lokale afleiding beschikbaar. De oplosser stelt vast dat dit vakje ${col(f)} is.`);
   if(keep.length===1){const o=keep[0],t=clueTxt(o.c),nm=nmC(o),where=o.kind==="line"?"in de lijn":o.kind==="zone"?"in het gebied eromheen":"rondom";
    if(o.c.type===1)return res([i],`Kijk naar ${nm}. De haakjes in ${t} betekenen: de ${o.c.cnt} blauwe vakjes ${where} liggen aan elkaar, als één groepje. Als dit vakje ${col(1-f)} zou zijn, kan dat groepje niet meer aaneengesloten liggen. Dit vakje is dus ${col(f)}.`);
    if(o.c.type===2)return res([i],`Kijk naar ${nm}. De streepjes in ${t} betekenen: de ${o.c.cnt} blauwe vakjes ${where} liggen níet allemaal aan elkaar, er zijn minstens twee groepjes. Als dit vakje ${col(1-f)} zou zijn, zouden ze wél één groepje vormen. Dit vakje is dus ${col(f)}.`)}
@@ -878,22 +879,22 @@ function plusHint(){plusSetup();const p=S.p,cur=S.cur,num=p.num;
   const nm=plusName(u),T=u.t,hasO=u.cells.some(i=>cur[i]===1),hasX=u.cells.some(i=>cur[i]===2),need=L.need,m=L.U.length;
   const og=hasO?"open getallen":hasX?"getallen die er nog staan":"getallen";
   const intro=hasO?`${cap(nm)} moet samen ${T} zijn. De omcirkelde getallen zijn samen al ${L.K}, dus de open getallen moeten samen nog ${need} maken.`:`${cap(nm)} moet samen ${T} zijn.`;
-  const H={unit:k,why:u.cells};
-  if(need===0){consider(Object.assign({sc:m/100,set:2,cells:L.U,btn:"Streep ze weg voor me",text:`De omcirkelde getallen in ${nm} zijn samen al ${T}: precies genoeg. Alle andere getallen in ${nm} moeten dus weg.`},H));return}
-  if(need===L.s0){consider(Object.assign({sc:m/100,set:1,cells:L.U,btn:"Omcirkel ze voor me",text:hasO?`${intro} De open getallen zijn samen ook precies ${need}. Ze moeten dus allemaal blijven staan.`:`${cap(nm)} moet samen ${T} zijn, en de ${og} zijn samen precies ${T}. Ze moeten dus allemaal blijven staan.`},H));return}
+  const H={unit:k,why:u.cells,proof:{rule:"combinations",count:L.n}};
+  if(need===0){H.proof.rule="complete";consider(Object.assign({sc:m/100,set:2,cells:L.U,btn:"Streep ze weg voor me",text:`De omcirkelde getallen in ${nm} zijn samen al ${T}: precies genoeg. Alle andere getallen in ${nm} moeten dus weg.`},H));return}
+  if(need===L.s0){H.proof.rule="remaining";consider(Object.assign({sc:m/100,set:1,cells:L.U,btn:"Omcirkel ze voor me",text:hasO?`${intro} De open getallen zijn samen ook precies ${need}. Ze moeten dus allemaal blijven staan.`:`${cap(nm)} moet samen ${T} zijn, en de ${og} zijn samen precies ${T}. Ze moeten dus allemaal blijven staan.`},H));return}
   const big=L.U.filter(i=>num[i]>need);
-  if(big.length){consider(Object.assign({sc:1+m/100,set:2,cells:big,btn:"Streep "+(big.length===1?"hem":"ze")+" weg voor me",text:`${intro} ${cap(de(big))} ${big.length===1?"is":"zijn"} groter dan ${need}, dus ${big.length===1?"die past":"die passen"} er niet meer in. Wegstrepen.`},H));return}
+  if(big.length){H.proof.rule="tooLarge";H.proof.excluded=big.length;consider(Object.assign({sc:1+m/100,set:2,cells:big,btn:"Streep "+(big.length===1?"hem":"ze")+" weg voor me",text:`${intro} ${cap(de(big))} ${big.length===1?"is":"zijn"} groter dan ${need}, dus ${big.length===1?"die past":"die passen"} er niet meer in. Wegstrepen.`},H));return}
   const mk=keep.filter(i=>L.s0-num[i]<need).sort((a,b)=>num[b]-num[a]);
-  if(mk.length){const i=mk[0];consider(Object.assign({sc:2+m/100,set:1,cells:[i],btn:"Omcirkel hem voor me",text:`${intro} Zonder de ${num[i]} zijn de andere ${og} samen maar ${L.s0-num[i]}, en dat is minder dan ${need}. De ${num[i]} moet dus blijven staan.`},H));return}
+  if(mk.length){const i=mk[0];H.proof.rule="essential";consider(Object.assign({sc:2+m/100,set:1,cells:[i],btn:"Omcirkel hem voor me",text:`${intro} Zonder de ${num[i]} zijn de andere ${og} samen maar ${L.s0-num[i]}, en dat is minder dan ${need}. De ${num[i]} moet dus blijven staan.`},H));return}
   /* Combinaties: bij weinig manieren noemen we ze allemaal, anders "stel dat ..." voor één getal. */
   const ways=new Map();for(let x=0;x<1<<m;x++)if(L.S[x]===need){const vs=[];L.U.forEach((i,b)=>{if(x>>b&1)vs.push(num[i])});vs.sort((a,b)=>b-a);ways.set(vs.length===1?"alleen de "+vs[0]:vs.join(" + "),1)}
-  const vals=L.U.map(i=>num[i]).join(", "),wl=[...ways.keys()],nW=wl.length;
+  const vals=L.U.map(i=>num[i]).join(", "),wl=[...ways.keys()],nW=wl.length;H.proof.count=nW;
   if(nW<=3){const pre=`${intro} Met de ${og} (${vals}) kun je ${need} maar op ${nW===1?"één manier":nwS(nW)+" manieren"} maken: ${lst(wl)}.`;
    if(rem.length)consider(Object.assign({sc:3+m/100+nW/1000,set:2,cells:rem,btn:"Streep "+(rem.length===1?"hem":"ze")+" weg voor me",text:`${pre} ${cap(de(rem))} ${rem.length===1?"zit":"zitten"} ${nW===1?"daar niet in":nW===2?"in geen van beide":"in geen van de drie"}, dus ${rem.length===1?"die moet":"die moeten"} weg.`},H));
    else consider(Object.assign({sc:3+m/100+nW/1000,set:1,cells:keep,btn:"Omcirkel "+(keep.length===1?"hem":"ze")+" voor me",text:`${pre} ${cap(de(keep))} ${keep.length===1?"zit":"zitten"} ${nW===1?"daarin":nW===2?"in allebei":"in alle drie"}, dus ${keep.length===1?"die blijft":"die blijven"} staan.`},H));return}
   const i=rem.length?rem[0]:keep[0],v=num[i],oth=L.U.filter(j=>j!==i).map(j=>num[j]),ov=oth.join(", ");
-  if(rem.length)consider(Object.assign({sc:3.5+m/100,set:2,cells:[i],btn:"Streep hem weg voor me",text:`${intro} Stel dat de ${v} blijft staan. Dan moeten de andere ${og} (${ov}) samen nog ${need-v} maken. Dat lukt met geen enkele combinatie${plusWhyNot(oth,need-v)}. De ${v} moet dus weg.`},H));
-  else consider(Object.assign({sc:3.5+m/100,set:1,cells:[i],btn:"Omcirkel hem voor me",text:`${intro} Stel dat de ${v} weg zou gaan. Dan moeten de andere ${og} (${ov}) samen ${need} maken. Dat lukt met geen enkele combinatie${plusWhyNot(oth,need)}. De ${v} moet dus blijven staan.`},H))});
+  if(rem.length){H.proof.rule="cannotInclude";consider(Object.assign({sc:3.5+m/100,set:2,cells:[i],btn:"Streep hem weg voor me",text:`${intro} Stel dat de ${v} blijft staan. Dan moeten de andere ${og} (${ov}) samen nog ${need-v} maken. Dat lukt met geen enkele combinatie${plusWhyNot(oth,need-v)}. De ${v} moet dus weg.`},H))}
+  else{H.proof.rule="cannotExclude";consider(Object.assign({sc:3.5+m/100,set:1,cells:[i],btn:"Omcirkel hem voor me",text:`${intro} Stel dat de ${v} weg zou gaan. Dan moeten de andere ${og} (${ov}) samen ${need} maken. Dat lukt met geen enkele combinatie${plusWhyNot(oth,need)}. De ${v} moet dus blijven staan.`},H))}});
  if(!best){const j=p.sol.findIndex((v,i)=>cur[i]===0&&!v);if(j<0)return null;return{cells:[j],why:[],set:2,kind:"reveal",btn:"Streep hem weg voor me",text:`Hier kan ik geen korte redenering voor vinden. Deze ${num[j]} moet weg.`}}
  return Object.assign({kind:"tech"},best)}
 
