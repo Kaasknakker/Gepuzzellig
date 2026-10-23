@@ -8,7 +8,7 @@
    const menu=document.getElementById(id);
    if(menu&&menu.classList.contains("open")&&!e.target.closest(inside)){menu.classList.remove("open");dismissing=true}
   }
-  if(dismissing)stop(e);
+  if(dismissing&&!e.target.closest("#tbHome,#tbMore,#pm"))stop(e);else dismissing=false;
  },{capture:true,passive:false});
  for(const type of ["pointermove","pointerup","pointercancel","touchstart","touchend","click","dblclick","contextmenu"])
   window.addEventListener(type,e=>{if(dismissing&&!(type==="click"&&e.detail===0))stop(e)},{capture:true,passive:false});
@@ -21,15 +21,16 @@ function fastPenUI(){
  const active=new Set();let firing=false,last=null,lastAt=-1e9;
  const fire=b=>{if(!b)return false;const now=performance.now();if(b===last&&now-lastAt<35)return true;firing=true;try{b.click()}finally{firing=false}last=b;lastAt=now;return true};
  document.addEventListener("pointerdown",e=>{if(e.pointerType!=="pen"||e.button>0)return;const b=targetAt(e.clientX,e.clientY);if(!b)return;e.preventDefault();active.add(e.pointerId);fire(b)},true);
- document.addEventListener("pointerup",e=>{if(e.pointerType!=="pen")return;const had=active.delete(e.pointerId);if(had)return;const b=targetAt(e.clientX,e.clientY);if(!b)return;e.preventDefault();fire(b)},true);
+ document.addEventListener("pointerup",e=>{if(e.pointerType==="pen"&&active.delete(e.pointerId))e.preventDefault()},true);
  document.addEventListener("pointercancel",e=>active.delete(e.pointerId),true);
- document.addEventListener("touchstart",e=>{const t=[...e.changedTouches].find(t=>t.touchType==="stylus");if(!t)return;const b=targetAt(t.clientX,t.clientY);if(!b)return;e.preventDefault();fire(b)},{passive:false,capture:true});
+ /* Eén Pencil-contact wordt uitsluitend op pointerdown uitgevoerd; touchstart en pointerup mogen hem niet herhalen. */
  document.addEventListener("click",e=>{if(firing||!last||performance.now()-lastAt>520)return;const b=e.target.closest&&e.target.closest("button,a[href],summary,[role=button]");if(b===last){e.preventDefault();e.stopImmediatePropagation()}},true);
 }
 fastPenUI();
 const ALLTYPES={bin:"Binair",star:"Star Battle",nono:"Nonogram",kak:"Kakuro",hex:"Hexcells",plus:"Pluszle",mur:"Murdoku",m24:"Maak 24"};
 /* Welke puzzels in de app staan. Kakuro en Maak 24 zitten nog in de code en kunnen later weer worden aangezet. */
 const ACTIVE=["bin","star","nono","hex","plus","mur"];
+const DOUBLE_TAP_MS=600;
 const TYPES=Object.fromEntries(ACTIVE.map(t=>[t,ALLTYPES[t]]));
 const HELP={
  bin:"Vul de vakjes met ✕ en ○. Nooit drie dezelfde naast elkaar, in elke rij en kolom evenveel ✕ als ○, en geen twee rijen of twee kolommen gelijk. Tik of linksklik voor ✕; dubbeltik, dubbelklik of rechtermuisklik voor ○. Nog een tik op een ✕ maakt het vakje weer leeg. Sleep over een paar rijen (omlaag) of kolommen (opzij) om te zien of ze al gelijk zijn: lijnen waarvan de ingevulde ✕ en ○ overal gelijk zijn (lege vakjes tellen niet mee, minstens de helft van de lijn bij beide ingevuld) worden groen samen met de lijn waar je op dat moment overheen sleept. Laat je los terwijl ze groen zijn, dan blijven ze staan.",
@@ -248,18 +249,18 @@ function binDown(e){const mb=mouseLR(e);if(S.done||S.type!=="bin"||e._closed||mb
   S.pick={t:drag2.line,at:ri>=0?ri:ci};binCompare();paintBin();return}
  const i=binCell(e.clientX,e.clientY);if(i<0)return;
  e.preventDefault();if(!S.start&&S.p.giv[i]<0)S.start=Date.now();invalidateHint();
- const N=S.p.W,r=i/N|0,c=i%N,dbl=mb!=="r"&&binLastTap.i===i&&binLastTap.note===!!potlood&&e.timeStamp-binLastTap.t<380;
+ const N=S.p.W,r=i/N|0,c=i%N,dbl=mb!=="r"&&binLastTap.i===i&&binLastTap.note===!!potlood&&e.timeStamp-binLastTap.t<DOUBLE_TAP_MS;
  let dblBase=null;
  if(dbl&&binLastTap.h===S.hist.length&&S.hist.length){const h=S.hist[S.hist.length-1];
   if(potlood&&h&&h.note&&h.i===i){S.hist.pop();noteRaw(i,h.from);S.redo=[]}
-  else if(!potlood&&Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.redo=[]}}
+  else if(!potlood&&Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.cur=dblBase.slice();S.redo=[]}}
  if(dbl)binLastTap={t:0,i:-1,h:0,note:false};else if(mb==="r")binLastTap={t:0,i:-1,h:0,note:false};
  if(potlood){
-  const old=noteVal(i),editable=S.p.giv[i]<0&&S.cur[i]<0,target=(mb==="r"||dbl)?2:mb==="l"?1:0,to=!editable?old:dbl?2:mb==null?(old===1?2:old===2?0:1):(old===target?0:target);
+  const old=noteVal(i),editable=S.p.giv[i]<0&&S.cur[i]<0,target=(mb==="r"||dbl)?2:1,to=!editable?old:(old===target?0:target);
   drag2={note:true,start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp,nchanges:new Map(),mouseDirect:mb!==null,dbl};S.rd=S.cd=S.pick=null;
   noteDragWrite(drag2,i,to);return}
  begin();if(dblBase)S.gs=dblBase;drag2={start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,old:S.cur[i],applied:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp,mouseDirect:mb!==null,dbl};S.rd=S.cd=S.pick=null;
- if(S.p.giv[i]<0){const o=S.cur[i],target=(mb==="r"||dbl)?1:0;if(dbl)S.cur[i]=1;else S.cur[i]=o===target?-1:target;drag2.applied=true}
+ if(S.p.giv[i]<0){const o=S.cur[i],target=(mb==="r"||dbl)?1:0;S.cur[i]=o===target?-1:target;drag2.applied=true}
  paintBin();
  if(mb===null&&!dbl)lpStart(e,()=>{if(!drag2||drag2.moved||drag2.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag2=null;S.gs=null;paintBin();lpNote(i)})}
 function binMove(e){if(!drag2||S.type!=="bin"||e.pointerId!==drag2.pid)return;
@@ -301,19 +302,19 @@ const noteDisp=i=>noteVal(i)===2?2:(noteVal(i)===1||(autoCrossOn()&&noteAdjStar(
 function applyNoteDrag(i){if(disp(i)!==0)return;if(drag.mode==="add"){if(noteDisp(i)===0)noteDragWrite(drag,i,1)}else if(drag.mode==="del"){if(noteVal(i)===1)noteDragWrite(drag,i,0)}}
 function starDown(e){const mb=mouseLR(e);if(S.done||S.type!=="star"||e._closed||mb==="")return;if(drag&&drag.pid!==e.pointerId)starEnd();
  const N=S.p.N;S.sg=gridGeo(N);const i=gridHit(S.sg,e.clientX,e.clientY,N,N);if(i<0)return;
- const dbl=mb!=="r"&&starLastTap.i===i&&starLastTap.note===!!potlood&&e.timeStamp-starLastTap.t<380;let dblBase=null;
+ const dbl=mb!=="r"&&starLastTap.i===i&&starLastTap.note===!!potlood&&e.timeStamp-starLastTap.t<DOUBLE_TAP_MS;let dblBase=null;
  if(dbl&&starLastTap.h===S.hist.length&&S.hist.length){const h=S.hist[S.hist.length-1];
   if(potlood&&h&&h.note&&h.i===i){S.hist.pop();noteRaw(i,h.from);S.redo=[]}
   else if(!potlood&&Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.redo=[];S.cur=dblBase.slice();paintAll()}}
  if(dbl)starLastTap={t:0,i:-1,h:0,note:false};else if(mb==="r")starLastTap={t:0,i:-1,h:0,note:false};
  e.preventDefault();if(!S.start)S.start=Date.now();invalidateHint();
- if(potlood){if(disp(i)!==0)return;const raw=noteVal(i),target=(mb==="r"||dbl)?2:1,mode=dbl?"add":raw===target?"del":"add";
+ if(potlood){if(disp(i)!==0)return;const raw=noteVal(i),target=(mb==="r"||dbl)?2:1,mode=raw===target?"del":"add";
   drag={note:true,directNote:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map(),dbl};
-  noteDragWrite(drag,i,dbl?2:mode==="del"?0:target);return}
+  noteDragWrite(drag,i,mode==="del"?0:target);return}
  begin();if(dblBase)S.gs=dblBase;
- const target=(mb==="r"||dbl)?2:1,old=S.cur[i],mode=dbl?"add":old===target?"del":"add";
+ const target=(mb==="r"||dbl)?2:1,old=S.cur[i],mode=old===target?"del":"add";
  drag={direct:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),dbl};drag.prev.set(i,old);
- setCell(i,dbl?2:mode==="del"?0:target);
+ setCell(i,mode==="del"?0:target);
  if(mb===null&&!dbl)lpStart(e,()=>{if(!drag||drag.moved||drag.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag=null;S.gs=null;paintAll();lpNote(i)})}
 function starEnter(j){const d=drag,k=d.path.indexOf(j);if(k>=0){while(d.path.length>k+1){const c=d.path.pop();if(d.prev.has(c)){if(d.note)noteDragWrite(d,c,d.prev.get(c));else S.cur[c]=d.prev.get(c);d.prev.delete(c)}}d.note?paintNotes():paintAll();return}
  d.path.push(j);if(d.note){const o=noteVal(j);if(d.directNote){if(disp(j)!==0)return;const nv=d.mode==="del"?(o===d.target?0:o):d.target;noteDragWrite(d,j,nv)}else applyNoteDrag(j);if(noteVal(j)!==o)d.prev.set(j,o);return}
@@ -371,7 +372,7 @@ function nonoLine(id){const N=S.p.W,k=+id.slice(1),idx=[];for(let j=0;j<(id[0]==
 function nonoDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="nono"||S.done||e._closed)return;e.preventDefault();if(nd&&nd.pid!==e.pointerId)nonoEnd();
  const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){if(mb==="r")return;nonoLine(ck.dataset.ln);return}
  S.ng=gridGeo(S.p.W);const i=nonoAt(e.clientX,e.clientY);if(i<0)return;e._nono=true;
- const dbl=mb!=="r"&&lastTap.i===i&&e.timeStamp-lastTap.t<380;if(dbl)lastTap={t:0,i:-1};else if(mb==="r")lastTap={t:0,i:-1};
+ const dbl=mb!=="r"&&lastTap.i===i&&e.timeStamp-lastTap.t<DOUBLE_TAP_MS;if(dbl)lastTap={t:0,i:-1};else if(mb==="r")lastTap={t:0,i:-1};
  if(dbl&&S.hist&&S.hist.length){const pre=S.hist[S.hist.length-1];if(Array.isArray(pre)&&pre.length===S.cur.length){const was=S.cur.slice();S.cur=S.hist.pop().slice();S.redo=[];was.forEach((v,j)=>{if(v!==S.cur[j])nonoPaint(j,S.cur[j])});ub()}}
  if(!S.start)S.start=Date.now();invalidateHint();begin();const old=S.cur[i],cross=S.p.color?-1:2,fill=S.p.color?nonoColorMode:1,active=S.p.color?(nonoMode==="x"?cross:fill):(nonoMode==="x"?cross:fill),val=dbl?cross:mb==="r"?(active===cross?fill:cross):active;
  nd={i0:i,last:i,moved:false,pid:e.pointerId,path:[i],prev:new Map(),old,val,mode:old===val?"del":"add",dbl};
@@ -1663,8 +1664,8 @@ requestAnimationFrame(()=>document.documentElement.removeAttribute("data-ui-pend
 /* ---- Bediening per puzzel ---- */
 function controlsOf(t){const common=[["Toetsenbord","Tab naar het bord, pijltjestoetsen naar een vakje, Enter om te plaatsen. Shift+Enter gebruikt de andere actie."]],rows=[];
  if(t==="nono"){rows.push(["Tik / linksklik","Gebruik de actieve vul-, kleur- of kruisstand"],["Rechtermuisknop","Gebruik de andere stand: kruisje ↔ vullen/laatst gekozen kleur"],["Dubbeltik / dubbelklik","Zet altijd een kruisje zonder je actieve stand of kleur te veranderen"],["Slepen","Vul of kruis meerdere vakjes in dezelfde stand"],["Naast het bord","Wissel tussen vullen/kleur en kruisjes"]);common.push(["Spatie","wissel stand"])}
- else if(t==="bin"){rows.push(["Tik / linksklik","Plaats ✕"],["Dubbeltik / dubbelklik","Plaats ○"],["Rechtermuisknop","Plaats direct ○ (of kies de knop Cirkel)"],["Potlood","Zelfde bediening als normaal, maar met kleine ✕ en ○"],["Teller slepen","Vergelijk die rij of kolom met de andere"])}
- else if(t==="star"){rows.push(["Tik / linksklik","Plaats een kruisje"],["Dubbeltik / dubbelklik","Plaats een ster"],["Rechtermuisknop","Plaats direct een ster (of kies de knop Ster)"],["Potlood","Zelfde bediening als normaal, maar met dunne kleine ☆ en ×"],["Slepen","Plaats dezelfde markering in meerdere vakjes"])}
+ else if(t==="bin"){rows.push(["Tik / linksklik","Plaats ✕"],["Dubbeltik / dubbelklik","Plaats ○, of wis een bestaande ○"],["Rechtermuisknop","Plaats of wis direct ○"],["Potlood","Zelfde bediening als normaal, maar met kleine ✕ en ○"],["Teller slepen","Vergelijk die rij of kolom met de andere"])}
+ else if(t==="star"){rows.push(["Tik / linksklik","Plaats een kruisje"],["Dubbeltik / dubbelklik","Plaats een ster, of wis een bestaande ster"],["Rechtermuisknop","Plaats of wis direct een ster"],["Potlood","Zelfde bediening als normaal, maar met dunne kleine ☆ en ×"],["Slepen","Plaats dezelfde markering in meerdere vakjes"])}
  else if(t==="plus"){rows.push(["Tik / linksklik","Gebruik de actieve stand: omcirkelen of wegstrepen"],["Rechtermuisknop","Gebruik de andere stand: omcirkelen ↔ wegstrepen"],["Slepen","Markeer meerdere getallen in dezelfde stand"],["Naast het bord","Wissel stand"]);common.push(["Spatie","wissel stand"])}
  else if(t==="hex"){rows.push(["Tik / linksklik","Gebruik de actieve stand: blauw of zwart"],["Rechtermuisknop","Gebruik de andere stand: blauw ↔ zwart"],["Blauw/grijs vlak","Wissel tussen blauw en zwart"],["Rand- of blauw cijfer","Links gebruikt de actieve stand; rechts de andere stand"]);common.push(["Spatie","wissel blauw/zwart"])}
  else if(t==="mur"){rows.push(["Tik / linksklik","Gebruik de actieve plaats- of kruisstand"],["Rechtermuisknop","Gebruik de andere stand: plaatsen ↔ wegkruisen"],["Naast het bord","Wissel tussen plaatsen en wegkruisen"]);common.push(["Spatie","wissel stand"])}
