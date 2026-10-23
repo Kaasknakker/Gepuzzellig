@@ -115,9 +115,11 @@ function freeLoc(){try{return JSON.parse(lsGet("pdfree")||"[]")}catch(e){return[
 const GV="g17";
 /* Kleurnonogram: gemengde kleuren voor nieuwe vrije puzzels (seed "q…") en voor dagpuzzels vanaf 24 oktober 2026. Oudere puzzels blijven precies hetzelfde. */
 const nonoMixOn=seed=>{seed=String(seed);if(seed[0]==="q")return true;const m=seed.match(/^nono(\d{4}-\d{2}-\d{2})/);return!!m&&m[1]>="2026-10-24"};
-function genCached(type,seed,lv,hard,nv){const cmix=type==="nono"&&nv==="color"&&nonoMixOn(seed),vk=(type==="nono"&&nv==="color"?"|color"+(cmix?"|m2":""):"")+(type==="mur"?"|cast"+hash(murCastSig()).toString(36):"");const k=GV+(type==="mur"?MGV:type==="plus"?PGV:"")+"|"+type+"|"+seed+"|"+lv+(hard?"|w":"")+vk;let all={};try{all=JSON.parse(lsGet("pdgen")||"{}")}catch(e){all={}}
+/* Oude dagpuzzels en lopende vrije Murdoku's behouden hun generator en bord. */
+function murVersion(seed,saved){const day=String(seed).match(/^mur(\d{4}-\d{2}-\d{2})/);return day?(day[1]<"2026-10-24"?"m4":MGV):saved&&saved.seed===seed&&["m4",MGV].includes(saved.mv)?saved.mv:MGV}
+function genCached(type,seed,lv,hard,nv,mv){const cmix=type==="nono"&&nv==="color"&&nonoMixOn(seed),vk=(type==="nono"&&nv==="color"?"|color"+(cmix?"|m2":""):"")+(type==="mur"?"|cast"+hash(murCastSig()).toString(36):"");const k=GV+(type==="mur"?(mv||MGV):type==="plus"?PGV:"")+"|"+type+"|"+seed+"|"+lv+(hard?"|w":"")+vk;let all={};try{all=JSON.parse(lsGet("pdgen")||"{}")}catch(e){all={}}
  if(all[k])try{return JSON.parse(all[k])}catch(e){}
- const p=type==="nono"&&nv==="color"?genColorNono(rng(hash(seed+"|color")),lv,!!hard,cmix):GEN[type](rng(hash(seed)),lv,!!hard);try{all[k]=JSON.stringify(p);const ks=Object.keys(all);for(const x of ks.slice(0,Math.max(0,ks.length-16)))delete all[x];lsSet("pdgen",JSON.stringify(all))}catch(e){}
+ const p=type==="nono"&&nv==="color"?genColorNono(rng(hash(seed+"|color")),lv,!!hard,cmix):type==="mur"?genMur(rng(hash(seed)),lv,!!hard,mv!=="m4"):GEN[type](rng(hash(seed)),lv,!!hard);try{all[k]=JSON.stringify(p);const ks=Object.keys(all);for(const x of ks.slice(0,Math.max(0,ks.length-16)))delete all[x];lsSet("pdgen",JSON.stringify(all))}catch(e){}
  return p}
 /* Weekend (zaterdag en zondag): de dagpuzzel is wat pittiger. Het archief: dagpuzzels van de afgelopen week alsnog doen. */
 const isWk=ds=>{const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay();return w===0||w===6};
@@ -134,14 +136,14 @@ function load(type,practice,fresh,date,skipPersist){clearHomeSkinAccent();docume
  $("#help").textContent=helpOf(type);$("#grid").innerHTML="";$("#m24").innerHTML="";$("#mur").innerHTML="";$("#hexsvg").innerHTML="";$("#pad").style.display="none";$("#m24").style.display="none";
  $("#msg").textContent="Puzzel maken...";setT("0:00");$("#grid").classList.remove("nfin");
  setTimeout(()=>{if(id!==loadId)return;
-  const seed=practice?(sv0&&sv0.seed?sv0.seed:"q"+Math.random()):type+S.date+sf0,ck=type+seed+(type==="nono"?"|"+S.nv:"");S.seed=seed;
-  const p=cache[ck+(S.hard?"|w":"")]||(cache[ck+(S.hard?"|w":"")]=genCached(type,seed,lvl0,S.hard,S.nv));S.p=p;if(type==="star")STK=p.K||2;
+  const seed=practice?(sv0&&sv0.seed?sv0.seed:"q"+Math.random()):type+S.date+sf0,mv=type==="mur"?murVersion(seed,sv0):null,ck=type+seed+(type==="nono"?"|"+S.nv:"")+(mv?"|"+mv:"");S.seed=seed;if(mv)S.mv=mv;
+  const p=cache[ck+(S.hard?"|w":"")]||(cache[ck+(S.hard?"|w":"")]=genCached(type,seed,lvl0,S.hard,S.nv,mv));S.p=p;if(type==="star")STK=p.K||2;
   const N=p.N||0;
   if(type==="bin")S.cur=p.giv.slice();else if(type==="kak")S.cur=Array(p.W*p.H).fill(0);else if(type==="m24"){S.r=0;setRound()}else if(type==="hex"){S.hx={rev:new Set([...p.rev0,...(p.zs||[])])};S.cs={}}else if(type==="mur"){S.cur=Array(N*N).fill(-1);S.ms=0;S.mxm=false;S.str=new Set()}else if(type==="plus"){S.cur=Array(p.W*p.H).fill(0);S.str=new Set()}else S.cur=Array(type==="nono"||type==="plus"?p.W*p.H:N*N).fill(0);
   const key=S.date+type+sf0;
   if(!practice&&localDoneInGroup(key,$("#group").value)){S.done=true;S.secs=store[key];
    if(type==="bin")S.cur=p.sol.slice();else if(type==="star")S.cur=p.sol.map(v=>v?2:0);else if(type==="nono")S.cur=p.sol.slice();else if(type==="kak")S.cur=p.sol.slice();else if(type==="hex")p.sol.forEach((v,i)=>S.hx.rev.add(i));else if(type==="plus")S.cur=p.sol.map(v=>v?1:2);else if(type==="mur")S.cur=solCur(p)}
-  if(!S.done&&sv0&&sv0.seed===seed&&((type!=="hex"&&type!=="plus"&&type!=="nono")||sv0.gv===GV)&&(type!=="mur"||sv0.mv===MGV)&&(type!=="plus"||sv0.pv===PGV)){try{
+  if(!S.done&&sv0&&sv0.seed===seed&&((type!=="hex"&&type!=="plus"&&type!=="nono")||sv0.gv===GV)&&(type!=="mur"||sv0.mv===S.mv)&&(type!=="plus"||sv0.pv===PGV)){try{
    if(sv0.cur&&S.cur&&sv0.cur.length===S.cur.length)S.cur=sv0.cur.slice();
    if(sv0.rev&&S.hx)S.hx.rev=new Set(sv0.rev);if(sv0.cs&&S.hx)S.cs=sv0.cs;
    if(type==="m24"&&sv0.r){S.r=sv0.r;setRound()}
@@ -1117,7 +1119,7 @@ function murHint(){const p=S.p,N=p.N,V=p.V,M=murM(p),nm=s=>p.ppl[s],cell=i=>`rij
  const fix=Array(N).fill(-1);S.cur.forEach((v,i)=>{if(v>=0)fix[v]=i});
  if(fix.every(x=>x>=0)){const k=p.reg[p.sol[V]];return{kind:"kill",cells:[p.sol[V]],cards:[V],set:null,text:`Iedereen staat goed. ${nm(V)} (het slachtoffer) lag ${room(k)}. Wie stond daar als enige bij? Dat is de moordenaar.`,btn:"Oké"}}
  const list=a=>a.length>1?a.slice(0,-1).join(", ")+" en "+a[a.length-1]:a[0];
- for(const st of[1,2,3,4]){const r=murSolve(M,p.cd,{st,fix,why:true});if(!r)break;
+ for(const st of[1,2,3,4,5]){const r=murSolve(M,p.cd,{st,fix,why:true});if(!r)break;
   const hit=r.ord.find(s=>fix[s]<0&&r.D[s].length===1&&r.D[s][0]===p.sol[s]);if(hit==null)continue;
   const at=p.sol[hit],used=[...r.U[hit]],cards=[...new Set([hit,...used.map(j=>p.cd[j].p)])];
   const byCl=(...q)=>{const j=new Set();q.forEach(o=>r.U[o].forEach(x=>j.add(x)));const a=[...new Set([...j].map(x=>nm(p.cd[x].p)))];return a.length?` (zie ${a.length>1?"de kaartjes van ":"het kaartje van "}${list(a)})`:""};
@@ -1131,13 +1133,14 @@ function murHint(){const p=S.p,N=p.N,V=p.V,M=murM(p),nm=s=>p.ppl[s],cell=i=>`rij
    else if(c==="V3")steps.push(`Het slachtoffer lag ${room(+f[1])}, samen met ${nm(+f[2])}. De moordenaar was daar alleen met het slachtoffer, dus verder stond daar niemand.`);
    else if(c==="H")steps.push(`In ${LN[+f[1]]} ${+f[2]+1} moet iemand staan, en alleen ${nm(hit)} kan daar nog.`);
    else if(c==="P"){const a=+f[4],b=+f[5];steps.push(`${nm(a)} en ${nm(b)} kunnen samen alleen in ${LN[+f[1]]} ${+f[2]+1} en ${+f[3]+1} staan${byCl(a,b)}. Daar is dus geen plek meer voor anderen.`)}
+   else if(c==="T"){const w=+f[2];steps.push(`Stel dat ${nm(hit)} op ${cell(+f[1])} ${hit===V?"lag":"stond"}. Dan ${w>=0&&w!==hit?"blijft er voor "+nm(w)+" geen plek meer over":"loopt het vast"}. Dus daar ${hit===V?"lag":"stond"} ${nm(hit)} niet.`)}
    else if(c==="L"){steps.push(`In ${LN[+f[1]]} ${+f[2]+1} en ${+f[3]+1} moeten twee mensen staan, en alleen ${nm(+f[4])} en ${nm(+f[5])} kunnen daar nog komen.`)}}
   if(occ.length){const t=occ.map(o=>{const x=fix[o]>=0?fix[o]:r.D[o][0];return`${nm(o)} (rij ${(x/N|0)+1}, kolom ${x%N+1}${fix[o]>=0?"":", dat volgt uit de aanwijzingen"})`});steps.unshift(`Deze rijen en kolommen zijn al bezet: ${list(t)}. Daar kan ${nm(hit)} niet meer staan.`)}
   const bk=[...Array(N*N).keys()].filter(i=>!murFree(i,M)&&((i/N|0)===(at/N|0)||i%N===at%N||p.reg[i]===p.reg[at]));if(bk.length&&steps.length<7)steps.push(`Op ${[...new Set(bk.map(i=>p.obj[i]))].map(t=>MOBJ[t].e).join(" ")} kan niemand staan.`);
   return{kind:"set",cells:[at],set:hit,cards,proof:{W:r.W,fix},intro:`${nm(hit)} kan nog maar op één plek staan. Zo kom je daarop:`,steps:steps.slice(0,7),outro:`Dus ${nm(hit)} ${hit===V?"lag":"stond"} op ${cell(at)}.`,text:`${nm(hit)} staat op ${cell(at)}.`,btn:`Zet ${nm(hit)} hier voor me`}}
  const s=fix.findIndex(x=>x<0);return{kind:"set",cells:[p.sol[s]],cards:[s],set:s,text:`Dit is een lastige stap. ${nm(s)} staat op ${cell(p.sol[s])}.`,btn:`Zet ${nm(s)} hier voor me`}}
 /* ---- Foutloos en zonder hint; elkaars voortgang ---- */
-const MGV="m4",PGV="p2";const HINTT=["star","bin","nono","hex","plus","mur"],BASEF=["name","group","date","type","secs","uid"];
+const MGV="m5",PGV="p2";const HINTT=["star","bin","nono","hex","plus","mur"],BASEF=["name","group","date","type","secs","uid"];
 let XS={};try{XS=JSON.parse(lsGet("pdx")||"{}")}catch(e){XS={}}
 const xsSave=()=>lsSet("pdx",JSON.stringify(XS));
 let OLDRULES=false;
@@ -1406,7 +1409,7 @@ function persist(forceCloud){if(S.discarded||!S.p||S.done||!S.start||!S.seed)ret
  const k=progKey(S.type,S.practice,S.date,S.sf),pc=progressPct();
  /* Een onaangeraakte of weer volledig leeggemaakte puzzel is geen lopende puzzel. */
  if(pc<=0&&!(S.nt&&Object.values(S.nt).some(Boolean))&&!(S.cs&&Object.values(S.cs).some(Boolean))&&!(S.str&&S.str.size)&&!(S.hints>0)&&!(S.mist>0)){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;UX.saves.delete(k);UX.paintStorage();return}
- const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,hintLedger:S.hintLedger||{},hintLegacy:S.hintLegacy||0,seenErrors:S.seenErrors||{},pc,group:$("#group").value.trim()};
+ const e={seed:S.seed,gv:GV,mv:S.mv||MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,hintLedger:S.hintLedger||{},hintLegacy:S.hintLegacy||0,seenErrors:S.seenErrors||{},pc,group:$("#group").value.trim()};
  if(S.hx){e.rev=[...S.hx.rev];e.cs=S.cs||{}}else if(S.type==="m24")e.r=S.r;else if(S.cur)e.cur=S.cur;if(S.str)e.str=[...S.str];if(S.nt&&Object.keys(S.nt).length)e.nt=S.nt;
  /* Hervatten moet ook echt hervatten: bewaar een begrensde undo/redo-geschiedenis.
     Maak 24 heeft een eigen ronde-state en laten we hier bewust buiten. */
@@ -1567,6 +1570,8 @@ addEventListener("pdpreviewstyle",e=>{const d=e.detail||{};updateStylePreview(d,
 addEventListener("pdrestorestyle",applyCurrentHomeStyle);
 function pageIn(el){if(!el||matchMedia("(prefers-reduced-motion: reduce)").matches)return;el.classList.remove("pagein");void el.offsetWidth;el.classList.add("pagein");setTimeout(()=>el.classList.remove("pagein"),260)}
 function fitHomePage(){document.documentElement.classList.remove("pagefit");document.body.classList.remove("pagefit");requestAnimationFrame(()=>{if(!document.body.classList.contains("home")||HVIEW==="score"||innerWidth<761)return;const h=$("#home");if(h&&h.scrollHeight<=innerHeight+2){document.documentElement.classList.add("pagefit");document.body.classList.add("pagefit")}})}
+/* Alleen voor de groep Rekensukkels (Peter en Aart): het verhaal achter de app. */
+const isRekensukkels=()=>($("#group").value||"").trim().toLowerCase()==="peter-aart-jk4hv92t"||String(GROUP_NAME||"").trim().toLowerCase()==="rekensukkels";
 function showScore(who="all"){HVIEW="score";SCOREWHO=who||"all";SWK=0;renderHome();pageIn($("#home"));window.scrollTo(0,0)}
 function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r=>!isFree(r)),today=dstr(),dow=(new Date().getDay()+6)%7,mon0=addDays(today,-dow),TS=Object.keys(TYPES);
  const pl=new Map();groupPlayers().forEach(p=>pl.set(uidOf(p),playerName(p)));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});const us=[...pl.keys()];
@@ -1604,7 +1609,7 @@ function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r
   const bars=`<div class="hcard"><div class="shd1"><b>Per puzzel</b><span class="mut">${PN}</span></div>${TS.map(t=>`<div class="sbr"><div class="sbt"><i style="background:${TCOL[t]}"></i>${TYPES[t]}</div><div class="sbb">${st.map(x=>{const n=x.per[t]||0;return`<div class="sbl p${x.i%2}"><span class="si">${x.nm[0]}</span><div class="strk"><div style="width:${Math.max(n?3:0,100*n/mx)}%;background:${TCOL[t]}"></div></div><span class="sn">${n}</span></div>`}).join("")}</div></div>`).join("")}</div>`;
   const W=16,start=addDays(mon0,-7*(W-1));
   const heat=`<div class="hcard"><div class="shd1"><b>Laatste ${W} weken</b><span class="mut">dagpuzzels per dag</span></div><div class="shm">${st.map(x=>{const cnt={};rows.forEach(r=>{if(r.uid===x.u&&r.date>=start)cnt[r.date]=(cnt[r.date]||0)+1});let o=`<div class="shp"><div class="srn">${x.nm}</div><div class="shg">`;for(let w=0;w<W;w++)for(let i=0;i<7;i++){const d=addDays(start,7*w+i),n=Math.min(TS.length,cnt[d]||0);o+=`<i class="${d>today?"fut":""}${d===today?" td":""}" style="${n?"background:color-mix(in srgb,var(--pc) "+Math.round(25+75*n/TS.length)+"%,transparent)":""}" title="${dnl(d)}: ${n}"></i>`}return o+"</div></div>"}).join("")}</div><div class="slg2 mut sm">minder <i></i><i style="background:color-mix(in srgb,var(--pc) 40%,transparent)"></i><i style="background:color-mix(in srgb,var(--pc) 70%,transparent)"></i><i style="background:var(--pc)"></i> meer</div></div>`;
-  h.innerHTML=`<div class="hwrap sco">${head(GROUP_NAME+' <button id="scoreGroupEdit" class="scoregroupedit" title="Groep beheren" aria-label="Groep beheren">✎</button>',"Samen "+together+" "+(together===1?"puzzel":"puzzels")+" opgelost "+PN)}<div class="scontrols">${views}${period}</div><div class="sovermain"><div class="soverheroes">${hero}</div>${cal}</div><div class="hgrid2 sh2">${bars}${heat}</div><div class="mut sm">Geen wedstrijd: gewoon kijken hoeveel jullie samen oplossen. Een telefoon- en groot-schermvariant van dezelfde dagpuzzel telt hier samen als één. Als je beide oplost, gebruikt dit overzicht het groot-schermresultaat; beide blijven als apparaatvariant vermeld. 🎯 = foutloos, 💡 = zonder hint.</div></div>`;
+  h.innerHTML=`<div class="hwrap sco">${head(GROUP_NAME+' <button id="scoreGroupEdit" class="scoregroupedit" title="Groep beheren" aria-label="Groep beheren">✎</button>'+(isRekensukkels()&&!ADMIN_READONLY?' <a id="scoreStory" class="scoregroupedit scorestory" href="verhaal.html" title="Hoe Gepuzzellig ontstond" aria-label="Hoe Gepuzzellig ontstond">i</a>':''),"Samen "+together+" "+(together===1?"puzzel":"puzzels")+" opgelost "+PN)}<div class="scontrols">${views}${period}</div><div class="sovermain"><div class="soverheroes">${hero}</div>${cal}</div><div class="hgrid2 sh2">${bars}${heat}</div><div class="mut sm">Geen wedstrijd: gewoon kijken hoeveel jullie samen oplossen. Een telefoon- en groot-schermvariant van dezelfde dagpuzzel telt hier samen als één. Als je beide oplost, gebruikt dit overzicht het groot-schermresultaat; beide blijven als apparaatvariant vermeld. 🎯 = foutloos, 💡 = zonder hint.</div></div>`;
  }
  $("#sBack").onclick=ADMIN_READONLY?()=>{location.href="admin.html"}:showHome;
  {const ge=$("#scoreGroupEdit");if(ge){if(ADMIN_READONLY)ge.remove();else ge.onclick=()=>window.dispatchEvent(new Event("pdopengroup"))}}

@@ -86,6 +86,7 @@ function murGuidance(move){
  for(const {kind,f} of direct){
   if(kind==="H")parts.push("Vergelijk wie nog in "+(f[1]==="0"?"rij ":"kolom ")+(+f[2]+1)+" kan staan. Volgens deze aanwijzingen blijft daarvoor maar één persoon over.");
   if(kind==="P"||kind==="L")parts.push(nm(+f[4])+" en "+nm(+f[5])+" hebben samen de twee "+(f[1]==="0"?"rijen ":"kolommen ")+(+f[2]+1)+" en "+(+f[3]+1)+" nodig. Die zijn daarmee voor andere personen niet meer beschikbaar.");
+  if(kind==="T")parts.push(name+" heeft nog maar een paar mogelijke plekken. Probeer er in gedachten één uit en redeneer verder"+(+f[2]>=0&&+f[2]!==person?": kan "+nm(+f[2])+" dan nog ergens staan?":": loopt het dan ergens vast?")+" Zo valt een van die plekken af.");
   if(kind==="V2")parts.push("De ruimte van "+nm(p.V)+" kan geen twee andere personen bevatten: de moordenaar was alleen met het slachtoffer.");
   if(kind==="V0")parts.push(nm(p.V)+" kan niet alleen in een ruimte liggen; er moet ook iemand anders in die ruimte kunnen staan.");
   if(kind==="V1")parts.push("Het slachtoffer ligt "+p.arts[+f[1]]+". Zoek wie volgens de kaartjes nog bij het slachtoffer kan staan; er moet precies één ander zijn.");

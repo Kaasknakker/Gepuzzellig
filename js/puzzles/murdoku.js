@@ -39,9 +39,10 @@ function murE(c,pos,M){const N=M.N,a=pos[c.p],ra=a/N|0,ca=a%N,rg=M.reg,ob=M.obj,
  return true}
 /* Menselijke oplosser. Geeft per persoon de nog mogelijke vakjes, en (met o.why) per persoon de redenen waarom vakjes afvielen.
    Stappen: 1 losse aanwijzingen en bezette rijen/kolommen; 2 + aanwijzingen over twee personen, alleen/niet alleen, het slachtoffer;
-   3 + "in deze rij/kolom kan alleen X nog"; 4 + paren. */
+   3 + "in deze rij/kolom kan alleen X nog"; 4 + paren;
+   5 + "stel dat": heeft iemand nog 2 of 3 plekken, probeer er één en kijk of het dan met stap 1-4 vastloopt. */
 function murSolve(M,cl,o){o=o||{};const N=M.N,V=M.V,st=o.st||4,rg=M.reg,R=i=>i/N|0,C=i=>i%N;
- const D=[];for(let p=0;p<N;p++)D.push(o.fix&&o.fix[p]>=0?[o.fix[p]]:[...Array(N*N).keys()].filter(i=>murFree(i,M)));
+ const D=[];for(let p=0;p<N;p++)D.push(o.D0?o.D0[p].slice():o.fix&&o.fix[p]>=0?[o.fix[p]]:[...Array(N*N).keys()].filter(i=>murFree(i,M)));
  const W=o.why?D.map(()=>[]):null,U=o.why?D.map(()=>new Set()):null,pos=[];
  const ord=[];D.forEach((d,p)=>{if(d.length===1)ord.push(p)});
  const cut=(p,keep,r,cj)=>{const a=D[p].filter(keep);if(a.length===D[p].length)return false;D[p]=a;if(a.length===1&&!ord.includes(p))ord.push(p);if(W){if(!W[p].includes(r))W[p].push(r);if(cj!=null)U[p].add(cj)}return true};
@@ -68,15 +69,20 @@ function murSolve(M,cl,o){o=o||{};const N=M.N,V=M.V,st=o.st||4,rg=M.reg,R=i=>i/N
      for(let q=0;q<N;q++)if(q!==a&&q!==b)ch=cut(q,x=>!ls.has(key(x)),"P|"+dim+"|"+L.join("|")+"|"+a+"|"+b)||ch}
     for(let l1=0;l1<N;l1++)for(let l2=l1+1;l2<N;l2++){const who=[];for(let q=0;q<N;q++)if(D[q].some(x=>key(x)===l1||key(x)===l2))who.push(q);
      if(who.length===2)for(const q of who)ch=cut(q,x=>key(x)===l1||key(x)===l2,"L|"+dim+"|"+l1+"|"+l2+"|"+who[0]+"|"+who[1])||ch}}}
-  if(D.some(d=>!d.length))return null;if(!ch)break}
+  if(D.some(d=>!d.length)){if(o.out)o.out.empty=D.findIndex(d=>!d.length);return null}
+  /* Stap 5 alleen als de makkelijkere stappen niets meer opleveren: per persoon met 2-3 plekken één plek uitproberen. */
+  if(!ch&&st>=5)for(let q=0;q<N&&!ch;q++){if(D[q].length<2||D[q].length>3)continue;
+   for(const i of D[q]){const D0=D.map(d=>d.slice()),out={};D0[q]=[i];
+    if(!murSolve(M,cl,{st:4,D0,out})){ch=cut(q,x=>x!==i,"T|"+i+"|"+(out.empty>=0?out.empty:-1))||ch;break}}}
+  if(!ch)break}
  return{D,W,U,ord}}
 const murDone=r=>!!r&&r.D.every(d=>d.length===1);
 /* Lukt het (zelden, vooral op Moeilijk) niet om een goede puzzel te vinden, probeer dan nog een ronde, en anders een niveau lager.
    Zo blijft de app nooit hangen op "Puzzel maken...". Puzzels die het eerste keer al lukte, blijven precies hetzelfde. */
-function genMur(R,lv,hard){lv=lv||2;for(let t=0;t<2;t++){const p=genMur0(R,lv,hard);if(p)return p}return(lv===3||lv===6)?genMur0(R,lv-1,hard):genMur0(R,2,false)}
-function genMur0(R,lv,hard){lv=lv||2;const N=MLV[lv]||6,V=N-1,easy=(lv===1||lv===4)&&!hard,tough=(lv===3||lv===6)||hard;
+function genMur(R,lv,hard,enhanced=true){lv=lv||2;for(let t=0;t<2;t++){const p=genMur0(R,lv,hard,enhanced);if(p)return p}return(lv===3||lv===6)?genMur0(R,lv-1,hard,enhanced):genMur0(R,2,false,enhanced)}
+function genMur0(R,lv,hard,enhanced){lv=lv||2;const N=MLV[lv]||6,V=N-1,easy=(lv===1||lv===4)&&!hard,tough=(lv===3||lv===6)||hard;const SM=enhanced&&tough?5:4;
  let best=null,bs=-1;
- for(let att=0;att<400&&!(best&&att>=(tough?16:6));att++){
+ for(let att=0;att<400&&!(best&&att>=(tough&&(!enhanced||best.need<5)?16:6));att++){
   const K=Math.max(4,N-1-(R()<.5?1:0)),reg=murRooms(N,K,R);if(!reg)continue;
   const rows=shuf([...Array(N).keys()],R),cols=shuf([...Array(N).keys()],R),sol=rows.map((r,p)=>r*N+cols[p]);
   const vk=reg[sol[V]],inV=[];for(let p=0;p<V;p++)if(reg[sol[p]]===vk)inV.push(p);if(inV.length!==1)continue;
@@ -97,7 +103,7 @@ function genMur0(R,lv,hard){lv=lv||2;const N=MLV[lv]||6,V=N-1,easy=(lv===1||lv==
    for(let x=0;x<N;x++){if(x===p)continue;add({p,t:"np",x},2.5);if(x!==V){add({p,t:"same",x},1.2);add({p,t:"nsame",x},.5)}
     for(const t of["hi","lo","le","ri"])add({p,t,x},.5)}}
   const wpick=a=>{let s=a.reduce((x,y)=>x+y.w,0)*R();for(const e of a){s-=e.w;if(s<=0)return e}return a[a.length-1]};
-  const cards=Array.from({length:V},()=>[]),all=()=>cards.flat();
+  const cards=Array.from({length:V},()=>[]),all=()=>cards.flat();const solveAll=()=>{const r=murSolve(M,all(),{st:4});return SM>4&&!murDone(r)&&r?murSolve(M,all(),{st:5}):r};/* Eerst aanvullen tot stap 1-4 genoeg is, daarna bij Moeilijk weghalen zolang "stel dat" het nog oplost. */
   for(let p=0;p<V;p++){const e=wpick(pool.filter(e=>e.c.p===p));cards[p].push(e.c)}
   let rs=murSolve(M,all(),{st:4}),ok=murDone(rs);
   for(let g=0;!ok&&rs&&g<N*2;g++){const open=[];for(let q=0;q<V;q++)if(rs.D[q].length>1&&cards[q].length<3)open.push(q);
@@ -105,10 +111,10 @@ function genMur0(R,lv,hard){lv=lv||2;const N=MLV[lv]||6,V=N-1,easy=(lv===1||lv==
    const cand=pool.filter(e=>(tgt<0?cards[e.c.p].length<3:e.c.p===tgt)&&!cards[e.c.p].includes(e.c));if(!cand.length)break;
    const e=wpick(cand);cards[e.c.p].push(e.c);rs=murSolve(M,all(),{st:4});ok=murDone(rs)}
   if(!ok)continue;
-  for(const c of shuf(all(),R)){const cd=cards[c.p];if(cd.length<2)continue;cd.splice(cd.indexOf(c),1);if(!murDone(murSolve(M,all(),{st:4})))cd.push(c)}
+  for(const c of shuf(all(),R)){const cd=cards[c.p];if(cd.length<2)continue;cd.splice(cd.indexOf(c),1);if(!murDone(solveAll()))cd.push(c)}
   if(cards.some(c=>c.length>3))continue;
-  const need=easy?(murDone(murSolve(M,all(),{st:3}))?3:9):[2,3,4].find(s=>murDone(murSolve(M,all(),{st:s})))||9;
-  if(easy&&need>3)continue;
+  const need=easy?(murDone(murSolve(M,all(),{st:3}))?3:9):[2,3,4,5].find(s=>s<=SM&&murDone(murSolve(M,all(),{st:s})))||9;
+  if(easy&&need>3)continue;if(enhanced&&tough&&need<4)continue;
   const sc=(easy?10-all().length:need*10+all().length)+R();if(sc>bs){bs=sc;
    const flat=all(),txt=c=>murClauseTxt(c,M,ppl,rooms);
    best={N,V,reg,obj:obj.map(o=>o?o.t:""),rooms:rooms.map(r=>r[1]),arts:rooms.map(r=>r[0]),ppl:ppl.map(x=>x[0]),gen:ppl.map(x=>x[1]),sol,killer:inV[0],

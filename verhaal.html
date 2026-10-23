@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="robots" content="noindex">
+<script>try{var t=localStorage.getItem("pdtheme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<title>Hoe Gepuzzellig ontstond</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,500;0,700;0,800;0,900;1,600&display=swap">
+<style>
+/* Layout: één rustige leeskolom zoals de app zelf (ronde letter, kaartjes met dikke onderrand), puzzelkleuren per onderdeel, een stroomschema in het midden. */
+:root{
+  --bg:#f6f4ef; --card:#ffffff; --fg:#1f2430; --mut:#626877; --line:#d9d4c8;
+  --acc:#2f6fed; --bin:#2f6fed; --star:#d9822b; --nono:#1d8a4b; --hex:#7a52d6; --mur:#c0392b;
+  --pat:#1f2430; --tint:#eef2fd;
+  --f-body:"Nunito",ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15171c; --card:#20232b; --fg:#ecebe6; --mut:#a3a7b3; --line:#3a3e4a;
+  --acc:#7fa6ff; --bin:#7fa6ff; --star:#f0a456; --nono:#4cc380; --hex:#a98bff; --mur:#ef6f61;
+  --pat:#ecebe6; --tint:#232a3d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#15171c; --card:#20232b; --fg:#ecebe6; --mut:#a3a7b3; --line:#3a3e4a;
+  --acc:#7fa6ff; --bin:#7fa6ff; --star:#f0a456; --nono:#4cc380; --hex:#a98bff; --mur:#ef6f61;
+  --pat:#ecebe6; --tint:#232a3d; color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:19px;line-height:1.6;position:relative}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;z-index:0;
+  background-color:var(--pat);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M20 20h14a6 6 0 1 1 12 0h14v14a6 6 0 1 0 0 12v14H46a6 6 0 1 0-12 0H20V46a6 6 0 1 1 0-12z' fill='none' stroke='black' stroke-width='2.5'/%3E%3Ctext x='88' y='104' font-family='sans-serif' font-weight='900' font-size='22' fill='black'%3E6%3C/text%3E%3C/svg%3E") 0 0/120px 120px;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M20 20h14a6 6 0 1 1 12 0h14v14a6 6 0 1 0 0 12v14H46a6 6 0 1 0-12 0H20V46a6 6 0 1 1 0-12z' fill='none' stroke='black' stroke-width='2.5'/%3E%3Ctext x='88' y='104' font-family='sans-serif' font-weight='900' font-size='22' fill='black'%3E6%3C/text%3E%3C/svg%3E") 0 0/120px 120px}
+.terug{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--fg);text-decoration:none;font-size:22px;font-weight:700;box-shadow:0 3px 0 var(--line);align-self:flex-start}
+.terug:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+main{position:relative;z-index:1;max-width:720px;margin:0 auto;padding-block:max(20px,env(safe-area-inset-top,0px)) max(48px,env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{text-wrap:balance;line-height:1.2;margin:0}
+h1{font-weight:900;font-size:clamp(34px,7vw,52px);letter-spacing:-.01em}
+h2{font-weight:900;font-size:clamp(25px,4.4vw,31px)}
+h3{font-weight:800;font-size:21px}
+p{margin:0}
+section{display:flex;flex-direction:column;gap:16px}
+.eyebrow{font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+.lead{font-size:clamp(20px,3vw,23px);color:var(--mut);font-weight:600}
+b,strong{font-weight:800}
+
+/* Kop met de zes puzzelblokjes */
+header{display:flex;flex-direction:column;gap:18px}
+.tiles{display:flex;gap:8px;flex-wrap:wrap}
+.tile{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:900;font-size:20px;
+  background:var(--c);box-shadow:0 4px 0 color-mix(in srgb,var(--c) 60%,#000)}
+
+/* Kaartjes zoals in de app */
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px;
+  box-shadow:0 4px 0 var(--line);min-width:0}
+.card .tag{align-self:flex-start;font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--c);border-radius:8px;padding:3px 9px}
+.card p{font-size:17px;line-height:1.5}
+.card .like{color:var(--mut);font-style:italic;font-weight:600}
+
+/* Stroomschema */
+.flow{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:14px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.node{flex:1 1 110px;min-width:0;text-align:center;border-radius:14px;padding:10px 8px;border:2px solid var(--c);background:color-mix(in srgb,var(--c) 12%,var(--card))}
+.node b{display:block;font-size:17px}
+.node span{display:block;font-size:14px;color:var(--mut);line-height:1.35}
+.arrow{color:var(--mut);font-weight:900;font-size:22px;flex:0 0 auto}
+.side{display:flex;gap:12px;flex-wrap:wrap}
+.side .node{flex:1 1 200px}
+.flow small{color:var(--mut);font-size:15px;line-height:1.45}
+
+/* Het regelboekje */
+.rules{background:var(--tint);border-radius:18px;padding:20px 22px;display:flex;flex-direction:column;gap:10px}
+.rules h3{font-size:18px}
+.rules ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px;font-size:17px}
+.quote{border-left:4px solid var(--mur);padding:4px 0 4px 16px;font-weight:700}
+
+/* Weetjes */
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.fact{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;gap:14px;align-items:baseline;min-width:0}
+.fact .n{font-weight:900;font-size:34px;color:var(--c);font-variant-numeric:tabular-nums;line-height:1;flex:0 0 auto}
+.fact p{font-size:16px;line-height:1.45}
+
+.tip{background:var(--card);border:2px solid var(--nono);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:12px;box-shadow:0 4px 0 color-mix(in srgb,var(--nono) 55%,#000)}
+.tip ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+footer{color:var(--mut);font-size:15px;text-align:center}
+
+@media (max-width:640px){
+  body{font-size:18px}
+  .cards{grid-template-columns:1fr}
+  .facts{grid-template-columns:1fr}
+  .row{flex-direction:column;align-items:stretch}
+  .arrow{transform:rotate(90deg);align-self:center;line-height:1}
+}
+</style>
+
+</head><body>
+<main>
+  <header>
+    <a class="terug" href="./" aria-label="Terug naar Gepuzzellig">←</a>
+    <div class="tiles" aria-hidden="true">
+      <span class="tile" style="--c:var(--bin)">0</span>
+      <span class="tile" style="--c:var(--star)">★</span>
+      <span class="tile" style="--c:var(--nono)">■</span>
+      <span class="tile" style="--c:var(--hex)">⬢</span>
+      <span class="tile" style="--c:var(--acc)">+</span>
+      <span class="tile" style="--c:var(--mur)">?</span>
+    </div>
+    <h1>Hoe Gepuzzellig ontstond</h1>
+    <p class="lead">Een puzzelapp voor ons tweeën, gebouwd zonder dat ik zelf één regel code heb getypt.</p>
+  </header>
+
+  <section>
+    <span class="eyebrow">Het begin</span>
+    <h2>Van rekensommen naar een eigen app</h2>
+    <p>We deden altijd samen de rekenraadsels op Beter Rekenen, maar al die sommen gingen herhalen. De puzzelapps die ik vond waren Engelstalig of werkten niet fijn op de iPad.</p>
+    <p>Dus heb ik het aan Claude gevraagd, gewoon in gewone taal: Nederlands, de iPad in liggende stand, elke dag dezelfde puzzels voor ons allebei, en zien hoe de ander het doet. Claude schreef de code, ik probeerde het uit en zei wat er anders moest. Dat ging honderden keren heen en weer.</p>
+    <p>Zo ontstond de basis. Het knapste stuk zijn de <b>puzzelmakers</b>: stukjes programma die elke dag zelf nieuwe puzzels bedenken, en controleren dat er precies één oplossing is die je met logisch nadenken kunt vinden. Er staat dus nergens een stapel kant-en-klare puzzels. Elke puzzel wordt ter plekke gemaakt, en omdat de datum het startpunt is, krijgen wij precies dezelfde.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow">De onderdelen</span>
+    <h2>Drie stukken die samenwerken</h2>
+    <div class="cards">
+      <div class="card" style="--c:var(--bin)">
+        <span class="tag">De app</span>
+        <p class="like">Een website die zich als app gedraagt.</p>
+        <p>Je zet hem op je beginscherm. Hij bewaart een kopie van zichzelf, dus hij werkt zelfs zonder internet.</p>
+      </div>
+      <div class="card" style="--c:var(--hex)">
+        <span class="tag">GitHub</span>
+        <p class="like">Een gedeelde map met een geheugen.</p>
+        <p>Alle bestanden van de app staan hier. Elke wijziging wordt vastgelegd, dus we kunnen altijd terug naar een eerdere versie.</p>
+      </div>
+      <div class="card" style="--c:var(--star)">
+        <span class="tag">Firebase</span>
+        <p class="like">Het scorebord in de cloud.</p>
+        <p>Een dienst van Google. Hier staan de scores, de groepen en wie wat heeft opgelost. Je logt in met je Google-account.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Hoe het aan elkaar hangt</span>
+    <h2>Van idee tot puzzel op je iPad</h2>
+    <div class="flow" role="img" aria-label="Peter vraagt ChatGPT om een wijziging, ChatGPT zet die in GitHub, GitHub zet de app online, en de app staat op de iPads. Firebase bewaart de scores. Claude legde de basis en controleert nu de puzzels en de code.">
+      <div class="row">
+        <div class="node" style="--c:var(--nono)"><b>Ik</b><span>bedenk wat ik wil</span></div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node" style="--c:var(--bin)"><b>ChatGPT</b><span>schrijft de code</span></div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node" style="--c:var(--hex)"><b>GitHub</b><span>bewaart en controleert</span></div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div class="node" style="--c:var(--mur)"><b>De app</b><span>op jouw en mijn iPad</span></div>
+      </div>
+      <div class="side">
+        <div class="node" style="--c:var(--star)"><b>Firebase</b><span>onthoudt scores, groepen en wie er mag inloggen</span></div>
+        <div class="node" style="--c:var(--acc)"><b>Claude</b><span>legde de basis en keurt nu mee</span></div>
+      </div>
+      <small>Ook de regels voor wie wat mag zien in Firebase staan in GitHub en worden vanzelf doorgezet. Ik hoef bijna niets met de hand te doen.</small>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Twee AI's</span>
+    <h2>De basis, de verbouwing en de keuring</h2>
+    <p>Claude bouwde de eerste versies: de puzzelmakers, de hints die stap voor stap uitleggen, en de indeling voor de iPad. Toen de app naar GitHub verhuisde, ben ik met ChatGPT verder gaan bouwen aan inloggen, groepen en thema's.</p>
+    <p>Claude kijkt nog geregeld mee als keurmeester. Die rekent bijvoorbeeld honderden puzzels door om te checken dat er maar één oplossing is en dat je hem logisch kunt oplossen. Ook controleert hij de knoppen op nagebootste iPad- en iPhone-schermen. Zelf proberen op onze apparaten blijft nodig.</p>
+    <p>Daar komen echt dingen uit. Laatst waren de knoppen Hint en Controleer op de iPhone zo smal geworden dat je ze niet meer kon raken.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow">De AI leert ook regels</span>
+    <h2>Eén haakje te veel</h2>
+    <p class="quote">Op een dag stond er één haakje te veel in de code. Daardoor deed de hele app het niet meer.</p>
+    <p>Sindsdien verbeteren we niet alleen de app, maar ook de regels voor de AI. In het project staat nu een vaste werkafspraak die elke AI eerst moet lezen:</p>
+    <div class="rules">
+      <h3>Uit de werkafspraak voor AI</h3>
+      <ol>
+        <li>Haal eerst de nieuwste versie op en kijk hoe het nu werkt.</li>
+        <li>Maak de kleinste wijziging die nodig is en laat de rest met rust.</li>
+        <li>Test op iPad, iPhone en computer, met vinger, muis en Pencil.</li>
+        <li>Vertel kort wat je hebt veranderd en wat je hebt gecontroleerd.</li>
+      </ol>
+    </div>
+    <p>Daarnaast controleert GitHub bij elke wijziging vanzelf of de code klopt en of de puzzels en hints nog goed werken. Een fout zoals dat haakje wordt zo automatisch opgemerkt.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow">Weetjes</span>
+    <h2>In getallen</h2>
+    <div class="facts">
+      <div class="fact" style="--c:var(--bin)"><span class="n">6</span><p>soorten puzzels: Binair, Star Battle, Nonogram, Hexcells, Pluszle en Murdoku</p></div>
+      <div class="fact" style="--c:var(--hex)"><span class="n">1</span><p>haakje te veel was genoeg om ooit de hele app stil te leggen</p></div>
+      <div class="fact" style="--c:var(--nono)"><span class="n">192</span><p>dagpuzzels die Claude in één keer heeft doorgerekend, inclusief alle hints</p></div>
+      <div class="fact" style="--c:var(--mur)"><span class="n">2</span><p>AI's: de een legde de basis, de ander bouwt verder</p></div>
+    </div>
+  </section>
+
+  <section class="tip">
+    <span class="eyebrow" style="color:var(--nono)">Zelf aan de slag met AI?</span>
+    <h2>Vier tips</h2>
+    <ul>
+      <li>Begin klein: één ding tegelijk.</li>
+      <li>Beschrijf zo precies mogelijk wat je wilt, alsof je het aan een nieuwe collega uitlegt.</li>
+      <li>Probeer alles zelf uit en zeg eerlijk wat er niet goed is.</li>
+      <li>Laat een tweede AI je werk eens nakijken.</li>
+    </ul>
+    <p>Je hoeft niet te kunnen programmeren. Je moet vooral goed kunnen uitleggen wat je bedoelt.</p>
+  </section>
+
+  <footer>Gemaakt voor een avondje puzzelen met pa.</footer>
+</main>
+
+</body></html>

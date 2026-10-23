@@ -5,8 +5,8 @@
    - Een nieuwe worker neemt meteen over, maar de app herlaadt daarvoor niet terwijl je bezig bent (zie core.js).
    Oude Gepuzzellig-caches worden bij activatie opgeruimd; andere caches op hetzelfde domein laten we met rust. */
 const PREFIX="gepuzzellig-";
-const C=PREFIX+"v102";
-const PAGES=["./","raadsels.html","admin.html"];
+const C=PREFIX+"v103";
+const PAGES=["./","raadsels.html","admin.html","verhaal.html"];
 
 /* Pagina's: sleutel zonder ?zoekdeel (en index.html = ./). Versiebestanden: de volledige url, inclusief ?v=. */
 const isPage=u=>u.pathname.endsWith("/")||u.pathname.endsWith(".html");

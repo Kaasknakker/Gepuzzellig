@@ -1153,3 +1153,6 @@ body.hintside[data-t=hex] #hexw,body.hintdock[data-t=hex] #hexw{padding:10px}
 .hdelete{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:44px;min-height:44px;padding:10px;border-radius:12px;box-shadow:none;color:#b5483a}
 .hdelete svg{width:20px;height:20px;display:block}
 .hdelete:hover{background:color-mix(in srgb,#b5483a 10%,var(--card))}
+
+/* Info-knopje naar het verhaal (alleen groep Rekensukkels). */
+.scorestory{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-weight:900;font-style:italic;font-family:Georgia,serif;font-size:16px}
