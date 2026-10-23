@@ -29,6 +29,13 @@ try{
    if(t==='plus'&&!phone)assert(geometry.cs>56&&geometry.cs<=96,'Pluszle passend en groter');
    if(!phone)assert(Math.abs((geometry.left+geometry.right)/2-width/2)<2,`${name}/${t}: bord niet gecentreerd`);
    if(t==='mur'&&!phone)assert.equal(geometry.murOverflow,'visible','Murdoku scrollt op groot scherm');
+   if(t==='mur'&&!phone)assert(await page.evaluate(()=>{const a=testAvailableRect(),g=$('#mgrid').getBoundingClientRect(),p=$('#playbox').getBoundingClientRect();return g.top-6>=a.top&&p.bottom+6<=a.bottom}),`${name}: Murdoku-rand/personen/uitleg buiten beeld`);
+   if(t==='mur'){
+    const before=await page.locator('#mgrid').boundingBox();
+    await page.evaluate(()=>toggleTwoMode());await page.waitForTimeout(100);
+    assert.deepEqual(await page.locator('#mgrid').boundingBox(),before,`${name}: Murdoku groeit bij standwissel`);
+    await page.evaluate(()=>toggleTwoMode());
+   }
    // Vergelijk dezelfde puzzel: de proef mag geen ruimte voor een lege footer reserveren.
    await page.locator('#testCompare').click();await page.waitForTimeout(80);
    const original=await page.evaluate(()=>{const r=$(S.type==='hex'?'#hexsvg':S.type==='mur'?'#mgrid':'#grid').getBoundingClientRect(),p=$('#pbot').getBoundingClientRect();return {width:r.width,height:r.height,left:r.left,right:r.right,bottom:r.bottom,footer:p.height,footerTop:p.top,side:p.height>p.width}});

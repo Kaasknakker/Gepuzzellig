@@ -40,6 +40,8 @@ Extra regressiecontrole: vergelijk hetzelfde bord met de oorspronkelijke stand, 
 
 Proef 3.1 voegt op de iPhone minimaal 12 px ruimte toe tussen de bovenste knoppenstrook en het speelveld. Het speelveld staat verticaal midden tussen bovenste en onderste bediening; bij Murdoku betreft dit het geheel met personen en aanwijzingen. De bestaande maatberekening neemt de tussenruimte mee, zodat hoge borden blijven passen. De originele vergelijkstand en grotere schermen behouden hun afstand.
 
+Proef 3.2 meet bij Murdoku op grotere schermen ook de echte hoogte van de personenrijen en legenda. Het geheel houdt ruimte voor de buitenrand. De schaalanimatie bij wisselen van invoerstand vervalt voor Murdoku; de rand blijft de stand aangeven. De browsercontrole controleert de volledige hoogte en een vaste rastermaat tijdens standwisselen.
+
 Op grotere schermen staat het bord zelf horizontaal midden in het scherm en verticaal midden in de beschikbare speelruimte. De bediening staat 12 px naast het bord; bij onvoldoende ruimte komt deze direct onder het bord. Bij Murdoku blijft het raster midden staan, met aanwijzingen rechts. Alleen iPhone gebruikt een scrollend aanwijzingenpaneel.
 
 Pluszle heeft een eigen maximum per puzzelformaat (80/88/96 px op tablet, lager op zeer grote desktops) in plaats van de te kleine vaste limiet van 56 px. De beschikbare schermruimte blijft bepalend. De bestaande iPhone-layout van Hexcells en Nonogram blijft behouden.

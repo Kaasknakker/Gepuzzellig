@@ -1275,6 +1275,8 @@ body.layout-proef.tablet.layout-bottom #pbot #nmode,body.layout-proef.tablet.lay
 body.layout-proef.tablet.layout-bottom #pbot #nmode.ncolor{grid-template-columns:repeat(6,minmax(0,1fr));width:auto}
 @media(min-width:740px){body.layout-proef.tablet.layout-wide #mur{display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:0;width:100%}body.layout-proef.tablet.layout-wide:not([data-t=mur]) #mur{display:none!important}body.layout-proef.tablet.layout-wide #mmain{grid-column:2;grid-row:1}body.layout-proef.tablet.layout-wide #mclues{grid-column:3;grid-row:1;margin-left:12px;width:calc(100% - 12px);max-width:300px;min-width:0;font-size:14px;padding:8px 10px}}
 .layout-clue-focus{outline:2px solid var(--hint-look);outline-offset:2px;border-radius:3px}
+/* De stand blijft zichtbaar via de rand; het hele bord schaalt niet meer bij wisselen. */
+body.layout-proef #mgrid.modeflash{animation:none}
 </style></head><body>
 <div id="iosPwaStatusStrip" aria-hidden="true"></div>
 <div id="bootveil" aria-hidden="true"><div class="bootinner"><i></i><i></i><i></i></div></div>
@@ -4434,7 +4436,7 @@ UX.init();
 document.body.classList.add('layout-proef');
 document.documentElement.removeAttribute('data-auth-pending');
 const testBar=document.createElement('div');testBar.id='layoutBar';
-testBar.innerHTML='<strong>Layoutproef 3.1</strong><select id="testSize" aria-label="Proefformaat"><option value="1">Klein</option><option value="2" selected>Normaal</option><option value="3">Groot</option></select><button id="testNew">Andere</button><button id="testCompare" aria-pressed="false">Origineel</button><a href="./">App</a>';
+testBar.innerHTML='<strong>Layoutproef 3.2</strong><select id="testSize" aria-label="Proefformaat"><option value="1">Klein</option><option value="2" selected>Normaal</option><option value="3">Groot</option></select><button id="testNew">Andere</button><button id="testCompare" aria-pressed="false">Origineel</button><a href="./">App</a>';
 document.body.prepend(testBar);
 let testOriginal=false,testRenderPass=false,testFrameId=0;
 const testRect=el=>el&&el.getBoundingClientRect();
@@ -4485,6 +4487,16 @@ rMur=function(){
   S._murMS=Math.max(28,Math.min(88,Math.floor((innerWidth-2*(clue+20))/S.p.N),Math.floor((area.height-130)/S.p.N)));
  }
  testBaseRMur();
+ // Namen en uitleg kunnen anders afbreken door lettertype, tekstgrootte of schermbreedte.
+ // Meet het hele blok; de rasterrand heeft rondom nog 8 px nodig.
+ if(!PHONE&&!testOriginal&&innerWidth>=740){
+  const height=testAvailableRect().height-16;
+  for(let n=0;n<6;n++){
+   const overflow=testRect($('#playbox')).height-height;if(overflow<=0)break;
+   const ms=Math.max(24,S._murMS-Math.ceil(overflow/S.p.N)-1);if(ms>=S._murMS)break;
+   S._murMS=ms;testBaseRMur();
+  }
+ }
 };
 const testBaseRender=render;
 render=function(){
