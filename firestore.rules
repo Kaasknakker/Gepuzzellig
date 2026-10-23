@@ -256,7 +256,10 @@ service cloud.firestore {
         || (signedIn() && resource.data.get('ownerAuthUid','') == request.auth.uid);
       allow list: if isAdmin();
 
+      // Nieuwe groepen krijgen altijd een willekeurig id "g_…" (zoals de app ze maakt). Zo kan niemand
+      // een groep aanmaken onder het id van een bestaande (oude) groep en zich daar eigenaar van maken.
       allow create: if hasProfile()
+        && groupId.matches('g_[a-z0-9]{6,20}')
         && request.resource.data.keys().hasOnly([
           'name','ownerAuthUid','inviteCode','theme','accent','createdAt','updatedAt'
         ])
