@@ -138,6 +138,28 @@ function hexDeduceL(P,rev,ls,zs,maxC,full,U){zs=zs||[];const n=P.cells.length,R2
   if(!found.length)return{all:R2.size===n,rev:R2,hard,prof};
   prof.push(rz<0?{c:0}:{c:1,zl:rz,n:found.length});
   steps++;found.forEach(i=>R2.add(i));if(R2.size===n)return{all:true,rev:R2,steps,hard,prof}}}
+/* Meet de speelroute: eerst alle beschikbare losse aanwijzingen, daarna twee
+   overlappende aanwijzingen. De volgorde komt overeen met hexHint en wordt in CI
+   daarmee vergeleken. Geen drietallen of globale zoekstappen voor de selectie. */
+function hexDifficulty(P,rev,ls,zs){const seen=new Set([...rev,...zs]),Q=P._q||new Set(P.qs||[]),hidden=P._zh||P.zh||[],seq=[];
+ const G={pos:P.sol.map((_,i)=>i),cyc:false,cnt:P.sol.reduce((a,b)=>a+b,0),type:0};
+ for(let guard=0;guard<P.n;guard++){
+  if(P.sol.every((v,i)=>!v||seen.has(i)))return{all:true,total:seq.length,comb:seq.filter(x=>x===2).length,single:seq.filter(x=>x===1).length,seq};
+  const cons=[];seen.forEach(i=>{if(!P.sol[i]&&!Q.has(i))cons.push({c:P.ring[i],kind:"ring"})});[...zs,...[...hidden].filter(i=>seen.has(i))].forEach(i=>cons.push({c:P.zone[i],kind:"zone"}));ls.forEach(j=>cons.push({c:P.lines[j].clue,kind:"line"}));cons.push({c:G,kind:"rest"});
+  let found=null;
+  for(const o of cons){let k=0;const hid=[];for(const i of o.c.pos)if(i>=0){if(seen.has(i))k+=P.sol[i];else hid.push(i)}if(hid.length&&(k===o.c.cnt||k+hid.length===o.c.cnt)){found={cells:hid,count:1};break}}
+  if(!found){const a=P.sol.map((v,i)=>seen.has(i)?v:-1),act=cons.filter(o=>o.c.pos.some(i=>i>=0&&a[i]<0)),cof=new Map();act.forEach(o=>o.c.pos.forEach(i=>{if(i>=0&&a[i]<0){if(!cof.has(i))cof.set(i,[]);if(!cof.get(i).includes(o))cof.get(i).push(o)}}));
+   const weight=o=>o.kind==="rest"?-5:o.kind==="ring"?0:1,order=arr=>arr.slice().sort((x,y)=>weight(y)-weight(x)),neighbors=new Map(),nb=o=>{if(neighbors.has(o))return neighbors.get(o);const set=new Set();o.c.pos.forEach(i=>{if(i>=0&&a[i]<0)(cof.get(i)||[]).forEach(x=>{if(x!==o)set.add(x)})});const r=order([...set]);neighbors.set(o,r);return r};
+   const bad=(i,set)=>{const t=a.slice();t[i]=1-P.sol[i];return!hexSatS(t,set.map(o=>o.c))};
+   for(const[i,cs]of cof){for(const o of cs)if(bad(i,[o])){found={cells:[i],count:1};break}if(found)break}
+   if(!found){let score=-1e9;for(const[i,cs]of cof){for(const o1 of order(cs)){for(const o2 of nb(o1))if(bad(i,[o1,o2])){const value=weight(o1)+weight(o2);if(value>score){score=value;found={cells:[i],count:2,keep:[o1,o2]}}break}}if(score>=2)break}}}
+  if(!found)return{all:false,total:seq.length,comb:seq.filter(x=>x===2).length,single:seq.filter(x=>x===1).length,seq};
+  if(found.keep&&found.keep.some(o=>o.kind==="rest")){const o=found.keep.find(o=>o.kind!=="rest");if(!o.c.type){const inside=new Set(o.c.pos),out=P.sol.map((_,i)=>i).filter(i=>!seen.has(i)&&!inside.has(i)),need=o.c.cnt-o.c.pos.filter(i=>i>=0&&seen.has(i)).reduce((n,i)=>n+P.sol[i],0),left=G.cnt-[...seen].reduce((n,i)=>n+P.sol[i],0);if(out.includes(found.cells[0])&&((left===need&&!P.sol[found.cells[0]])||(left-need===out.length&&P.sol[found.cells[0]])))found.cells=out}}
+  if(found.keep&&!found.keep.some(o=>o.kind==="rest")){const target=found.cells[0],f=P.sol[target],unknown=o=>o.c.pos.filter(i=>i>=0&&!seen.has(i)),need=o=>o.c.cnt-o.c.pos.filter(i=>i>=0&&seen.has(i)).reduce((n,i)=>n+P.sol[i],0);
+   for(const[A,B]of[found.keep,found.keep.slice().reverse()]){const UA=unknown(A),UB=unknown(B),shared=UA.filter(i=>UB.includes(i)),outsideA=UA.length-shared.length,outsideB=UB.filter(i=>!shared.includes(i)),nA=need(A),nB=need(B),min=Math.max(0,nA-outsideA),max=Math.min(shared.length,nA);if(!shared.length||!outsideB.includes(target))continue;if((!f&&min===nB&&min>0)||(f&&max===nA&&nB-max===outsideB.length&&outsideB.length>0)){found.cells=outsideB;break}}}
+  seq.push(found.count);found.cells.forEach(i=>seen.add(i));
+ }
+ return{all:false,total:seq.length,comb:0,single:0,seq}}
 /* Niveaus. T = ongeveer aantal vakjes, MC = hoeveel aanwijzingen je hooguit tegelijk moet combineren,
    zf = deel van de blauwe vakjes dat een getal krijgt (vóór het weghalen), zr = deel daarvan dat al open ligt,
    q = hoeveel zwarte vakjes hooguit een "?" krijgen (geen getal). */
@@ -152,10 +174,10 @@ const HMC={1:HXL[1].MC,2:HXL[2].MC,3:HXL[3].MC,4:HXL[4].MC,5:HXL[5].MC,6:HXL[6].
 /* Nieuwe opzet: begin met veel aanwijzingen (alle lijnen, veel blauwe getallen) en haal daarna alles weg wat niet nodig is.
    Zo is elke aanwijzing die overblijft echt nodig. Eerst krijgen zwarte vakjes een "?", dan pas gaan lijnen en blauwe getallen eruit,
    zodat de blauwe getallen en lijnen het werk moeten doen. Daarna kiezen we de puzzel waarbij je de blauwe getallen het meest nodig hebt. */
-function genHex(R,lv,hard){const L0=HXL[lv||2]||HXL[2],L=hard?Object.assign({},L0,{q:L0.q+.1,zf:L0.zf+.05,tries:L0.tries+2}):L0,MC=L.MC;let best=null,bs=-Infinity,ok=0;
+function genHex(R,lv,hard,enhanced=true){const tough=enhanced&&(lv===3||lv===6);const L0=HXL[lv||2]||HXL[2],L=hard?Object.assign({},L0,{q:L0.q+.1,zf:L0.zf+.05,tries:L0.tries+2}):L0,MC=L.MC;let best=null,bs=-Infinity,ok=0;
  /* Soms (ongeveer 1 op de 3) mag de teller "nog te vinden" nodig zijn; dan krijgen zulke puzzels voorrang. Anders is hij nooit nodig. */
  const useG=R()<.35;
- for(let att=0;att<40&&ok<L.tries;att++){const cells=hexBoard(R,L.RAD,lv),n=cells.length,key=new Map(cells.map((c,i)=>[c.q+","+c.r,i]));
+ for(let att=0;att<40&&ok<(tough?L.tries+5:L.tries);att++){const cells=hexBoard(R,L.RAD,lv),n=cells.length,key=new Map(cells.map((c,i)=>[c.q+","+c.r,i]));
   const sol=cells.map(()=>R()<.5?1:0),nb=sol.reduce((a,b)=>a+b,0);if(nb<n*.4||nb>n*.6)continue;
   const ring=cells.map(c=>mkClue(HDIR.map(([dq,dr])=>{const j=key.get((c.q+dq)+","+(c.r+dr));return j===undefined?-1:j}),true,sol,R,1));
   const lines=hexLines(cells).map(l=>({...l,clue:mkClue(l.idx,false,sol,R,1)}));
@@ -189,13 +211,16 @@ function genHex(R,lv,hard){const L0=HXL[lv||2]||HXL[2],L=hard?Object.assign({},L
   const zh0=cand._zh;cand._zh=new Set();const noZ=zAll.length?hexDeduceL(cand,[...rev,...zs],ls,[],MC).rev.size/n:1;cand._zh=zh0;
   const noL=ls.size?hexDeduceL(cand,rev,[],zs,MC).rev.size/n:1;
   const hard=lv===3||lv===6,mid=lv===2||lv===5;
-  const sc=hard?c*1.5+(1-noZ)*30+(1-noL)*8+Math.min(zAll.length,7)*1.5-(zAll.length<3?20:0)
+  const route=tough?hexDifficulty(cand,rev,ls,zs):null;if(route&&!route.all)continue;
+  const sc=tough?Math.min(route.comb/Math.max(1,route.total),.4)*250+Math.min(route.comb,12)*2+(1-noZ)*8+(1-noL)*4+Math.min(zAll.length,7)
+   :hard?c*1.5+(1-noZ)*30+(1-noL)*8+Math.min(zAll.length,7)*1.5-(zAll.length<3?20:0)
    :mid?Math.min(c,6)+(1-noZ)*20+(1-noL)*6+Math.min(zAll.length,5)-(zAll.length<2?10:0)
    :-c*2+(1-noZ)*6+Math.min(zAll.length,3);
   /* Twee lijngetallen bij hetzelfde startpunt zijn lastig te lezen: zulke puzzels alleen als er niets beters is. */
   const nT=blk.filter(i=>!cand._q.has(i)&&ring[i].type).length+[...ls].filter(j=>lines[j].clue.type).length;
   const scG=(needG?8:0)+Math.min(nT,8)*(hard?1.5:mid?1.2:.8);let dupV=0;{const vs=new Set();[...ls].forEach(j=>{const k=lines[j].vq+","+lines[j].vr;if(vs.has(k))dupV++;vs.add(k)})}
-  ok++;if(sc+scG-dupV*1000>bs){bs=sc+scG-dupV*1000;cand.rev0=[...rev];cand.lineShow=[...ls];cand.zs=[...zs];cand.zh=[...zh];cand.qs=[...cand._q];cand.st={c,noZ:Math.round(noZ*100),noL:Math.round(noL*100),needG,nT};best=cand}}
+  ok++;if(sc+scG-dupV*1000>bs){bs=sc+scG-dupV*1000;cand.rev0=[...rev];cand.lineShow=[...ls];cand.zs=[...zs];cand.zh=[...zh];cand.qs=[...cand._q];cand.st={c,noZ:Math.round(noZ*100),noL:Math.round(noL*100),needG,nT};if(tough){cand.st.pairs=route.comb;cand.st.moves=route.total}best=cand}
+  if(tough&&ok>=L.tries&&dupV===0&&route.comb>=5&&route.comb/route.total>=.25)break}
  if(best){delete best._q;delete best._zh}
  return best}
 

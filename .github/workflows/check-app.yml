@@ -34,3 +34,5 @@ jobs:
         run: node .github/scripts/check-murdoku.mjs
       - name: Binair-moeilijkheid en compatibiliteit controleren
         run: node .github/scripts/check-binair.mjs
+      - name: Hexcells-combinatiestappen en compatibiliteit controleren
+        run: node .github/scripts/check-hexcells.mjs

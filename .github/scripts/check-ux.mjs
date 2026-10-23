@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 const read=p=>fs.readFileSync(p,'utf8'),core=read('js/core.js'),raad=read('raadsels.html');
 const section=(s,a,b)=>s.slice(s.indexOf(a),s.indexOf(b,s.indexOf(a)));
 let count=0,saved={},pushes=[],clears=[];
-const context={S:null,GV:1,MGV:1,PGV:1,BGV:1,PKEY:'test',dstr:()=> '2026-10-23',addDays:()=> '2026-10-15',nonoDayVariant:()=> 'color',
+const context={S:null,GV:1,MGV:1,PGV:1,BGV:1,HGV:1,PKEY:'test',dstr:()=> '2026-10-23',addDays:()=> '2026-10-15',nonoDayVariant:()=> 'color',
  progAll:()=>JSON.parse(JSON.stringify(saved)),lsSet:(k,v)=>{saved=JSON.parse(v);return true},playMs:()=>1000,
  cloudPushProgress:(...args)=>pushes.push(args),cloudClearProgress:k=>clears.push(k),$:()=>({value:'groep'}),
  UX:{saves:new Map(),storage(){},paintStorage(){}},tijd:n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')};
@@ -42,3 +42,7 @@ console.log('OK: '+count+' UX-regressies (sessies, notities, markeringen, valida
 context.S={type:'bin',practice:true,p:{giv:[-1,-1]},cur:[0,-1],nt:{1:2},start:1,seed:'qold',sf:'',date:'2026-10-23',bv:'b1',hist:[],redo:[]};saved={};context.persist();assert.equal(saved['p:bin'].bv,'b1');assert.equal(saved['p:bin'].cur[0],0);assert.equal(saved['p:bin'].nt[1],2);
 context.S.bv='b2';context.persist();assert.equal(saved['p:bin'].bv,'b2');
 console.log('OK: Binair bewaart de generatorversie met de voortgang en potloodnotities');
+
+// Onthulde Hexcells-vakjes en eigen markeringen blijven bij de oude generator.
+context.S={type:'hex',practice:true,p:{cells:[{},{}],rev0:[0]},hx:{rev:new Set([0,1])},cs:{l0:1},start:1,seed:'qhexold',sf:'',date:'2026-10-23',hv:'h1',hist:[{hexClue:'l0',from:0}],redo:[]};saved={};context.persist();assert.equal(saved['p:hex'].hv,'h1');assert.deepEqual(saved['p:hex'].rev,[0,1]);assert.equal(saved['p:hex'].cs.l0,1);context.S.hv='h2';context.persist();assert.equal(saved['p:hex'].hv,'h2');
+console.log('OK: Hexcells bewaart generatorversie, onthulde vakjes en eigen markeringen');
