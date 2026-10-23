@@ -1252,8 +1252,8 @@ const freeLvl=r=>{if(!isFree(r))return 0;const p=(r.type.split("~")[1]||"").spli
 const diffGroup=l=>l===1||l===4?1:l===2||l===5?2:l===3||l===6?3:0;
 function renderOver(all,pl){const el=$("#sv-over");if(!el||el.hidden)return;el.innerHTML="";
  const today=dstr(),dow=(new Date().getDay()+6)%7,mon=addDays(today,-dow);
- const inP=d=>OPER==="week"?d>=mon&&d<=addDays(mon,6):OPER==="maand"?d.slice(0,7)===today.slice(0,7):OPER==="jaar"?d.slice(0,4)===today.slice(0,4):true;
- const pw=document.createElement("div");pw.className="pp";[["week","Week"],["maand","Maand"],["jaar","Jaar"],["alles","Alles"]].forEach(([k,t])=>{const b=document.createElement("button");b.textContent=t;b.className=k===OPER?"on":"";b.onclick=()=>{OPER=k;lsSet("pdper",k);renderOver(all,pl)};pw.append(b)});el.append(pw);
+ const inP=d=>OPER==="dag"?d===today:OPER==="week"?d>=mon&&d<=addDays(mon,6):OPER==="maand"?d.slice(0,7)===today.slice(0,7):OPER==="jaar"?d.slice(0,4)===today.slice(0,4):true;
+ const pw=document.createElement("div");pw.className="pp";[["dag","Dag"],["week","Week"],["maand","Maand"],["jaar","Jaar"],["alles","Alles"]].forEach(([k,t])=>{const b=document.createElement("button");b.textContent=t;b.className=k===OPER?"on":"";b.onclick=()=>{OPER=k;lsSet("pdper",k);renderOver(all,pl)};pw.append(b)});el.append(pw);
  const us=[...pl.keys()],cnt={};us.forEach(u=>{cnt[u]={}});
  all.forEach(r=>{if(!cnt[r.uid]||!TYPES[baseT(r)]||!inP(r.date))return;const c=cnt[r.uid],t=baseT(r);c[t]=c[t]||{d:0,v:0};if(isFree(r))c[t].v++;else c[t].d++});
  const tb=document.createElement("table");tb.className="ot";let hd="<tr><th>Puzzel</th>";us.forEach(u=>hd+="<th>"+pl.get(u)+"</th>");tb.innerHTML=hd+"</tr>";
@@ -1582,8 +1582,8 @@ function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r
  const pl=new Map();groupPlayers().forEach(p=>pl.set(uidOf(p),playerName(p)));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});const us=[...pl.keys()];
  if(SCOREWHO!=="all"&&!pl.has(SCOREWHO))SCOREWHO="all";
  setHomeSkin(SCOREWHO==="all"?GROUP_STYLE:styleForPlayer(SCOREWHO));
- const inP=d=>OPER==="week"?d>=mon0&&d<=addDays(mon0,6):OPER==="maand"?d.slice(0,7)===today.slice(0,7):OPER==="jaar"?d.slice(0,4)===today.slice(0,4):true;
- const PN={week:"deze week",maand:"deze maand",jaar:"dit jaar",alles:"in totaal"}[OPER]||"";
+ const inP=d=>OPER==="dag"?d===today:OPER==="week"?d>=mon0&&d<=addDays(mon0,6):OPER==="maand"?d.slice(0,7)===today.slice(0,7):OPER==="jaar"?d.slice(0,4)===today.slice(0,4):true;
+ const PN={dag:"vandaag",week:"deze week",maand:"deze maand",jaar:"dit jaar",alles:"in totaal"}[OPER]||"";
  const q=r=>r.uid===uid&&XS[r.date+r.type]?Object.assign({},r,XS[r.date+r.type]):r,pc=(a,b)=>b?Math.round(100*a/b)+"%":"–";
  const variantNote=r=>{if(isFree(r))return"";const f=new Set(raw.filter(x=>!isFree(x)&&x.uid===r.uid&&x.date===r.date&&baseT(x)===baseT(r)).map(dayForm)),a=[];if(f.has("large"))a.push("🖥️ Groot scherm ✓");if(f.has("phone"))a.push("📱 Telefoon ✓");return a.join(" · ")};
  const st=us.map((u,i)=>{const mine=all.filter(r=>r.uid===u&&TYPES[baseT(r)]&&inP(r.date)),d=mine.filter(r=>!isFree(r));let km=0,fl=0,kh=0,nh=0;
@@ -1593,7 +1593,7 @@ function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r
   return{u,i,nm:pl.get(u),d:d.length,v:mine.length-d.length,fl,km,nh,kh,streak:streakOf(rows,u),best,fav:fav&&fav[0],per,perD,mine}});
  const together=st.reduce((a,x)=>a+x.d+x.v,0);
  const views=`<div class="sviews">${[["all","Overzicht"],...groupPlayers().map(p=>[uidOf(p),playerName(p)])].map(([k,t])=>`<button data-who="${k}" class="${k===SCOREWHO?"on":""}">${k==="all"?"▦":"👤"} ${t}</button>`).join("")}</div>`;
- const period=`<div class="sper">${[["week","Week"],["maand","Maand"],["jaar","Jaar"],["alles","Alles"]].map(([k,t])=>`<button data-p="${k}" class="${k===OPER?"on":""}">${t}</button>`).join("")}</div>`;
+ const period=`<div class="sper">${[["dag","Dag"],["week","Week"],["maand","Maand"],["jaar","Jaar"],["alles","Alles"]].map(([k,t])=>`<button data-p="${k}" class="${k===OPER?"on":""}">${t}</button>`).join("")}</div>`;
  const head=(title,sub)=>`<div class="stop"><button id="sBack" aria-label="Terug">←</button><div><h2>${title}</h2><div class="mut">${sub}</div></div></div>`;
  if(SCOREWHO!=="all"){
   const x=st.find(v=>v.u===SCOREWHO),mine=x?x.mine:[],daily=mine.filter(r=>!isFree(r)),statSecs=r=>{const n=+r.secs||0;return n>0&&n<=MAX_REASONABLE_SECS?n:0},badTimes=mine.filter(r=>(+r.secs||0)>MAX_REASONABLE_SECS).length,total=mine.reduce((n,r)=>n+statSecs(r),0);

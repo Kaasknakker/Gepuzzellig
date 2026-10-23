@@ -936,7 +936,7 @@ body.phone.home .hhomeviews .hvicon{width:27px;height:27px}
 body.phone .sco{gap:8px!important}
 body.phone .scontrols{flex-direction:column;align-items:stretch;gap:6px}
 body.phone .scontrols .sviews,body.phone .scontrols .sper{width:100%;box-sizing:border-box;display:grid;grid-template-columns:repeat(3,1fr)}
-body.phone .scontrols .sper{grid-template-columns:repeat(4,1fr)}
+body.phone .scontrols .sper{grid-template-columns:repeat(5,1fr)}
 body.phone .scontrols button{padding:7px 3px;font-size:11px}
 body.phone .sco .stop h2{font-size:21px}
 body.phone .sco .hcard{padding:10px 11px;border-radius:15px}
