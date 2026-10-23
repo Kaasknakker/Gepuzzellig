@@ -72,6 +72,15 @@ for(const fn of handlers.click||[])fn({target:button,preventDefault(){suppressed
 const homeButton={closest:()=>homeButton};suppressed=false;
 for(const fn of handlers.click||[])fn({target:homeButton,preventDefault(){suppressed=true},stopImmediatePropagation(){suppressed=true}});
 assert.equal(suppressed,false,'native click on scroll page remains available');
+// Scrolls in account dialogs must not toggle the underlying Murdoku mode or
+// suppress the browser's Pencil scroll gesture.
+const modalEvents={},modal=vm.createContext({S:{type:'mur',p:{},mxm:false},document:{addEventListener:(name,fn)=>{(modalEvents[name]??=[]).push(fn)}}});
+vm.runInContext(section('const BGX=','/* Verborgen tik-meter'),modal);
+let modalPrevented=false;
+const modalEvent={pointerType:'pen',button:0,changedTouches:[{touchType:'stylus'}],target:{closest:s=>s.includes('.authcover')?{}:null},preventDefault(){modalPrevented=true}};
+for(const name of ['pointerdown','touchstart','touchend'])for(const fn of modalEvents[name]||[])fn(modalEvent);
+assert.equal(modalPrevented,false,'Pencil scrolling in profile/group dialog is left to browser');
+assert.equal(modal.S.mxm,false,'dialog scroll never changes puzzle input mode');
 const dismissHandlers={};let open=true;
 const dismiss=vm.createContext({window:{addEventListener:(name,fn)=>dismissHandlers[name]=fn},document:{getElementById:id=>id==='more'?{classList:{contains:()=>open,remove:()=>open=false}}:null}});
 vm.runInContext(core.slice(0,core.indexOf('function fastPenUI(')),dismiss);
