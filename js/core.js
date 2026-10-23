@@ -1507,14 +1507,13 @@ function discardProgress(k){
  const m=progressList().find(m=>m.k===k);if(!m)return;
  UX.dialog("Puzzel wissen?",(card,close)=>{
   UX.text(card,"Wil je de voortgang van "+FREE_NAME(m.type,nonoMetaVariant(m))+" wissen? Je kunt dit niet ongedaan maken.");
-  const cancel=document.createElement("button");cancel.textContent="Annuleren";cancel.onclick=close;
   const remove=document.createElement("button");remove.textContent="Wis puzzel";remove.className="hdelete";
   remove.onclick=()=>{
    if(S&&S.p&&progKey(S.type,S.practice,S.date,S.sf)===k){pausePlay();S.discarded=true}
    progDel(k);UX.saves.delete(k);close();renderHome();
    requestAnimationFrame(()=>document.querySelector(".hcont[data-pk],#hFree")?.focus());
   };
-  card.append(cancel,remove);
+  card.append(remove);
  });
 }
 function resumeProgress(k){const e=progAll()[k],m=progressMeta(k,e);if(!m)return;if(!m.practice){load(m.type,false,false,m.date);return}clearFreeProgressType(m.type,k,m.type==="nono"?nonoMetaVariant(m):null);RANDOM=false;setFreePreferences(m.type,m.lvl,nonoMetaVariant(m));load(m.type,true,false)}
