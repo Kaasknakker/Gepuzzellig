@@ -32,3 +32,5 @@ jobs:
         run: node .github/scripts/check-hint-guidance.mjs
       - name: Murdoku-oplossingen en bestaande voortgang controleren
         run: node .github/scripts/check-murdoku.mjs
+      - name: Binair-moeilijkheid en compatibiliteit controleren
+        run: node .github/scripts/check-binair.mjs

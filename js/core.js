@@ -117,9 +117,11 @@ const GV="g17";
 const nonoMixOn=seed=>{seed=String(seed);if(seed[0]==="q")return true;const m=seed.match(/^nono(\d{4}-\d{2}-\d{2})/);return!!m&&m[1]>="2026-10-24"};
 /* Oude dagpuzzels en lopende vrije Murdoku's behouden hun generator en bord. */
 function murVersion(seed,saved){const day=String(seed).match(/^mur(\d{4}-\d{2}-\d{2})/);return day?(day[1]<"2026-10-24"?"m4":MGV):saved&&saved.seed===seed&&["m4",MGV].includes(saved.mv)?saved.mv:MGV}
-function genCached(type,seed,lv,hard,nv,mv){const cmix=type==="nono"&&nv==="color"&&nonoMixOn(seed),vk=(type==="nono"&&nv==="color"?"|color"+(cmix?"|m2":""):"")+(type==="mur"?"|cast"+hash(murCastSig()).toString(36):"");const k=GV+(type==="mur"?(mv||MGV):type==="plus"?PGV:"")+"|"+type+"|"+seed+"|"+lv+(hard?"|w":"")+vk;let all={};try{all=JSON.parse(lsGet("pdgen")||"{}")}catch(e){all={}}
+/* Nieuwe Moeilijk-Binair vanaf 24 oktober; eerdere borden en vrije voortgang blijven gelijk. */
+function binVersion(seed,saved){const day=String(seed).match(/^bin(\d{4}-\d{2}-\d{2})/);return day?(day[1]<"2026-10-24"?"b1":BGV):saved&&saved.seed===seed?(saved.bv||"b1"):BGV}
+function genCached(type,seed,lv,hard,nv,mv,bv){const cmix=type==="nono"&&nv==="color"&&nonoMixOn(seed),vk=(type==="nono"&&nv==="color"?"|color"+(cmix?"|m2":""):"")+(type==="mur"?"|cast"+hash(murCastSig()).toString(36):"");const k=GV+(type==="mur"?(mv||MGV):type==="bin"?(bv==="b1"?"":BGV):type==="plus"?PGV:"")+"|"+type+"|"+seed+"|"+lv+(hard?"|w":"")+vk;let all={};try{all=JSON.parse(lsGet("pdgen")||"{}")}catch(e){all={}}
  if(all[k])try{return JSON.parse(all[k])}catch(e){}
- const p=type==="nono"&&nv==="color"?genColorNono(rng(hash(seed+"|color")),lv,!!hard,cmix):type==="mur"?genMur(rng(hash(seed)),lv,!!hard,mv!=="m4"):GEN[type](rng(hash(seed)),lv,!!hard);try{all[k]=JSON.stringify(p);const ks=Object.keys(all);for(const x of ks.slice(0,Math.max(0,ks.length-16)))delete all[x];lsSet("pdgen",JSON.stringify(all))}catch(e){}
+ const p=type==="nono"&&nv==="color"?genColorNono(rng(hash(seed+"|color")),lv,!!hard,cmix):type==="mur"?genMur(rng(hash(seed)),lv,!!hard,mv!=="m4"):type==="bin"?genBin(rng(hash(seed)),lv,!!hard,bv!=="b1"):GEN[type](rng(hash(seed)),lv,!!hard);try{all[k]=JSON.stringify(p);const ks=Object.keys(all);for(const x of ks.slice(0,Math.max(0,ks.length-16)))delete all[x];lsSet("pdgen",JSON.stringify(all))}catch(e){}
  return p}
 /* Weekend (zaterdag en zondag): de dagpuzzel is wat pittiger. Het archief: dagpuzzels van de afgelopen week alsnog doen. */
 const isWk=ds=>{const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay();return w===0||w===6};
@@ -136,14 +138,14 @@ function load(type,practice,fresh,date,skipPersist){clearHomeSkinAccent();docume
  $("#help").textContent=helpOf(type);$("#grid").innerHTML="";$("#m24").innerHTML="";$("#mur").innerHTML="";$("#hexsvg").innerHTML="";$("#pad").style.display="none";$("#m24").style.display="none";
  $("#msg").textContent="Puzzel maken...";setT("0:00");$("#grid").classList.remove("nfin");
  setTimeout(()=>{if(id!==loadId)return;
-  const seed=practice?(sv0&&sv0.seed?sv0.seed:"q"+Math.random()):type+S.date+sf0,mv=type==="mur"?murVersion(seed,sv0):null,ck=type+seed+(type==="nono"?"|"+S.nv:"")+(mv?"|"+mv:"");S.seed=seed;if(mv)S.mv=mv;
-  const p=cache[ck+(S.hard?"|w":"")]||(cache[ck+(S.hard?"|w":"")]=genCached(type,seed,lvl0,S.hard,S.nv,mv));S.p=p;if(type==="star")STK=p.K||2;
+  const seed=practice?(sv0&&sv0.seed?sv0.seed:"q"+Math.random()):type+S.date+sf0,mv=type==="mur"?murVersion(seed,sv0):null,bv=type==="bin"?binVersion(seed,sv0):null,ck=type+seed+(type==="nono"?"|"+S.nv:"")+(mv?"|"+mv:"")+(bv?"|"+bv:"");S.seed=seed;if(mv)S.mv=mv;if(bv)S.bv=bv;
+  const p=cache[ck+(S.hard?"|w":"")]||(cache[ck+(S.hard?"|w":"")]=genCached(type,seed,lvl0,S.hard,S.nv,mv,bv));S.p=p;if(type==="star")STK=p.K||2;
   const N=p.N||0;
   if(type==="bin")S.cur=p.giv.slice();else if(type==="kak")S.cur=Array(p.W*p.H).fill(0);else if(type==="m24"){S.r=0;setRound()}else if(type==="hex"){S.hx={rev:new Set([...p.rev0,...(p.zs||[])])};S.cs={}}else if(type==="mur"){S.cur=Array(N*N).fill(-1);S.ms=0;S.mxm=false;S.str=new Set()}else if(type==="plus"){S.cur=Array(p.W*p.H).fill(0);S.str=new Set()}else S.cur=Array(type==="nono"||type==="plus"?p.W*p.H:N*N).fill(0);
   const key=S.date+type+sf0;
   if(!practice&&localDoneInGroup(key,$("#group").value)){S.done=true;S.secs=store[key];
    if(type==="bin")S.cur=p.sol.slice();else if(type==="star")S.cur=p.sol.map(v=>v?2:0);else if(type==="nono")S.cur=p.sol.slice();else if(type==="kak")S.cur=p.sol.slice();else if(type==="hex")p.sol.forEach((v,i)=>S.hx.rev.add(i));else if(type==="plus")S.cur=p.sol.map(v=>v?1:2);else if(type==="mur")S.cur=solCur(p)}
-  if(!S.done&&sv0&&sv0.seed===seed&&((type!=="hex"&&type!=="plus"&&type!=="nono")||sv0.gv===GV)&&(type!=="mur"||sv0.mv===S.mv)&&(type!=="plus"||sv0.pv===PGV)){try{
+  if(!S.done&&sv0&&sv0.seed===seed&&((type!=="hex"&&type!=="plus"&&type!=="nono")||sv0.gv===GV)&&(type!=="bin"||(sv0.bv||"b1")===S.bv)&&(type!=="mur"||sv0.mv===S.mv)&&(type!=="plus"||sv0.pv===PGV)){try{
    if(sv0.cur&&S.cur&&sv0.cur.length===S.cur.length)S.cur=sv0.cur.slice();
    if(sv0.rev&&S.hx)S.hx.rev=new Set(sv0.rev);if(sv0.cs&&S.hx)S.cs=sv0.cs;
    if(type==="m24"&&sv0.r){S.r=sv0.r;setRound()}
@@ -1140,7 +1142,7 @@ function murHint(){const p=S.p,N=p.N,V=p.V,M=murM(p),nm=s=>p.ppl[s],cell=i=>`rij
   return{kind:"set",cells:[at],set:hit,cards,proof:{W:r.W,fix},intro:`${nm(hit)} kan nog maar op één plek staan. Zo kom je daarop:`,steps:steps.slice(0,7),outro:`Dus ${nm(hit)} ${hit===V?"lag":"stond"} op ${cell(at)}.`,text:`${nm(hit)} staat op ${cell(at)}.`,btn:`Zet ${nm(hit)} hier voor me`}}
  const s=fix.findIndex(x=>x<0);return{kind:"set",cells:[p.sol[s]],cards:[s],set:s,text:`Dit is een lastige stap. ${nm(s)} staat op ${cell(p.sol[s])}.`,btn:`Zet ${nm(s)} hier voor me`}}
 /* ---- Foutloos en zonder hint; elkaars voortgang ---- */
-const MGV="m5",PGV="p2";const HINTT=["star","bin","nono","hex","plus","mur"],BASEF=["name","group","date","type","secs","uid"];
+const MGV="m5",PGV="p2",BGV="b2";const HINTT=["star","bin","nono","hex","plus","mur"],BASEF=["name","group","date","type","secs","uid"];
 let XS={};try{XS=JSON.parse(lsGet("pdx")||"{}")}catch(e){XS={}}
 const xsSave=()=>lsSet("pdx",JSON.stringify(XS));
 let OLDRULES=false;
@@ -1410,6 +1412,7 @@ function persist(forceCloud){if(S.discarded||!S.p||S.done||!S.start||!S.seed)ret
  /* Een onaangeraakte of weer volledig leeggemaakte puzzel is geen lopende puzzel. */
  if(pc<=0&&!(S.nt&&Object.values(S.nt).some(Boolean))&&!(S.cs&&Object.values(S.cs).some(Boolean))&&!(S.str&&S.str.size)&&!(S.hints>0)&&!(S.mist>0)){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;UX.saves.delete(k);UX.paintStorage();return}
  const e={seed:S.seed,gv:GV,mv:S.mv||MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,hintLedger:S.hintLedger||{},hintLegacy:S.hintLegacy||0,seenErrors:S.seenErrors||{},pc,group:$("#group").value.trim()};
+ if(S.type==="bin")e.bv=S.bv||BGV;
  if(S.hx){e.rev=[...S.hx.rev];e.cs=S.cs||{}}else if(S.type==="m24")e.r=S.r;else if(S.cur)e.cur=S.cur;if(S.str)e.str=[...S.str];if(S.nt&&Object.keys(S.nt).length)e.nt=S.nt;
  /* Hervatten moet ook echt hervatten: bewaar een begrensde undo/redo-geschiedenis.
     Maak 24 heeft een eigen ronde-state en laten we hier bewust buiten. */

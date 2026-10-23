@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 const read=p=>fs.readFileSync(p,'utf8'),core=read('js/core.js'),raad=read('raadsels.html');
 const section=(s,a,b)=>s.slice(s.indexOf(a),s.indexOf(b,s.indexOf(a)));
 let count=0,saved={},pushes=[],clears=[];
-const context={S:null,GV:1,MGV:1,PGV:1,PKEY:'test',dstr:()=> '2026-10-23',addDays:()=> '2026-10-15',nonoDayVariant:()=> 'color',
+const context={S:null,GV:1,MGV:1,PGV:1,BGV:1,PKEY:'test',dstr:()=> '2026-10-23',addDays:()=> '2026-10-15',nonoDayVariant:()=> 'color',
  progAll:()=>JSON.parse(JSON.stringify(saved)),lsSet:(k,v)=>{saved=JSON.parse(v);return true},playMs:()=>1000,
  cloudPushProgress:(...args)=>pushes.push(args),cloudClearProgress:k=>clears.push(k),$:()=>({value:'groep'}),
  UX:{saves:new Map(),storage(){},paintStorage(){}},tijd:n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')};
@@ -37,3 +37,8 @@ for(const block of raad.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi))if(!
 const ux={lsGet:()=>JSON.stringify({types:['bin'],level:'current'}),TYPES:{bin:'Binair',star:'Star Battle'},lvOf:()=>5,rndLevel:()=>2};vm.createContext(ux);vm.runInContext(read('js/ux.js')+'\nglobalThis.subject=UX;',ux);for(let n=0;n<30;n++){const pick=ux.subject.chooseRandom('bin');assert.equal(pick.t,'bin');assert.equal(pick.l,5);count++}
 ux.subject.paintStorage=()=>{};ux.subject.storage('session',{at:200,remote:'failed'});ux.subject.storage('session',{at:100,remote:'saved'});assert.equal(ux.subject.saves.get('session').remote,'failed');count++;
 console.log('OK: '+count+' UX-regressies (sessies, notities, markeringen, validatie, willekeurig en opslagstatus)');
+
+// Oude Binair-voortgang blijft ook na opnieuw opslaan bij dezelfde generator.
+context.S={type:'bin',practice:true,p:{giv:[-1,-1]},cur:[0,-1],nt:{1:2},start:1,seed:'qold',sf:'',date:'2026-10-23',bv:'b1',hist:[],redo:[]};saved={};context.persist();assert.equal(saved['p:bin'].bv,'b1');assert.equal(saved['p:bin'].cur[0],0);assert.equal(saved['p:bin'].nt[1],2);
+context.S.bv='b2';context.persist();assert.equal(saved['p:bin'].bv,'b2');
+console.log('OK: Binair bewaart de generatorversie met de voortgang en potloodnotities');
