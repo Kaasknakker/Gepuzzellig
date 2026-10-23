@@ -52,7 +52,7 @@ const legacyGroup=()=>window.PD_SETUP&&window.PD_SETUP.group||"";
 const scoreGroup=k=>SG[k]||legacyGroup();
 const localDoneInGroup=(k,g)=>!!store[k]&&scoreGroup(k).toLowerCase()===String(g||"").toLowerCase();
 let uid="x";
-const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 const autoCrossPrefs=Object.fromEntries(["star","nono","mur"].map(t=>[t,lsGet("pdautocross:"+t)!=="off"]));
 const autoCrossOn=(t=S.type)=>autoCrossPrefs[t]!==false;
 function updateAutoCross(){const b=$("#autocross");if(!b)return;b.hidden=!["star","nono","mur"].includes(S.type);b.setAttribute("aria-checked",String(autoCrossOn()));b.querySelector(".autocrossstate").textContent=autoCrossOn()?"Aan":"Uit"}
@@ -107,10 +107,10 @@ const isWk=ds=>{const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDa
 /* Willekeurig puzzelen: na elke vrije puzzel komt een andere, willekeurige soort. Stopt zodra je zelf een dagpuzzel kiest. */
 let RANDOM=false;const rndType=not=>{const L=Object.keys(TYPES).filter(t=>t!==not);return L[Math.floor(Math.random()*L.length)]};
 const rndLevel=t=>{const L=LVN[t]||[2];return L[Math.floor(Math.random()*L.length)]};
-const randomPick=not=>{const t=rndType(not),l=rndLevel(t),nv=t==="nono"?(Math.random()<.5?"classic":"color"):"classic";return{t,l,nv}};
-function startRandomPick(p){if(!p||!TYPES[p.t])return;RANDOM=true;const had=Object.prototype.hasOwnProperty.call(LV,p.t),oldL=LV[p.t],oldNv=nonoVariant;if(LVN[p.t])LV[p.t]=p.l;if(p.t==="nono")nonoVariant=p.nv;const m=$("#npm");if(m)m.hidden=true;document.body.classList.remove("home","newpick");load(p.t,true,true);if(LVN[p.t]){if(had)LV[p.t]=oldL;else delete LV[p.t];lsSet("pdlvl",JSON.stringify(LV))}if(p.t==="nono"){nonoVariant=oldNv;lsSet("pdnvar",oldNv)}}
+const randomPick=not=>UX.chooseRandom(not);
+function startRandomPick(p,confirmed){if(!p||!TYPES[p.t])return;pauseAndPersistActive(true);const old=latestFreeProgress(p.t,p.t==="nono"?p.nv:undefined);if(old&&!confirmed){UX.dialog("Je hebt nog een vrije "+FREE_NAME(p.t,p.nv),(card,close)=>{UX.text(card,"Deze puzzel is "+(old.e.pc||0)+"% ingevuld. Kies of je verdergaat of de puzzel vervangt.");for(const [label,action]of [["Verder puzzelen",()=>resumeProgress(old.k)],["Vervangen",()=>startRandomPick(p,true)]]){const button=document.createElement("button");button.textContent=label;button.onclick=()=>{close();action()};card.append(button)}});return}if(old)clearFreeProgressType(p.t,null,p.t==="nono"?p.nv:null);RANDOM=true;const had=Object.prototype.hasOwnProperty.call(LV,p.t),oldL=LV[p.t],oldNv=nonoVariant;if(LVN[p.t])LV[p.t]=p.l;if(p.t==="nono")nonoVariant=p.nv;const m=$("#npm");if(m)m.hidden=true;document.body.classList.remove("home","newpick");load(p.t,true,true,undefined,true);if(LVN[p.t]){if(had)LV[p.t]=oldL;else delete LV[p.t];lsSet("pdlvl",JSON.stringify(LV))}if(p.t==="nono"){nonoVariant=oldNv;lsSet("pdnvar",oldNv)}}
 function startRandomFree(not){startRandomPick(randomPick(not||""))}
-function load(type,practice,fresh,date){clearHomeSkinAccent();document.documentElement.classList.remove("pagefit");document.body.classList.remove("pagefit");try{pauseAndPersistActive(true)}catch(e){console.warn("Vorige puzzel opslaan mislukt; nieuwe puzzel wordt toch geopend",e)}if(!practice)RANDOM=false;if(NIEUW&&HOMEREADY){if(document.body.classList.contains("home")||document.body.classList.contains("newpick"))window.scrollTo(0,0);document.body.classList.remove("home","newpick");const np=$("#npm");if(np)np.hidden=true}
+function load(type,practice,fresh,date,skipPersist){clearHomeSkinAccent();document.documentElement.classList.remove("pagefit");document.body.classList.remove("pagefit");try{if(!skipPersist)pauseAndPersistActive(true)}catch(e){console.warn("Vorige puzzel opslaan mislukt; nieuwe puzzel wordt toch geopend",e)}if(!practice)RANDOM=false;if(NIEUW&&HOMEREADY){if(document.body.classList.contains("home")||document.body.classList.contains("newpick"))window.scrollTo(0,0);document.body.classList.remove("home","newpick");const np=$("#npm");if(np)np.hidden=true}
  const dd=!practice&&date?date:dstr(),id=++loadId,lvl0=practice?lvOf(type):dagLv(type,dd),sf0=sfx(lvl0);lsSet("pdtab",type);{const fn=$("#fin");if(fn)fn.hidden=true}potlood=false;S={nt:{},type,practice,date:dd,hard:!practice&&isWk(dd)&&!dagVast(dd),arch:dd!==dstr(),start:0,done:false,secs:0,sel:-1,id,hist:[],redo:[],pen:0,mist:0,hints:0,flash:-1,hl:-1,lvl:lvl0,sf:sf0,nv:type==="nono"?(practice?nonoVariant:nonoDayVariant(dd)):"classic"};hideHint();ub();$("#next").classList.remove("pulse");
  const pk0=progKey(type,practice,S.date,sf0),sv0=fresh?null:progAll()[pk0];if(fresh)progDel(pk0);
  document.body.dataset.t=type;pageIn($("#stage"));document.querySelectorAll("#tabs button").forEach(b=>{b.classList.toggle("on",b.dataset.t===type);if(PHONE&&b.dataset.t===type)try{b.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"})}catch(e){}});updateArchiveVisibility();{const nb=$("#next");if(nb.closest("#more"))nb.innerHTML='<span class="ic">🎲</span><span>Nieuwe puzzel</span>';else nb.textContent=PHONE?"🎲 Nieuwe puzzel":"Nieuwe puzzel ➜"}if(PHONE)$("#next").style.display="";$("#next").title="Nieuwe puzzel";
@@ -144,7 +144,7 @@ function celebrate(){if(matchMedia("(prefers-reduced-motion: reduce)").matches)r
    dat aanrakingen op de pagina geen scrollen of zoomen zijn (net als in het Hexcells-veld). Alleen als de pagina niet hoeft te scrollen. */
 function tapMode(){const de=document.documentElement,on=["nono","plus","hex","mur"].includes(S.type);de.classList.remove("tap");if(document.body.classList.contains("home"))return;if(on&&(PHONE||(de.scrollHeight<=innerHeight+60&&de.scrollWidth<=innerWidth+20)))de.classList.add("tap")}
 addEventListener("resize",()=>{setTimeout(tapMode,60);setTimeout(fitHomePage,80)});
-function render(){render0();paintNotes();updateAutoCross();if(NIEUW)updTop()}
+function render(){render0();paintNotes();updateAutoCross();if(NIEUW)updTop();UX.board()}
 function render0(){const t=S.type;ub();setTimeout(tapMode,0);if(!S.p)return;
  const pk=S.id+t,prev=S.pk===pk?[...document.querySelectorAll("#grid .c")].map(d=>d.classList.contains("gx")?"":d.textContent):null;S.pk=pk;
  $("#hexw").style.display=t==="hex"?"flex":"none";
@@ -676,7 +676,7 @@ function rHex(){if(!S.p||S.type!=="hex"||!S.hx)return;{const hs=$("#hexstat");if
   for(let k=0;k<6;k++){const a1=Math.PI/3*k+(PHONE?Math.PI/6:0),a2=a1+Math.PI/3,am=a1+Math.PI/6,d=sz*(1.0+Math.random()*.9),pt=(a)=>(cx+sz*.93*Math.cos(a)).toFixed(1)+","+(cy+sz*.93*Math.sin(a)).toFixed(1);
    sh+=`<polygon points="${cx.toFixed(1)},${cy.toFixed(1)} ${pt(a1)} ${pt(a2)}" fill="#f2ae3d" stroke="#fff" stroke-width="1.5" style="--dx:${(Math.cos(am)*d).toFixed(1)}px;--dy:${(Math.sin(am)*d+sz*.9).toFixed(1)}px;--rot:${((Math.random()-.5)*220).toFixed(0)}deg"/>`}
   const t3=document.createElement("template");t3.innerHTML=sh+"</svg>";const el=t3.content.firstElementChild;w.append(el);setTimeout(()=>el.remove(),750)}
- hexMsg()}
+ hexMsg();UX.board()}
 function hexSync(a,b){if(a.nodeType!==b.nodeType||a.nodeName!==b.nodeName){a.replaceWith(b.cloneNode(true));return}
  if(a.nodeType===3){if(a.nodeValue!==b.nodeValue)a.nodeValue=b.nodeValue;return}
  if(a.nodeType!==1)return;
@@ -685,7 +685,7 @@ function hexSync(a,b){if(a.nodeType!==b.nodeType||a.nodeName!==b.nodeName){a.rep
  if(a.childNodes.length!==b.childNodes.length){a.replaceChildren(...[...b.childNodes].map(n=>n.cloneNode(true)));return}
  for(let i=0;i<a.childNodes.length;i++)hexSync(a.childNodes[i],b.childNodes[i])}
 function hexAfter(){pingBusy();if(S.p.sol.every((v,i)=>!v||S.hx.rev.has(i))){finish();return}rHex()}
-function hexClue(k,forcedMode){if(!S.cs)S.cs={};const c=S.cs[k]||0,mode=forcedMode||hexMode;if(mode==="b"){if(c===1)delete S.cs[k];else S.cs[k]=1}else{if(c===2)delete S.cs[k];else S.cs[k]=2}rHex()}
+function hexClue(k,forcedMode){if(!S.cs)S.cs={};const c=S.cs[k]||0;S.hist.push({hexClue:k,from:c});S.redo=[];const mode=forcedMode||hexMode;if(mode==="b"){if(c===1)delete S.cs[k];else S.cs[k]=1}else{if(c===2)delete S.cs[k];else S.cs[k]=2}if(!S.start)S.start=Date.now();ub();persist();rHex();UX.board()}
 function hexTap(i,forcedMode){if(S.done)return;if(S.hx.rev.has(i)){if(hexZn(S.p,i))hexClue("z"+i,forcedMode);return}S.zh=-1;S.hl=-1;if(!S.start)S.start=Date.now();invalidateHint();const mode=forcedMode||hexMode;
  if(S.p.sol[i]===(mode==="b"?1:0)){S.hx.rev.add(i);S.popH=i;hexAfter()}
  else{S.mist++;S.flash=i;rHex();setTimeout(()=>{S.flash=-1;if(S.type==="hex"&&!S.done)rHex()},450)}}
@@ -925,12 +925,14 @@ function initCur(){const p=S.p;return S.type==="bin"?p.giv.slice():Array(S.type=
 function undo(){if(S.done||!S.p||!S.hist.length)return;invalidateHint();
  if(S.type==="m24"){S.redo.push(S.tiles);S.tiles=S.hist.pop();S.a=-1;S.op="";rM24();return}
  const h=S.hist.pop();
+ if(h&&h.hexClue){S.redo.push({hexClue:h.hexClue,from:S.cs[h.hexClue]||0});if(h.from)S.cs[h.hexClue]=h.from;else delete S.cs[h.hexClue];rHex();ub();persist();UX.board();return}
  if(h&&h.notes){S.redo.push(h);noteApplyChanges(h.changes,false);paintNotes();persist();ub();return}
  if(h&&h.note){S.redo.push(h);noteApplyChanges([h],false);paintNotes();persist();ub();return}
  S.redo.push(S.cur.slice());S.cur=h;S.rd=S.cd=S.pick=null;render();persist()}
 function redo(){if(S.done||!S.p||!S.redo.length)return;invalidateHint();
  if(S.type==="m24"){S.hist.push(S.tiles);S.tiles=S.redo.pop();S.a=-1;S.op="";rM24();return}
  const h=S.redo.pop();
+ if(h&&h.hexClue){S.hist.push({hexClue:h.hexClue,from:S.cs[h.hexClue]||0});if(h.from)S.cs[h.hexClue]=h.from;else delete S.cs[h.hexClue];rHex();ub();persist();UX.board();return}
  if(h&&h.notes){S.hist.push(h);noteApplyChanges(h.changes,true);paintNotes();persist();ub();return}
  if(h&&h.note){S.hist.push(h);noteApplyChanges([h],true);paintNotes();persist();ub();return}
  S.hist.push(S.cur.slice());S.cur=h;S.rd=S.cd=S.pick=null;render();check();persist()}
@@ -1348,7 +1350,7 @@ function updateArchiveVisibility(){const a=$("#arch");if(a){a.style.display=S.pr
    b.innerHTML="<span>"+(k===0?"Vandaag":k===1?"Gisteren":dnl(d))+(isWk(d)?" 💪":"")+(featOf(d)===t?" ⭐":"")+"</span>"+(who?'<span class="lw">'+who+"</span>":"");
    b.onclick=ev=>{ev.stopPropagation();pop.classList.remove("open");load(S.type,false,false,d)};pop.append(b)}
   const r=ab.getBoundingClientRect();pop.style.top=Math.round(r.bottom+6)+"px";pop.style.left=Math.round(Math.max(6,Math.min(innerWidth-236,r.left+r.width/2-115)))+"px";pop.classList.add("open")};
- document.addEventListener("pointerdown",e=>{if(pop.classList.contains("open")&&!e.target.closest("#archp,#arch")){pop.classList.remove("open");e._closed=true}},true)}$("#next").onclick=()=>RANDOM?startRandomFree(S.type):showNewFree(S.type,false,true);
+ document.addEventListener("pointerdown",e=>{if(pop.classList.contains("open")&&!e.target.closest("#archp,#arch")){pop.classList.remove("open");e._closed=true}},true)}$("#next").onclick=()=>RANDOM?UX.randomSettings(S.type):showNewFree(S.type,false,true);
 let LAYW=innerWidth,LAYH=innerHeight,LAYRT=0;
 function resetPuzzleFit(){if(!S)return;delete S._csFit;delete S._hexFit;delete S._murMS;MURMS=0}
 addEventListener("resize",()=>{clearTimeout(LAYRT);LAYRT=setTimeout(()=>{const w=innerWidth,h=innerHeight,dw=Math.abs(w-LAYW),dh=Math.abs(h-LAYH),turn=(w>h)!==(LAYW>LAYH);if(!turn&&dw<24&&dh<100)return;LAYW=w;LAYH=h;resetPuzzleFit();if(S.p)render()},140)});
@@ -1368,28 +1370,29 @@ function progressPct(){if(!S||!S.p)return 0;const p=S.p,cur=S.cur,ratio=(a,b)=>b
  if(S.type==="hex"&&S.hx){const base=new Set([...(p.rev0||[]),...(p.zs||[])]),a=[...S.hx.rev].filter(i=>!base.has(i)).length,b=Math.max(0,(p.cells||[]).length-base.size);return ratio(a,b)}
  if(S.type==="mur"&&cur)return ratio(cur.filter(v=>v!==-1).length,cur.length);
  if(S.type==="m24")return ratio(S.r||0,5);return 0}
-function cloudPushProgress(k,e,force){if(!cloudProgOk()||!e||progressSolved(k,e))return;const now=Date.now();if(!force&&now-(cloudProgLast[k]||0)<60000)return;cloudProgLast[k]=now;
- const entry=Object.assign({},e,{k});window.PD_DB.saveProgress({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",ck:cloudProgKey(k),entry}).catch(()=>{cloudProgLast[k]=0})}
+function cloudPushProgress(k,e,force){if(!cloudProgOk()||!e||progressSolved(k,e))return;if(navigator.onLine===false){UX.storage(k,{at:e.at,remote:"failed"});return}const now=Date.now();if(!force&&now-(cloudProgLast[k]||0)<60000)return;cloudProgLast[k]=now;
+ const entry=Object.assign({},e,{k});UX.storage(k,{at:e.at,remote:"saving"});
+ return window.PD_DB.saveProgress({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",ck:cloudProgKey(k),entry}).then(()=>UX.storage(k,{at:e.at,remote:"saved"})).catch(()=>{cloudProgLast[k]=Date.now();UX.storage(k,{at:e.at,remote:"failed"})})}
 function cloudClearProgress(k){if(!cloudProgOk()||!window.PD_DB.clearProgress)return;window.PD_DB.clearProgress({uid,group:$("#group").value.trim(),ck:cloudProgKey(k)}).catch(()=>{})}
 function progDel(k){const a=progAll();if(k in a){delete a[k];lsSet(PKEY,JSON.stringify(a))}cloudClearProgress(k)}
 function mergeCloudProgress(mp){if(PHONE||!mp)return false;const a=progAll(),remote={};let ch=false,reload=false,curk=S&&S.p?progKey(S.type,S.practice,S.date,S.sf):"";
  Object.values(mp).forEach(e=>{if(!e||!e.k)return;remote[e.k]=e;const k=e.k;if(!progressRelevant(k)||progressSolved(k,e)){cloudClearProgress(k);return}const l=a[k];if(!l||(e.at||0)>(l.at||0)){const z=Object.assign({},e);delete z.k;a[k]=z;ch=true;if(k===curk&&!document.body.classList.contains("home")&&(e.at||0)>(S._saveAt||0))reload=true}});
  const now=Date.now();for(const[k,e0]of Object.entries(a)){if(!progressRelevant(k)||progressSolved(k,e0))continue;let e=e0;if(!e.at&&!remote[k]){e=Object.assign({},e,{at:now});a[k]=e;ch=true}const r=remote[k];if(!r||(e.at||0)>(r.at||0))cloudPushProgress(k,e,true)}
- if(ch)lsSet(PKEY,JSON.stringify(a));if(reload&&S&&S.p&&!S.done){const t=S.type,pr=S.practice,d=S.date;S.start=0;load(t,pr,false,d)}else if(document.body.classList.contains("home"))try{renderHome()}catch(e){}return ch}
+ if(ch&&!lsSet(PKEY,JSON.stringify(a))&&curk)UX.storage(curk,{local:false,remote:"saved"});if(reload&&S&&S.p&&!S.done){const t=S.type,pr=S.practice,d=S.date;S.start=0;load(t,pr,false,d)}else if(document.body.classList.contains("home"))try{renderHome()}catch(e){}return ch}
 function pullCloudProgress(force){if(PHONE||!uid||uid==="x"||!window.PD_DB||!window.PD_DB.getProgress||cloudProgPulling)return Promise.resolve(false);const now=Date.now();if(!force&&now-cloudProgPullAt<15000)return Promise.resolve(false);cloudProgPullAt=now;cloudProgPulling=true;
- return window.PD_DB.getProgress($("#group").value.trim(),uid).then(mergeCloudProgress).catch(()=>false).finally(()=>{cloudProgPulling=false})}
+ return window.PD_DB.getProgress($("#group").value.trim(),uid).then(mergeCloudProgress).catch(()=>{if(S&&S.p)UX.storage(progKey(S.type,S.practice,S.date,S.sf),{remote:"failed"});return false}).finally(()=>{cloudProgPulling=false})}
 function persist(forceCloud){if(!S.p||S.done||!S.start||!S.seed)return;const a=progAll(),today=dstr();let pruned=false;
  for(const k in a)if(k.startsWith("d:")&&k.split(":")[1]<addDays(today,-8)){delete a[k];pruned=true}
  const k=progKey(S.type,S.practice,S.date,S.sf),pc=progressPct();
  /* Een onaangeraakte of weer volledig leeggemaakte puzzel is geen lopende puzzel. */
- if(pc<=0&&!(S.hints>0)&&!(S.mist>0)){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;return}
+ if(pc<=0&&!(S.nt&&Object.values(S.nt).some(Boolean))&&!(S.cs&&Object.values(S.cs).some(Boolean))&&!(S.str&&S.str.size)&&!(S.hints>0)&&!(S.mist>0)){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;UX.saves.delete(k);UX.paintStorage();return}
  const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,hintLedger:S.hintLedger||{},hintLegacy:S.hintLegacy||0,seenErrors:S.seenErrors||{},pc,group:$("#group").value.trim()};
  if(S.hx){e.rev=[...S.hx.rev];e.cs=S.cs||{}}else if(S.type==="m24")e.r=S.r;else if(S.cur)e.cur=S.cur;if(S.str)e.str=[...S.str];if(S.nt&&Object.keys(S.nt).length)e.nt=S.nt;
  /* Hervatten moet ook echt hervatten: bewaar een begrensde undo/redo-geschiedenis.
     Maak 24 heeft een eigen ronde-state en laten we hier bewust buiten. */
  if(S.type!=="m24"){if(S.hist&&S.hist.length)e.hist=S.hist.slice(-60);if(S.redo&&S.redo.length)e.redo=S.redo.slice(-30)}
  const prev=a[k],plain=x=>{if(!x)return"";const q=Object.assign({},x);delete q.at;return JSON.stringify(q)},changed=!prev||plain(prev)!==plain(e);
- e.at=changed?Date.now():(prev.at||Date.now());a[k]=e;S._saveAt=e.at;lsSet(PKEY,JSON.stringify(a));if(changed||forceCloud)cloudPushProgress(k,e,!!forceCloud)}
+ e.at=changed?Date.now():(prev.at||Date.now());a[k]=e;S._saveAt=e.at;const local=lsSet(PKEY,JSON.stringify(a));UX.storage(k,{at:e.at,local,remote:changed?"local":(UX.saves.get(k)||{}).remote});if(changed||forceCloud)cloudPushProgress(k,e,!!forceCloud)}
 setInterval(persist,3000);
 document.addEventListener("visibilitychange",()=>{if(document.hidden){pausePlay();persist(true)}else pullCloudProgress(true).finally(()=>resumePlay())});
 addEventListener("blur",()=>{pausePlay();persist(true)});
@@ -1409,7 +1412,7 @@ function doCheck(){if(S.done||!S.p||!["bin","star","nono","kak","mur","plus"].in
  if(bad.length)registerErrors(bad);persist();
  const t=bad.length?(bad.length===1?"1 vakje klopt niet":bad.length+" vakjes kloppen niet"):"Alles wat je hebt ingevuld klopt";
  m.classList.remove("good","warn");m.classList.add(bad.length?"warn":"good");m.textContent=t;setTimeout(()=>{els.forEach(d=>d.classList.remove("bad"));if(m.textContent===t){m.textContent="";m.classList.remove("good","warn")}},2800)}
-$("#chk").onclick=doCheck;
+$("#chk").onclick=doCheck;$("#chk").title="Dezelfde verkeerde invoer opnieuw controleren telt niet opnieuw als foutmoment.";
 /* ---- Weergave: systeem, licht of donker ---- */
 const themeMode=()=>{const t=lsGet("pdtheme");return t==="light"||t==="dark"?t:"system"};
 function updTheme(redraw){const mode=themeMode(),root=document.documentElement;if(mode==="system")root.removeAttribute("data-theme");else root.dataset.theme=mode;
@@ -1475,8 +1478,8 @@ const dayLvDevice=(t,ds,phone)=>{if(!dagVast(ds))return null;const[y,m,d]=ds.spl
 const dayTypeDevice=(t,ds,phone)=>{const l=dayLvDevice(t,ds,phone);return t+sfx(l||dagLv(t,ds))};
 function myDone(td,t){if(!dagVast(td)){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))||""}const ty=dayTypeDevice(t,td,PHONE),k=td+ty,g=($("#group").value||"").trim().toLowerCase();return localDoneInGroup(k,g)||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty&&(r.group||"").toLowerCase()===g)?k:""}
 function myDoneOther(td,t){if(!dagVast(td))return"";const ty=dayTypeDevice(t,td,!PHONE),k=td+ty,g=($("#group").value||"").trim().toLowerCase();return localDoneInGroup(k,g)||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty&&(r.group||"").toLowerCase()===g)?k:""}
-function progressMeta(k,e){let m;if((m=/^d:(\\d{4}-\\d\\d-\\d\\d):([a-z0-9]+)(?:\\.(\\d))?$/.exec(k))){const t=m[2],d=m[1];return{k,e,practice:false,date:d,type:t,lvl:+(m[3]||2),color:t==="nono"&&nonoDayVariant(d)==="color"}};
- if((m=/^p:([a-z0-9]+?)(?:\\.(\\d))?(c)?$/.exec(k)))return{k,e,practice:true,date:dstr(),type:m[1],lvl:+(m[2]||2),color:!!m[3]};return null}
+function progressMeta(k,e){let m;if((m=/^d:(\d{4}-\d\d-\d\d):([a-z0-9]+)(?:\.(\d))?$/.exec(k))){const t=m[2],d=m[1];return{k,e,practice:false,date:d,type:t,lvl:+(m[3]||2),color:t==="nono"&&nonoDayVariant(d)==="color"}};
+ if((m=/^p:([a-z0-9]+?)(?:\.(\d))?(c)?$/.exec(k)))return{k,e,practice:true,date:dstr(),type:m[1],lvl:+(m[2]||2),color:!!m[3]};return null}
 const nonoMetaVariant=m=>m&&m.type==="nono"?(m.color?"color":"classic"):"";
 function currentSessionMeta(){return S&&S.p?{type:S.type,practice:!!S.practice,date:S.date,nv:S.nv,lvl:S.lvl,done:!!S.done,pc:progressPct(),key:S.practice?progKey(S.type,S.practice,S.date,S.sf):""}:null}
 function pauseAndPersistActive(forceCloud){if(!S||!S.p||S.done||!S.start)return false;pausePlay();persist(!!forceCloud);return true}
@@ -1486,7 +1489,7 @@ function freeProgressList(t,nv){return progressList({practice:true,type:t||"",va
 function clearFreeProgressType(t,keep,nv){let target=nv||"";if(t==="nono"&&!target&&keep){const e=progAll()[keep],m=progressMeta(keep,e);target=nonoMetaVariant(m)}freeProgressList(t).forEach(m=>{if(m.k!==keep&&(t!=="nono"||!target||nonoMetaVariant(m)===target))progDel(m.k)})}
 function latestFreeProgress(t,nv){if(t==="nono"&&!nv){for(const v of["classic","color"]){const a=freeProgressList(t,v);a.slice(1).forEach(m=>progDel(m.k))}return freeProgressList(t)[0]||null}const a=freeProgressList(t,nv),m=a[0]||null;a.slice(1).forEach(x=>progDel(x.k));return m}
 function resumeProgress(k){const e=progAll()[k],m=progressMeta(k,e);if(!m)return;if(!m.practice){load(m.type,false,false,m.date);return}clearFreeProgressType(m.type,k,m.type==="nono"?nonoMetaVariant(m):null);RANDOM=false;setFreePreferences(m.type,m.lvl,nonoMetaVariant(m));load(m.type,true,false)}
-function startChosenFree(t,l,nv,random,replace){if(replace)clearFreeProgressType(t,null,t==="nono"?nv:null);setFreePreferences(t,l,nv);RANDOM=!!random;$("#npm").hidden=true;document.body.classList.remove("newpick");load(t,true,true)}
+function startChosenFree(t,l,nv,random,replace){pauseAndPersistActive(true);if(replace)clearFreeProgressType(t,null,t==="nono"?nv:null);setFreePreferences(t,l,nv);RANDOM=!!random;$("#npm").hidden=true;document.body.classList.remove("newpick");load(t,true,true,undefined,true)}
 /* Nieuwe vrije puzzel: één flow voor alle puzzeltypes.
    De Nonogramvariant komt van de gekozen Home-tegel of de huidige puzzel; nooit wisselen tijdens het spelen.
    Een lopende huidige puzzel krijgt één bevestiging; opgeslagen voortgang krijgt expliciet Verdergaan of Nieuwe puzzel. */
@@ -1496,14 +1499,11 @@ function showNewFree(t,random,fromCurrent,nvForced){if(!TYPES[t])return;
  clearOnline();document.body.classList.remove("home");document.body.classList.add("newpick");toggleSide(false);
  const m=$("#npm"),lvBox=$("#nplv"),sub=$("#npsub");let nv=t==="nono"?(nvForced||(random?(Math.random()<.5?"classic":"color"):(origin&&origin.type==="nono"&&origin.nv?origin.nv:nonoVariant))):"classic";
  const titleName=()=>FREE_NAME(t,nv);document.body.dataset.t=t;document.documentElement.style.setProperty("--tc",TCOL[t]||"var(--pc)");document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));const ti=$("#tbTitle");if(ti)ti.innerHTML=tIcon(t,false,t==="nono"?nv:"")+`<div><b>${titleName()}</b><small>Vrij puzzelen · Nieuwe puzzel</small></div>`;m.hidden=false;pageIn(m.querySelector(".npcard"));window.scrollTo(0,0);
- const meta=old=>[old&&LVN[old.type]?LVL[old.lvl]:"",old&&old.e.pc!=null?old.e.pc+"% klaar":""].filter(Boolean).join(" · ");
- const sameOrigin=old=>!!(fromCurrent&&origin&&origin.practice&&old&&old.k===origin.key);
- const backToOrigin=()=>{if(!origin){showHome();return}if(origin.practice)setFreePreferences(origin.type,origin.lvl,origin.nv);else if(origin.type==="nono"&&origin.nv){nonoVariant=origin.nv;lsSet("pdnvar",nonoVariant)}document.body.classList.remove("newpick");m.hidden=true;load(origin.type,origin.practice,false,origin.date)};
+ const meta=old=>[old&&LVN[old.type]?LVL[old.lvl]:"",old&&old.e.pc!=null?old.e.pc+"% ingevuld":""].filter(Boolean).join(" · ");
  const levelScreen=()=>{$("#npmt").textContent="Nieuwe "+titleName();sub.textContent=LVN[t]?"Kies de moeilijkheid.":"Klaar voor een nieuwe puzzel?";lvBox.innerHTML="";const old=latestFreeProgress(t,t==="nono"?nv:undefined),levels=LVN[t]||[2];levels.forEach(l=>{const b=document.createElement("button");b.className="nplvb";const desc=t==="nono"&&nv==="color"?(LVS[t][l]||"")+" · "+nonoColorCount(l)+" kleuren":LVS[t]&&LVS[t][l]?LVS[t][l]:"";b.innerHTML="<b>"+(LVN[t]?LVL[l]:"Starten")+"</b><small>"+desc+"</small><span>›</span>";b.onclick=()=>startChosenFree(t,l,nv,random,!!old);lvBox.append(b)})};
- const existing=old=>{$("#npmt").textContent=titleName();sub.textContent="Je hebt nog een onafgemaakte vrije puzzel.";lvBox.innerHTML='<div class="npwarn"><b>Wat wil je doen?</b><p>'+meta(old)+'</p><div class="npactions"><button id="npcontinue">Verder puzzelen</button><button id="npreplace" class="secondary">Nieuwe puzzel</button></div></div>';$("#npcontinue").onclick=()=>resumeProgress(old.k);$("#npreplace").onclick=levelScreen};
- const picker=()=>{const old=latestFreeProgress(t,t==="nono"?nv:undefined);if(old&&!sameOrigin(old))existing(old);else levelScreen()};
- const confirmNew=()=>{$("#npmt").textContent="Nieuwe puzzel?";sub.textContent="Je huidige puzzel is nog niet af.";const p=origin&&origin.pc!=null?origin.pc:0;lvBox.innerHTML='<div class="npwarn"><b>Weet je het zeker?</b><p>Je bent nog bezig met deze puzzel'+(p>0?" ("+p+"% klaar)":"")+'. Je voortgang blijft bewaard totdat je echt een nieuwe puzzel start.</p><div class="npactions"><button id="npstay" class="secondary">Blijven puzzelen</button><button id="npgo">Ja, nieuwe puzzel</button></div></div>';$("#npstay").onclick=backToOrigin;$("#npgo").onclick=picker};
- if(fromCurrent&&origin&&!origin.done&&origin.pc>0)confirmNew();else picker()}
+ const existing=old=>{$("#npmt").textContent=titleName();sub.textContent="Je hebt nog een onafgemaakte vrije puzzel.";lvBox.innerHTML='<div class="npwarn"><b>Wat wil je doen?</b><p>'+meta(old)+'</p><div class="npactions"><button id="npcontinue">Verder puzzelen</button><button id="npreplace" class="secondary">Vervangen</button></div></div>';$("#npcontinue").onclick=()=>resumeProgress(old.k);$("#npreplace").onclick=levelScreen};
+ const old=latestFreeProgress(t,t==="nono"?nv:undefined);if(old)existing(old);else levelScreen()}
+
 $("#npmx").onclick=showHome;
 
 /* Puzzelsoort openen: hervat eerst de meest recente onafgemaakte sessie van dit type. Een bewust nieuwe vrije puzzel loopt via showNewFree(). */
@@ -1564,40 +1564,40 @@ function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r
   const bars=`<div class="hcard"><div class="shd1"><b>Per puzzel</b><span class="mut">${PN}</span></div>${TS.map(t=>`<div class="sbr"><div class="sbt"><i style="background:${TCOL[t]}"></i>${TYPES[t]}</div><div class="sbb">${st.map(x=>{const n=x.per[t]||0;return`<div class="sbl p${x.i%2}"><span class="si">${x.nm[0]}</span><div class="strk"><div style="width:${Math.max(n?3:0,100*n/mx)}%;background:${TCOL[t]}"></div></div><span class="sn">${n}</span></div>`}).join("")}</div></div>`).join("")}</div>`;
   const W=16,start=addDays(mon0,-7*(W-1));
   const heat=`<div class="hcard"><div class="shd1"><b>Laatste ${W} weken</b><span class="mut">dagpuzzels per dag</span></div><div class="shm">${st.map(x=>{const cnt={};rows.forEach(r=>{if(r.uid===x.u&&r.date>=start)cnt[r.date]=(cnt[r.date]||0)+1});let o=`<div class="shp"><div class="srn">${x.nm}</div><div class="shg">`;for(let w=0;w<W;w++)for(let i=0;i<7;i++){const d=addDays(start,7*w+i),n=Math.min(TS.length,cnt[d]||0);o+=`<i class="${d>today?"fut":""}${d===today?" td":""}" style="${n?"background:color-mix(in srgb,var(--pc) "+Math.round(25+75*n/TS.length)+"%,transparent)":""}" title="${dnl(d)}: ${n}"></i>`}return o+"</div></div>"}).join("")}</div><div class="slg2 mut sm">minder <i></i><i style="background:color-mix(in srgb,var(--pc) 40%,transparent)"></i><i style="background:color-mix(in srgb,var(--pc) 70%,transparent)"></i><i style="background:var(--pc)"></i> meer</div></div>`;
-  h.innerHTML=`<div class="hwrap sco">${head(GROUP_NAME+' <button id="scoreGroupEdit" class="scoregroupedit" title="Groep beheren" aria-label="Groep beheren">✎</button>',"Samen "+together+" "+(together===1?"puzzel":"puzzels")+" opgelost "+PN)}<div class="scontrols">${views}${period}</div><div class="sovermain"><div class="soverheroes">${hero}</div>${cal}</div><div class="hgrid2 sh2">${bars}${heat}</div><div class="mut sm">Geen wedstrijd: gewoon kijken hoeveel jullie samen oplossen. Een telefoon- en groot-schermvariant van dezelfde dagpuzzel telt hier samen als één. 🎯 = foutloos, 💡 = zonder hint.</div></div>`;
+  h.innerHTML=`<div class="hwrap sco">${head(GROUP_NAME+' <button id="scoreGroupEdit" class="scoregroupedit" title="Groep beheren" aria-label="Groep beheren">✎</button>',"Samen "+together+" "+(together===1?"puzzel":"puzzels")+" opgelost "+PN)}<div class="scontrols">${views}${period}</div><div class="sovermain"><div class="soverheroes">${hero}</div>${cal}</div><div class="hgrid2 sh2">${bars}${heat}</div><div class="mut sm">Geen wedstrijd: gewoon kijken hoeveel jullie samen oplossen. Een telefoon- en groot-schermvariant van dezelfde dagpuzzel telt hier samen als één. Als je beide oplost, gebruikt dit overzicht het groot-schermresultaat; beide blijven als apparaatvariant vermeld. 🎯 = foutloos, 💡 = zonder hint.</div></div>`;
  }
  $("#sBack").onclick=ADMIN_READONLY?()=>{location.href="admin.html"}:showHome;
  {const ge=$("#scoreGroupEdit");if(ge){if(ADMIN_READONLY)ge.remove();else ge.onclick=()=>window.dispatchEvent(new Event("pdopengroup"))}}
  if(ADMIN_READONLY){const wrap=h.querySelector(".hwrap.sco");if(wrap&&!wrap.querySelector(".adminviewbar"))wrap.insertAdjacentHTML("afterbegin",'<div class="adminviewbar">👁 Beheerweergave <span>Alleen-lezen · terug met ← naar Beheer</span></div>')}
  h.querySelectorAll(".sviews button").forEach(b=>b.onclick=()=>{SCOREWHO=b.dataset.who;SWK=0;renderHome();pageIn($("#home"))});
  h.querySelectorAll(".sper button").forEach(b=>b.onclick=()=>{OPER=b.dataset.p;lsSet("pdper",OPER);renderHome()});
- h.querySelectorAll(".snav").forEach(b=>b.onclick=()=>{SWK=Math.min(0,SWK+ +b.dataset.w);renderHome()});h.querySelectorAll(".spmain").forEach(b=>b.onclick=()=>{const d=b.parentElement.querySelector(".spdetail"),open=!d.hidden;h.querySelectorAll(".spdetail").forEach(x=>x.hidden=true);h.querySelectorAll(".spmain").forEach(x=>{x.classList.remove("open");x.setAttribute("aria-expanded","false")});if(!open){d.hidden=false;b.classList.add("open");b.setAttribute("aria-expanded","true")}fitHomePage()});fitHomePage()}
+ h.querySelectorAll(".snav").forEach(b=>b.onclick=()=>{SWK=Math.min(0,SWK+ +b.dataset.w);renderHome()});h.querySelectorAll(".spmain").forEach(b=>b.onclick=()=>{const d=b.parentElement.querySelector(".spdetail"),open=!d.hidden;h.querySelectorAll(".spdetail").forEach(x=>x.hidden=true);h.querySelectorAll(".spmain").forEach(x=>{x.classList.remove("open");x.setAttribute("aria-expanded","false")});if(!open){d.hidden=false;b.classList.add("open");b.setAttribute("aria-expanded","true")}fitHomePage()});UX.home();fitHomePage()}
 function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return renderScore(h);setHomeSkin(PROFILE_STYLE);Object.keys(TYPES).forEach(latestFreeProgress);const td=dstr(),ft=featOf(td),now=new Date(),hr=now.getHours();
  const groet=hr<6?"Goedenacht":hr<12?"Goedemorgen":hr<18?"Goedemiddag":"Goedenavond",me=($("#name").value||"").trim()||"puzzelaar";
  const datum=now.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}),g=($("#group").value||"").trim().toLowerCase(),others=groupPlayers().filter(p=>uidOf(p)!==uid),types=Object.keys(TYPES),raadselsOK=g==="peter-aart-jk4hv92t"||String(GROUP_NAME||"").trim().toLowerCase()==="rekensukkels";
  const pa=progAll(),busyMeta=t=>progressList({practice:false,type:t,date:td},pa)[0]||null;
- const progRing=(p,t)=>p==null?"":`<span class="pdonut" style="--p:${p};--ring:${TCOL[t]||"var(--pc)"}"><b>${p}%</b></span>`;
+ const progRing=(p,t)=>p==null?"":`<span class="pdonut" aria-label="${p}% ingevuld" title="${p}% ingevuld; dit zegt niet of de vakjes correct zijn" style="--p:${p};--ring:${TCOL[t]||"var(--pc)"}"><b>${p}%</b></span>`;
  const active=progressList({},pa),dayActive=active.filter(m=>!m.practice),freeActive=active.filter(m=>m.practice),olderDay=dayActive.filter(m=>m.date!==td),homeRaw=allRows();
  const resumeCard=m=>{const nv=m.type==="nono"?(m.color?"color":"classic"):"",name=m.practice?FREE_NAME(m.type,nv):(TYPES[m.type]||m.type),badge=!m.practice&&nv?`<span class="nvbadge ${nv}">${nv==="color"?"Kleur":"Klassiek"}</span>`:"",sub=[m.practice?"Vrij puzzelen":m.date===td?"Vandaag":dnl(m.date),LVN[m.type]?LVL[m.lvl]:""].filter(Boolean).join(" · ");return`<button class="hcont${nv?" nono-"+nv:""}" data-pk="${m.k}" title="Ga verder met ${name}">${tIcon(m.type,false,m.practice?nv:"")}<span class="ctxt"><b>${name}${badge}</b><small>${sub}</small></span>${progRing(m.e.pc==null?0:m.e.pc,m.type)}<span class="hgo2">›</span></button>`};
  const otherLabel=PHONE?"Groot scherm":"Telefoon",otherIcon=PHONE?"🖥️":"📱";
  const dayExact=(name,t,phone)=>{const u=uidOf(name),ty=dayTypeDevice(t,td,phone),sync=homeRaw.find(x=>!isFree(x)&&x.uid===u&&x.date===td&&x.type===ty);if(u!==uid)return sync||null;const loc=store[td+ty]?myRow(td,ty):null;return loc?Object.assign({},sync||{},loc):sync||null};
  const dayResultFor=(name,t)=>dayExact(name,t,PHONE),dayOtherResultFor=(name,t)=>dagVast(td)?dayExact(name,t,!PHONE):null;
  const dayPeopleDetail=t=>`<div class="ddpeople">${groupPlayers().map(name=>{const r=dayResultFor(name,t),o=dayOtherResultFor(name,t);return`<span class="ddperson ${r?"done":o?"otherdone":""}"><b>${playerName(name)}</b>${r?`<i>✓</i><span>⏱ ${fmt(r.secs||0)}</span>${quickBadges(r,t)}`:"<span>Deze variant nog niet</span>"}${o?`<span class="ddother">${otherIcon} ${otherLabel} ✓</span>`:""}</span>`}).join("")}</div>`;
- const dayPeerCompact=t=>{const peers=groupPlayers().filter(name=>uidOf(name)!==uid);return peers.length?`<span class="daypeer">${peers.map(name=>{const u=uidOf(name),r=dayResultFor(name,t),o=dayOtherResultFor(name,t),ty=dayTypeDevice(t,td,PHONE),busy=!r&&!!busyOf(u,td,ty),cls=r?"done":busy?"busy":o?"otherdone":"";return`<span class="${cls}" title="${playerName(name)}: ${r?"deze variant klaar":busy?"bezig met deze variant":o?otherLabel+"-variant klaar":"nog niet klaar"}${r&&o?" · "+otherLabel+" ook klaar":""}"><b>${playerName(name)}</b> ${r?`✓${r.mist===0?' <i class="peerico">🎯</i>':""}${HINTT.includes(t)&&r.hints===0?' <i class="peerico">💡</i>':""}`:busy?"…":o?`<i class="peerdev">${otherIcon}✓</i>`:"—"}</span>`}).join("")}</span>`:""};
+ const dayPeerCompact=t=>{if(UX.largeGroup()){const peers=groupPlayers().filter(p=>uidOf(p)!==uid),done=peers.filter(p=>dayResultFor(p,t)).length,busy=peers.filter(p=>!dayResultFor(p,t)&&busyOf(uidOf(p),td,dayTypeDevice(t,td,PHONE))).length;return `<span class="daypeer uxsummary" title="Andere groepsleden · deze apparaatvariant">${done} klaar · ${busy} bezig</span>`}const peers=groupPlayers().filter(name=>uidOf(name)!==uid);return peers.length?`<span class="daypeer">${peers.map(name=>{const u=uidOf(name),r=dayResultFor(name,t),o=dayOtherResultFor(name,t),ty=dayTypeDevice(t,td,PHONE),busy=!r&&!!busyOf(u,td,ty),cls=r?"done":busy?"busy":o?"otherdone":"";return`<span class="${cls}" title="${playerName(name)}: ${r?"deze variant klaar":busy?"bezig met deze variant":o?otherLabel+"-variant klaar":"nog niet klaar"}${r&&o?" · "+otherLabel+" ook klaar":""}"><b>${playerName(name)}</b> ${r?`✓${r.mist===0?' <i class="peerico">🎯</i>':""}${HINTT.includes(t)&&r.hints===0?' <i class="peerico">💡</i>':""}`:busy?"…":o?`<i class="peerdev">${otherIcon}✓</i>`:"—"}</span>`}).join("")}</span>`:""};
  const dayMistBadge=r=>!r||r.mist==null?"":r.mist===0?`<span class="rq good" title="Foutloos">🎯</span>`:`<span class="rq" title="${r.mist} ${r.mist===1?"fout":"fouten"}">❌ ${r.mist}</span>`;
  const dayHintBadge=(r,t)=>!r||!HINTT.includes(t)||r.hints==null?"":r.hints===0?`<span class="rq good" title="Zonder hint">💡</span>`:`<span class="rq" title="${hintSummary(r)}">💡 ${r.hints}</span>`;
  const detailMetric=(ic,lab,val,good)=>`<div class="ddmetric ${good?"good":""}"><span>${ic}</span><b>${val}</b><small>${lab}</small></div>`;
  const dayDetail=(t,r)=>{const err=r&&r.mist!=null?r.mist:null,hi=r&&HINTT.includes(t)&&r.hints!=null?r.hints:null;return`<div class="daydetail"><div class="ddmain"><div class="ddstatus"><span class="ddcheck">✓</span><div><b>Opgelost</b><small>${dnl(td)}${t==="nono"?" · "+(nonoDayVariant(td)==="color"?"Kleur":"Klassiek"):""}</small></div></div><div class="ddmetrics">${detailMetric("⏱","Tijd",fmt(r&&r.secs||0),false)}${detailMetric(err===0?"🎯":"❌","Fouten",err==null?"–":err,err===0)}${HINTT.includes(t)?detailMetric("💡","Hulp",hi==null?"–":hintSummary(r),hi===0):""}</div><button class="dayview" data-view-t="${t}">Puzzel bekijken ›</button></div>${dayPeopleDetail(t)}</div>`};
- const doneToday=t=>myDone(td,t),dayRow=t=>{const k=doneToday(t),m=busyMeta(t),pc=m&&m.e.pc!=null?m.e.pc:null,r=k?ownDayResult(td,t):null,o=dayOtherResultFor(me,t),sub=t==="nono"?(nonoDayVariant(td)==="color"?"Kleur":"Klassiek"):"",other=o?`<small class="otherday">${otherIcon} ${otherLabel} ✓</small>`:"";
-  return`<div class="dayitem ${t===ft?"featured ":""}${HDOPEN===t?"open":""}" style="--dayc:${TCOL[t]||"var(--pc)"}"><button class="hdrow ${k?"ok":m?"busy":""}" data-day-t="${t}"${m?` data-pk="${m.k}"`:""}><span class="dot"></span>${tIcon(t,false)}<span class="dname">${TYPES[t]}${t===ft?`<small class="featlabel">⭐ Puzzel van de dag${sub?" · "+sub:""}</small>`:sub?`<small>${sub}</small>`:""}${other}</span>${dayPeerCompact(t)}<span class="dstate ${k?"done":"pending"}">${k?`<span class="dtime">⏱ ${fmt((r&&r.secs)||store[k]||0)}</span><span class="dmist">${dayMistBadge(r)}</span><span class="dhint">${dayHintBadge(r,t)}</span>`:`<span class="dpending">${pc!=null?progRing(pc,t):""}<b>${m?"Verder":"Start"}${pc!=null?" · "+pc+"%":""}</b></span>`}<span class="darrow">${k&&HDOPEN===t?"⌃":"›"}</span></span></button>${k&&HDOPEN===t?dayDetail(t,r):""}</div>`};
+ const doneToday=t=>myDone(td,t),dayRow=t=>{const k=doneToday(t),m=busyMeta(t),pc=m&&m.e.pc!=null?m.e.pc:null,r=k?ownDayResult(td,t):null,o=dayOtherResultFor(uid,t),sub=t==="nono"?(nonoDayVariant(td)==="color"?"Kleur":"Klassiek"):"",other=o?`<small class="otherday">${otherIcon} ${otherLabel} ✓</small>`:"";
+  return`<div class="dayitem ${t===ft?"featured ":""}${HDOPEN===t?"open":""}" style="--dayc:${TCOL[t]||"var(--pc)"}"><button class="hdrow ${k?"ok":m?"busy":""}" data-day-t="${t}"${m?` data-pk="${m.k}"`:""}><span class="dot"></span>${tIcon(t,false)}<span class="dname">${TYPES[t]}${t===ft?`<small class="featlabel">⭐ Puzzel van de dag${sub?" · "+sub:""}</small>`:sub?`<small>${sub}</small>`:""}${other}</span>${dayPeerCompact(t)}<span class="dstate ${k?"done":"pending"}">${k?`<span class="dtime">⏱ ${fmt((r&&r.secs)||store[k]||0)}</span><span class="dmist">${dayMistBadge(r)}</span><span class="dhint">${dayHintBadge(r,t)}</span>`:`<span class="dpending">${pc!=null?progRing(pc,t):""}<b>${m?"Verder":"Start"}${pc!=null?" · "+pc+"% ingevuld":""}</b></span>`}<span class="darrow">${k&&HDOPEN===t?"⌃":"›"}</span></span></button>${UX.largeGroup()?`<button class="uxpeople" data-ux-people="${t}" aria-label="Groepsstatus voor ${TYPES[t]}, ${PHONE?"telefoon":"groot scherm"}: ${dayPeerCompact(t).replace(/<[^>]+>/g,"")}" title="Andere groepsleden · ${PHONE?"telefoon":"groot scherm"}">${dayPeerCompact(t).replace(/<[^>]+>/g,"")} ›</button>`:""}${k&&HDOPEN===t?dayDetail(t,r):""}</div>`};
  const freeTiles=types.flatMap(t=>t==="nono"?[{t,nv:"classic",name:"Nonogram"},{t,nv:"color",name:"Kleurnonogram"}]:[{t,nv:"",name:TYPES[t]}]),freeTile=x=>{const t=x.t,nv=x.nv,sub=LVN[t]?"Kies niveau":"Nieuwe puzzel";return`<button class="tile free" data-free-t="${t}" data-free-nv="${nv}" style="--tc:${TCOL[t]}">${tIcon(t,1,nv)}<span>${x.name}</span><small class="tcount">${sub}</small></button>`};
  const homeRows=statsRows(homeRaw),countOf=(who,period)=>homeRows.filter(r=>r.uid===who&&TYPES[baseT(r)]&&(period==="today"?r.date===td:r.date.slice(0,7)===td.slice(0,7))).length,livePeers=others.map(name=>({name,st:liveOf(uidOf(name))})).filter(x=>x.st),liveTop=livePeers.map(x=>{const st=x.st,bits=[TYPES[st.onlineType]||"Puzzel",st.onlinePractice?"Vrij puzzelen":"Dagpuzzel",st.onlineType==="nono"&&st.onlineNono?(st.onlineNono==="color"?"Kleur":"Klassiek"):"",st.onlineLvl&&LVL[st.onlineLvl]?LVL[st.onlineLvl]:""].filter(Boolean);return `<div class="hlivebar" title="${liveTitle(st)}"><i></i><b>${playerName(x.name)} is online</b><span>${bits.join(" · ")}</span></div>`}).join("");
  const personCard=(name,who)=>{const mc=countOf(who,"month"),tc=countOf(who,"today");return`<button data-home-who="${who}"><span class="hvicon">👤</span><b>${playerName(name)}${who===uid?' <i>(jij)</i>':""}</b><small>🧩 ${mc} deze maand · ${tc} vandaag</small></button>`};
  const monthTogether=groupPlayers().reduce((n,p)=>n+countOf(uidOf(p),"month"),0),todayTogether=groupPlayers().reduce((n,p)=>n+countOf(uidOf(p),"today"),0);
  const allRowsN=homeRows.filter(r=>!isFree(r)),strk=streakOf(allRowsN,uid);
- h.innerHTML=`<div class="hwrap"><div class="hbrand"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Gepuzzellig</span></div><div class="htop"><div><h2>${groet} ${me}</h2><div class="mut">${datum[0].toUpperCase()+datum.slice(1)} · ${GROUP_NAME}</div></div><div class="hactions"><div class="htheme" role="group" aria-label="Weergave"><button data-theme-mode="system" title="Volg systeem"><span class="thi">◐</span><span class="thtxt">Systeem</span></button><button data-theme-mode="light" title="Lichte weergave"><span class="thi">☀️</span><span class="thtxt">Licht</span></button><button data-theme-mode="dark" title="Donkere weergave"><span class="thi">🌙</span><span class="thtxt">Donker</span></button></div><button id="hProfile" class="hprofile" title="Profiel" aria-label="Profiel">${(me[0]||"P").toUpperCase()}</button></div></div>${liveTop}
+ h.innerHTML=`<div class="hwrap"><div class="hbrand"><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Gepuzzellig</span></div><div class="htop"><div><h2>${groet} ${me}</h2><div class="mut">${datum[0].toUpperCase()+datum.slice(1)} · ${GROUP_NAME}</div></div><div class="hactions"><div class="htheme" role="group" aria-label="Weergave"><button data-theme-mode="system" title="Volg systeem"><span class="thi">◐</span><span class="thtxt">Systeem</span></button><button data-theme-mode="light" title="Lichte weergave"><span class="thi">☀️</span><span class="thtxt">Licht</span></button><button data-theme-mode="dark" title="Donkere weergave"><span class="thi">🌙</span><span class="thtxt">Donker</span></button></div><button id="hProfile" class="hprofile" title="Profiel" aria-label="Profiel">${(me[0]||"P").toUpperCase()}</button></div></div>${UX.largeGroup()&&livePeers.length?`<button class="hlivebar" data-ux-live><b>${livePeers.length} groepsleden puzzelen nu</b><span>Bekijk wie ›</span></button>`:liveTop}${UX.storageMarkup()}
 
- <section class="hsection hdaily"><div class="hsecthead"><div><h3>📅 Dagelijkse puzzels</h3><span class="mut">Vandaag · ${types.filter(doneToday).length} van ${types.length} klaar</span></div><span class="hstreak">🔥 ${strk} ${strk===1?"dag":"dagen"}</span></div>
+ <section class="hsection hdaily"><div class="hsecthead"><div><h3>📅 Dagelijkse puzzels</h3><span class="mut">Vandaag · ${types.filter(doneToday).length} van ${types.length} klaar · ${PHONE?"telefoonvariant":"groot-schermvariant"}</span></div><span class="hstreak">🔥 ${strk} ${strk===1?"dag":"dagen"}</span></div>
   <div class="hcard hdlist">${[ft,...types.filter(t=>t!==ft)].map(dayRow).join("")}</div>
   ${olderDay.length?`<div class="hsub"><div class="hsubhead"><b>Eerdere dagpuzzels</b><span class="mut">${olderDay.length} bezig</span></div><div class="hcontlist">${olderDay.map(resumeCard).join("")}</div></div>`:""}
   ${raadselsOK?'<a class="hcard hraad" href="raadsels.html"><span class="ticon big" style="background:#c2255c">÷</span><div><b>Rekenraadsel van vandaag</b> <span class="hpill">proefversie</span><div class="mut">Eén 3F-rekenraadsel per dag, met kladpapier en rekenmachine.</div></div><span class="hgo">›</span></a>':""}
@@ -1608,7 +1608,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
   <div class="tiles freegrid">${freeTiles.map(freeTile).join("")}</div>
  </section>
 
- <section class="hsection htogether"><div class="hsecthead"><div><h3>👥 ${GROUP_NAME}</h3><span class="mut">Samen of per persoon bekijken</span></div></div><div class="hhomeviews"><button data-home-who="all"><span class="hvicon">▦</span><b>Overzicht</b><small>🧩 ${monthTogether} samen deze maand · ${todayTogether} vandaag</small></button>${groupPlayers().map(p=>personCard(p,uidOf(p))).join("")}</div></section></div>`;
+ <section class="hsection htogether"><div class="hsecthead"><div><h3>👥 ${GROUP_NAME}</h3><span class="mut">Samen of per persoon bekijken</span></div></div><div class="hhomeviews"><button data-home-who="all"><span class="hvicon">▦</span><b>Overzicht</b><small>🧩 ${monthTogether} samen deze maand · ${todayTogether} vandaag</small></button>${UX.largeGroup()?`<button data-ux-members><span class="hvicon">👥</span><b>Bekijk alle ${groupPlayers().length} leden</b><small>Zoeken en persoonlijk overzicht</small></button>`:groupPlayers().map(p=>personCard(p,uidOf(p))).join("")}</div></section></div>`;
  h.querySelectorAll(".hdrow[data-day-t]").forEach(b=>b.onclick=()=>{const t=b.dataset.dayT;if(myDone(td,t)){HDOPEN=HDOPEN===t?"":t;renderHome()}else if(b.dataset.pk)resumeProgress(b.dataset.pk);else load(t,false)});
  h.querySelectorAll(".dayview[data-view-t]").forEach(b=>b.onclick=()=>load(b.dataset.viewT,false,false,td));
  h.querySelectorAll(".hcont[data-pk]").forEach(b=>b.onclick=()=>withFreshProgress(()=>resumeProgress(b.dataset.pk)));
@@ -1616,7 +1616,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  h.querySelectorAll(".hhomeviews [data-home-who]").forEach(b=>b.onclick=()=>showScore(b.dataset.homeWho));
  {const hp=$("#hProfile");if(hp)hp.onclick=()=>window.dispatchEvent(new Event("pdopenprofile"))}
  h.querySelectorAll(".htheme [data-theme-mode]").forEach(b=>b.onclick=()=>setThemeMode(b.dataset.themeMode));updTheme(false);
- $("#hFree").onclick=()=>startRandomFree("");fitHomePage()}
+ $("#hFree").onclick=()=>UX.randomSettings("");UX.home();fitHomePage()}
 if(NIEUW)nieuwLayout();
 {const td=dstr(),ft=featOf(td),first=lsGet("pdfeat")!==td;lsSet("pdfeat",td);
  const t=first&&!myDone(td,ft)?ft:TYPES[lsGet("pdtab")]?lsGet("pdtab"):ft;first&&!myDone(td,ft)?load(t,false):openType(t)}
@@ -1625,20 +1625,20 @@ if(NIEUW){showHome();HOMEREADY=true}
 requestAnimationFrame(()=>document.documentElement.removeAttribute("data-ui-pending"));
 
 /* ---- Bediening per puzzel ---- */
-function controlsOf(t){const common=[],rows=[];
+function controlsOf(t){const common=[["Toetsenbord","Tab naar het bord, pijltjestoetsen naar een vakje, Enter om te plaatsen. Shift+Enter gebruikt de andere actie."]],rows=[];
  if(t==="nono"){rows.push(["Tik / linksklik","Gebruik de actieve vul-, kleur- of kruisstand"],["Rechtermuisknop","Gebruik de andere stand: kruisje ↔ vullen/laatst gekozen kleur"],["Dubbeltik / dubbelklik","Zet altijd een kruisje zonder je actieve stand of kleur te veranderen"],["Slepen","Vul of kruis meerdere vakjes in dezelfde stand"],["Naast het bord","Wissel tussen vullen/kleur en kruisjes"]);common.push(["Spatie","wissel stand"])}
- else if(t==="bin"){rows.push(["Tik / linksklik","Plaats ✕"],["Dubbeltik / dubbelklik","Plaats ○"],["Rechtermuisknop","Plaats direct ○"],["Potlood","Zelfde bediening als normaal, maar met kleine ✕ en ○"],["Teller slepen","Vergelijk die rij of kolom met de andere"])}
- else if(t==="star"){rows.push(["Tik / linksklik","Plaats een kruisje"],["Dubbeltik / dubbelklik","Plaats een ster"],["Rechtermuisknop","Plaats direct een ster"],["Potlood","Zelfde bediening als normaal, maar met dunne kleine ☆ en ×"],["Slepen","Plaats dezelfde markering in meerdere vakjes"])}
+ else if(t==="bin"){rows.push(["Tik / linksklik","Plaats ✕"],["Dubbeltik / dubbelklik","Plaats ○"],["Rechtermuisknop","Plaats direct ○ (of kies de knop Cirkel)"],["Potlood","Zelfde bediening als normaal, maar met kleine ✕ en ○"],["Teller slepen","Vergelijk die rij of kolom met de andere"])}
+ else if(t==="star"){rows.push(["Tik / linksklik","Plaats een kruisje"],["Dubbeltik / dubbelklik","Plaats een ster"],["Rechtermuisknop","Plaats direct een ster (of kies de knop Ster)"],["Potlood","Zelfde bediening als normaal, maar met dunne kleine ☆ en ×"],["Slepen","Plaats dezelfde markering in meerdere vakjes"])}
  else if(t==="plus"){rows.push(["Tik / linksklik","Gebruik de actieve stand: omcirkelen of wegstrepen"],["Rechtermuisknop","Gebruik de andere stand: omcirkelen ↔ wegstrepen"],["Slepen","Markeer meerdere getallen in dezelfde stand"],["Naast het bord","Wissel stand"]);common.push(["Spatie","wissel stand"])}
  else if(t==="hex"){rows.push(["Tik / linksklik","Gebruik de actieve stand: blauw of zwart"],["Rechtermuisknop","Gebruik de andere stand: blauw ↔ zwart"],["Blauw/grijs vlak","Wissel tussen blauw en zwart"],["Rand- of blauw cijfer","Links gebruikt de actieve stand; rechts de andere stand"]);common.push(["Spatie","wissel blauw/zwart"])}
  else if(t==="mur"){rows.push(["Tik / linksklik","Gebruik de actieve plaats- of kruisstand"],["Rechtermuisknop","Gebruik de andere stand: plaatsen ↔ wegkruisen"],["Naast het bord","Wissel tussen plaatsen en wegkruisen"]);common.push(["Spatie","wissel stand"])}
  else if(t==="kak"){rows.push(["Tik / klik","Selecteer een wit vakje"],["Cijferknoppen","Vul het geselecteerde vakje in"],["Toetsen 1–9","Vul het cijfer direct in"],["Backspace / 0","Wis het geselecteerde vakje"])}
  else if(t==="m24"){rows.push(["Tik / klik","Kies een getal en daarna een bewerking"],["Ongedaan","Ga één rekenstap terug"])}
  else rows.push(["Tik / klik","Gebruik het gekozen vakje of de actieve actie"]);
- if(NOTET.includes(t))common.push(["A","aantekeningen aan/uit"]);
+ common.push(["Fouten",t==="hex"?"Elke verkeerde onthulpoging telt direct; onthulde vakjes blijven staan.":t==="mur"?"Een nieuwe controlefout of een verkeerde beschuldiging telt als foutmoment; dezelfde invoer opnieuw controleren telt niet opnieuw.":"Controle telt één nieuw foutmoment; dezelfde verkeerde invoer opnieuw bekijken telt niet opnieuw."]);if(NOTET.includes(t))common.push(["A","aantekeningen aan/uit"]);
  if(HINTT.includes(t))common.push(["H","hint"]);
  if(["bin","star","nono","kak","mur","plus"].includes(t))common.push(["C","controleer"]);
- if(t!=="hex")common.push(["⌘/Ctrl Z","ongedaan"],["⇧⌘/Ctrl Z","opnieuw"]);
+ common.push(["⌘/Ctrl Z",t==="hex"?"eigen markering ongedaan":"ongedaan"],["⇧⌘/Ctrl Z","opnieuw"]);
  common.push(["?","uitleg"],["Esc","sluiten"]);
  return{rows,keys:common}}
 function showControls(){if(!S||!S.type)return;const t=S.type,m=$("#cm"),d=controlsOf(t);$("#cmt").textContent="Bediening · "+TYPES[t];
@@ -1658,7 +1658,7 @@ addEventListener("keydown",e=>{if(e.key==="Escape"){if(document.body.classList.c
 /* Sneltoetsen: handig op desktop en op een iPad met toetsenbord. */
 function closeOverlays(){clearHint();const f=$("#fin");if(f)f.hidden=true;const sd=$("#side");if(sd)sd.classList.remove("open");const ap=$("#archp");if(ap)ap.classList.remove("open");const pm=$("#pmp");if(pm)pm.classList.remove("open");$("#hm").hidden=true;$("#cm").hidden=true}
 function overlayOpen(){const f=$("#fin"),h=$("#hint");return document.body.classList.contains("newpick")||!$("#hm").hidden||!$("#cm").hidden||(f&&!f.hidden)||(h&&getComputedStyle(h).display!=="none")||$("#side").classList.contains("open")||($("#archp")&&$("#archp").classList.contains("open"))||($("#pmp")&&$("#pmp").classList.contains("open"))}
-addEventListener("keydown",e=>{const a=document.activeElement,tag=(a&&a.tagName)||"",typing=/INPUT|TEXTAREA|SELECT/.test(tag)||(a&&a.isContentEditable);if(typing)return;if(document.body.classList.contains("newpick")){if(e.key==="Escape"){e.preventDefault();showHome()}return}const k=e.key.toLowerCase();
+addEventListener("keydown",e=>{const a=document.activeElement,tag=(a&&a.tagName)||"",typing=/INPUT|TEXTAREA|SELECT/.test(tag)||(a&&a.isContentEditable);if(typing||document.body.classList.contains("home"))return;if(e.key===" "&&a&&a.closest("button,a,summary"))return;if(document.body.classList.contains("newpick")){if(e.key==="Escape"){e.preventDefault();showHome()}return}const k=e.key.toLowerCase();
  if((e.ctrlKey||e.metaKey)&&k==="z"){e.preventDefault();e.shiftKey?redo():undo();return}
  if(e.ctrlKey||e.metaKey||e.altKey)return;
  if(e.key==="Escape"){closeOverlays();return}
@@ -1676,3 +1676,37 @@ addEventListener("keydown",e=>{const a=document.activeElement,tag=(a&&a.tagName)
 const A11Y_IDS=["nf","nc1","nc2","nc3","nc4","nx","pxb","pob","mb","mz","potb","today","prac"];
 function syncA11y(){A11Y_IDS.forEach(id=>{const b=$("#"+id);if(b)b.setAttribute("aria-pressed",b.classList.contains("on")?"true":"false")});document.querySelectorAll("#tabs button").forEach(b=>{if(b.classList.contains("on"))b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});const pb=$("#potb");if(pb)pb.setAttribute("aria-keyshortcuts","A");for(const id of["nf","nc1","nc2","nc3","nc4","nx","pxb","pob","mb","mz"]){const b=$("#"+id);if(b)b.setAttribute("aria-keyshortcuts","Space")}}
 syncA11y();
+UX.init();
+
+/* Modale vensters: focus binnen het venster, achtergrond tijdelijk inert. */
+(()=>{
+ const selector='[role="dialog"][aria-modal="true"]',tabbable='button,input,select,textarea,a[href],[tabindex],[contenteditable="true"]';
+ let active=null,opener=null;const inertBefore=new Map();
+ const visible=e=>e.isConnected&&!e.closest('[hidden]')&&e.getClientRects().length>0;
+ const items=()=>active?[...active.querySelectorAll(tabbable)].filter(e=>!e.disabled&&e.tabIndex>=0&&!e.closest('[inert]')&&visible(e)):[];
+ const focusFirst=()=>{const first=items()[0];if(first)first.focus();else if(active){active.tabIndex=-1;active.focus()}};
+ function sync(){
+  const dialogs=[...document.querySelectorAll(selector)].filter(visible).sort((a,b)=>(parseInt(getComputedStyle(a).zIndex)||0)-(parseInt(getComputedStyle(b).zIndex)||0)),next=dialogs.at(-1)||null;
+  for(const[e,value]of inertBefore)e.inert=value;inertBefore.clear();
+  if(next!==active){if(!active&&next)opener=document.activeElement;active=next;
+   if(!active){if(opener&&visible(opener)&&!opener.closest('[inert]'))opener.focus();opener=null}}
+  if(!active)return;
+  for(let branch=active;branch&&branch!==document.body;branch=branch.parentElement){
+   for(const sibling of branch.parentElement.children)if(sibling!==branch){inertBefore.set(sibling,sibling.inert);sibling.inert=true}}
+  if(!active.contains(document.activeElement))focusFirst();
+ }
+ new MutationObserver(sync).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
+ document.addEventListener('focusin',()=>{if(active&&!active.contains(document.activeElement))focusFirst()});
+ window.addEventListener('keydown',e=>{
+  if(!active)return;
+  /* Voorkom dat puzzelsneltoetsen achter een dialoog worden uitgevoerd. */
+  e.stopPropagation();
+  if(e.key==='Tab'){const list=items(),i=list.indexOf(document.activeElement);
+   if(!list.length){e.preventDefault();focusFirst()}
+   else if(e.shiftKey&&(i<=0)){e.preventDefault();list.at(-1).focus()}
+   else if(!e.shiftKey&&(i<0||i===list.length-1)){e.preventDefault();list[0].focus()}}
+  if(e.key==='Escape'){const close={hm:'hmx',cm:'cmx',authaccount:'authx',groupaccount:'groupx',uxDialog:'uxClose'}[active.id];
+   if(close){e.preventDefault();document.getElementById(close)?.click()}}
+ },true);
+ sync();
+})();

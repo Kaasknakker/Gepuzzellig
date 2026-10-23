@@ -506,12 +506,19 @@ const ZES=[
    hints:[`Werk terug vanaf de 6 die overblijven: hoeveel lagen er voordat ${Q} pakte?`,`6 + ${y} = ${6+y} is ${b===2?"de andere helft":`${b-1}/${b} deel`} van wat er lag. Er lagen dus ${r1} bollen toen ${Q} begon.`],
    uitwerking:[`Voordat ${Q} pakte: (6 + ${y}) is ${b-1}/${b} deel → ${r1} bollen.`,`${P} pakte ${frac(a)} van ${N} = ${N/a}, en dan bleven er ${r1} over.`,`${N} − ${N/a} − ${r1} = ${x} bollen extra. En wat bleef er over? Juist: 6.`]}}}}];
 /* Antwoord van de speler vergelijken. */
-function raadCheck(q,inp){inp=String(inp||"").trim();if(!inp)return null;
+function raadCheck(q,inp){inp=String(inp??"").trim();if(!inp)return null;
  if(q.soort==="keuze")return inp===q.ans;
- if(q.soort==="code")return inp.replace(/\D/g,"")===q.ans;
- if(q.soort==="tijd"){const m=inp.replace(/[.\s]/g,":").match(/^(\d{1,2}):?(\d{2})$/);if(!m)return false;return tijd(+m[1]*60+ +m[2])===q.ans}
- let s=inp.replace(/\s|€/g,"");if(s.includes(","))s=s.replace(/\./g,"").replace(",",".");else if(/\.\d{3}$/.test(s))s=s.replace(/\./g,"");
- const v=parseFloat(s);return Number.isFinite(v)&&Math.abs(v-q.ans)<(q.tol||1e-6)+1e-9}
+ /* undefined betekent een ongeldige schrijfwijze, geen inhoudelijk fout antwoord. */
+ if(q.soort==="code")return /^\d+$/.test(inp)?inp===q.ans:undefined;
+ if(q.soort==="tijd"){const m=inp.match(/^(\d{1,2})(?:[:.]|\s+)?(\d{2})$/);if(!m||+m[1]>23||+m[2]>59)return undefined;return tijd(+m[1]*60+ +m[2])===q.ans}
+ let s=inp.replace(/\u2212/g,"-").replace(/[\u00a0\u202f]/g," ");
+ if(s.startsWith("€"))s=s.slice(1).trim();else if(s.endsWith("€"))s=s.slice(0,-1).trim();
+ /* Nederlandse duizendtallen en decimale komma; een decimale punt mag ook.
+    Een punt met precies drie cijfers erachter blijft een duizendtalscheiding. */
+ if(/^[+-]?(?:\d{1,3}(?:[.]\d{3})+|\d{1,3}(?: \d{3})+)(?:,\d+)?$/.test(s))s=s.replace(/[. ]/g,"").replace(",",".");
+ else if(/^[+-]?(?:\d+(?:,\d+)?|,\d+)$/.test(s))s=s.replace(",",".");
+ else if(!/^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/.test(s))return undefined;
+ const v=Number(s);if(!Number.isFinite(v))return undefined;return Math.abs(v-q.ans)<(q.tol||1e-6)+1e-9}
 function raadMaak(t,seed){const q=t.gen(RR(seed));q.soort=q.soort||"getal";q.id=t.id;q.naam=q.naam||t.naam;return q}
 /* ===== Extra soorten, geïnspireerd op de lievelingsraadsels van Aart (eigen tekst en getallen) ===== */
 const lijstNL=a=>a.length>1?a.slice(0,-1).join(", ")+" en "+a[a.length-1]:a[0];
@@ -869,7 +876,11 @@ function fastPenUI(){
 fastPenUI();
 const hashS=s=>{let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
 const vandaag=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
-function kaart(q,onDone){const c=document.createElement("div");c.className="card";const st={mist:0,hints:0,done:false};
+function raadRead(k,fallback){try{return JSON.parse(localStorage.getItem(k)||"null")||fallback}catch(e){return fallback}}
+function raadRememberFree(q){try{localStorage.setItem("pdraad-last-free",JSON.stringify({q,key:losKey}))}catch(e){}}
+function kaart(q,onDone){const c=document.createElement("div");c.className="card";const st={mist:0,hints:0,done:false},saveKey=q.id+"|"+hashS(q.tekst+"|"+q.ans),saved=raadRead("pdraad-progress",{})[saveKey];let revealed=false;const saveInfo=document.createElement("p");saveInfo.className="mut sm";saveInfo.setAttribute("role","status");saveInfo.textContent="Dit rekenraadsel wordt alleen op dit apparaat bewaard.";
+ function save(){const all=raadRead("pdraad-progress",{});all[saveKey]={value:q.soort==="keuze"?keuze:inp&&inp.value,mist:st.mist,hints:st.hints,done:st.done,revealed,at:Date.now()};const keys=Object.keys(all).sort((a,b)=>(all[b].at||0)-(all[a].at||0));keys.slice(40).forEach(k=>delete all[k]);try{localStorage.setItem("pdraad-progress",JSON.stringify(all));saveInfo.textContent="Op dit apparaat bewaard."}catch(e){saveInfo.textContent="Bewaren op dit apparaat lukt niet. Houd deze pagina open."}}
+
  const top=document.createElement("div");top.className="top";top.innerHTML=`${q.kop?`<span class="lv">${q.kop}</span>`:""}<span class="soort">${q.naam}</span><span class="badges"></span>`;c.append(top);
  if(q.intro){const pi=document.createElement("p");pi.className="zes";pi.textContent=q.intro;c.append(pi)}
  if(q.svg){const sv=document.createElement("div");sv.className="svgw";sv.innerHTML=q.svg;c.append(sv)}
@@ -883,7 +894,7 @@ function kaart(q,onDone){const c=document.createElement("div");c.className="card
  let inp=null,keuze=null;const ans=document.createElement("div");
  if(q.soort==="keuze"){ans.className="opts";q.keuzes.forEach(k=>{const b=document.createElement("button");b.className="opt";b.textContent=k;b.onclick=()=>{if(st.done)return;keuze=k;ans.querySelectorAll(".opt").forEach(o=>o.classList.toggle("sel",o===b));controleer()};ans.append(b)})}
  else{ans.className="ans";inp=document.createElement("input");inp.id="in-"+q.id+"-"+Math.random().toString(36).slice(2,7);inp.autocomplete="off";inp.inputMode=q.soort==="tijd"?"numeric":"decimal";inp.placeholder=q.soort==="tijd"?"uu:mm":"antwoord";inp.setAttribute("aria-label","Antwoord");
-  inp.onkeydown=e=>{if(e.key==="Enter")controleer()};ans.append(inp);if(q.eenheid){const u=document.createElement("span");u.className="unit";u.textContent=q.eenheid;ans.append(u)}}
+  inp.onkeydown=e=>{if(e.key==="Enter")controleer()};inp.oninput=save;ans.append(inp);if(q.eenheid){const u=document.createElement("span");u.className="unit";u.textContent=q.eenheid;ans.append(u)}}
  c.append(ans);
  const bar=document.createElement("div");bar.className="bar";
  const bc=document.createElement("button");bc.className="btn p";bc.textContent="Controleer";bc.onclick=()=>controleer();if(q.soort!=="keuze")bar.append(bc);
@@ -892,13 +903,15 @@ function kaart(q,onDone){const c=document.createElement("div");c.className="card
  c.append(bar,fb,hl);const uw=document.createElement("div");uw.className="uitw";uw.hidden=true;uw.innerHTML="<b>Uitwerking</b>";const ol=document.createElement("ol");q.uitwerking.forEach(x=>{const li=document.createElement("li");li.textContent=x;ol.append(li)});uw.append(ol);c.append(uw);
  const badges=()=>{top.querySelector(".badges").textContent=st.done?[st.mist===0?"🎯":"",st.hints===0?"💡":""].filter(Boolean).join(" ")||"✓":""};
  function controleer(){if(st.done)return;const val=q.soort==="keuze"?keuze:inp.value;const r=raadCheck(q,val);if(r===null){fb.className="fb";fb.textContent="Vul eerst een antwoord in.";return}
+  if(r===undefined){fb.className="fb";fb.textContent=q.soort==="tijd"?"Schrijf een geldige tijd als uu:mm, bijvoorbeeld 13:45.":q.soort==="code"?"Vul alleen de cijfers van de code in, ook de nullen aan het begin.":"Vul alleen het eindantwoord in, bijvoorbeeld 12 of 12,5. De eenheid hoef je niet in te vullen.";return}
   if(r){st.done=true;c.classList.add("ok");fb.className="fb ok";fb.textContent="Goed! "+(st.mist===0&&st.hints===0?"In één keer en zonder hint. 🎯💡":st.mist===0?"In één keer goed. 🎯":"")+(String(q.ans)==="6"?" Natuurlijk. Altijd 6. 😌":"");if(inp)inp.disabled=true;bc.disabled=true;bh.disabled=true;bu.hidden=false;bu.textContent="Bekijk de uitwerking";
    if(q.soort==="keuze")ans.querySelectorAll(".opt").forEach(o=>{if(o.textContent===q.ans)o.classList.add("goed")});badges();onDone&&onDone(st)}
-  else{st.mist++;fb.className="fb bad";fb.textContent=q.soort==="tijd"&&!/^\s*\d{1,2}[:.]?\d{2}\s*$/.test(val)?"Schrijf de tijd als uu:mm, bijvoorbeeld 13:45.":"Nog niet goed. Probeer het nog eens"+(st.hints<2?", of neem een hint.":".");
-   if(q.soort==="keuze")ans.querySelectorAll(".opt.sel").forEach(o=>{o.classList.add("fout");o.classList.remove("sel")});c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake")}}
+  else{st.mist++;fb.className="fb bad";fb.textContent="Nog niet goed. Probeer het nog eens"+(st.hints<2?", of neem een hint.":".");
+   if(q.soort==="keuze")ans.querySelectorAll(".opt.sel").forEach(o=>{o.classList.add("fout");o.classList.remove("sel")});c.classList.remove("shake");void c.offsetWidth;c.classList.add("shake")}save()}
  function hint(){if(st.done)return;if(st.hints<q.hints.length){const li=document.createElement("li");li.innerHTML=`<b>Hint ${st.hints+1}.</b> `;li.append(document.createTextNode(q.hints[st.hints]));hl.append(li);st.hints++}
-  if(st.hints>=q.hints.length){bh.disabled=true;bu.hidden=false}}
- function uitwerking(geef){uw.hidden=false;bu.hidden=true;if(geef&&!st.done){st.done=true;st.mist=Math.max(st.mist,1);st.hints++;fb.className="fb";fb.textContent=`Het antwoord is ${q.soort==="getal"?String(q.ans).replace(".",",")+(q.eenheid?" "+q.eenheid:""):q.ans}.`;if(inp)inp.disabled=true;bc.disabled=true;bh.disabled=true;badges();onDone&&onDone(st)}}
+  if(st.hints>=q.hints.length){bh.disabled=true;bu.hidden=false}save()}
+ function uitwerking(geef){if(geef)revealed=true;uw.hidden=false;bu.hidden=true;if(geef&&!st.done){st.done=true;st.mist=Math.max(st.mist,1);st.hints++;fb.className="fb";fb.textContent=`Het antwoord is ${q.soort==="getal"?String(q.ans).replace(".",",")+(q.eenheid?" "+q.eenheid:""):q.ans}.`;if(inp)inp.disabled=true;bc.disabled=true;bh.disabled=true;badges();onDone&&onDone(st)}save()}
+ c.append(saveInfo);if(saved){st.mist=Math.max(0,+saved.mist||0);if(inp)inp.value=String(saved.value??"");else keuze=saved.value;const hints=Math.min(q.hints.length,Math.max(0,+saved.hints||0));for(let n=0;n<hints;n++)hint();if(saved.revealed)uitwerking(true);else if(saved.done)controleer()}
  return c}
 let setSeed=vandaag();
 /* Eén 3F-raadsel per dag. Alleen de sterke soorten doen mee. Niet dezelfde soort binnen 10 dagen, en niet twee dagen achter elkaar uit dezelfde familie. */
@@ -921,7 +934,7 @@ function dagRaadsel(ds){if(isZesDag(ds))return zesRaadsel(ds);const r=dagReeks(d
 function toonSet(){const box=$("#set");box.innerHTML="";const echt=setSeed===vandaag();let q;
  if(echt){q=dagRaadsel(setSeed);q.kop=q.kop||"Rekenraadsel van vandaag";}else{const R=RR(hashS(setSeed));q=raadMaak(DAGPOOL[Math.floor(R()*DAGPOOL.length)],hashS(setSeed+"q"));q.kop="Nog een raadsel"}
  const dt=new Date().toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"});$("#setnaam").textContent=echt?dt[0].toUpperCase()+dt.slice(1):"Vrij raadsel";box.append(kaart(q));Klad.open("dag|"+setSeed)}
-$("#nieuw").onclick=()=>{const box=$("#los");box.innerHTML="";document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));const sd=Math.floor(Math.random()*1e9);losKey="los|w"+sd;const q=raadMaak(DAGPOOL[Math.floor(Math.random()*DAGPOOL.length)],sd);q.kop="Willekeurig";box.append(kaart(q));Klad.open(losKey)};
+$("#nieuw").onclick=()=>{const box=$("#los");box.innerHTML="";document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));const sd=Math.floor(Math.random()*1e9);losKey="los|w"+sd;const q=raadMaak(DAGPOOL[Math.floor(Math.random()*DAGPOOL.length)],sd);q.kop="Willekeurig";raadRememberFree(q);box.append(kaart(q));Klad.open(losKey)};
 let losKey="los";const tab=w=>{$("#tDag").classList.toggle("on",w==="d");$("#tSoort").classList.toggle("on",w==="s");$("#vDag").hidden=w!=="d";$("#vSoort").hidden=w!=="s";Klad.open(w==="d"?"dag|"+setSeed:losKey)};
 $("#tDag").onclick=()=>tab("d");$("#tSoort").onclick=()=>tab("s");
 /* Soorten per groep, nieuwe soorten met een labeltje. */
@@ -929,7 +942,7 @@ $("#tDag").onclick=()=>tab("d");$("#tSoort").onclick=()=>tab("s");
  const alle=[...RAAD.map(t=>Object.assign({},t,{g:FAM[t.id]||(t.lvl==="2F"?"licht":"extra")})),...ZES.map(z=>Object.assign({},z,{zes:1,g:"zes"}))];
  GR.forEach(([g,kop])=>{const L=alle.filter(t=>t.g===g).sort((a,b)=>a.naam.localeCompare(b.naam));if(!L.length)return;const h=document.createElement("div");h.className="chiph";h.textContent=kop;$("#chips").append(h);
   L.forEach(t=>{const b=document.createElement("button");b.className="chip";b.textContent=t.naam;if(t.vanaf||t.lvl||(t.zes&&ZES.indexOf(ZES.find(z=>z.id===t.id))>=3)){const sm=document.createElement("small");sm.textContent="nieuw";b.append(sm)}
-   b.onclick=()=>{document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));const box=$("#los");box.innerHTML="";const sd=Math.floor(Math.random()*1e9);losKey="los|"+t.id+sd;const q=t.zes?Object.assign(raadMaak(ZES.find(z=>z.id===t.id),sd),{kop:"⭐ Altijd 6",intro:"Het antwoord van de som is 6. Wat hoort er dan op de lege plek?"}):raadMaak(RAAD.find(x=>x.id===t.id),sd);if(!t.zes)q.kop=FAM[t.id]?"":"extra";box.append(kaart(q));Klad.open(losKey);try{box.scrollIntoView({behavior:"smooth",block:"start"})}catch(e){}};$("#chips").append(b)})})}
+   b.onclick=()=>{document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x===b));const box=$("#los");box.innerHTML="";const sd=Math.floor(Math.random()*1e9);losKey="los|"+t.id+sd;const q=t.zes?Object.assign(raadMaak(ZES.find(z=>z.id===t.id),sd),{kop:"⭐ Altijd 6",intro:"Het antwoord van de som is 6. Wat hoort er dan op de lege plek?"}):raadMaak(RAAD.find(x=>x.id===t.id),sd);if(!t.zes)q.kop=FAM[t.id]?"":"extra";raadRememberFree(q);box.append(kaart(q));Klad.open(losKey);try{box.scrollIntoView({behavior:"smooth",block:"start"})}catch(e){}};$("#chips").append(b)})})}
 /* ---- Kladpapier: tekenen met Pencil of vinger, gummen, per raadsel bewaard ---- */
 const Klad=(()=>{const cv=$("#kcv"),pap=$("#papier"),ctx=cv.getContext("2d");let key="",pages=[[]],pi=0,strokes=pages[0],cur=null,tool="pen",col="ink",penSeen=false,W=0,H=0;const all={};
  const css=n=>getComputedStyle(document.documentElement).getPropertyValue("--"+n).trim()||"#000";
@@ -1010,6 +1023,7 @@ const Reken=(()=>{const K=[["C","fn"],["(","fn"],[")","fn"],["÷","op"],["7"],["
  $("#kCalc").onclick=()=>zet(box.hidden);let aan=false;try{aan=localStorage.getItem("calcAan")==="1"}catch(e){}zet(aan);toon();
  return{reken}})();
 toonSet();
+{const last=raadRead("pdraad-last-free",null);if(last&&last.q&&typeof last.q.id==="string"&&Array.isArray(last.q.hints)&&Array.isArray(last.q.uitwerking)){losKey=String(last.key||"los");$("#los").append(kaart(last.q))}}
 
 document.addEventListener("dblclick",e=>e.preventDefault(),{capture:true});
 </script></body></html>
