@@ -170,14 +170,25 @@ function rGrid(){const{type,p}=S,N=type==="bin"||type==="nono"?p.W:p.N,M=type===
   const d=document.createElement("div"),v=S.cur[i];d.className="c";
   if(type==="bin"){if(p.giv[i]>=0)d.classList.add("g");binSym(d,v)}
   else if(type==="star"){d.textContent=sym(disp(i));d.style.background=`hsl(${HUES[S.pal[p.reg[i]]]},${dark?"30%,40%":"48%,86%"})`;
-   const r=i/N|0,c=i%N,t=(rr,cc)=>rr<0||cc<0||rr>=N||cc>=N||p.reg[rr*N+cc]!==p.reg[i]?"2.5px solid var(--fg)":"1px solid var(--line)";
-   d.style.borderTop=t(r-1,c);d.style.borderBottom=t(r+1,c);d.style.borderLeft=t(r,c-1);d.style.borderRight=t(r,c+1);
+   d.style.border="0";
    if(S.hint){if(S.hint.cells.includes(i))d.classList.add("ht");else if(S.hint.why.includes(i))d.classList.add("hr");if(S.hint.ghost&&S.hint.ghost.includes(i)&&!disp(i)){d.classList.add("gx");d.textContent="✕"}}}
   else{if(nono&&p.color){if(v>0)d.classList.add("nc"+v);d.textContent=v===-1?"✕":""}else{if(v===1)d.classList.add("f");d.textContent=v===2?"✕":""}d.style.color="var(--mut)";if(nono&&S.hint){if(S.hint.cells.includes(i))d.classList.add("ht");else if(S.hint.why.includes(i))d.classList.add("hr")}}
   if(type==="star"||type==="bin"||nono){d.dataset.i=i;S.cells[i]=d}else d.onclick=()=>tap(i);g.append(d)}
  if(nono){for(let k=0;k<Math.max(N,M);k++)nonoClue(Math.min(k,M-1)*N+Math.min(k,N-1))}
- if(type==="star")paintAll();
+ if(type==="star"){drawStarLines(g,p,CS);paintAll()}
  if(type==="bin"){const cr=document.createElement("div");cr.className="corner";cr.innerHTML=`<b>${p.W/2}</b><i>${p.H/2}</i>`;g.append(cr);for(let c=0;c<N;c++){const k=mkCnt();S.colc[c]=k;g.append(k)}paintBin()}}
+
+/* Eén lijn per gedeelde rand; de buitenrand volgt de bestaande ronde hoeken. */
+function drawStarLines(g,p,cs){const N=p.N,size=N*cs,ns="http://www.w3.org/2000/svg",svg=document.createElementNS(ns,"svg");
+ svg.classList.add("star-lines");svg.setAttribute("viewBox",`0 0 ${size} ${size}`);svg.setAttribute("aria-hidden","true");
+ let thin="",regions="";
+ for(let k=1;k<N;k++){const x=k*cs;thin+=`M${x} 0V${size}M0 ${x}H${size}`;
+  for(let j=0;j<N;j++){const a=j*cs,b=(j+1)*cs;
+   if(p.reg[j*N+k-1]!==p.reg[j*N+k])regions+=`M${x} ${a}V${b}`;
+   if(p.reg[(k-1)*N+j]!==p.reg[k*N+j])regions+=`M${a} ${x}H${b}`}}
+ const path=(d,color,width)=>{const el=document.createElementNS(ns,"path");el.setAttribute("d",d);el.setAttribute("fill","none");el.setAttribute("stroke",color);el.setAttribute("stroke-width",width);el.setAttribute("stroke-linecap","square");svg.append(el)};
+ path(thin,"var(--line)",2);path(regions,"var(--fg)",4);
+ const frame=document.createElementNS(ns,"rect");for(const[k,v]of Object.entries({x:2,y:2,width:size-4,height:size-4,rx:12,fill:"none",stroke:"var(--fg)","stroke-width":4}))frame.setAttribute(k,v);svg.append(frame);g.append(svg)}
 
 /* ---- Binair: slepen over rijen/kolommen = controleren op gelijke lijnen (vult niets in) ---- */
 const SX='<svg viewBox="0 0 24 24"><path d="M5.5 5.5L18.5 18.5M18.5 5.5L5.5 18.5" stroke="var(--fg)" stroke-width="1.7" stroke-linecap="round" fill="none"/></svg>',SO='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.3" stroke="var(--one)" stroke-width="2" fill="none"/></svg>';
@@ -209,8 +220,8 @@ function binCell(x,y){const g=G2;if(!g)return -1;const c=Math.floor((x-g.x)/g.cs
 let penAct=null;addEventListener("pointerdown",e=>{if(e.pointerType==="pen")penAct={id:e.pointerId,t:performance.now()};else if(penAct&&performance.now()-penAct.t<4000&&e.target.closest&&e.target.closest("#grid,#hexsvg,#mgrid")){e.stopPropagation();e.preventDefault()}},true);
 const penUp=e=>{if(e.pointerType==="pen"&&penAct&&penAct.id===e.pointerId)penAct=null};addEventListener("pointerup",penUp,true);addEventListener("pointercancel",penUp,true);
 /* Gedeelde vakjes-geometrie: rekent met offsetLeft/offsetTop, dus een vakje dat net 'popt' (vergroot) verschuift de raakzone niet. */
-function gridGeo(W){const g=$("#grid"),gr=g.getBoundingClientRect(),a=S.cells[0],b=S.cells[1]||a,d=S.cells[W]||a;
- return{x:gr.left+a.offsetLeft-g.offsetLeft,y:gr.top+a.offsetTop-g.offsetTop,pw:(b.offsetLeft-a.offsetLeft)||a.offsetWidth,ph:(d.offsetTop-a.offsetTop)||a.offsetHeight}}
+function gridGeo(W){const g=$("#grid"),gr=g.getBoundingClientRect(),a=S.cells[0],b=S.cells[1]||a,d=S.cells[W]||a,relative=a.offsetParent===g;
+ return{x:gr.left+a.offsetLeft-(relative?0:g.offsetLeft),y:gr.top+a.offsetTop-(relative?0:g.offsetTop),pw:(b.offsetLeft-a.offsetLeft)||a.offsetWidth,ph:(d.offsetTop-a.offsetTop)||a.offsetHeight}}
 function gridHit(G,x,y,W,H){if(!G)return -1;const c=Math.floor((x-G.x)/G.pw),r=Math.floor((y-G.y)/G.ph);return c<0||r<0||c>=W||r>=H?-1:r*W+c}
 /* Binair: dubbelklik/dubbeltik is één logische zet. Ongedaan verwijdert dus ○ in één stap, ook bij potloodnotities. */
 function binDown(e){const mb=mouseLR(e);if(S.done||S.type!=="bin"||e._closed||mb==="")return;if(drag2&&drag2.pid!==e.pointerId)binEnd();
@@ -634,7 +645,7 @@ function rHex(){if(!S.p||S.type!=="hex"||!S.hx)return;{const hs=$("#hexstat");if
  let tx="";const zcnt=new Map();Object.keys(cs).forEach(k=>{if(cs[k]===1&&k[0]==="z"){const zc=P.zone[+k.slice(1)];if(zc){zc.pos.forEach(j=>zcnt.set(j,(zcnt.get(j)||0)+1));zcnt.set(+k.slice(1),(zcnt.get(+k.slice(1))||0)+1)}}});
  P.cells.forEach((c,i)=>{const[x,y]=px(c.q,c.r),rv=S.hx.rev.has(i),bl=P.sol[i]===1,ts=zcnt.has(i)?` stroke="rgba(15,25,45,${zcnt.get(i)>1?.6:.42})" stroke-width="${(sz*.075).toFixed(1)}" paint-order="stroke" stroke-linejoin="round"`:"";
   let fill=rv?(bl?K.blu:K.blk):K.hid;if(S.flash===i)fill="#e5484d";
-  let stroke=K.bd,sw=2.2,dash="";const target=H&&H.cells.includes(i);if(target){stroke=D?"#b9d9df":"#315b65";sw=3}else if(H&&H.why.includes(i)){stroke=D?"#e2d4b5":"#685637";sw=2.5;dash=' stroke-dasharray="3 3"'}
+  let stroke=K.bd,sw=2.2,dash="";const target=H&&H.cells.includes(i);if(target){stroke="var(--hint-target)";sw=3}else if(H&&H.why.includes(i)){stroke="var(--hint-look)";sw=2.5;dash=' stroke-dasharray="3 3"'}
   s+=`<g data-i="${i}" class="${S.popH===i?"pop":S.flash===i?"shake":""}" style="cursor:${rv?"default":"pointer"}"><polygon points="${hp(x,y,sz*1.0)}" fill="transparent" stroke="none"/><polygon pointer-events="none" points="${hp(x,y,sz*.93)}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"${dash} stroke-linejoin="miter"/>${target?`<polygon pointer-events="none" points="${hp(x,y,sz*.80)}" fill="none" stroke="${stroke}" stroke-width="1.5"/>`:""}`;
   if(rv&&bl&&hexZn(P,i))tx+=`<text x="${x}" y="${y+sz*.26}" text-anchor="middle" font-size="${sz*.78}" font-weight="700" fill="#fff" fill-opacity="${cs["z"+i]===2?.4:1}"${ts} pointer-events="none">${P.zone[i].cnt}</text>`;
   if(rv&&!bl)tx+=`<text x="${x}" y="${y+sz*.26}" text-anchor="middle" font-size="${sz*.78}" font-weight="700" fill="#fff"${ts} pointer-events="none">${hexQ(P,i)?"?":clueTxt(P.ring[i])}</text>`;
@@ -657,7 +668,7 @@ function rHex(){if(!S.p||S.type!=="hex"||!S.hx)return;{const hs=$("#hexstat");if
  if(zp)zv+=`<path d="${zp}" stroke="rgba(20,30,50,${D?.5:.28})" stroke-width="${(sz*.17).toFixed(1)}" stroke-linecap="round" fill="none" pointer-events="none"/><path d="${zp}" stroke="#fff" stroke-width="${(sz*.08).toFixed(1)}" stroke-linecap="round" fill="none" pointer-events="none"/>`;
  s+=`<g class="ovl">${zv}${ov}</g><g class="txl">${tx}</g>`;
  window._tp=[];P.lineShow.forEach(j=>{const l=P.lines[j],[x,y]=px(l.vq,l.vr),ang0=l.d===0?-90:l.d===1?30:-30,ang=TR?90-ang0:ang0,fwd=l.d!==1,sg=fwd?1:-1,rad=ang*Math.PI/180,ux=Math.cos(rad)*sg,uy=Math.sin(rad)*sg,a0=sz*.1*sg,a1=sz*.7*sg,hd=sz*.17;const tp=LP[j];window._tp.push(tp);
-  s+=`<g data-l="${j}" style="cursor:pointer">${H&&H.hexLines&&H.hexLines.includes(j)?`<ellipse class="hint-line" cx="${tp[0].toFixed(1)}" cy="${tp[1].toFixed(1)}" rx="${sz*.75}" ry="${sz*.5}" fill="none" stroke="${D?"#e2d4b5":"#685637"}" stroke-width="2" stroke-dasharray="3 3" pointer-events="none"/>`:""}<circle cx="${tp[0].toFixed(1)}" cy="${tp[1].toFixed(1)}" r="${sz*.6}" fill="transparent"/><text x="${tp[0].toFixed(1)}" y="${(tp[1]+sz*.22).toFixed(1)}" text-anchor="middle" font-size="${sz*.6}" font-weight="700" fill-opacity="${cs["l"+j]===2?.35:1}" style="fill:${K.lab}">${clueTxt(l.clue)}</text>${(()=>{const sh=shared(j),b0=sh?.5:.4,sx=tp[0]+ux*sz*b0,sy=tp[1]+uy*sz*b0,ex=x+ux*sz*.85,ey=y+uy*sz*.85,h=sz*.17,px2=-uy,py2=ux;return`<path d="M${sx.toFixed(1)} ${sy.toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} M${(ex-ux*h+px2*h).toFixed(1)} ${(ey-uy*h+py2*h).toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${(ex-ux*h-px2*h).toFixed(1)} ${(ey-uy*h-py2*h).toFixed(1)}" style="stroke:${K.arr};fill:none" stroke-width="2.5" stroke-opacity="${cs["l"+j]===2?.35:1}" stroke-linecap="round" stroke-linejoin="round"/>`})()}</g>`});
+  s+=`<g data-l="${j}" style="cursor:pointer">${H&&H.hexLines&&H.hexLines.includes(j)?`<ellipse class="hint-line" cx="${tp[0].toFixed(1)}" cy="${tp[1].toFixed(1)}" rx="${sz*.75}" ry="${sz*.5}" fill="none" stroke="var(--hint-look)" stroke-width="2" stroke-dasharray="3 3" pointer-events="none"/>`:""}<circle cx="${tp[0].toFixed(1)}" cy="${tp[1].toFixed(1)}" r="${sz*.6}" fill="transparent"/><text x="${tp[0].toFixed(1)}" y="${(tp[1]+sz*.22).toFixed(1)}" text-anchor="middle" font-size="${sz*.6}" font-weight="700" fill-opacity="${cs["l"+j]===2?.35:1}" style="fill:${K.lab}">${clueTxt(l.clue)}</text>${(()=>{const sh=shared(j),b0=sh?.5:.4,sx=tp[0]+ux*sz*b0,sy=tp[1]+uy*sz*b0,ex=x+ux*sz*.85,ey=y+uy*sz*.85,h=sz*.17,px2=-uy,py2=ux;return`<path d="M${sx.toFixed(1)} ${sy.toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} M${(ex-ux*h+px2*h).toFixed(1)} ${(ey-uy*h+py2*h).toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${(ex-ux*h-px2*h).toFixed(1)} ${(ey-uy*h-py2*h).toFixed(1)}" style="stroke:${K.arr};fill:none" stroke-width="2.5" stroke-opacity="${cs["l"+j]===2?.35:1}" stroke-linecap="round" stroke-linejoin="round"/>`})()}</g>`});
  const ph=S.popH;S.popH=-1;const tp2=document.createElement("template");tp2.innerHTML=s+`<rect class="hit" x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" fill="transparent"/></svg>`;const nw=tp2.content.firstElementChild,old=w.firstElementChild;
  if(old&&old.nodeName===nw.nodeName)hexSync(old,nw);else{w.textContent="";w.append(nw)}
  const oldSh=w.querySelector(".shards");if(oldSh)oldSh.remove();
@@ -1015,13 +1026,13 @@ function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const 
  const ms=MURMS|| (PHONE?Math.max(HINTPAD?20:30,Math.min(Math.floor((sw-8)/N),Math.floor(HINTPAD?(availH-14)/N:availH*.55/N))):Math.max(40,Math.min(100,wide?Math.min(Math.floor((availBot()+14-top-(NIEUW?165:150))/N)-MURFIX,Math.floor((sw-330)/N)):Math.floor((sw-8)/N))));MURMS=ms;
  const main=document.createElement("div");main.id="mmain";const g=document.createElement("div");g.id="mgrid";g.style.gridTemplateColumns=`repeat(${N},${ms}px)`;g.style.setProperty("--ms",ms+"px");
  const first=[];{/* Naam van de ruimte op een plek waar hij past: het eerste vakje met genoeg ruimte naar rechts (anders het breedste stuk). */
-  const fs=Math.max(8,ms*.14),runOf=i=>{let n=1;while(i%N+n<N&&p.reg[i+n]===p.reg[i])n++;return n},best=[];
+  const fs=Math.max(10,ms*.16),runOf=i=>{let n=1;while(i%N+n<N&&p.reg[i+n]===p.reg[i])n++;return n},best=[];
   p.reg.forEach((k,i)=>{const need=Math.ceil((p.rooms[k].length*fs*.75+10)/ms),run=runOf(i),sc=Math.min(run,need);if(best[k]===undefined||sc>best[k]){best[k]=sc;first[k]=i}})}
  const thick="2.5px solid var(--fg)",thin="1px solid color-mix(in srgb,var(--fg) 16%,transparent)",edge=(i,j)=>p.reg[j]!==p.reg[i]?thick:thin;
  for(let i=0;i<N*N;i++){const k=p.reg[i],r=i/N|0,c=i%N,d=document.createElement("div");d.className="mc";d.dataset.i=i;
   d.style.background=`hsl(${HUES[k]},${dark?"30%,30%":"50%,87%"})`;
   d.style.borderTop=r===0?thick:edge(i,i-N);d.style.borderBottom=r===N-1?thick:edge(i,i+N);d.style.borderLeft=c===0?thick:edge(i,i-1);d.style.borderRight=c===N-1?thick:edge(i,i+1);
-  if(first[k]===i){const l=document.createElement("span");l.className="rl";l.textContent=p.rooms[k];let run=1;while(c+run<N&&p.reg[i+run]===k)run++;l.style.maxWidth=(run*ms-8)+"px";l.style.overflow="hidden";d.append(l)}
+  if(first[k]===i){const l=document.createElement("span");l.className="rl";l.textContent=p.rooms[k];l.title=p.rooms[k];let run=1;while(c+run<N&&p.reg[i+run]===k)run++;l.style.maxWidth=(run*ms-8)+"px";l.style.overflow="hidden";d.append(l)}
   const t=p.obj[i];if(t){const e=document.createElement("span");e.className="ob"+(MOBJ[t].seat?" seat":" blk");e.textContent=MOBJ[t].e;e.title=MOBJ[t].n;d.append(e);if(!MOBJ[t].seat)d.classList.add("blk")}
   const x=document.createElement("span");x.className="mx";x.textContent="×";d.append(x);
   const sl=document.createElement("span");sl.className="slot";d.append(sl);S.mcells[i]=d;g.append(d)}
@@ -1510,7 +1521,9 @@ function seasonNow(d){d=d||new Date();const m=d.getMonth()+1,day=d.getDate(),md=
 function setHomeSkin(style){const x=typeof style==="string"?cleanStyle({theme:style},style==="aart"?"aart":style==="peter"?"peter":"shared",style==="aart"?"orange":"blue"):cleanStyle(style);document.body.classList.remove(...STYLE_THEMES.map(t=>"skin-"+t));document.body.classList.add("skin-"+x.theme);document.body.classList.remove("season-autumn","season-sint","season-xmas","season-winter","season-spring","season-summer");if(x.theme==="season")document.body.classList.add("season-"+seasonNow());document.body.style.setProperty("--home-accent",STYLE_ACCENTS[x.accent]);document.body.style.setProperty("--pc",STYLE_ACCENTS[x.accent])}
 function clearHomeSkinAccent(){document.body.style.removeProperty("--home-accent");document.body.style.removeProperty("--pc")}
 function applyCurrentHomeStyle(){if(!document.body.classList.contains("home"))return;if(HVIEW==="score")setHomeSkin(SCOREWHO==="all"?GROUP_STYLE:styleForPlayer(SCOREWHO));else setHomeSkin(PROFILE_STYLE)}
-addEventListener("pdpreviewstyle",e=>{const d=e.detail||{};if(document.body.classList.contains("home"))setHomeSkin(cleanStyle(d,d.kind==="group"?"shared":PROFILE_STYLE.theme,d.kind==="group"?"orange":PROFILE_STYLE.accent))});
+function updateStylePreview(style,kind){const box=$(kind==="group"?"#groupstylepreview":"#profstylepreview");if(!box)return;const x=cleanStyle(style,"shared",kind==="group"?"orange":"blue");
+ box.className="stylepreview skin-"+x.theme+(x.theme==="season"?" season-"+seasonNow():"");box.style.setProperty("--home-accent",STYLE_ACCENTS[x.accent])}
+addEventListener("pdpreviewstyle",e=>{const d=e.detail||{};updateStylePreview(d,d.kind);if(document.body.classList.contains("home"))setHomeSkin(cleanStyle(d,d.kind==="group"?"shared":PROFILE_STYLE.theme,d.kind==="group"?"orange":PROFILE_STYLE.accent))});
 addEventListener("pdrestorestyle",applyCurrentHomeStyle);
 function pageIn(el){if(!el||matchMedia("(prefers-reduced-motion: reduce)").matches)return;el.classList.remove("pagein");void el.offsetWidth;el.classList.add("pagein");setTimeout(()=>el.classList.remove("pagein"),260)}
 function fitHomePage(){document.documentElement.classList.remove("pagefit");document.body.classList.remove("pagefit");requestAnimationFrame(()=>{if(!document.body.classList.contains("home")||HVIEW==="score"||innerWidth<761)return;const h=$("#home");if(h&&h.scrollHeight<=innerHeight+2){document.documentElement.classList.add("pagefit");document.body.classList.add("pagefit")}})}
