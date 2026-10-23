@@ -1128,6 +1128,9 @@ html.tap body.hintside #stage{touch-action:pan-x pan-y}
 #groupownerbox>.stylebox,#groupownerbox>.murcastbox{margin-top:20px}
 .groupinvite>div{flex-wrap:wrap;gap:12px}.groupinvite code{min-width:0;overflow-wrap:anywhere}
 .murcastactions{gap:12px}.murcastactions button,.groupswitch button{min-height:44px}
+#murdokunames[readonly]{pointer-events:none;resize:none}
+#murdokuedit{margin-bottom:10px}
+.authcard{touch-action:pan-y}
 .mc .rl{font-size:max(10px,calc(var(--ms)*.16));font-weight:700;opacity:.9;background:color-mix(in srgb,var(--card) 92%,transparent);text-transform:none;letter-spacing:0;line-height:1.2}
 
 /* Meer lucht in de Home-kop, zonder de puzzellijsten uit te rekken. */

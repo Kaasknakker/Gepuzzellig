@@ -28,6 +28,16 @@ function fastPenUI(){
  document.addEventListener("click",e=>{if(firing||!last||performance.now()-lastAt>520)return;const b=e.target.closest&&e.target.closest("button,a[href],summary,[role=button]");if(b===last){e.preventDefault();e.stopImmediatePropagation()}},true);
 }
 fastPenUI();
+/* De namenlijst is bij openen een leesvlak: een Pencil-veeg mag geen
+   handschriftinvoer starten. Bewerken wordt bewust met de knop aangezet. */
+function setMurdokuNameEditing(on,focus=false){
+ const field=document.getElementById("murdokunames"),button=document.getElementById("murdokuedit");if(!field||!button)return;
+ field.readOnly=!on;field.tabIndex=on?0:-1;
+ button.textContent=on?"Klaar met bewerken":"Namen bewerken";button.setAttribute("aria-expanded",String(on));
+ if(!on&&document.activeElement===field)field.blur();
+ if(on&&focus)field.focus();
+}
+{const button=document.getElementById("murdokuedit");if(button)button.onclick=()=>setMurdokuNameEditing(document.getElementById("murdokunames").readOnly,true)}
 const ALLTYPES={bin:"Binair",star:"Star Battle",nono:"Nonogram",kak:"Kakuro",hex:"Hexcells",plus:"Pluszle",mur:"Murdoku",m24:"Maak 24"};
 /* Welke puzzels in de app staan. Kakuro en Maak 24 zitten nog in de code en kunnen later weer worden aangezet. */
 const ACTIVE=["bin","star","nono","hex","plus","mur"];
@@ -804,7 +814,7 @@ $("#sbtn").onclick=()=>$("#side").classList.toggle("open");
 document.addEventListener("pointerdown",e=>{const sd=$("#side");if(sd.classList.contains("open")&&!e.target.closest("#side,#sbtn")){sd.classList.remove("open");e._closed=true}},true);
 /* Naast het veld tikken (vinger of Pencil) wisselt de stand. Alles wat zelf iets doet (knoppen, menu's, scorebord, hint) telt niet mee;
    de lege ruimte in de kolommen links en rechts wel. */
-const BGX="#topbar,#more,#home,#archp,#grid,#mgrid,#mclues,#mpal,#macc,#hexsvg,button,input,label,select,a,#side,header,nav,#pick,#hint,#fin,#hm,#cm,#npm,#pbot,#prow,#pmp,#time,#streak,#hexstat,#sbtn";
+const BGX="#topbar,#more,#home,#archp,#grid,#mgrid,#mclues,#mpal,#macc,#hexsvg,button,input,label,select,a,.authcover,.uxcover,#side,header,nav,#pick,#hint,#fin,#hm,#cm,#npm,#pbot,#prow,#pmp,#time,#streak,#hexstat,#sbtn";
 const twoMode=()=>["nono","plus","hex","mur"].includes(S.type)&&S.p&&!S.done;
 function pulseEl(el){if(!el)return;el.classList.remove("modeflash");void el.offsetWidth;el.classList.add("modeflash");setTimeout(()=>el.classList.remove("modeflash"),260)}
 function flashMode(){const el=S.type==="plus"?(plusMode==="x"?$("#pxb"):$("#pob")):S.type==="nono"?(nonoMode==="x"?$("#nx"):S.nv==="color"?$("#nc"+nonoColorMode):$("#nf")):S.type==="hex"?(hexMode==="b"?$("#mb"):$("#mz")):S.type==="mur"?$("#mgrid"):null;pulseEl(el)}

@@ -11,9 +11,9 @@
 <script>try{if(navigator.standalone===true||matchMedia("(display-mode: standalone)").matches)document.documentElement.dataset.standalone=""}catch(e){}</script>
 <script>try{var t=localStorage.getItem("pdtheme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;else document.documentElement.removeAttribute("data-theme")}catch(e){}</script>
 <title>Gepuzzellig</title>
-<link rel="stylesheet" href="css/app.css?v=108">
-<script src="js/config.js?v=108"></script>
-<link rel="stylesheet" href="css/ux.css?v=108">
+<link rel="stylesheet" href="css/app.css?v=109">
+<script src="js/config.js?v=109"></script>
+<link rel="stylesheet" href="css/ux.css?v=109">
 </head><body>
 <div id="iosPwaStatusStrip" aria-hidden="true"></div>
 <div id="bootveil" aria-hidden="true"><div class="bootinner"><i></i><i></i><i></i></div></div>
@@ -40,7 +40,7 @@
    <label>Groepsnaam<input id="groupnameedit" maxlength="40"></label>
    <button id="groupnamesave">Naam wijzigen</button>
    <div class="stylebox"><small>Groepsstijl</small><label>Achtergrond<select id="grouptheme"><option value="shared">Puzzellig</option><option value="peter">Treinen</option><option value="aart">Getallen</option><option value="stars">Sterren</option><option value="nature">Natuur</option><option value="retro">Retro</option><option value="animals">Dieren</option><option value="sea">Zee</option><option value="travel">Reizen</option><option value="music">Muziek</option><option value="party">Feest</option><option value="coffee">Koffie &amp; taart</option><option value="season">Seizoen (wisselt vanzelf)</option><option value="minimal">Rustig</option></select></label><div class="stylecolors" id="groupcolors"></div><input id="groupaccent" type="hidden"><div class="stylepreview skin-shared" id="groupstylepreview" aria-label="Voorbeeld van de groepsstijl"><small class="stylepreviewlabel">Voorbeeld</small><div class="stylepreviewcard"><span class="stylepreviewtitle">Groepsstijl</span><span class="stylepreviewaction">Groepsoverzicht →</span></div></div><div class="stylehint">Deze stijl verschijnt direct op het gezamenlijke groepsoverzicht. Wijzigingen worden meteen toegepast en opgeslagen.</div><p id="groupstylemsg" class="authmsg stylestatus" role="status" aria-live="polite"></p></div>
-   <div class="murcastbox"><small>🕵️ Murdoku-personages</small><p>Één naam per regel. Gebruik familie, vrienden of verzonnen namen. Extra namen worden automatisch neutraal aangevuld.</p><textarea id="murdokunames" rows="7" maxlength="500" spellcheck="false" placeholder="Sam&#10;Noor&#10;Finn&#10;Emma"></textarea><div class="murcastactions"><button id="murdokumembers" class="authsecondary">Gebruik groepsleden</button><button id="murdokusave">Cast opslaan</button></div><p id="murdokumsg" class="authmsg" role="status" aria-live="polite"></p></div>
+   <div class="murcastbox"><small>🕵️ Murdoku-personages</small><p id="murdokunameshelp">Kies ‘Namen bewerken’ om de namen aan te passen, één per regel. Gebruik familie, vrienden of verzonnen namen. Extra namen worden automatisch neutraal aangevuld.</p><button id="murdokuedit" class="authsecondary" aria-controls="murdokunames" aria-expanded="false">Namen bewerken</button><textarea id="murdokunames" rows="7" maxlength="500" spellcheck="false" readonly tabindex="-1" aria-label="Murdoku-personages" aria-describedby="murdokunameshelp" placeholder="Sam&#10;Noor&#10;Finn&#10;Emma"></textarea><div class="murcastactions"><button id="murdokumembers" class="authsecondary">Gebruik groepsleden</button><button id="murdokusave">Cast opslaan</button></div><p id="murdokumsg" class="authmsg" role="status" aria-live="polite"></p></div>
   </div>
   <div class="groupinvite"><small>Groepscode</small><div><code id="groupcode">—</code><button id="groupcopy" class="authsecondary">Kopieer</button></div><p class="mut sm">Deel deze code met iemand die bij jullie groep hoort.</p></div>
   <div class="groupmembers"><small>Leden</small><div id="groupmembers"></div></div>
@@ -74,18 +74,18 @@
 <aside id="side"><div id="stabs"><button data-s="today" class="on">Vandaag</button><button data-s="over">Overzicht</button></div><div id="sv-today"><strong>Dagpuzzels vandaag</strong><div id="board" class="mut">Laden...</div><div id="week"></div></div><div id="sv-over" hidden></div>
 <details id="uit"><summary>Uitleg</summary><div id="help" class="mut"></div></details></aside>
 </main>
-<script src="js/puzzles/shared.js?v=108"></script>
-<script src="js/puzzles/binair.js?v=108"></script>
-<script src="js/puzzles/starbattle.js?v=108"></script>
-<script src="js/puzzles/nonogram.js?v=108"></script>
-<script src="js/puzzles/kakuro.js?v=108"></script>
-<script src="js/puzzles/maak24.js?v=108"></script>
-<script src="js/puzzles/hexcells.js?v=108"></script>
-<script src="js/puzzles/murdoku.js?v=108"></script>
-<script src="js/puzzles/pluszle.js?v=108"></script>
-<script src="js/hint-guidance.js?v=108"></script>
-<script src="js/hints.js?v=108"></script>
-<script src="js/ux.js?v=108"></script>
-<script src="js/core.js?v=108"></script>
-<script type="module" src="js/firebase.js?v=108"></script>
+<script src="js/puzzles/shared.js?v=109"></script>
+<script src="js/puzzles/binair.js?v=109"></script>
+<script src="js/puzzles/starbattle.js?v=109"></script>
+<script src="js/puzzles/nonogram.js?v=109"></script>
+<script src="js/puzzles/kakuro.js?v=109"></script>
+<script src="js/puzzles/maak24.js?v=109"></script>
+<script src="js/puzzles/hexcells.js?v=109"></script>
+<script src="js/puzzles/murdoku.js?v=109"></script>
+<script src="js/puzzles/pluszle.js?v=109"></script>
+<script src="js/hint-guidance.js?v=109"></script>
+<script src="js/hints.js?v=109"></script>
+<script src="js/ux.js?v=109"></script>
+<script src="js/core.js?v=109"></script>
+<script type="module" src="js/firebase.js?v=109"></script>
 </body></html>
