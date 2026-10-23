@@ -11,35 +11,35 @@
 <script>try{if(navigator.standalone===true||matchMedia("(display-mode: standalone)").matches)document.documentElement.dataset.standalone=""}catch(e){}</script>
 <script>try{var t=localStorage.getItem("pdtheme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;else document.documentElement.removeAttribute("data-theme")}catch(e){}</script>
 <title>Gepuzzellig</title>
-<link rel="stylesheet" href="css/app.css?v=91">
-<script src="js/config.js?v=91"></script>
+<link rel="stylesheet" href="css/app.css?v=92">
+<script src="js/config.js?v=92"></script>
 </head><body>
 <div id="iosPwaStatusStrip" aria-hidden="true"></div>
 <div id="bootveil" aria-hidden="true"><div class="bootinner"><i></i><i></i><i></i></div></div>
 <header><h1><span class="logo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="ttl">Gepuzzellig</span></h1><nav id="tabs" aria-label="Puzzelsoorten"></nav>
 <button id="theme" title="Donkere of lichte weergave" aria-label="Donkere of lichte weergave"></button><button id="sbtn" title="Overzicht en statistieken" aria-label="Overzicht en statistieken">📊</button><button id="authbtn" title="Google-account" aria-label="Google-account">Account</button><input id="name" type="hidden"><input id="group" type="hidden"></header>
 <div id="authgate" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="authgt">
- <div class="authcard"><span class="authlogo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><h2 id="authgt">Welkom bij Gepuzzellig</h2><p>Log in met Google om je gekoppelde profiel en groep te gebruiken.</p><button id="authgoogle" class="authgoogle"><span class="g">G</span> Doorgaan met Google</button><p id="authmsg" class="authmsg"></p></div>
+ <div class="authcard"><span class="authlogo" aria-hidden="true"><i></i><i></i><i></i><i></i></span><h2 id="authgt">Welkom bij Gepuzzellig</h2><p>Log in met Google om je gekoppelde profiel en groep te gebruiken.</p><button id="authgoogle" class="authgoogle"><span class="g">G</span> Doorgaan met Google</button><p id="authmsg" class="authmsg" role="status" aria-live="polite"></p></div>
 </div>
 <div id="authaccount" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="authat">
- <div class="authcard authform"><button id="authx" class="authx" aria-label="Sluiten">✕</button><h2 id="authat">Profiel</h2><div id="authwho" class="authwho"></div>
+ <div class="authcard authform"><div class="authdialoghead"><button id="authx" class="authx" aria-label="Sluiten">✕</button><h2 id="authat">Profiel</h2></div><div id="authwho" class="authwho"></div>
   <label>Naam<input id="profname" maxlength="30" autocomplete="nickname"></label>
-  <div class="stylebox"><small>Mijn stijl</small><label>Achtergrond<select id="proftheme"><option value="shared">Puzzellig</option><option value="peter">Treinen</option><option value="aart">Getallen</option><option value="stars">Sterren</option><option value="nature">Natuur</option><option value="retro">Retro</option><option value="animals">Dieren</option><option value="sea">Zee</option><option value="travel">Reizen</option><option value="music">Muziek</option><option value="party">Feest</option><option value="coffee">Koffie &amp; taart</option><option value="season">Seizoen (wisselt vanzelf)</option><option value="minimal">Rustig</option></select></label><div class="stylecolors" id="profcolors"></div><input id="profaccent" type="hidden"><div class="stylehint">Je stijl zie je direct op Home en op je persoonlijke overzicht. Wijzigingen worden meteen toegepast en opgeslagen.</div></div>
+  <div class="stylebox"><small>Mijn stijl</small><label>Achtergrond<select id="proftheme"><option value="shared">Puzzellig</option><option value="peter">Treinen</option><option value="aart">Getallen</option><option value="stars">Sterren</option><option value="nature">Natuur</option><option value="retro">Retro</option><option value="animals">Dieren</option><option value="sea">Zee</option><option value="travel">Reizen</option><option value="music">Muziek</option><option value="party">Feest</option><option value="coffee">Koffie &amp; taart</option><option value="season">Seizoen (wisselt vanzelf)</option><option value="minimal">Rustig</option></select></label><div class="stylecolors" id="profcolors"></div><input id="profaccent" type="hidden"><div class="stylepreview skin-shared" id="profstylepreview" aria-label="Voorbeeld van je persoonlijke stijl"><small class="stylepreviewlabel">Voorbeeld</small><div class="stylepreviewcard"><span class="stylepreviewtitle">Jouw stijl</span><span class="stylepreviewaction">Verder puzzelen →</span></div></div><div class="stylehint">Je stijl zie je direct op Home en op je persoonlijke overzicht. Wijzigingen worden meteen toegepast en opgeslagen.</div><p id="profstylemsg" class="authmsg stylestatus" role="status" aria-live="polite"></p></div>
   <div class="profgroupcard"><small>Mijn groep</small><b id="profgroupname">Puzzelsukkels</b><button id="profgroupmanage" class="authsecondary">Groep beheren ›</button></div>
-  <div class="accessinvite"><small>Gepuzzellig uitnodigen</small><p>Nodig iemand uit met het Google-e-mailadres waarmee diegene gaat inloggen. Gepuzzellig probeert de uitnodiging automatisch per e-mail te versturen en maakt altijd ook een kopieerbare link.</p><label>Google e-mailadres<input id="inviteemail" type="email" autocomplete="email" placeholder="naam@gmail.com"></label><button id="invitecreate" class="authsecondary">Stuur uitnodiging</button><div id="inviteout" hidden><input id="invitelink" readonly><button id="invitecopy" class="authsecondary">Kopieer link</button></div><p id="invitemsg" class="authmsg"></p></div>
+  <div class="accessinvite"><small>Gepuzzellig uitnodigen</small><p>Nodig iemand uit met het Google-e-mailadres waarmee diegene gaat inloggen. Gepuzzellig probeert de uitnodiging automatisch per e-mail te versturen en maakt altijd ook een kopieerbare link.</p><label>Google e-mailadres<input id="inviteemail" type="email" autocomplete="email" placeholder="naam@gmail.com"></label><button id="invitecreate" class="authsecondary">Stuur uitnodiging</button><div id="inviteout" hidden><input id="invitelink" readonly><button id="invitecopy" class="authsecondary">Kopieer link</button></div><p id="invitemsg" class="authmsg" role="status" aria-live="polite"></p></div>
   <button id="adminopen" class="authsecondary" hidden>🛡 Beheer Gepuzzellig</button>
   <div class="authactions"><button id="profsave">Naam opslaan</button><button id="authout" class="authsecondary">Uitloggen</button></div>
-  <p id="profmsg" class="authmsg"></p>
+  <p id="profmsg" class="authmsg" role="status" aria-live="polite"></p>
  </div>
 </div>
 <div id="groupaccount" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="groupat">
- <div class="authcard authform groupform"><button id="groupx" class="authx" aria-label="Sluiten">✕</button><h2 id="groupat">Mijn groep</h2>
+ <div class="authcard authform groupform"><div class="authdialoghead"><button id="groupx" class="authx" aria-label="Sluiten">✕</button><h2 id="groupat">Mijn groep</h2></div>
   <div class="groupcurrent"><small>Huidige groep</small><b id="groupcurrentname">Puzzelsukkels</b><span id="grouprole" class="mut"></span></div>
   <div id="groupownerbox">
    <label>Groepsnaam<input id="groupnameedit" maxlength="40"></label>
    <button id="groupnamesave">Naam wijzigen</button>
-   <div class="stylebox"><small>Groepsstijl</small><label>Achtergrond<select id="grouptheme"><option value="shared">Puzzellig</option><option value="peter">Treinen</option><option value="aart">Getallen</option><option value="stars">Sterren</option><option value="nature">Natuur</option><option value="retro">Retro</option><option value="animals">Dieren</option><option value="sea">Zee</option><option value="travel">Reizen</option><option value="music">Muziek</option><option value="party">Feest</option><option value="coffee">Koffie &amp; taart</option><option value="season">Seizoen (wisselt vanzelf)</option><option value="minimal">Rustig</option></select></label><div class="stylecolors" id="groupcolors"></div><input id="groupaccent" type="hidden"><div class="stylehint">Deze stijl verschijnt direct op het gezamenlijke groepsoverzicht. Wijzigingen worden meteen toegepast en opgeslagen.</div></div>
-   <div class="murcastbox"><small>🕵️ Murdoku-personages</small><p>Één naam per regel. Gebruik familie, vrienden of verzonnen namen. Extra namen worden automatisch neutraal aangevuld.</p><textarea id="murdokunames" rows="7" maxlength="500" spellcheck="false" placeholder="Sam&#10;Noor&#10;Finn&#10;Emma"></textarea><div class="murcastactions"><button id="murdokumembers" class="authsecondary">Gebruik groepsleden</button><button id="murdokusave">Cast opslaan</button></div><p id="murdokumsg" class="authmsg"></p></div>
+   <div class="stylebox"><small>Groepsstijl</small><label>Achtergrond<select id="grouptheme"><option value="shared">Puzzellig</option><option value="peter">Treinen</option><option value="aart">Getallen</option><option value="stars">Sterren</option><option value="nature">Natuur</option><option value="retro">Retro</option><option value="animals">Dieren</option><option value="sea">Zee</option><option value="travel">Reizen</option><option value="music">Muziek</option><option value="party">Feest</option><option value="coffee">Koffie &amp; taart</option><option value="season">Seizoen (wisselt vanzelf)</option><option value="minimal">Rustig</option></select></label><div class="stylecolors" id="groupcolors"></div><input id="groupaccent" type="hidden"><div class="stylepreview skin-shared" id="groupstylepreview" aria-label="Voorbeeld van de groepsstijl"><small class="stylepreviewlabel">Voorbeeld</small><div class="stylepreviewcard"><span class="stylepreviewtitle">Groepsstijl</span><span class="stylepreviewaction">Groepsoverzicht →</span></div></div><div class="stylehint">Deze stijl verschijnt direct op het gezamenlijke groepsoverzicht. Wijzigingen worden meteen toegepast en opgeslagen.</div><p id="groupstylemsg" class="authmsg stylestatus" role="status" aria-live="polite"></p></div>
+   <div class="murcastbox"><small>🕵️ Murdoku-personages</small><p>Één naam per regel. Gebruik familie, vrienden of verzonnen namen. Extra namen worden automatisch neutraal aangevuld.</p><textarea id="murdokunames" rows="7" maxlength="500" spellcheck="false" placeholder="Sam&#10;Noor&#10;Finn&#10;Emma"></textarea><div class="murcastactions"><button id="murdokumembers" class="authsecondary">Gebruik groepsleden</button><button id="murdokusave">Cast opslaan</button></div><p id="murdokumsg" class="authmsg" role="status" aria-live="polite"></p></div>
   </div>
   <div class="groupinvite"><small>Uitnodigingscode</small><div><code id="groupcode">—</code><button id="groupcopy" class="authsecondary">Kopieer</button></div><p class="mut sm">Deel deze code met iemand die bij jullie groep hoort.</p></div>
   <div class="groupmembers"><small>Leden</small><div id="groupmembers"></div></div>
@@ -48,14 +48,14 @@
    <div class="groupor"><span>of</span></div>
    <label>Nieuwe groep maken<input id="groupnewname" maxlength="40" placeholder="Naam van de groep"></label><button id="groupcreate" class="authsecondary">Nieuwe groep maken</button>
   </details>
-  <p id="groupmsg" class="authmsg"></p>
+  <p id="groupmsg" class="authmsg" role="status" aria-live="polite"></p>
  </div>
 </div>
 <div id="signupcover" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="signupat">
- <div class="authcard authform"><h2 id="signupat">Welkom bij Gepuzzellig</h2><p id="signupintro">Je uitnodiging is geldig. Kies de naam die andere puzzelaars zien.</p><div id="signupwho" class="authwho"></div><label>Naam<input id="signupname" maxlength="30" autocomplete="nickname"></label><button id="signupaccept">Account activeren</button><button id="signupout" class="authsecondary">Ander Google-account</button><p class="mut sm">Beheerders van Gepuzzellig kunnen groepsleden en puzzelactiviteit bekijken voor beheer en ondersteuning.</p><p id="signupmsg" class="authmsg"></p></div>
+ <div class="authcard authform"><h2 id="signupat">Welkom bij Gepuzzellig</h2><p id="signupintro">Je uitnodiging is geldig. Kies de naam die andere puzzelaars zien.</p><div id="signupwho" class="authwho"></div><label>Naam<input id="signupname" maxlength="30" autocomplete="nickname"></label><button id="signupaccept">Account activeren</button><button id="signupout" class="authsecondary">Ander Google-account</button><p class="mut sm">Beheerders van Gepuzzellig kunnen groepsleden en puzzelactiviteit bekijken voor beheer en ondersteuning.</p><p id="signupmsg" class="authmsg" role="status" aria-live="polite"></p></div>
 </div>
 <div id="onboardgroup" class="authcover" hidden role="dialog" aria-modal="true" aria-labelledby="onboardat">
- <div class="authcard authform groupform"><h2 id="onboardat">Waar wil je puzzelen?</h2><p>Je account is geactiveerd. Kies nu een groep; tot die tijd worden er geen puzzelgegevens gedeeld.</p><button id="onboardsuggest" hidden></button><div id="onboardfirstor" class="groupor"><span>of</span></div><label>Deelnemen aan een andere groep<input id="onboardcode" maxlength="12" autocapitalize="characters" placeholder="Groepscode"></label><button id="onboardjoin">Deelnemen met code</button><div class="groupor"><span>of</span></div><label>Nieuwe groep maken<input id="onboardnew" maxlength="40" placeholder="Naam van je nieuwe groep"></label><button id="onboardcreate" class="authsecondary">Nieuwe groep maken</button><button id="onboardout" class="authsecondary">Uitloggen</button><p id="onboardmsg" class="authmsg"></p></div>
+ <div class="authcard authform groupform"><h2 id="onboardat">Waar wil je puzzelen?</h2><p>Je account is geactiveerd. Kies nu een groep; tot die tijd worden er geen puzzelgegevens gedeeld.</p><button id="onboardsuggest" hidden></button><div id="onboardfirstor" class="groupor"><span>of</span></div><label>Deelnemen aan een andere groep<input id="onboardcode" maxlength="12" autocapitalize="characters" placeholder="Groepscode"></label><button id="onboardjoin">Deelnemen met code</button><div class="groupor"><span>of</span></div><label>Nieuwe groep maken<input id="onboardnew" maxlength="40" placeholder="Naam van je nieuwe groep"></label><button id="onboardcreate" class="authsecondary">Nieuwe groep maken</button><button id="onboardout" class="authsecondary">Uitloggen</button><p id="onboardmsg" class="authmsg" role="status" aria-live="polite"></p></div>
 </div>
 
 <main>
@@ -73,17 +73,17 @@
 <aside id="side"><div id="stabs"><button data-s="today" class="on">Vandaag</button><button data-s="over">Overzicht</button></div><div id="sv-today"><strong>Dagpuzzels vandaag</strong><div id="board" class="mut">Laden...</div><div id="week"></div></div><div id="sv-over" hidden></div>
 <details id="uit"><summary>Uitleg</summary><div id="help" class="mut"></div></details></aside>
 </main>
-<script src="js/puzzles/shared.js?v=91"></script>
-<script src="js/puzzles/binair.js?v=91"></script>
-<script src="js/puzzles/starbattle.js?v=91"></script>
-<script src="js/puzzles/nonogram.js?v=91"></script>
-<script src="js/puzzles/kakuro.js?v=91"></script>
-<script src="js/puzzles/maak24.js?v=91"></script>
-<script src="js/puzzles/hexcells.js?v=91"></script>
-<script src="js/puzzles/murdoku.js?v=91"></script>
-<script src="js/puzzles/pluszle.js?v=91"></script>
-<script src="js/hint-guidance.js?v=91"></script>
-<script src="js/hints.js?v=91"></script>
-<script src="js/core.js?v=91"></script>
-<script type="module" src="js/firebase.js?v=91"></script>
+<script src="js/puzzles/shared.js?v=92"></script>
+<script src="js/puzzles/binair.js?v=92"></script>
+<script src="js/puzzles/starbattle.js?v=92"></script>
+<script src="js/puzzles/nonogram.js?v=92"></script>
+<script src="js/puzzles/kakuro.js?v=92"></script>
+<script src="js/puzzles/maak24.js?v=92"></script>
+<script src="js/puzzles/hexcells.js?v=92"></script>
+<script src="js/puzzles/murdoku.js?v=92"></script>
+<script src="js/puzzles/pluszle.js?v=92"></script>
+<script src="js/hint-guidance.js?v=92"></script>
+<script src="js/hints.js?v=92"></script>
+<script src="js/core.js?v=92"></script>
+<script type="module" src="js/firebase.js?v=92"></script>
 </body></html>
