@@ -2,7 +2,7 @@
 document.body.classList.add('layout-proef');
 document.documentElement.removeAttribute('data-auth-pending');
 const testBar=document.createElement('div');testBar.id='layoutBar';
-testBar.innerHTML='<strong>Layoutproef 3</strong><select id="testSize" aria-label="Proefformaat"><option value="1">Klein</option><option value="2" selected>Normaal</option><option value="3">Groot</option></select><button id="testNew">Andere</button><button id="testCompare" aria-pressed="false">Origineel</button><a href="./">App</a>';
+testBar.innerHTML='<strong>Layoutproef 3.1</strong><select id="testSize" aria-label="Proefformaat"><option value="1">Klein</option><option value="2" selected>Normaal</option><option value="3">Groot</option></select><button id="testNew">Andere</button><button id="testCompare" aria-pressed="false">Origineel</button><a href="./">App</a>';
 document.body.prepend(testBar);
 let testOriginal=false,testRenderPass=false,testFrameId=0;
 const testRect=el=>el&&el.getBoundingClientRect();
@@ -15,6 +15,7 @@ function testAvailableRect(){
  return {left,right,top,bottom,width:Math.max(0,right-left),height:Math.max(0,bottom-top)};
 }
 function testFrame(){
+ $('#playbox').style.setProperty('--phone-y','0px');
  const active=!PHONE&&!testOriginal&&!document.body.classList.contains('home')&&!document.body.classList.contains('newpick');
  document.body.classList.toggle('layout-wide',active);
  if(!active){document.body.classList.remove('layout-rail','layout-bottom');window.LAYOUT_BOTTOM=false;return}
@@ -28,6 +29,10 @@ function testFrame(){
  document.documentElement.style.setProperty('--bottom-shift','0px');
 }
 function testArrange(){
+ if(PHONE&&!testOriginal&&S.p&&!document.body.classList.contains('home')&&!document.body.classList.contains('newpick')){
+  const area=testAvailableRect(),play=testRect($('#playbox'));
+  $('#playbox').style.setProperty('--phone-y',Math.max(0,(area.height-play.height)/2)+'px');return;
+ }
  if(!document.body.classList.contains('layout-wide')||!S.p)return;
  let area=testAvailableRect(),anchor=testRect($(S.type==='mur'?'#mgrid':'#playbox')),pb=testRect($('#pbot'));
  if(S._testMode==='rail'&&anchor.left<pb.width+20){
