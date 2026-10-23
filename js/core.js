@@ -13,11 +13,12 @@
  for(const type of ["pointermove","pointerup","pointercancel","touchstart","touchend","click","dblclick","contextmenu"])
   window.addEventListener(type,e=>{if(dismissing&&!(type==="click"&&e.detail===0))stop(e)},{capture:true,passive:false});
 })();
-/* Snelle Apple Pencil-tikken: gewone UI reageert direct op pen-pointerevents.
-   Puzzelvelden en teken/rekenvlakken zijn uitgesloten en houden hun eigen bediening. */
+/* Snelle Pencil-bediening voor de vaste puzzelknoppen. Scrollbare pagina’s en
+   vensters gebruiken gewone browserklikken: neerzetten om te scrollen activeert geen knop.
+   Puzzelvelden en teken/rekenvlakken houden hun eigen bediening. */
 function fastPenUI(){
  const excluded="#grid,#mgrid,#hexsvg,#mur,#m24,#mpal,#papier,canvas,.calc";
- const targetAt=(x,y)=>{const el=document.elementFromPoint(x,y),b=el&&el.closest&&el.closest("button,a[href],summary,[role=button]");if(!b||b.matches(":disabled")||b.closest(excluded))return null;return b};
+ const targetAt=(x,y)=>{const el=document.elementFromPoint(x,y),b=el&&el.closest&&el.closest("button,a[href],summary,[role=button]");if(!b||b.matches(":disabled")||b.closest(excluded)||b.closest("#home,.authcover,.uxcover,#side,#more,#pmp,#archp,#hm,#cm,#npm,#hint"))return null;return b};
  const active=new Set();let firing=false,last=null,lastAt=-1e9;
  const fire=b=>{if(!b)return false;const now=performance.now();if(b===last&&now-lastAt<35)return true;firing=true;try{b.click()}finally{firing=false}last=b;lastAt=now;return true};
  document.addEventListener("pointerdown",e=>{if(e.pointerType!=="pen"||e.button>0)return;const b=targetAt(e.clientX,e.clientY);if(!b)return;e.preventDefault();active.add(e.pointerId);fire(b)},true);

@@ -54,16 +54,27 @@ for(const color of [false,true])for(const pointerType of ['touch','pen','mouse']
 }
 `,c);
 // A Pencil contact must not activate a menu on both down and up/touchstart.
-const handlers={},button={matches:()=>false,closest:s=>s.startsWith('button')?button:null,click:()=>calls++};
+let scrollSurface=false;
+const handlers={},button={matches:()=>false,closest:s=>s.startsWith('button')||scrollSurface&&s.startsWith('#home,')?button:null,click:()=>calls++};
 let calls=0;
 const pen=vm.createContext({document:{elementFromPoint:()=>button,addEventListener:(name,fn)=>{(handlers[name]??=[]).push(fn)}},performance:{now:()=>1000},Set});
 vm.runInContext(section('function fastPenUI(){','fastPenUI();'),pen);vm.runInContext('fastPenUI()',pen);
 const event={pointerType:'pen',pointerId:1,button:0,clientX:0,clientY:0,preventDefault(){}};
 for(const name of ['pointerdown','touchstart','pointerup'])for(const fn of handlers[name]||[])fn(event);
 assert.equal(calls,1,'one Pencil contact activates UI exactly once');
+scrollSurface=true;calls=0;
+for(const name of ['pointerdown','pointermove','pointerup'])for(const fn of handlers[name]||[])fn({...event,pointerId:2,clientY:name==='pointerdown'?0:100});
+assert.equal(calls,0,'Pencil scroll over Home button never activates it on contact');
+let suppressed=false;
+for(const fn of handlers.click||[])fn({target:button,preventDefault(){suppressed=true},stopImmediatePropagation(){suppressed=true}});
+// The preceding direct toolbar action used the same mock button. A normal Home
+// button is a different DOM element and must retain the native completed click.
+const homeButton={closest:()=>homeButton};suppressed=false;
+for(const fn of handlers.click||[])fn({target:homeButton,preventDefault(){suppressed=true},stopImmediatePropagation(){suppressed=true}});
+assert.equal(suppressed,false,'native click on scroll page remains available');
 const dismissHandlers={};let open=true;
 const dismiss=vm.createContext({window:{addEventListener:(name,fn)=>dismissHandlers[name]=fn},document:{getElementById:id=>id==='more'?{classList:{contains:()=>open,remove:()=>open=false}}:null}});
-vm.runInContext(core.slice(0,core.indexOf('/* Snelle Apple Pencil-tikken')),dismiss);
+vm.runInContext(core.slice(0,core.indexOf('function fastPenUI(')),dismiss);
 for(const navigation of [false,true]){
  open=true;let stopped=false;
  const e={target:{closest:s=>navigation&&s==='#tbHome,#tbMore,#pm'},preventDefault(){stopped=true},stopImmediatePropagation(){stopped=true}};
