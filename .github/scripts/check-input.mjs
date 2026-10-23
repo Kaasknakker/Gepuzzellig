@@ -9,8 +9,8 @@ vm.runInContext(`
 let S,potlood=false,drag2=null,drag=null,G2,CS=30;
 let binLastTap={t:0,i:-1},starLastTap={t:0,i:-1};
 const DOUBLE_TAP_MS=600,$=()=>({setPointerCapture(){}}),mouseLR=e=>e.pointerType==='mouse'?(e.button===2?'r':'l'):null;
-const gridGeo=()=>({x:0,y:0,pw:30,ph:30}),binCell=()=>0,gridHit=()=>0;
-const invalidateHint=()=>{},paintBin=()=>{},paintAll=()=>{},check=()=>{},lpStart=()=>{},ub=()=>{};
+const gridGeo=()=>({x:0,y:0,pw:30,ph:30}),binCell=()=>0,gridHit=(_g,x,y)=>Math.floor(y/30)*(S.p.N||S.p.W)+Math.floor(x/30);
+const invalidateHint=()=>{},paintBin=()=>{},paintAll=()=>{},paintNotes=()=>{},check=()=>{},lpStart=()=>{},ub=()=>{};
 const disp=i=>S.cur[i],noteVal=i=>S.nt[i]||0,noteRaw=(i,v)=>S.nt[i]=v;
 function begin(){S.gs=S.cur.slice()}
 function commit(){if(S.gs&&S.gs.join()!==S.cur.join())S.hist.push(S.gs);S.gs=null}
@@ -20,6 +20,7 @@ function noteFinish(d){for(const [i,v]of d.nchanges)if(v.from!==v.to)S.hist.push
 `,c);
 vm.runInContext(section('function binDown(','$("#grid").addEventListener("touchstart"'),c);
 vm.runInContext(section('function starDown(','function starEnter('),c);
+vm.runInContext(section('function starEnter(','function starUp('),c);
 vm.runInContext(section('function starUp(','addEventListener("pointerup",starUp)'),c);
 vm.runInContext(`
 for(const type of ['bin','star'])for(const pointerType of ['touch','pen','mouse'])for(const notes of [false,true]){
@@ -39,6 +40,24 @@ for(const type of ['bin','star'])for(const pointerType of ['touch','pen','mouse'
  h=S.hist.pop();if(notes)noteRaw(0,h.from);else S.cur=h;assert.equal(value(),notes?2:secondary,'undo restores secondary');
  S.hist=[];S.cur=[empty];S.nt={};binLastTap=starLastTap={t:0,i:-1};tap(5000);tap(5800);assert.equal(value(),notes?0:empty,'separate taps toggle primary');
 }
+`,c);
+// Crossing occupied cells, starting on one, and dragging back must preserve
+// existing stars/crosses. A completed stroke remains a single undo step.
+vm.runInContext(`
+for(const pointerType of ['touch','pen','mouse'])for(const old of [0,1,2])for(const notes of [false,true]){
+ potlood=notes;S={type:'star',p:{N:5},cur:Array(25).fill(0),nt:{},hist:[],redo:[],start:0};
+ if(notes){S.nt={0:old,2:2,3:1}}else{S.cur[0]=old;S.cur[2]=2;S.cur[3]=1}
+ const original=S.cur.slice();starLastTap={t:0,i:-1};
+ const e={pointerType,button:0,pointerId:7,clientX:5,clientY:5,timeStamp:10000,preventDefault(){}};
+ starDown(e);starMove({...e,clientX:135});
+ const values=()=>Array.from({length:5},(_,i)=>notes?noteVal(i):S.cur[i]);
+ assert.deepEqual(values(),[old||1,1,2,1,1],'drag preserves stars and existing crosses');
+ starMove({...e,clientX:35});
+ assert.deepEqual(values(),[old||1,1,2,1,0],'backtracking restores only new crosses');
+ starUp({...e,timeStamp:10500});
+ if(!notes){assert.equal(S.hist.length,1);S.cur=S.hist.pop();assert.deepEqual(S.cur,original,'one undo restores stroke')}
+}
+potlood=false;
 `,c);
 // Nonogram: a cross (including color Nonogram) also clears with one tap.
 vm.runInContext(`let nd=null,lastTap={t:0,i:-1},nonoMode='f',nonoColorMode=1;const nonoAt=()=>0,nonoLine=()=>{},nonoAuto=()=>{};function nonoPaint(i,v){S.cur[i]=v}`,c);
@@ -81,6 +100,18 @@ const modalEvent={pointerType:'pen',button:0,changedTouches:[{touchType:'stylus'
 for(const name of ['pointerdown','touchstart','touchend'])for(const fn of modalEvents[name]||[])fn(modalEvent);
 assert.equal(modalPrevented,false,'Pencil scrolling in profile/group dialog is left to browser');
 assert.equal(modal.S.mxm,false,'dialog scroll never changes puzzle input mode');
+// The first pen stroke back up after the bottom edge must move immediately.
+const scrollHandlers={},card={scrollHeight:1000,clientHeight:400,scrollTop:600,setPointerCapture(){},hasPointerCapture:()=>false};
+let scrollClicks=0;
+const scrollButton={isConnected:true,matches:()=>false,focus(){},click(){scrollClicks++}},scrollTarget={closest:s=>s==='.authcard'?card:s.startsWith('button')?scrollButton:null};
+const scrollContext=vm.createContext({document:{addEventListener:(name,fn)=>{(scrollHandlers[name]??=[]).push(fn)}},performance:{now:()=>1000}});
+vm.runInContext(section('function penScrollDialogs(){','penScrollDialogs();')+'penScrollDialogs();',scrollContext);
+const scrollEvent=(y=300,extra={})=>({pointerType:'pen',pointerId:3,button:0,clientY:y,target:scrollTarget,preventDefault(){},stopImmediatePropagation(){},...extra});
+const sendScroll=(type,event)=>{for(const fn of scrollHandlers[type]||[])fn(event)};
+sendScroll('pointerdown',scrollEvent());sendScroll('pointermove',scrollEvent(200));sendScroll('pointerup',scrollEvent(200));assert.equal(card.scrollTop,600,'bottom is clamped');
+sendScroll('pointerdown',scrollEvent());sendScroll('pointermove',scrollEvent(380));sendScroll('pointerup',scrollEvent(380));assert.equal(card.scrollTop,520,'first stroke from bottom moves up');assert.equal(scrollClicks,0,'scroll over button never clicks');
+sendScroll('pointerdown',scrollEvent());sendScroll('pointerup',scrollEvent());assert.equal(scrollClicks,1,'short Pencil tap clicks once');
+let compatBlocked=false;sendScroll('click',scrollEvent(300,{detail:1,preventDefault(){compatBlocked=true}}));assert(compatBlocked,'compatibility click is suppressed');
 const dismissHandlers={};let open=true;
 const dismiss=vm.createContext({window:{addEventListener:(name,fn)=>dismissHandlers[name]=fn},document:{getElementById:id=>id==='more'?{classList:{contains:()=>open,remove:()=>open=false}}:null}});
 vm.runInContext(core.slice(0,core.indexOf('function fastPenUI(')),dismiss);
@@ -89,6 +120,15 @@ for(const navigation of [false,true]){
  const e={target:{closest:s=>navigation&&s==='#tbHome,#tbMore,#pm'},preventDefault(){stopped=true},stopImmediatePropagation(){stopped=true}};
  dismissHandlers.pointerdown(e);assert.equal(open,false);assert.equal(stopped,!navigation,'navigation acts immediately; background only dismisses');
  stopped=false;dismissHandlers.pointerdown(e);assert.equal(stopped,false,'next contact is not swallowed');
+}
+for(const id of ['authaccount','groupaccount']){
+ const handlers={},cover={hidden:false},dialog=vm.createContext({Event:class{constructor(type){this.type=type}},window:{addEventListener:(name,fn)=>handlers[name]=fn,dispatchEvent(){}},document:{getElementById:key=>key===id?cover:null}});
+ vm.runInContext(core.slice(0,core.indexOf('function fastPenUI(')),dialog);
+ cover.closest=()=>null;let stopped=0;
+ const e={target:cover,detail:1,preventDefault(){stopped++},stopImmediatePropagation(){stopped++}};
+ handlers.pointerdown(e);assert.equal(cover.hidden,true);assert(stopped>0,'backdrop contact is consumed');
+ for(const type of ['pointerup','touchend','click']){stopped=0;handlers[type](e);assert(stopped>0,'dismissal never reaches underlying UI')}
+ stopped=0;handlers.pointerdown({...e,target:{closest:()=>null}});assert.equal(stopped,0,'next contact remains usable');
 }
 // Run real save-and-return flow with Firestore's nested-array constraint.
 let saved={},captured=null,rendered=false,failSave=false,status={};

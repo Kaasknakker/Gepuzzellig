@@ -5,16 +5,21 @@ const {chromium}=createRequire(import.meta.url)('playwright');
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import path from 'node:path';
-const url=process.argv[2]||pathToFileURL(path.resolve('proef-layout.html')).href;
+const isApp=process.argv.includes('--app');
+const url=process.argv.slice(2).find(x=>!x.startsWith('--'))||pathToFileURL(path.resolve(isApp?'index.html':'proef-layout.html')).href;
 const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||undefined,args:['--no-sandbox']});
 let boards=0,hints=0;
 try{
  for(const [name,width,height,phone]of [['iphone-small',320,667,true],['iphone',390,844,true],['ipad-portrait',820,1180,false],['ipad-landscape',1180,820,false],['desktop-4k',3840,2160,false]]){
   const context=await browser.newContext({viewport:{width,height},hasTouch:phone,userAgent:phone?'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)':'Mozilla/5.0'});
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.stack));
+  // Controle van de echte app gebruikt een lege lokale browsersessie zonder accountverbinding.
+  if(isApp)await page.route('**/js/firebase.js*',r=>r.fulfill({contentType:'text/javascript',body:''}));
   // Proef mag echte opslag niet lezen of wijzigen, ook niet op hetzelfde domein.
   await page.addInitScript(()=>{localStorage.setItem('pdprog4','{"sentinel":true}');localStorage.setItem('pd2','{"sentinel":true}')});
-  await page.goto(url);await page.waitForFunction(()=>S.type==='bin'&&S.p&&S.cells?.length);await page.waitForTimeout(120);
+  await page.goto(url);
+  if(isApp)await page.evaluate(()=>{document.documentElement.removeAttribute('data-auth-pending');document.querySelectorAll('.authcover').forEach(e=>e.hidden=true);setMe('layout-tester','Testspeler');setFreePreferences('bin',PHONE?5:2);load('bin',true,true)});
+  await page.waitForFunction(()=>S.type==='bin'&&S.p&&S.cells?.length);await page.waitForTimeout(120);
   for(const t of ['bin','star','nono','hex','plus','mur']){
    await page.evaluate(([t,l])=>{setFreePreferences(t,l);load(t,true,true)},[t,phone?6:3]);
    await page.waitForFunction(t=>S.type===t&&!!S.p,t);await page.waitForTimeout(120);
@@ -37,6 +42,7 @@ try{
     await page.evaluate(()=>toggleTwoMode());
    }
    // Vergelijk dezelfde puzzel: de proef mag geen ruimte voor een lege footer reserveren.
+   if(!isApp){
    await page.locator('#testCompare').click();await page.waitForTimeout(80);
    const original=await page.evaluate(()=>{const r=$(S.type==='hex'?'#hexsvg':S.type==='mur'?'#mgrid':'#grid').getBoundingClientRect(),p=$('#pbot').getBoundingClientRect();return {width:r.width,height:r.height,left:r.left,right:r.right,bottom:r.bottom,footer:p.height,footerTop:p.top,side:p.height>p.width}});
    await page.locator('#testCompare').click();await page.waitForTimeout(80);
@@ -46,6 +52,7 @@ try{
    // Alleen de nieuwe tussenruimte (12 px) en afronding mogen maat kosten.
    const fitRatio=Math.max(0,1-12/original.height)*.97;
    if(phone&&t!=='mur'&&originalFits){assert(restored.board.width>=original.width*fitRatio,`${name}/${t}: kleiner dan passend origineel`);assert(restored.board.height>=original.height*fitRatio,`${name}/${t}: onnodig lagere puzzel`)}
+   }
    if(!phone)assert(await page.evaluate(()=>{const b=$(S.type==='mur'&&document.body.classList.contains('layout-rail')?'#mgrid':'#playbox').getBoundingClientRect(),p=$('#pbot').getBoundingClientRect();return !testOverlap(b,p,0)&&(document.body.classList.contains('layout-rail')?Math.abs(b.left-p.right-12)<2:p.top>=b.bottom&&p.top-b.bottom<16)}),`${name}/${t}: bediening niet naast/onder bord`);
    assert(await page.evaluate(()=>{
     const make=(extra={})=>({level:1,scope:[],why:[],cells:[],cards:[],move:{cells:[]},...extra});
@@ -86,7 +93,7 @@ try{
    }
   }
   assert.deepEqual(errors,[],`${name}: browserfouten`);
-  assert.equal(await page.evaluate(()=>localStorage.getItem('pdprog4')),'{"sentinel":true}');assert.equal(await page.evaluate(()=>localStorage.getItem('pd2')),'{"sentinel":true}');
+  if(!isApp){assert.equal(await page.evaluate(()=>localStorage.getItem('pdprog4')),'{"sentinel":true}');assert.equal(await page.evaluate(()=>localStorage.getItem('pd2')),'{"sentinel":true}')}
   console.log('OK',name);await context.close();
  }
  console.log(`OK ${boards} borden, ${hints} hintstappen, vaste geometrie, geen overlap, tijdelijke opslag.`);
