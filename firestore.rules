@@ -176,7 +176,7 @@ service cloud.firestore {
         && request.resource.data.inviteCode.size() <= 12
         && request.resource.data.invitedByAuthUid is string
         && request.resource.data.groupJoinCode == ''
-        && request.resource.data.theme in ['shared','peter','aart','stars','nature','retro','minimal']
+        && request.resource.data.theme in ['shared','peter','aart','stars','nature','retro','animals','sea','travel','music','party','coffee','season','minimal']
         && request.resource.data.accent in ['blue','purple','teal','green','orange','pink','red']
         && exists(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode))
         && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.email == request.auth.token.email
@@ -202,7 +202,7 @@ service cloud.firestore {
           && request.resource.data.displayName is string
           && request.resource.data.displayName.size() > 0
           && request.resource.data.displayName.size() <= 30
-          && request.resource.data.get('theme','shared') in ['shared','peter','aart','stars','nature','retro','minimal']
+          && request.resource.data.get('theme','shared') in ['shared','peter','aart','stars','nature','retro','animals','sea','travel','music','party','coffee','season','minimal']
           && request.resource.data.get('accent','blue') in ['blue','purple','teal','green','orange','pink','red']
           && request.resource.data.groupId is string
           && (
@@ -273,7 +273,7 @@ service cloud.firestore {
         && request.resource.data.inviteCode is string
         && request.resource.data.inviteCode.size() >= 6
         && request.resource.data.inviteCode.size() <= 12
-        && request.resource.data.theme in ['shared','peter','aart','stars','nature','retro','minimal']
+        && request.resource.data.theme in ['shared','peter','aart','stars','nature','retro','animals','sea','travel','music','party','coffee','season','minimal']
         && request.resource.data.accent in ['blue','purple','teal','green','orange','pink','red']
         && request.resource.data.createdAt is int
         && request.resource.data.createdAt >= 0
@@ -291,7 +291,7 @@ service cloud.firestore {
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 40
-        && request.resource.data.get('theme','shared') in ['shared','peter','aart','stars','nature','retro','minimal']
+        && request.resource.data.get('theme','shared') in ['shared','peter','aart','stars','nature','retro','animals','sea','travel','music','party','coffee','season','minimal']
         && request.resource.data.get('accent','orange') in ['blue','purple','teal','green','orange','pink','red']
         && request.resource.data.updatedAt is int
         && request.resource.data.updatedAt >= 0;
