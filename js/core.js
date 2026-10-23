@@ -19,10 +19,10 @@ const TYPES=Object.fromEntries(ACTIVE.map(t=>[t,ALLTYPES[t]]));
 const HELP={
  bin:"Vul de vakjes met ✕ en ○. Nooit drie dezelfde naast elkaar, in elke rij en kolom evenveel ✕ als ○, en geen twee rijen of twee kolommen gelijk. Tik of linksklik voor ✕; dubbeltik, dubbelklik of rechtermuisklik voor ○. Nog een tik op een ✕ maakt het vakje weer leeg. Sleep over een paar rijen (omlaag) of kolommen (opzij) om te zien of ze al gelijk zijn: lijnen waarvan de ingevulde ✕ en ○ overal gelijk zijn (lege vakjes tellen niet mee, minstens de helft van de lijn bij beide ingevuld) worden groen samen met de lijn waar je op dat moment overheen sleept. Laat je los terwijl ze groen zijn, dan blijven ze staan.",
  star:"Zet in elke rij, elke kolom en elk gekleurd gebied precies __K__ __S__. Sterren raken elkaar nooit, ook niet diagonaal. Tik of linksklik voor ✕ (geen ster); dubbeltik, dubbelklik of rechtermuisklik voor ★. Nog een tik op een ✕ maakt het vakje weer leeg.",
- nono:"De getallen geven de lengtes van de blokken gevulde vakjes in die rij of kolom, in volgorde. Kies links ■ Vullen of ✕ Kruisje, of tik naast het veld (met je vinger of de Pencil) om te wisselen. Tik op een vakje om het te vullen of een kruisje te zetten, nog eens tikken maakt het weer leeg. Slepen werkt in dezelfde stand. Klopt een rij of kolom precies met de getallen, dan worden de lege vakjes daarin vanzelf kruisjes en wordt het getal lichter. Tik op een getal om alle lege vakjes in die rij of kolom kruisjes te maken.",
+ nono:"De getallen geven de lengtes van de blokken gevulde vakjes in die rij of kolom, in volgorde. Kies links ■ Vullen of ✕ Kruisje, of tik naast het veld (met je vinger of de Pencil) om te wisselen. Tik op een vakje om het te vullen of een kruisje te zetten, nog eens tikken maakt het weer leeg. Slepen werkt in dezelfde stand. Klopt een rij of kolom precies met de getallen, dan wordt het getal lichter. Met Automatisch kruisjes aan worden de lege vakjes daarin vanzelf kruisjes. Tik op een getal om alle lege vakjes in die rij of kolom kruisjes te maken.",
  kak:"Vul cijfers 1 t/m 9 in. De getallen in de zwarte vakjes zijn de som van het stuk rechts (bovenste getal) of eronder (onderste getal). Binnen één som komt elk cijfer maar één keer voor.",
  hex:"Elk vakje is blauw of zwart. Een zwart vakje met een getal vertelt hoeveel van zijn 6 buren blauw zijn. {3} betekent dat die blauwe buren aan elkaar liggen, -3- dat ze niet allemaal aan elkaar liggen. Een zwart vakje met ? zegt niets. Een blauw vakje met een getal vertelt hoeveel vakjes in het gebied eromheen (tot twee vakjes ver, het vakje zelf telt niet mee) blauw zijn. Sommige blauwe vakjes laten pas een getal zien als je ze gevonden hebt. Tik met Blauw op zo'n getal om de zone te tonen: een lichte zeshoek met een witte rand. Waar zones overlappen wordt het nog lichter. Zwart maakt het getal lichter als je er klaar mee bent. Getallen buiten het veld gelden voor de hele lijn in de richting van de pijl. Kies Blauw en tik op zo'n getal om een lichte lijn door die vakjes te zetten; tik nog een keer om hem weg te halen. Kies Zwart en tik op het getal als je klaar bent met die lijn: de lijn verdwijnt en het getal wordt lichter. Kies Blauw of Zwart en tik op een oranje vakje. Tik naast het veld (met je vinger of de Pencil) om te wisselen tussen Blauw en Zwart.",
- mur:"Er is een moord gepleegd. Zet iedereen op zijn plek, ook het slachtoffer (💀). In elke rij en elke kolom staat precies één persoon. Kies iemand onderaan en tik op een vakje. Weet je zeker dat er ergens niemand kan staan? Kies ✕ Kruisje en tik op dat vakje (nog eens tikken haalt het weg). Naast het bord tikken wisselt ook tussen kruisjes en personen. Foutje? Tik op iemand op het bord: dan is het vakje weer leeg en is die persoon meteen gekozen, zodat je hem ergens anders kunt neerzetten. In de rij en kolom van iemand die staat, komen vanzelf kruisjes. Op stoelen, bedden en banken kun je zitten; op de andere voorwerpen kan niemand staan. Naast betekent recht ernaast in dezelfde ruimte, dus niet schuin en niet door een muur. Alleen betekent: niemand anders in dezelfde ruimte. Tik op een kaartje om het door te strepen. De moordenaar was alleen met het slachtoffer: als iedereen goed staat, wijs je hem aan.",
+ mur:"Er is een moord gepleegd. Zet iedereen op zijn plek, ook het slachtoffer (💀). In elke rij en elke kolom staat precies één persoon. Kies iemand onderaan en tik op een vakje. Weet je zeker dat er ergens niemand kan staan? Kies ✕ Kruisje en tik op dat vakje (nog eens tikken haalt het weg). Naast het bord tikken wisselt ook tussen kruisjes en personen. Foutje? Tik op iemand op het bord: dan is het vakje weer leeg en is die persoon meteen gekozen, zodat je hem ergens anders kunt neerzetten. Met Automatisch kruisjes aan komen in de rij en kolom van iemand die staat vanzelf kruisjes. Op stoelen, bedden en banken kun je zitten; op de andere voorwerpen kan niemand staan. Naast betekent recht ernaast in dezelfde ruimte, dus niet schuin en niet door een muur. Alleen betekent: niemand anders in dezelfde ruimte. Tik op een kaartje om het door te strepen. De moordenaar was alleen met het slachtoffer: als iedereen goed staat, wijs je hem aan.",
  plus:"Elk getal blijft staan of moet weg. De getallen die blijven staan tellen per rij op tot de som rechts, en per kolom tot de som onder. Op Moeilijk zijn er ook gekleurde vlakken: daarin tellen ze op tot het kleine getal in de hoek van het vlak. Kies ✕ Wegstrepen of ○ Omcirkelen (dat getal blijft zeker staan), of tik naast het veld (met je vinger of de Pencil) om te wisselen. Tik op een getal, nog eens tikken maakt het weer open. Open betekent: nog niet weggestreept en niet omcirkeld. Slepen werkt in dezelfde stand. Tik op een som om er een schuine streep door te zetten als je klaar bent met die rij of kolom; nog eens tikken haalt hem weg. De app rekent niet mee en vult niets vanzelf in. Je bent klaar als alle sommen kloppen.",
  m24:"Maak met alle vier de getallen precies 24. Tik een getal, een bewerking en een tweede getal. Er zijn 5 rondes en je totaaltijd telt."};
 const TIPS={
@@ -35,7 +35,7 @@ const TIPS={
  plus:["Begin met getallen die te groot zijn: moet een rij nog maar 6 maken, dan kan een 8 daarin nooit blijven staan.","Andersom: zijn alle andere getallen samen te weinig zonder een bepaald getal, dan moet dat getal blijven. Omcirkel het.","Omcirkelen helpt: zo weet je in de kruisende rij of kolom ook al een stukje van de som.","Lukt dat niet, bekijk dan alle manieren om de som te maken. Zit een getal in geen enkele manier, dan moet het weg. Zit het in elke manier, dan blijft het.","Op Moeilijk heb je de gekleurde vlakken echt nodig. Zit je vast in de rijen en kolommen, kijk dan naar een vlak."],
  m24:["Zoek eerst naar 3×8, 4×6, 2×12 of 25−1.","Breuken mogen tussendoor: 8 ÷ 3 kan handig zijn als je daarna weer vermenigvuldigt."]};
 const tipsOf=t=>t==="nono"&&S&&S.nv==="color"?["Begin met lange gekleurde blokken: overlap werkt net als bij een gewone Nonogram.","Let extra op de kleurgrens: rood naast blauw mag direct, rood naast rood niet.","Als een gekleurd blok volledig vastligt, kun je vaak meteen bepalen welke vakjes ernaast leeg moeten blijven.","Kom je vast te zitten, kijk naar een rij of kolom waarin al één of meer kleuren staan. Die beperken de mogelijke plaatsen sterk."]:(TIPS[t]||[]).map(x=>x.startsWith("__2X2__")?x.slice(7):x).concat(t==="star"&&(STLV[lvOf("star")]||[0,2])[1]>1?["Vakjes die elkaar allemaal raken (bijvoorbeeld een blokje van 2×2) kunnen samen maar één ster hebben."]:[]);
-const NOTEH={bin:" Met ✏️ Potlood werkt het hetzelfde als normaal (tik ✕, dubbeltik ○), maar kleiner en lichter. Slepen blijft de rij/kolomvergelijking. Aantekeningen tellen niet mee.",star:" Met ✏️ Potlood werkt het bord hetzelfde als normaal (tik ✕, dubbeltik ★), maar kleiner en lichter. Sleep om snel kleine kruisjes te zetten of weg te halen; rond een potloodster verschijnen automatisch lichte kruisjes. Aantekeningen tellen niet mee.",mur:" Met ✏️ Potlood maak je kandidaat-aantekeningen: kies iemand onderaan en tik op een vakje, dan komt daar de kleine letter van die persoon. Je kunt meerdere kandidaten in één vakje bewaren. Aantekeningen tellen niet mee."};
+const NOTEH={bin:" Met ✏️ Potlood werkt het hetzelfde als normaal (tik ✕, dubbeltik ○), maar kleiner en lichter. Slepen blijft de rij/kolomvergelijking. Aantekeningen tellen niet mee.",star:" Met ✏️ Potlood werkt het bord hetzelfde als normaal (tik ✕, dubbeltik ★), maar kleiner en lichter. Sleep om snel kleine kruisjes te zetten of weg te halen; met Automatisch kruisjes aan verschijnen rond een potloodster lichte kruisjes. Aantekeningen tellen niet mee.",mur:" Met ✏️ Potlood maak je kandidaat-aantekeningen: kies iemand onderaan en tik op een vakje, dan komt daar de kleine letter van die persoon. Je kunt meerdere kandidaten in één vakje bewaren. Aantekeningen tellen niet mee."};
 const helpOf=t=>{let s=t==="nono"&&S&&S.nv==="color"?"De gekleurde getallen geven de blokken in die rij of kolom, in volgorde. Blokken van dezelfde kleur moeten minstens één leeg vakje tussen zich hebben; blokken van verschillende kleuren mogen direct tegen elkaar liggen. Kies onderaan een kleur of ✕ Kruisje. Tik of sleep om die stand toe te passen; nogmaals met dezelfde stand maakt het vakje weer leeg. Tik op een aanwijzing om de overige open vakjes in die rij of kolom als leeg te markeren.":HELP[t]+(NOTEH[t]?NOTEH[t]+" Snel: houd een vakje even ingedrukt om meteen een aantekening te zetten, zonder te wisselen.":"");if(t==="star"){const k=(STLV[lvOf("star")]||[0,2])[1];s=s.replace("__K__",k).replace("__S__",k>1?"sterren":"ster")}return s};
 const isDark=()=>{const t=document.documentElement.dataset.theme;return t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches};
 const dstr=()=>new Date().toLocaleDateString("sv");
@@ -53,6 +53,11 @@ const scoreGroup=k=>SG[k]||legacyGroup();
 const localDoneInGroup=(k,g)=>!!store[k]&&scoreGroup(k).toLowerCase()===String(g||"").toLowerCase();
 let uid="x";
 const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const autoCrossPrefs=Object.fromEntries(["star","nono","mur"].map(t=>[t,lsGet("pdautocross:"+t)!=="off"]));
+const autoCrossOn=(t=S.type)=>autoCrossPrefs[t]!==false;
+function updateAutoCross(){const b=$("#autocross");if(!b)return;b.hidden=!["star","nono","mur"].includes(S.type);b.setAttribute("aria-checked",String(autoCrossOn()));b.querySelector(".autocrossstate").textContent=autoCrossOn()?"Aan":"Uit"}
+/* De voorkeur verandert geen opgeslagen zetten of ongedaan-geschiedenis. Nonogram past hem toe bij volgende zetten. */
+function toggleAutoCross(){autoCrossPrefs[S.type]=!autoCrossOn();lsSet("pdautocross:"+S.type,autoCrossOn()?"on":"off");clearHint();render()}
 let nonoVariant=lsGet("pdnvar")==="color"?"color":"classic";
 /* iPhone (of andere kleine telefoon): eigen indeling en eigen puzzelformaten (niveau 4-6, hoger dan breed).
    Testen op de computer kan met ?tel=1 achter de link, uitzetten met ?tel=0. */
@@ -139,7 +144,7 @@ function celebrate(){if(matchMedia("(prefers-reduced-motion: reduce)").matches)r
    dat aanrakingen op de pagina geen scrollen of zoomen zijn (net als in het Hexcells-veld). Alleen als de pagina niet hoeft te scrollen. */
 function tapMode(){const de=document.documentElement,on=["nono","plus","hex","mur"].includes(S.type);de.classList.remove("tap");if(document.body.classList.contains("home"))return;if(on&&(PHONE||(de.scrollHeight<=innerHeight+60&&de.scrollWidth<=innerWidth+20)))de.classList.add("tap")}
 addEventListener("resize",()=>{setTimeout(tapMode,60);setTimeout(fitHomePage,80)});
-function render(){render0();paintNotes();if(NIEUW)updTop()}
+function render(){render0();paintNotes();updateAutoCross();if(NIEUW)updTop()}
 function render0(){const t=S.type;ub();setTimeout(tapMode,0);if(!S.p)return;
  const pk=S.id+t,prev=S.pk===pk?[...document.querySelectorAll("#grid .c")].map(d=>d.classList.contains("gx")?"":d.textContent):null;S.pk=pk;
  $("#hexw").style.display=t==="hex"?"flex":"none";
@@ -256,7 +261,7 @@ addEventListener("pointerup",binUp);addEventListener("pointercancel",binUp);
 let drag=null,starLastTap={t:0,i:-1,h:0,note:false};
 const sym=v=>v===2?"★":v===1?"✕":"";
 function adjStar(i){const N=S.p.N,r=i/N|0,c=i%N;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const rr=r+dr,cc=c+dc;if(rr>=0&&rr<N&&cc>=0&&cc<N&&S.cur[rr*N+cc]===2)return true}return false}
-const disp=i=>S.cur[i]===2?2:(S.cur[i]===1||adjStar(i))?1:0;
+const disp=i=>S.cur[i]===2?2:(S.cur[i]===1||(autoCrossOn()&&adjStar(i)))?1:0;
 /* Te veel sterren in een rij, kolom of gebied, of sterren die elkaar raken: al die sterren rood. */
 function starBadSet(){const N=S.p.N,K=STK,bad=new Set(),rows={},cols={},regs={};
  S.cur.forEach((v,i)=>{if(v!==2)return;const r=i/N|0,c=i%N;(rows[r]=rows[r]||[]).push(i);(cols[c]=cols[c]||[]).push(i);(regs[S.p.reg[i]]=regs[S.p.reg[i]]||[]).push(i);
@@ -266,7 +271,7 @@ function paintAll(){const bad=starBadSet();S.cells.forEach((d,i)=>{if(d){d.textC
 function setCell(i,v){S.cur[i]=v;paintAll()}
 function applyDrag(i){if(drag.mode==="add"){if(disp(i)===0)setCell(i,1)}else if(drag.mode==="del"){if(S.cur[i]===1)setCell(i,0)}}
 function noteAdjStar(i){const N=S.p.N,r=i/N|0,c=i%N;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const rr=r+dr,cc=c+dc,j=rr*N+cc;if(rr>=0&&rr<N&&cc>=0&&cc<N&&noteVal(j)===2&&disp(j)===0)return true}return false}
-const noteDisp=i=>noteVal(i)===2?2:(noteVal(i)===1||noteAdjStar(i))?1:0;
+const noteDisp=i=>noteVal(i)===2?2:(noteVal(i)===1||(autoCrossOn()&&noteAdjStar(i)))?1:0;
 function applyNoteDrag(i){if(disp(i)!==0)return;if(drag.mode==="add"){if(noteDisp(i)===0)noteDragWrite(drag,i,1)}else if(drag.mode==="del"){if(noteVal(i)===1)noteDragWrite(drag,i,0)}}
 function starDown(e){const mb=mouseLR(e);if(S.done||S.type!=="star"||e._closed||mb==="")return;if(drag&&drag.pid!==e.pointerId)starEnd();
  const N=S.p.N;S.sg=gridGeo(N);const i=gridHit(S.sg,e.clientX,e.clientY,N,N);if(i<0)return;
@@ -315,7 +320,7 @@ function nonoEnter(j){const k=nd.path.indexOf(j);if(k>=0){while(nd.path.length>k
  nd.path.push(j);const o=S.cur[j];nonoApply(j);if(S.cur[j]!==o)nd.prev.set(j,o)}
 function nonoApply(j){if(nd.mode==="add"){if(S.cur[j]===0)nonoPaint(j,nd.val)}else if(S.cur[j]===nd.val)nonoPaint(j,0)}
 /* Is een rij of kolom precies volgens de getallen gevuld? Dan worden de lege vakjes daarin vanzelf kruisjes. */
-function nonoAuto(changed){const W=S.p.W,H=S.p.H,rows=new Set(),cols=new Set();changed.forEach(i=>{rows.add(i/W|0);cols.add(i%W)});
+function nonoAuto(changed){if(!autoCrossOn())return;const W=S.p.W,H=S.p.H,rows=new Set(),cols=new Set();changed.forEach(i=>{rows.add(i/W|0);cols.add(i%W)});
  const fix=(idx,cl)=>{const v=idx.map(i=>S.cur[i]);if(!v.includes(0))return;if(S.p.color){if(cnEq(cnClue(v.map(x=>x>0?x:0)),cl)){idx.forEach(i=>{if(S.cur[i]===0)nonoPaint(i,-1)});return}
    /* Kleur: hetzelfde principe als klassiek. Als een gekleurd blok aantoonbaar dit specifieke getal is
       en op een vaste plek ligt, kruis alleen buurvakjes die in geen enkele geldige plaatsing nog gekleurd kunnen zijn. */
@@ -975,7 +980,7 @@ function clearAllNotes(){if(S.done||!S.p||!S.nt)return;const ch=Object.keys(S.nt
 function paintNotes(){if(!S.p||!S.nt)return;const t=S.type;
  if(t==="mur"){if(!S.mcells)return;const dark=isDark(),N=S.p.N,rc=Array(N).fill(0),cc=Array(N).fill(0);S.cur.forEach((v,i)=>{if(v>=0){rc[i/N|0]++;cc[i%N]++}});
   /* Aantekeningen in vakjes die vanzelf zijn afgekruist (rij of kolom van een geplaatst persoon) even verbergen; haal je die persoon weg, dan komen ze terug. */
-  S.mcells.forEach((d,i)=>{let e=d.querySelector(".mnt");const v=noteVal(i),show=v&&S.cur[i]===-1&&!rc[i/N|0]&&!cc[i%N];
+  S.mcells.forEach((d,i)=>{let e=d.querySelector(".mnt");const v=noteVal(i),show=v&&S.cur[i]===-1&&(!autoCrossOn()||(!rc[i/N|0]&&!cc[i%N]));
    if(!show){if(e)e.remove();return}if(!e){e=document.createElement("span");e.className="mnt";d.append(e)}
    e.classList.toggle("nxo",v===MNX);const h=(v&MNX?'<i class="mnx">×</i>':"")+S.p.ppl.map((nm,s)=>v&(1<<s)?`<b style="color:${s===S.p.V?"var(--fg)":`hsl(${MHUE[s]},62%,${dark?"62%":"40%"})`}">${nm[0]}</b>`:"").join("");if(e.innerHTML!==h)e.innerHTML=h});return}
  if(!["bin","star","nono"].includes(t)||!S.cells)return;
@@ -1061,7 +1066,7 @@ function paintMur(){const p=S.p,N=p.N,dark=isDark();if(!S.mcells||!S.mcells.leng
  const H=S.hint&&S.type==="mur"?S.hint:null;
  S.cur.forEach((v,i)=>{const d=S.mcells[i],sl=d.querySelector(".slot"),was=d.dataset.v||"",nv=v>=0?""+v:"";
   if(was!==nv){d.dataset.v=nv;sl.innerHTML=v>=0?murTok(p,v,dark):"";if(v>=0)popEl(sl)}
-  d.classList.toggle("on",v>=0);d.classList.toggle("xm",v===-2);d.classList.toggle("xx",v<0&&!murBlocked(p,i)&&(v===-2||rc[i/N|0]>0||cc[i%N]>0));
+  d.classList.toggle("on",v>=0);d.classList.toggle("xm",v===-2);d.classList.toggle("xx",v<0&&!murBlocked(p,i)&&(v===-2||(autoCrossOn()&&(rc[i/N|0]>0||cc[i%N]>0))));
   d.classList.toggle("conf",v>=0&&(rc[i/N|0]>1||cc[i%N]>1));d.classList.toggle("ht",!!H&&H.cells.includes(i))});
  document.querySelectorAll("#mpal .pb").forEach(b=>{if(b.dataset.s==="x"){b.classList.toggle("on",!!S.mxm&&!S.done);return}const s=+b.dataset.s;b.classList.toggle("on",S.ms===s&&!S.mxm&&!S.done);b.classList.toggle("placed",placed.has(s))});
  const mg=$("#mgrid");if(mg){mg.classList.toggle("mxmode",!!S.mxm&&!S.done);mg.classList.toggle("pmode",!S.mxm&&!S.done)}
@@ -1413,7 +1418,7 @@ function phoneLayout(){document.body.classList.add("phone");const hd=$("header")
  const pbot=document.createElement("div");pbot.id="pbot";document.body.append(pbot);
  prow.append($("#arch"),$("#hexstat"),$("#msg"));
  pbot.append($("#undo"),$("#redo"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✏️";$("#notewipe").innerHTML="🧹";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
- pmp.append($("#next"),$("#sbtn"),$("#helpb"),$("#ctrlb"),$("#reset"),$("#time"),$("#streak"),makeThemeSeg(),$("#authbtn"));$("#theme").hidden=true;
+ pmp.append($("#next"),$("#autocross"),$("#sbtn"),$("#helpb"),$("#ctrlb"),$("#reset"),$("#time"),$("#streak"),makeThemeSeg(),$("#authbtn"));$("#theme").hidden=true;
  $("#chk").innerHTML="✓<span> Klopt?</span>";$("#hintb").innerHTML="💡<span> Hint</span>";
  pm.onclick=()=>pmp.classList.toggle("open");pmp.addEventListener("click",e=>{if(e.target.closest("button"))setTimeout(()=>pmp.classList.remove("open"),80)});
  document.addEventListener("pointerdown",e=>{if(pmp.classList.contains("open")&&!e.target.closest("#pmp,#pm")){pmp.classList.remove("open");e._closed=true}},true);
@@ -1441,7 +1446,7 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
   const sec=(t)=>{const h=document.createElement("div");h.className="mh";h.textContent=t;more.append(h)};
   const lst=(...ids)=>{const d=document.createElement("div");d.className="mlist";ids.forEach(i=>d.append($(i)));more.append(d)};
   const ic=(b,i,t)=>{b.innerHTML='<span class="ic">'+i+'</span><span>'+t+'</span>'};
-  sec("Puzzel");lst("#arch","#next");sec("Weergave");more.append(makeThemeSeg());sec("Overig");lst("#sbtn","#helpb","#ctrlb","#reset","#authbtn");more.append($("#streak"));$("#theme").hidden=true;
+  sec("Puzzel");lst("#arch","#next","#autocross");sec("Weergave");more.append(makeThemeSeg());sec("Overig");lst("#sbtn","#helpb","#ctrlb","#reset","#authbtn");more.append($("#streak"));$("#theme").hidden=true;
   ic($("#arch"),"📅","Eerdere dagpuzzels");ic($("#next"),"🎲","Nog een puzzel");ic($("#sbtn"),"📊","Overzicht en statistieken");ic($("#helpb"),"❓","Uitleg van deze puzzel");ic($("#ctrlb"),"⌨️","Bediening");
   {const r=$("#reset");r.innerHTML='<b class="ic">⟲</b><span>Reset</span>'}updTheme();
   $("#tbHome").onclick=showHome;$("#tbMore").onclick=e=>{e.stopPropagation();more.classList.toggle("open")};
@@ -1624,6 +1629,7 @@ function controlsOf(t){const common=[],rows=[];
  return{rows,keys:common}}
 function showControls(){if(!S||!S.type)return;const t=S.type,m=$("#cm"),d=controlsOf(t);$("#cmt").textContent="Bediening · "+TYPES[t];
  $("#cmp").innerHTML='<div class="csec"><h3>Touch en muis</h3><div class="clist">'+d.rows.map(x=>'<div class="crow"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join("")+'</div></div><div class="csec"><h3>Sneltoetsen</h3><div class="ckeys">'+d.keys.map(x=>'<span><kbd>'+x[0]+'</kbd> '+x[1]+'</span>').join("")+'</div></div>';m.hidden=false}
+$("#autocross").onclick=toggleAutoCross;
 $("#ctrlb").onclick=showControls;$("#cmx").onclick=()=>{$("#cm").hidden=true};
 $("#cm").addEventListener("pointerdown",e=>{if(e.target===$("#cm"))$("#cm").hidden=true});
 

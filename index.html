@@ -11,8 +11,8 @@
 <script>try{if(navigator.standalone===true||matchMedia("(display-mode: standalone)").matches)document.documentElement.dataset.standalone=""}catch(e){}</script>
 <script>try{var t=localStorage.getItem("pdtheme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;else document.documentElement.removeAttribute("data-theme")}catch(e){}</script>
 <title>Gepuzzellig</title>
-<link rel="stylesheet" href="css/app.css?v=84">
-<script src="js/config.js?v=84"></script>
+<link rel="stylesheet" href="css/app.css?v=86">
+<script src="js/config.js?v=86"></script>
 </head><body>
 <div id="iosPwaStatusStrip" aria-hidden="true"></div>
 <div id="bootveil" aria-hidden="true"><div class="bootinner"><i></i><i></i><i></i></div></div>
@@ -61,7 +61,7 @@
 <main>
 <aside id="rail" aria-label="Puzzelgereedschap"><div id="time" role="button" tabindex="0" aria-label="Tijd tonen of verbergen">0:00</div><div id="streak">🔥 <b>0</b> dagen reeks</div><div id="msg" role="status" aria-live="polite" aria-atomic="true"></div>
 <div id="tools"><button id="undo" title="Ongedaan maken (Ctrl/Cmd+Z)"><b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></b><span>Ongedaan</span></button><button id="redo" title="Opnieuw (Ctrl/Cmd+Shift+Z)"><b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></b><span>Opnieuw</span></button><button id="reset" title="Puzzel opnieuw beginnen"><b>⟲</b><span>Reset</span></button></div>
-<div id="hexbtns"><div id="hexstat"></div><button id="mb" class="on" title="Blauw (Spatie wisselt)">🔵 Blauw</button><button id="mz" title="Zwart (Spatie wisselt)">⚫ Zwart</button></div><div id="nmode" aria-label="Invulstand"><button id="nf" class="on" title="Vullen (Spatie wisselt)">■ Vullen</button><button id="nc1" class="ncb" title="Rood"><i></i><span>Rood</span></button><button id="nc2" class="ncb" title="Blauw"><i></i><span>Blauw</span></button><button id="nc3" class="ncb" title="Geel"><i></i><span>Geel</span></button><button id="nc4" class="ncb" title="Groen"><i></i><span>Groen</span></button><button id="nx" title="Kruisje (Spatie wisselt)">✕ Kruisje</button></div><div id="pmode" aria-label="Markeerstand"><button id="pxb" class="on" title="Wegstrepen (Spatie wisselt)">✕ Wegstrepen</button><button id="pob" title="Omcirkelen (Spatie wisselt)">○ Omcirkelen</button></div><button id="potb" title="Aantekeningen (A)">✏️ Potlood</button><button id="notewipe" title="Alle potloodnotities wissen">🧹 Wis notities</button><button id="hintb" title="Hint (H)">💡 Hint</button><button id="chk" title="Controleer (C)">✓ Controleer</button><button id="helpb" title="Uitleg over deze puzzel">❓ Uitleg</button><button id="ctrlb" title="Bediening en sneltoetsen">⌨️ Bediening</button></aside>
+<div id="hexbtns"><div id="hexstat"></div><button id="mb" class="on" title="Blauw (Spatie wisselt)">🔵 Blauw</button><button id="mz" title="Zwart (Spatie wisselt)">⚫ Zwart</button></div><div id="nmode" aria-label="Invulstand"><button id="nf" class="on" title="Vullen (Spatie wisselt)">■ Vullen</button><button id="nc1" class="ncb" title="Rood"><i></i><span>Rood</span></button><button id="nc2" class="ncb" title="Blauw"><i></i><span>Blauw</span></button><button id="nc3" class="ncb" title="Geel"><i></i><span>Geel</span></button><button id="nc4" class="ncb" title="Groen"><i></i><span>Groen</span></button><button id="nx" title="Kruisje (Spatie wisselt)">✕ Kruisje</button></div><div id="pmode" aria-label="Markeerstand"><button id="pxb" class="on" title="Wegstrepen (Spatie wisselt)">✕ Wegstrepen</button><button id="pob" title="Omcirkelen (Spatie wisselt)">○ Omcirkelen</button></div><button id="potb" title="Aantekeningen (A)">✏️ Potlood</button><button id="notewipe" title="Alle potloodnotities wissen">🧹 Wis notities</button><button id="hintb" title="Hint (H)">💡 Hint</button><button id="chk" title="Controleer (C)">✓ Controleer</button><button id="helpb" title="Uitleg over deze puzzel">❓ Uitleg</button><button id="autocross" type="button" role="switch" aria-checked="true" hidden title="Onthouden per puzzelsoort op dit apparaat. Bij Nonogram blijven eerder gezette kruisjes staan."><span>Automatisch kruisjes</span><span class="autocrossstate">Aan</span></button><button id="ctrlb" title="Bediening en sneltoetsen">⌨️ Bediening</button></aside>
 <section id="stage"><div id="playbox">
 <div id="grid"></div><div id="pad"></div><div id="m24"></div><div id="mur"></div><div id="hexw"><div id="hexsvg"></div></div></div>
 <div id="npm" hidden role="region" aria-labelledby="npmt"><div class="hc npcard"><button id="npmx" class="npx" aria-label="Terug naar Home" title="Terug naar Home">←</button><h2 id="npmt">Nieuwe puzzel</h2><div id="npsub" class="mut"></div><div id="nplv"></div></div></div></section>
@@ -73,15 +73,15 @@
 <aside id="side"><div id="stabs"><button data-s="today" class="on">Vandaag</button><button data-s="over">Overzicht</button></div><div id="sv-today"><strong>Dagpuzzels vandaag</strong><div id="board" class="mut">Laden...</div><div id="week"></div></div><div id="sv-over" hidden></div>
 <details id="uit"><summary>Uitleg</summary><div id="help" class="mut"></div></details></aside>
 </main>
-<script src="js/puzzles/shared.js?v=84"></script>
-<script src="js/puzzles/binair.js?v=84"></script>
-<script src="js/puzzles/starbattle.js?v=84"></script>
-<script src="js/puzzles/nonogram.js?v=84"></script>
-<script src="js/puzzles/kakuro.js?v=84"></script>
-<script src="js/puzzles/maak24.js?v=84"></script>
-<script src="js/puzzles/hexcells.js?v=84"></script>
-<script src="js/puzzles/murdoku.js?v=84"></script>
-<script src="js/puzzles/pluszle.js?v=84"></script>
-<script src="js/core.js?v=84"></script>
-<script type="module" src="js/firebase.js?v=84"></script>
+<script src="js/puzzles/shared.js?v=86"></script>
+<script src="js/puzzles/binair.js?v=86"></script>
+<script src="js/puzzles/starbattle.js?v=86"></script>
+<script src="js/puzzles/nonogram.js?v=86"></script>
+<script src="js/puzzles/kakuro.js?v=86"></script>
+<script src="js/puzzles/maak24.js?v=86"></script>
+<script src="js/puzzles/hexcells.js?v=86"></script>
+<script src="js/puzzles/murdoku.js?v=86"></script>
+<script src="js/puzzles/pluszle.js?v=86"></script>
+<script src="js/core.js?v=86"></script>
+<script type="module" src="js/firebase.js?v=86"></script>
 </body></html>
