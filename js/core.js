@@ -33,8 +33,8 @@ const ACTIVE=["bin","star","nono","hex","plus","mur"];
 const DOUBLE_TAP_MS=600;
 const TYPES=Object.fromEntries(ACTIVE.map(t=>[t,ALLTYPES[t]]));
 const HELP={
- bin:"Vul de vakjes met ✕ en ○. Nooit drie dezelfde naast elkaar, in elke rij en kolom evenveel ✕ als ○, en geen twee rijen of twee kolommen gelijk. Tik of linksklik voor ✕; dubbeltik, dubbelklik of rechtermuisklik voor ○. Nog een tik op een ✕ maakt het vakje weer leeg. Sleep over een paar rijen (omlaag) of kolommen (opzij) om te zien of ze al gelijk zijn: lijnen waarvan de ingevulde ✕ en ○ overal gelijk zijn (lege vakjes tellen niet mee, minstens de helft van de lijn bij beide ingevuld) worden groen samen met de lijn waar je op dat moment overheen sleept. Laat je los terwijl ze groen zijn, dan blijven ze staan.",
- star:"Zet in elke rij, elke kolom en elk gekleurd gebied precies __K__ __S__. Sterren raken elkaar nooit, ook niet diagonaal. Tik of linksklik voor ✕ (geen ster); dubbeltik, dubbelklik of rechtermuisklik voor ★. Nog een tik op een ✕ maakt het vakje weer leeg.",
+ bin:"Vul de vakjes met ✕ en ○. Nooit drie dezelfde naast elkaar, in elke rij en kolom evenveel ✕ als ○, en geen twee rijen of twee kolommen gelijk. Tik of linksklik voor ✕; dubbeltik, dubbelklik of rechtermuisklik voor ○. Nog één tik op een ingevuld vakje maakt het weer leeg. Sleep over een paar rijen (omlaag) of kolommen (opzij) om te zien of ze al gelijk zijn: lijnen waarvan de ingevulde ✕ en ○ overal gelijk zijn (lege vakjes tellen niet mee, minstens de helft van de lijn bij beide ingevuld) worden groen samen met de lijn waar je op dat moment overheen sleept. Laat je los terwijl ze groen zijn, dan blijven ze staan.",
+ star:"Zet in elke rij, elke kolom en elk gekleurd gebied precies __K__ __S__. Sterren raken elkaar nooit, ook niet diagonaal. Tik of linksklik voor ✕ (geen ster); dubbeltik, dubbelklik of rechtermuisklik voor ★. Nog één tik op een ingevuld vakje maakt het weer leeg.",
  nono:"De getallen geven de lengtes van de blokken gevulde vakjes in die rij of kolom, in volgorde. Kies links ■ Vullen of ✕ Kruisje, of tik naast het veld (met je vinger of de Pencil) om te wisselen. Tik op een vakje om het te vullen of een kruisje te zetten, nog eens tikken maakt het weer leeg. Slepen werkt in dezelfde stand. Klopt een rij of kolom precies met de getallen, dan wordt het getal lichter. Met Automatisch kruisjes aan worden de lege vakjes daarin vanzelf kruisjes. Tik op een getal om alle lege vakjes in die rij of kolom kruisjes te maken.",
  kak:"Vul cijfers 1 t/m 9 in. De getallen in de zwarte vakjes zijn de som van het stuk rechts (bovenste getal) of eronder (onderste getal). Binnen één som komt elk cijfer maar één keer voor.",
  hex:"Elk vakje is blauw of zwart. Een zwart vakje met een getal vertelt hoeveel van zijn 6 buren blauw zijn. {3} betekent dat die blauwe buren aan elkaar liggen, -3- dat ze niet allemaal aan elkaar liggen. Een zwart vakje met ? zegt niets. Een blauw vakje met een getal vertelt hoeveel vakjes in het gebied eromheen (tot twee vakjes ver, het vakje zelf telt niet mee) blauw zijn. Sommige blauwe vakjes laten pas een getal zien als je ze gevonden hebt. Tik met Blauw op zo'n getal om de zone te tonen: een lichte zeshoek met een witte rand. Waar zones overlappen wordt het nog lichter. Zwart maakt het getal lichter als je er klaar mee bent. Getallen buiten het veld gelden voor de hele lijn in de richting van de pijl. Kies Blauw en tik op zo'n getal om een lichte lijn door die vakjes te zetten; tik nog een keer om hem weg te halen. Kies Zwart en tik op het getal als je klaar bent met die lijn: de lijn verdwijnt en het getal wordt lichter. Kies Blauw of Zwart en tik op een oranje vakje. Tik naast het veld (met je vinger of de Pencil) om te wisselen tussen Blauw en Zwart.",
@@ -256,11 +256,11 @@ function binDown(e){const mb=mouseLR(e);if(S.done||S.type!=="bin"||e._closed||mb
   else if(!potlood&&Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.cur=dblBase.slice();S.redo=[]}}
  if(dbl)binLastTap={t:0,i:-1,h:0,note:false};else if(mb==="r")binLastTap={t:0,i:-1,h:0,note:false};
  if(potlood){
-  const old=noteVal(i),editable=S.p.giv[i]<0&&S.cur[i]<0,target=(mb==="r"||dbl)?2:1,to=!editable?old:(old===target?0:target);
+  const old=noteVal(i),editable=S.p.giv[i]<0&&S.cur[i]<0,target=(mb==="r"||dbl)?2:1,to=!editable?old:((mb!=="r"&&!dbl&&old>0)||old===target?0:target);
   drag2={note:true,start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp,nchanges:new Map(),mouseDirect:mb!==null,dbl};S.rd=S.cd=S.pick=null;
   noteDragWrite(drag2,i,to);return}
  begin();if(dblBase)S.gs=dblBase;drag2={start:i,minr:r,maxr:r,minc:c,maxc:c,moved:false,old:S.cur[i],applied:false,pid:e.pointerId,x:e.clientX,y:e.clientY,t:e.timeStamp,mouseDirect:mb!==null,dbl};S.rd=S.cd=S.pick=null;
- if(S.p.giv[i]<0){const o=S.cur[i],target=(mb==="r"||dbl)?1:0;S.cur[i]=o===target?-1:target;drag2.applied=true}
+ if(S.p.giv[i]<0){const o=S.cur[i],target=(mb==="r"||dbl)?1:0;S.cur[i]=(mb!=="r"&&!dbl&&o>=0)||o===target?-1:target;drag2.applied=true}
  paintBin();
  if(mb===null&&!dbl)lpStart(e,()=>{if(!drag2||drag2.moved||drag2.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag2=null;S.gs=null;paintBin();lpNote(i)})}
 function binMove(e){if(!drag2||S.type!=="bin"||e.pointerId!==drag2.pid)return;
@@ -308,11 +308,11 @@ function starDown(e){const mb=mouseLR(e);if(S.done||S.type!=="star"||e._closed||
   else if(!potlood&&Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.redo=[];S.cur=dblBase.slice();paintAll()}}
  if(dbl)starLastTap={t:0,i:-1,h:0,note:false};else if(mb==="r")starLastTap={t:0,i:-1,h:0,note:false};
  e.preventDefault();if(!S.start)S.start=Date.now();invalidateHint();
- if(potlood){if(disp(i)!==0)return;const raw=noteVal(i),target=(mb==="r"||dbl)?2:1,mode=raw===target?"del":"add";
+ if(potlood){if(disp(i)!==0)return;const raw=noteVal(i),target=(mb==="r"||dbl)?2:1,mode=(mb!=="r"&&!dbl&&raw>0)||raw===target?"del":"add";
   drag={note:true,directNote:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map(),dbl};
   noteDragWrite(drag,i,mode==="del"?0:target);return}
  begin();if(dblBase)S.gs=dblBase;
- const target=(mb==="r"||dbl)?2:1,old=S.cur[i],mode=old===target?"del":"add";
+ const target=(mb==="r"||dbl)?2:1,old=S.cur[i],mode=(mb!=="r"&&!dbl&&old!==0)||old===target?"del":"add";
  drag={direct:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),dbl};drag.prev.set(i,old);
  setCell(i,mode==="del"?0:target);
  if(mb===null&&!dbl)lpStart(e,()=>{if(!drag||drag.moved||drag.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag=null;S.gs=null;paintAll();lpNote(i)})}
@@ -375,8 +375,9 @@ function nonoDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="nono"||S.done||e.
  const dbl=mb!=="r"&&lastTap.i===i&&e.timeStamp-lastTap.t<DOUBLE_TAP_MS;if(dbl)lastTap={t:0,i:-1};else if(mb==="r")lastTap={t:0,i:-1};
  if(dbl&&S.hist&&S.hist.length){const pre=S.hist[S.hist.length-1];if(Array.isArray(pre)&&pre.length===S.cur.length){const was=S.cur.slice();S.cur=S.hist.pop().slice();S.redo=[];was.forEach((v,j)=>{if(v!==S.cur[j])nonoPaint(j,S.cur[j])});ub()}}
  if(!S.start)S.start=Date.now();invalidateHint();begin();const old=S.cur[i],cross=S.p.color?-1:2,fill=S.p.color?nonoColorMode:1,active=S.p.color?(nonoMode==="x"?cross:fill):(nonoMode==="x"?cross:fill),val=dbl?cross:mb==="r"?(active===cross?fill:cross):active;
- nd={i0:i,last:i,moved:false,pid:e.pointerId,path:[i],prev:new Map(),old,val,mode:old===val?"del":"add",dbl};
- const nv=dbl?val:(old===val?0:val);nonoPaint(i,nv);if(nv!==old)nd.prev.set(i,old)}
+ const remove=(mb!=="r"&&old!==0)||old===val;
+ nd={i0:i,last:i,moved:false,pid:e.pointerId,path:[i],prev:new Map(),old,val:remove?old:val,mode:remove?"del":"add",dbl};
+ const nv=remove?0:val;nonoPaint(i,nv);if(nv!==old)nd.prev.set(i,old)}
 function nonoMove(e){if(!nd||S.type!=="nono"||e.pointerId!==nd.pid)return;const i=nonoAt(e.clientX,e.clientY);if(i<0||i===nd.last)return;const N=S.p.W;nd.moved=true;
  const r0=nd.last/N|0,c0=nd.last%N,r1=i/N|0,c1=i%N,n=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));
  for(let k=1;k<=n;k++)nonoEnter(Math.round(r0+(r1-r0)*k/n)*N+Math.round(c0+(c1-c0)*k/n));
@@ -1386,13 +1387,15 @@ function progressPct(){if(!S||!S.p)return 0;const p=S.p,cur=S.cur,ratio=(a,b)=>b
  if(S.type==="hex"&&S.hx){const base=new Set([...(p.rev0||[]),...(p.zs||[])]),a=[...S.hx.rev].filter(i=>!base.has(i)).length,b=Math.max(0,(p.cells||[]).length-base.size);return ratio(a,b)}
  if(S.type==="mur"&&cur)return ratio(cur.filter(v=>v!==-1).length,cur.length);
  if(S.type==="m24")return ratio(S.r||0,5);return 0}
+/* Firestore kan geen bordlijsten direct in een geschiedenislijst bewaren. Alleen de cloudversie krijgt een omhullend object. */
+function cloudProgressHistory(e,encode){const out=Object.assign({},e);for(const key of ["hist","redo"])if(Array.isArray(out[key]))out[key]=out[key].map(step=>encode?(Array.isArray(step)?{board:step}:step):(step&&Array.isArray(step.board)?step.board:step));return out}
 function cloudPushProgress(k,e,force){if(!cloudProgOk()||!e||progressSolved(k,e))return;if(navigator.onLine===false){UX.storage(k,{at:e.at,remote:"failed"});return}const now=Date.now();if(!force&&now-(cloudProgLast[k]||0)<60000)return;cloudProgLast[k]=now;
- const entry=Object.assign({},e,{k});UX.storage(k,{at:e.at,remote:"saving"});
- return window.PD_DB.saveProgress({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",ck:cloudProgKey(k),entry}).then(()=>UX.storage(k,{at:e.at,remote:"saved"})).catch(()=>{cloudProgLast[k]=Date.now();UX.storage(k,{at:e.at,remote:"failed"})})}
+ const entry=Object.assign(cloudProgressHistory(e,true),{k});UX.storage(k,{at:e.at,remote:"saving"});
+ return Promise.resolve().then(()=>window.PD_DB.saveProgress({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",ck:cloudProgKey(k),entry})).then(()=>UX.storage(k,{at:e.at,remote:"saved"})).catch(()=>{cloudProgLast[k]=Date.now();UX.storage(k,{at:e.at,remote:"failed"})})}
 function cloudClearProgress(k){if(!cloudProgOk()||!window.PD_DB.clearProgress)return;window.PD_DB.clearProgress({uid,group:$("#group").value.trim(),ck:cloudProgKey(k)}).catch(()=>{})}
 function progDel(k){const a=progAll();if(k in a){delete a[k];lsSet(PKEY,JSON.stringify(a))}cloudClearProgress(k)}
 function mergeCloudProgress(mp){if(PHONE||!mp)return false;const a=progAll(),remote={};let ch=false,reload=false,curk=S&&S.p?progKey(S.type,S.practice,S.date,S.sf):"";
- Object.values(mp).forEach(e=>{if(!e||!e.k)return;remote[e.k]=e;const k=e.k;if(!progressRelevant(k)||progressSolved(k,e)){cloudClearProgress(k);return}const l=a[k];if(!l||(e.at||0)>(l.at||0)){const z=Object.assign({},e);delete z.k;a[k]=z;ch=true;if(k===curk&&!document.body.classList.contains("home")&&(e.at||0)>(S._saveAt||0))reload=true}});
+ Object.values(mp).forEach(raw=>{if(!raw||!raw.k)return;const e=cloudProgressHistory(raw,false);remote[e.k]=e;const k=e.k;if(!progressRelevant(k)||progressSolved(k,e)){cloudClearProgress(k);return}const l=a[k];if(!l||(e.at||0)>(l.at||0)){const z=Object.assign({},e);delete z.k;a[k]=z;ch=true;if(k===curk&&!document.body.classList.contains("home")&&(e.at||0)>(S._saveAt||0))reload=true}});
  const now=Date.now();for(const[k,e0]of Object.entries(a)){if(!progressRelevant(k)||progressSolved(k,e0))continue;let e=e0;if(!e.at&&!remote[k]){e=Object.assign({},e,{at:now});a[k]=e;ch=true}const r=remote[k];if(!r||(e.at||0)>(r.at||0))cloudPushProgress(k,e,true)}
  if(ch&&!lsSet(PKEY,JSON.stringify(a))&&curk)UX.storage(curk,{local:false,remote:"saved"});if(reload&&S&&S.p&&!S.done){const t=S.type,pr=S.practice,d=S.date;S.start=0;load(t,pr,false,d)}else if(document.body.classList.contains("home"))try{renderHome()}catch(e){}return ch}
 function pullCloudProgress(force){if(PHONE||!uid||uid==="x"||!window.PD_DB||!window.PD_DB.getProgress||cloudProgPulling)return Promise.resolve(false);const now=Date.now();if(!force&&now-cloudProgPullAt<15000)return Promise.resolve(false);cloudProgPullAt=now;cloudProgPulling=true;
@@ -1664,8 +1667,8 @@ requestAnimationFrame(()=>document.documentElement.removeAttribute("data-ui-pend
 /* ---- Bediening per puzzel ---- */
 function controlsOf(t){const common=[["Toetsenbord","Tab naar het bord, pijltjestoetsen naar een vakje, Enter om te plaatsen. Shift+Enter gebruikt de andere actie."]],rows=[];
  if(t==="nono"){rows.push(["Tik / linksklik","Gebruik de actieve vul-, kleur- of kruisstand"],["Rechtermuisknop","Gebruik de andere stand: kruisje ↔ vullen/laatst gekozen kleur"],["Dubbeltik / dubbelklik","Zet altijd een kruisje zonder je actieve stand of kleur te veranderen"],["Slepen","Vul of kruis meerdere vakjes in dezelfde stand"],["Naast het bord","Wissel tussen vullen/kleur en kruisjes"]);common.push(["Spatie","wissel stand"])}
- else if(t==="bin"){rows.push(["Tik / linksklik","Plaats ✕"],["Dubbeltik / dubbelklik","Plaats ○, of wis een bestaande ○"],["Rechtermuisknop","Plaats of wis direct ○"],["Potlood","Zelfde bediening als normaal, maar met kleine ✕ en ○"],["Teller slepen","Vergelijk die rij of kolom met de andere"])}
- else if(t==="star"){rows.push(["Tik / linksklik","Plaats een kruisje"],["Dubbeltik / dubbelklik","Plaats een ster, of wis een bestaande ster"],["Rechtermuisknop","Plaats of wis direct een ster"],["Potlood","Zelfde bediening als normaal, maar met dunne kleine ☆ en ×"],["Slepen","Plaats dezelfde markering in meerdere vakjes"])}
+ else if(t==="bin"){rows.push(["Tik / linksklik","Leeg vakje: ✕. Ingevuld vakje: leegmaken"],["Dubbeltik / dubbelklik","Plaats ○, of wis een bestaande ○"],["Rechtermuisknop","Plaats of wis direct ○"],["Potlood","Zelfde bediening als normaal, maar met kleine ✕ en ○"],["Teller slepen","Vergelijk die rij of kolom met de andere"])}
+ else if(t==="star"){rows.push(["Tik / linksklik","Leeg vakje: kruisje. Ingevuld vakje: leegmaken"],["Dubbeltik / dubbelklik","Plaats een ster, of wis een bestaande ster"],["Rechtermuisknop","Plaats of wis direct een ster"],["Potlood","Zelfde bediening als normaal, maar met dunne kleine ☆ en ×"],["Slepen","Plaats dezelfde markering in meerdere vakjes"])}
  else if(t==="plus"){rows.push(["Tik / linksklik","Gebruik de actieve stand: omcirkelen of wegstrepen"],["Rechtermuisknop","Gebruik de andere stand: omcirkelen ↔ wegstrepen"],["Slepen","Markeer meerdere getallen in dezelfde stand"],["Naast het bord","Wissel stand"]);common.push(["Spatie","wissel stand"])}
  else if(t==="hex"){rows.push(["Tik / linksklik","Gebruik de actieve stand: blauw of zwart"],["Rechtermuisknop","Gebruik de andere stand: blauw ↔ zwart"],["Blauw/grijs vlak","Wissel tussen blauw en zwart"],["Rand- of blauw cijfer","Links gebruikt de actieve stand; rechts de andere stand"]);common.push(["Spatie","wissel blauw/zwart"])}
  else if(t==="mur"){rows.push(["Tik / linksklik","Gebruik de actieve plaats- of kruisstand"],["Rechtermuisknop","Gebruik de andere stand: plaatsen ↔ wegkruisen"],["Naast het bord","Wissel tussen plaatsen en wegkruisen"]);common.push(["Spatie","wissel stand"])}

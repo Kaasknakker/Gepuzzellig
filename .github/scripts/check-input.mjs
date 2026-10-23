@@ -30,10 +30,27 @@ for(const type of ['bin','star'])for(const pointerType of ['touch','pen','mouse'
  function tap(t,button=0){const e={pointerType,button,pointerId:1,clientX:5,clientY:5,timeStamp:t,target:{closest:()=>null},preventDefault(){}};down(e);up({...e,timeStamp:t+40})}
  tap(1000);tap(1540);assert.equal(value(),notes?2:secondary,type+' slow double tap');assert.equal(S.hist.length,1,'one undo step');
  let h=S.hist.pop();if(notes)noteRaw(0,h.from);else S.cur=h;assert.equal(value(),notes?0:empty,'undo removes secondary');
+ for(const mark of [notes?1:type==='bin'?0:1,notes?2:secondary]){
+  S.hist=[];S.cur=[notes?empty:mark];S.nt=notes?{0:mark}:{};binLastTap=starLastTap={t:0,i:-1};
+  tap(2500);assert.equal(value(),notes?0:empty,type+' one tap clears either existing mark');
+ }
  S.hist=[];S.cur=[notes?empty:secondary];S.nt=notes?{0:2}:{};binLastTap=starLastTap={t:0,i:-1};
  tap(3000);tap(3540);assert.equal(value(),notes?0:empty,type+' '+pointerType+' notes='+notes+' double tap clears existing secondary');
  h=S.hist.pop();if(notes)noteRaw(0,h.from);else S.cur=h;assert.equal(value(),notes?2:secondary,'undo restores secondary');
  S.hist=[];S.cur=[empty];S.nt={};binLastTap=starLastTap={t:0,i:-1};tap(5000);tap(5800);assert.equal(value(),notes?0:empty,'separate taps toggle primary');
+}
+`,c);
+// Nonogram: a cross (including color Nonogram) also clears with one tap.
+vm.runInContext(`let nd=null,lastTap={t:0,i:-1},nonoMode='f',nonoColorMode=1;const nonoAt=()=>0,nonoLine=()=>{},nonoAuto=()=>{};function nonoPaint(i,v){S.cur[i]=v}`,c);
+vm.runInContext(section('function nonoDown(','function nonoMove('),c);
+vm.runInContext(section('function nonoUp(','addEventListener("pointerup",nonoUp)'),c);
+vm.runInContext(`
+for(const color of [false,true])for(const pointerType of ['touch','pen','mouse']){
+ S={type:'nono',p:{W:1,H:1,color},cur:[0],hist:[],redo:[],start:0};lastTap={t:0,i:-1};
+ function tap(t){const e={pointerType,button:0,pointerId:1,clientX:5,clientY:5,timeStamp:t,target:{closest:()=>null},preventDefault(){}};nonoDown(e);nonoUp({...e,timeStamp:t+40})}
+ tap(1000);tap(1540);assert.equal(S.cur[0],color?-1:2,'double tap places cross');assert.equal(S.hist.length,1);
+ tap(3000);assert.equal(S.cur[0],0,'single tap clears cross');
+ tap(4000);assert.equal(S.cur[0],1);tap(5000);assert.equal(S.cur[0],0,'single tap clears filled cell');
 }
 `,c);
 // A Pencil contact must not activate a menu on both down and up/touchstart.
@@ -53,4 +70,35 @@ for(const navigation of [false,true]){
  dismissHandlers.pointerdown(e);assert.equal(open,false);assert.equal(stopped,!navigation,'navigation acts immediately; background only dismisses');
  stopped=false;dismissHandlers.pointerdown(e);assert.equal(stopped,false,'next contact is not swallowed');
 }
-console.log('OK: slow double taps and undo for touch/Pencil/mouse, regular and pencil marks; one UI action per Pencil contact');
+// Run real save-and-return flow with Firestore's nested-array constraint.
+let saved={},captured=null,rendered=false,failSave=false,status={};
+const flags=new Set(),elements={};
+function noNestedArrays(value){if(Array.isArray(value)){for(const item of value){assert(!Array.isArray(item),'Firestore rejects direct nested arrays');noNestedArrays(item)}}else if(value&&typeof value==='object')for(const item of Object.values(value))noNestedArrays(item)}
+const home=vm.createContext({console,Date,Promise,Array,Object,Set,
+ S:null,HOMEREADY:true,RANDOM:false,HVIEW:'',HDOPEN:'',GV:'test',MGV:'test',PGV:'test',PKEY:'progress',uid:'test',cloudProgLast:{},
+ navigator:{onLine:true},cloudProgOk:()=>true,progressSolved:()=>false,cloudProgKey:k=>k,
+ progAll:()=>JSON.parse(JSON.stringify(saved)),lsSet:(k,v)=>{saved=JSON.parse(v);return true},dstr:()=> '2026-10-23',addDays:()=> '2026-10-15',playMs:()=>1000,
+ UX:{saves:new Map(),storage:(k,v)=>{status={...status,...v}},paintStorage(){}},
+ $:id=>elements[id]??={value:'test',hidden:false,classList:{remove(){}}},
+ document:{body:{classList:{add:x=>flags.add(x),remove:x=>flags.delete(x),contains:x=>flags.has(x)}}},
+ clearOnline(){},clearHint(){},toggleSide(){},tapMode(){},renderHome(){rendered=true},pageIn(){},cloudClearProgress(){},
+ window:{scrollTo(){},PD_DB:{saveProgress:o=>{noNestedArrays(o.entry);captured=o.entry;if(failSave)throw new Error('save failed');return Promise.resolve()}}}
+});
+for(const [a,b]of [
+ ['function progKey(','const cloudProgKey'],['function progressPct(','/* Firestore kan'],
+ ['function cloudProgressHistory(','function cloudClearProgress('],['function persist(','setInterval(persist'],
+ ['function pausePlay(','function resumePlay('],['function pauseAndPersistActive(','function setFreePreferences('],
+ ['function showHome(','const dayLvDevice=']
+])vm.runInContext(section(a,b),home);
+for(const type of ['bin','star','nono','plus','mur','hex']){
+ saved={};captured=null;rendered=false;flags.clear();status={};
+ home.S={type,practice:true,date:'2026-10-23',sf:'',seed:'test',start:1,p:{giv:[-1],cells:[{},{}],rev0:[]},cur:[type==='bin'?0:1],hist:[[-1],{note:1,i:0,from:0,to:1}],redo:[[0]],nt:{}};
+ if(type==='hex')home.S.hx={rev:new Set([0])};
+ home.showHome();assert(rendered&&flags.has('home'),type+' returns Home after input');
+ await new Promise(setImmediate);assert(captured,type+' saved');assert.equal(status.remote,'saved');
+ assert.deepEqual(JSON.parse(JSON.stringify(home.cloudProgressHistory(captured,false).hist)),[[-1],{note:1,i:0,from:0,to:1}]);
+ assert.deepEqual(JSON.parse(JSON.stringify(home.cloudProgressHistory(captured,false).redo)),[[0]]);
+ assert(Array.isArray(saved['p:'+type].hist[0]),'local undo format stays compatible');
+}
+failSave=true;rendered=false;home.showHome();assert(rendered,'sync cloud failure cannot block navigation');await new Promise(setImmediate);assert.equal(status.remote,'failed');
+console.log('OK: single tap clears marks, slow double taps and undo for touch/Pencil/mouse; Nonogram crosses; Pencil navigation; save/return and cloud history for all six puzzles');
