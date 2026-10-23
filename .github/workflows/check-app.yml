@@ -20,6 +20,8 @@ jobs:
           node-version: "22"
       - name: App controleren
         run: node .github/scripts/check-app.mjs
+      - name: Opslag en UX-regressies controleren
+        run: node .github/scripts/check-ux.mjs
       - name: Automatische kruisjes controleren
         run: node .github/scripts/check-autocross.mjs
       - name: Stapsgewijze hints controleren
