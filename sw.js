@@ -1,14 +1,14 @@
 /* Gepuzzellig: offline app-shell + altijd eerst de nieuwste online versie.
    Oude Gepuzzellig-caches worden bij activatie opgeruimd; andere caches op hetzelfde domein laten we met rust. */
 const PREFIX="gepuzzellig-";
-const C=PREFIX+"v71";
+const C=PREFIX+"v72";
 
 const sleutel=r=>{const u=new URL(r.url);u.search="";u.hash="";if(u.pathname.endsWith("/index.html"))u.pathname=u.pathname.slice(0,-10);return u.href};
 
 self.addEventListener("install",e=>{
  e.waitUntil((async()=>{
   const c=await caches.open(C);
-  await Promise.all(["./","raadsels.html","admin.html"].map(async u=>{
+  await Promise.all(["./","raadsels.html","admin.html","css/app.css","js/config.js","js/app.js","js/firebase.js"].map(async u=>{
    try{
     const req=new Request(new URL(u,self.registration.scope),{cache:"reload"});
     const res=await fetch(req);
