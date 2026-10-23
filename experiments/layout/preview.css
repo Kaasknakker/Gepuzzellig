@@ -1,0 +1,55 @@
+/* Alleen de zelfstandige layoutproef gebruikt deze overrides. */
+#layoutBar{display:flex;align-items:center;gap:8px;min-height:40px;padding:5px 12px;background:var(--card);border-bottom:1px solid var(--line);font-size:13px;position:relative;z-index:45}
+#layoutBar strong{margin-right:auto}#layoutBar button,#layoutBar select{font:inherit;min-height:30px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;color:var(--fg);background:var(--card)}
+#layoutBar a{color:var(--fg)}
+#layoutIntro{padding:10px 0;color:var(--mut);font-size:13px;line-height:1.5}
+body.layout-proef #authbtn,body.layout-proef #hProfile{display:none!important}
+body.layout-proef:not(.home):not(.newpick) main{height:auto!important;overflow:visible!important;padding-top:4px!important}
+body.layout-proef:not(.home):not(.newpick) #stage{position:fixed;top:var(--test-top);left:var(--test-left);width:var(--test-width);height:var(--test-height);margin:0!important;padding:0!important;max-height:none!important;overflow:auto;overscroll-behavior:contain;justify-content:flex-start;align-items:center}
+body.layout-proef #playbox{width:max-content;max-width:none;flex-shrink:0}
+body.layout-proef.phone #pbot{flex-wrap:wrap;align-content:center;min-height:112px;gap:6px;padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+body.layout-proef.phone #pbot>button{min-height:44px;max-height:44px;padding:7px 5px}
+body.layout-proef.phone #pbot #nmode,body.layout-proef.phone #pbot #pmode{flex:2 1 120px}
+body.layout-proef.phone #pbot #potb,body.layout-proef.phone #pbot #notewipe{flex:0 1 44px}
+body.layout-proef.phone #pbot #undo,body.layout-proef.phone #pbot #redo{flex:0 1 40px}
+body.layout-proef.phone #pbot #hintb,body.layout-proef.phone #pbot #chk{flex:1 1 64px}
+body.layout-proef.phone #stage{touch-action:pan-x pan-y!important}
+body.layout-proef.phone #mur{width:var(--test-width);gap:8px}
+body.layout-proef.phone #mclues{touch-action:pan-y!important;overscroll-behavior:contain;font-size:15px;padding:8px 10px}
+body.layout-proef:not(.phone) #mclues{max-height:none!important;overflow:visible}
+body.layout-proef.phone #home .hwrap{padding:12px 10px 24px!important}
+body.layout-proef.phone #home .hsection{margin-top:12px}
+body.layout-proef.phone .sper{flex-wrap:wrap;gap:3px}
+body.layout-proef.phone .sper button{min-height:40px;padding:6px 11px}
+body.layout-proef.phone .sco .stop{flex-wrap:wrap}
+#layoutShade{position:fixed;inset:0;width:100%;height:100%;z-index:37;pointer-events:none}
+#layoutShade[hidden]{display:none}
+body.layout-proef #hint.layout-hint{position:fixed!important;transform:none!important;left:var(--card-left)!important;top:var(--card-top)!important;right:auto!important;bottom:auto!important;width:var(--card-width)!important;height:var(--card-height)!important;max-height:none!important;margin:0;padding:12px;border:1px solid var(--line);border-radius:14px;z-index:40;display:flex!important;flex-direction:column;box-shadow:0 8px 30px #0003;background:var(--card);overflow:hidden;font-size:15px;animation:none!important}
+body.layout-proef #hint.layout-hint .hx{top:6px;right:6px;width:36px;height:36px;min-width:36px;min-height:36px;z-index:1}
+body.layout-proef #hint.layout-hint .hht{font-size:16px;margin:0 38px 4px 0;line-height:1.3}
+.layout-copy{overflow:auto;min-height:0;flex:1;touch-action:pan-y;overscroll-behavior:contain}
+body.layout-proef #hint.layout-hint .hintbody{font-size:15px;line-height:1.45;margin:6px 0}
+body.layout-proef #hint.layout-hint .hintprogress{font-size:12px}
+body.layout-proef #hint.layout-hint .hintusage{font-size:11px;margin:5px 0;padding:4px 0 0}
+body.layout-proef #hint.layout-hint .hintlegend{font-size:12px;margin:5px 0}
+.layout-actions{display:flex;gap:6px;flex:none;margin-top:8px}
+body.layout-proef #hint.layout-hint .layout-actions button{margin:0!important;min-height:44px;padding:7px 9px;font-size:13px;line-height:1.2}
+body.layout-proef #hint.layout-hint .hintback{width:auto;flex:0 0 64px}
+body.layout-proef #hint.layout-tray{display:grid!important;grid-template-columns:minmax(0,1fr) 112px;grid-template-rows:24px minmax(0,1fr);gap:4px 10px;padding:8px 10px;border-radius:12px 12px 0 0}
+body.layout-proef #hint.layout-tray .hht{grid-column:1;grid-row:1;font-size:14px;margin:0}
+body.layout-proef #hint.layout-tray .layout-copy{grid-column:1;grid-row:2;padding-right:2px}
+body.layout-proef #hint.layout-tray .layout-copy .hintprogress,body.layout-proef #hint.layout-tray .hintusage{display:none}
+body.layout-proef #hint.layout-tray .hintbody{margin:0 0 7px;font-size:15px}
+body.layout-proef #hint.layout-tray .hx{position:static;grid-column:2;grid-row:1;justify-self:end;width:30px;min-width:30px;height:24px;min-height:24px}
+body.layout-proef #hint.layout-tray .layout-actions{grid-column:2;grid-row:2;flex-direction:column;margin:0;overflow:auto;touch-action:pan-y}
+body.layout-proef #hint.layout-tray .layout-actions .hintback{flex:none;width:100%;min-height:30px}
+body.layout-proef.layout-tray-open #pbot{visibility:hidden}
+@media(max-width:500px){#layoutBar{gap:5px;padding:5px 7px;font-size:12px}#layoutBar strong{font-size:12px}#layoutBar select{max-width:92px}#layoutBar a{font-size:11px}}
+
+body.layout-proef.phone[data-t=bin] #grid .c,body.layout-proef.phone[data-t=nono] #grid .c{height:var(--test-cell-height,var(--cs))}
+body.layout-proef[data-t=mur] #playbox{width:100%}
+
+body.layout-proef #stage{animation:none!important;transform:none!important}
+body.layout-proef #grid .ncl{min-width:min(21px,var(--cs));height:min(21px,var(--cs));padding:0 3px;font-size:clamp(10px,calc(var(--cs)*.5),12px)}
+body.layout-proef #grid .ncv{gap:1px}
+html.tap body.layout-proef,html.tap body.layout-proef main,html.tap body.layout-proef #stage{touch-action:pan-y}

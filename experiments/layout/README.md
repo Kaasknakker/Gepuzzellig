@@ -1,0 +1,29 @@
+# Layoutproef
+
+`proef-layout.html` is een zelfstandige, tijdelijke proef naast de gewone app. De productiepagina, scripts, stylesheet, Firebase-inrichting en service worker blijven ongewijzigd. De proef bevat een snapshot van de bestaande puzzels en hints, met uitsluitend presentatieaanpassingen. Alle testopslag zit in het geheugen van de geopende pagina; herladen wist de proefvoortgang. Firebase wordt niet geladen en de proef registreert geen service worker.
+
+Bron bij eerste bouw: main `6f54f029ff5629379a7a9fb323eb1beec2f5e480`.
+
+- iPhone: vaste beschikbare speelruimte, minder marges, optioneel hogere Binair-/Nonogramcellen; Murdoku-aanwijzingen kunnen scrollen.
+- Grotere schermen: begrensde celgrootte, compact Pluszle, Murdoku zonder apart scrollpaneel voor de aanwijzingen.
+- Hints: doorschijnende laag met vrijgehouden relevante gebieden; tekstplek wordt vooraf voor de drie stappen bepaald. Alleen de huidige stap wordt gemarkeerd.
+- Als er geen geschikte tekstplek is, vervangt de hint tijdelijk de bestaande bediening. Langere uitleg scrolt binnen de vaste kaart.
+- Via **Vergelijk** bekijk je dezelfde puzzel met de bestaande indeling. Via de terugknop kun je Home en overzichten bekijken.
+
+Dit is een proef om te beoordelen, geen definitieve vervanging. Bij wijzigen van vensterformaat mag de tekstplek opnieuw worden bepaald. Op zeer kleine liggende telefoons kan scrollen nodig zijn.
+
+## Bouwen en controleren
+
+Vanuit de repositoryroot:
+
+```sh
+node experiments/layout/build.mjs
+node experiments/layout/build.mjs --check
+node experiments/layout/check.mjs
+```
+
+De browsercontrole vereist Playwright. Met `PLAYWRIGHT_CHROMIUM_EXECUTABLE` kan een bestaande Chromium worden gekozen. Geef optioneel een gepubliceerde test-URL mee als argument.
+
+Gecontroleerd met Chromium: 320×667 en 390×844 (telefoon), 820×1180 en 1180×820 (tablet), 3840×2160 (desktop). Alle zes actieve puzzels op hun grootste formaat: 30 borden en 90 hintstappen. Checks: bordbreedte/-hoogte, geen overlap met benodigd hintgebied, vaste bord- en kaartgeometrie, hints voeren niets voortijdig uit, uitklappen/sluiten, begrensd Pluszle, geen afzonderlijke Murdoku-scroll op grote schermen, originele lokale opslag onaangeroerd. Screenshots van telefoon, tablet en desktop visueel bekeken.
+
+Echte Safari-, Apple Pencil- en iOS-veilige-schermrandcontrole blijft gebruikersacceptatie op de apparaten zelf. De browsercontrole simuleert schermformaten; dit is geen claim van fysieke apparaattests.
