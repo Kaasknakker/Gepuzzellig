@@ -261,10 +261,10 @@ service cloud.firestore {
       allow create: if hasProfile()
         && groupId.matches('g_[a-z0-9]{6,20}')
         && request.resource.data.keys().hasOnly([
-          'name','ownerAuthUid','inviteCode','theme','accent','createdAt','updatedAt'
+          'name','ownerAuthUid','inviteCode','theme','accent','murdokuNames','createdAt','updatedAt'
         ])
         && request.resource.data.keys().hasAll([
-          'name','ownerAuthUid','inviteCode','theme','accent','createdAt','updatedAt'
+          'name','ownerAuthUid','inviteCode','theme','accent','murdokuNames','createdAt','updatedAt'
         ])
         && request.resource.data.ownerAuthUid == request.auth.uid
         && request.resource.data.name is string
@@ -275,6 +275,8 @@ service cloud.firestore {
         && request.resource.data.inviteCode.size() <= 12
         && request.resource.data.theme in ['shared','peter','aart','stars','nature','retro','animals','sea','travel','music','party','coffee','season','minimal']
         && request.resource.data.accent in ['blue','purple','teal','green','orange','pink','red']
+        && request.resource.data.murdokuNames is list
+        && request.resource.data.murdokuNames.size() <= 18
         && request.resource.data.createdAt is int
         && request.resource.data.createdAt >= 0
         && request.resource.data.updatedAt is int
@@ -283,7 +285,7 @@ service cloud.firestore {
       allow update: if signedIn()
         && resource.data.get('ownerAuthUid', '') == request.auth.uid
         && request.resource.data.keys().hasOnly([
-          'name','ownerAuthUid','inviteCode','theme','accent','createdAt','updatedAt'
+          'name','ownerAuthUid','inviteCode','theme','accent','murdokuNames','createdAt','updatedAt'
         ])
         && request.resource.data.ownerAuthUid == resource.data.ownerAuthUid
         && request.resource.data.inviteCode == resource.data.inviteCode
@@ -293,6 +295,8 @@ service cloud.firestore {
         && request.resource.data.name.size() <= 40
         && request.resource.data.get('theme','shared') in ['shared','peter','aart','stars','nature','retro','animals','sea','travel','music','party','coffee','season','minimal']
         && request.resource.data.get('accent','orange') in ['blue','purple','teal','green','orange','pink','red']
+        && request.resource.data.get('murdokuNames',[]) is list
+        && request.resource.data.get('murdokuNames',[]).size() <= 18
         && request.resource.data.updatedAt is int
         && request.resource.data.updatedAt >= 0;
 
