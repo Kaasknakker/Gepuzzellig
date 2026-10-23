@@ -86,11 +86,12 @@ let paints=0;
 const nodes={'.hintnext':{},'.hintback':{},'.hintlegend':{}};
 const $=()=>({querySelector:s=>nodes[s]});
 const repaintHint=()=>paints++;
-let S={hint:{level:3,cells:[1],why:[0],ghost:[2],cards:[3],hexLines:[4],move:{}},done:false};
+let S={hint:{level:3,cells:[1],why:[0],ghost:[2],cards:[3],hexLines:[4],unit:0,move:{}},done:false};
 ${core.slice(core.indexOf('function invalidateHint()'),core.indexOf('function hintGo()'))}
 ${core.slice(core.indexOf('function doStep()'),core.indexOf('$("#hintb").onclick'))}
 invalidateHint();
 assert.equal(S.hint.stale,true);assert.equal(paints,1);
+assert.equal(S.hint.unit,null);
 for(const key of ['cells','why','ghost','cards','hexLines'])assert.equal(S.hint[key].length,0);
 assert.equal(nodes['.hintback'].hidden,true);
 assert.equal(nodes['.hintnext'].textContent,'Vernieuw hint voor dit bord');

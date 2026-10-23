@@ -577,7 +577,7 @@ function hideHint(){S.hint=null;document.body.classList.remove("hintdock");const
  if(visible&&!matchMedia("(prefers-reduced-motion: reduce)").matches){b.classList.add("closing");hintHideT=setTimeout(done,135)}else done()}
 function clearHint(){if(!S.hint)return;hideHint();repaintHint()}
 /* Een bordgebaar mag de geometrie niet veranderen voordat de cel is bepaald. */
-function invalidateHint(){const h=S.hint;if(!h||h.stale)return;h.stale=true;h.cells=[];h.why=[];h.ghost=[];h.cards=[];h.hexLines=[];
+function invalidateHint(){const h=S.hint;if(!h||h.stale)return;h.stale=true;h.cells=[];h.why=[];h.ghost=[];h.cards=[];h.hexLines=[];h.unit=null;
  const b=$("#hint"),next=b.querySelector(".hintnext"),back=b.querySelector(".hintback");
  if(next){next.textContent="Vernieuw hint voor dit bord";next.onclick=()=>{clearHint();hintGo()}}
  if(back)back.hidden=true;
