@@ -24,16 +24,26 @@ try{
    });
    assert(geometry.left>=-1&&geometry.right<=width+1,`${name}/${t}: bord buiten breedte: ${JSON.stringify(geometry)}`);
    if(t!=='mur')assert(geometry.bottom<=geometry.stage.bottom+2,`${name}/${t}: bord buiten speelruimte: ${JSON.stringify(geometry)}`);
-   if(t==='plus'&&!phone)assert(geometry.cs<=56,'Pluszle onnodig vergroot');
+   if(t==='plus'&&!phone)assert(geometry.cs>56&&geometry.cs<=96,'Pluszle passend en groter');
+   if(!phone)assert(Math.abs((geometry.left+geometry.right)/2-width/2)<2,`${name}/${t}: bord niet gecentreerd`);
    if(t==='mur'&&!phone)assert.equal(geometry.murOverflow,'visible','Murdoku scrollt op groot scherm');
    // Vergelijk dezelfde puzzel: de proef mag geen ruimte voor een lege footer reserveren.
    await page.locator('#testCompare').click();await page.waitForTimeout(80);
    const original=await page.evaluate(()=>{const r=$(S.type==='hex'?'#hexsvg':S.type==='mur'?'#mgrid':'#grid').getBoundingClientRect(),p=$('#pbot').getBoundingClientRect();return {width:r.width,height:r.height,left:r.left,right:r.right,bottom:r.bottom,footer:p.height,footerTop:p.top,side:p.height>p.width}});
    await page.locator('#testCompare').click();await page.waitForTimeout(80);
    const restored=await page.evaluate(()=>({footer:$('#pbot').getBoundingClientRect().height,board:$(S.type==='hex'?'#hexsvg':S.type==='mur'?'#mgrid':'#grid').getBoundingClientRect().toJSON()}));
-   assert(Math.abs(restored.footer-original.footer)<1,`${name}/${t}: verhoogde lege knoppenstrook`);
+   if(phone)assert(Math.abs(restored.footer-original.footer)<1,`${name}/${t}: verhoogde lege knoppenstrook`);
    const originalFits=original.left>=0&&original.right<=width&&original.bottom<=(original.side?height:original.footerTop)+1;
-   if(width<2000&&t!=='mur'&&t!=='plus'&&originalFits){assert(restored.board.width>=original.width*.97,`${name}/${t}: kleiner dan passend origineel`);assert(restored.board.height>=original.height*.97,`${name}/${t}: onnodig lagere puzzel`)}
+   if(phone&&t!=='mur'&&originalFits){assert(restored.board.width>=original.width*.97,`${name}/${t}: kleiner dan passend origineel`);assert(restored.board.height>=original.height*.97,`${name}/${t}: onnodig lagere puzzel`)}
+   if(!phone)assert(await page.evaluate(()=>{const b=$(S.type==='mur'&&document.body.classList.contains('layout-rail')?'#mgrid':'#playbox').getBoundingClientRect(),p=$('#pbot').getBoundingClientRect();return !testOverlap(b,p,0)&&(document.body.classList.contains('layout-rail')?Math.abs(b.left-p.right-12)<2:p.top>=b.bottom&&p.top-b.bottom<16)}),`${name}/${t}: bediening niet naast/onder bord`);
+   assert(await page.evaluate(()=>{
+    const make=(extra={})=>({level:1,scope:[],why:[],cells:[],cards:[],move:{cells:[]},...extra});
+    if(S.type==='mur'){const c=S.p.cd.find(c=>c.t==='room');if(c){const ids=testContextCells(make({cards:[c.p]}));return S.p.reg.every((k,i)=>k!==c.k||ids.includes(i))}}
+    if(S.type==='bin'){const W=S.p.W,a=Array.from({length:W},(_,i)=>i),b=a.map(i=>i+W);return [...a,...b].every(i=>testContextCells(make({move:{proof:{line:{ci:a},other:{ci:b}}}})).includes(i))}
+    if(S.type==='plus')return S.pu[0].cells.every(i=>testContextCells(make({unit:0})).includes(i));
+    if(S.type==='star'){const ids=testContextCells(make({move:{cells:[0]}}));return S.p.reg.every((k,i)=>k!==S.p.reg[0]||ids.includes(i))}
+    return true;
+   }),`${name}/${t}: volledig hintgebied ontbreekt`);
    boards++;
    if(t==='hex')assert(await page.evaluate(()=>{
     const p=S.p,j=p.lineShow[0],z=(p.zs||[])[0]??(p.zh||[])[0];

@@ -5,7 +5,7 @@
 Bron bij eerste bouw: main `6f54f029ff5629379a7a9fb323eb1beec2f5e480`.
 
 - iPhone: oorspronkelijke indeling en oorspronkelijke hoogte van de knoppenstrook; Murdoku-aanwijzingen kunnen scrollen.
-- Grotere schermen: begrensde celgrootte, compact Pluszle, Murdoku zonder apart scrollpaneel voor de aanwijzingen.
+- Grotere schermen: begrensde celgrootte, leesbaar Pluszle, Murdoku zonder apart scrollpaneel voor de aanwijzingen.
 - Hints: doorschijnende laag met vrijgehouden relevante gebieden; tekstplek wordt vooraf voor de drie stappen bepaald. Alleen de huidige stap wordt gemarkeerd.
 - Als er geen geschikte tekstplek is, vervangt de hint tijdelijk de bestaande bediening. Langere uitleg scrolt binnen de vaste kaart.
 - Via **Origineel** bekijk je dezelfde puzzel met de bestaande indeling. Via de terugknop kun je Home en overzichten bekijken.
@@ -35,3 +35,13 @@ De eerste proef maakte de velden onnodig kleiner door vaste speelbreedtes, lage 
 Hexcells maakt de hele betrokken lijn of zone helder, inclusief het aanwijzingsvakje. De gaten in de hintlaag volgen de echte zeshoeken; daardoor worden geen halve buurvakjes zichtbaar. De ruimere gebieden van alle hintstappen worden vooraf meegenomen bij de tekstplaatsing. Een later gebied wordt pas bij de bijbehorende stap helder.
 
 Extra regressiecontrole: vergelijk hetzelfde bord met de oorspronkelijke stand, controleer dat de knoppenstrook niet hoger is en dat een passend origineel op telefoon/tablet niet onnodig kleiner wordt (maximaal 3% marge voor randen). Controleer volledige lijn-/zone-dekking en zeshoekige maskeruitsparingen. Visuele controle in donker thema bij 1180×820 en 390×724, inclusief lijn- en zonevoorbeelden.
+
+## Derde proef: gecentreerd bord en ruimere hintgebieden
+
+Op grotere schermen staat het bord zelf horizontaal midden in het scherm en verticaal midden in de beschikbare speelruimte. De bediening staat 12 px naast het bord; bij onvoldoende ruimte komt deze direct onder het bord. Bij Murdoku blijft het raster midden staan, met aanwijzingen rechts. Alleen iPhone gebruikt een scrollend aanwijzingenpaneel.
+
+Pluszle heeft een eigen maximum per puzzelformaat (80/88/96 px op tablet, lager op zeer grote desktops) in plaats van de te kleine vaste limiet van 56 px. De beschikbare schermruimte blijft bepalend. De bestaande iPhone-layout van Hexcells en Nonogram blijft behouden.
+
+De hintlaag houdt hele betrokken kamers bij Murdoku, gebieden bij Star Battle, somgebieden bij Pluszle en vergeleken lijnen met tellers bij Binair helder. Nonogram benadrukt vanaf de uitlegstap het betrokken blokgetal wanneer de afleiding dit aanwijst. De tekstplek houdt vanaf stap één rekening met alle later benodigde gebieden.
+
+De browsercontrole controleert ook exacte horizontale centrering, nabije bediening zonder overlap, volledige hintgebieden en de grotere maar begrensde Pluszle-cellen. De vergelijking op onveranderde telefoonlayouts houdt de bestaande maatcontrole; op grotere schermen wordt de nieuwe centrering en bedieningindeling gecontroleerd.
