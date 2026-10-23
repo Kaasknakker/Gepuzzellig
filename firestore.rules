@@ -45,7 +45,7 @@ service cloud.firestore {
       return hasProfile()
         && myGroup().size() > 0
         && request.resource.data.keys().hasOnly([
-          'name','group','date','type','secs','uid','mist','hints','hintSteps','emo','note'
+          'name','group','date','type','secs','uid','mist','hints','hintSteps','emo','note','completedOn'
         ])
         && request.resource.data.keys().hasAll([
           'name','group','date','type','secs','uid'
@@ -57,6 +57,10 @@ service cloud.firestore {
         && request.resource.data.group == myGroup()
         && request.resource.data.date is string
         && request.resource.data.date.size() <= 10
+        && (!('completedOn' in request.resource.data) || (
+          request.resource.data.completedOn is string
+          && request.resource.data.completedOn.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        ))
         && request.resource.data.type is string
         && request.resource.data.type.size() > 0
         && request.resource.data.type.size() <= 80
