@@ -20,3 +20,5 @@ jobs:
           node-version: "22"
       - name: App controleren
         run: node .github/scripts/check-app.mjs
+      - name: Automatische kruisjes controleren
+        run: node .github/scripts/check-autocross.mjs
