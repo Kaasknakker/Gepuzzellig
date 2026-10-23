@@ -128,7 +128,7 @@ function load(type,practice,fresh,date){clearHomeSkinAccent();document.documentE
    if(sv0.cur&&S.cur&&sv0.cur.length===S.cur.length)S.cur=sv0.cur.slice();
    if(sv0.rev&&S.hx)S.hx.rev=new Set(sv0.rev);if(sv0.cs&&S.hx)S.cs=sv0.cs;
    if(type==="m24"&&sv0.r){S.r=sv0.r;setRound()}
-   if(sv0.str&&S.str)S.str=new Set(sv0.str);if(sv0.nt)S.nt=Object.assign({},sv0.nt);if(type!=="m24"){S.hist=Array.isArray(sv0.hist)?sv0.hist.slice(-60):[];S.redo=Array.isArray(sv0.redo)?sv0.redo.slice(-30):[]}S.pen=0;S.mist=sv0.mist||0;S.hints=sv0.hints||0;S._saveAt=sv0.at||0;{const oldEl=+sv0.el||0,safeEl=oldEl>=0&&oldEl<=MAX_REASONABLE_MS?oldEl:0;S.start=Date.now()-safeEl}S.pauseAt=0;S.resumed=true}catch(e){}}
+   if(sv0.str&&S.str)S.str=new Set(sv0.str);if(sv0.nt)S.nt=Object.assign({},sv0.nt);if(type!=="m24"){S.hist=Array.isArray(sv0.hist)?sv0.hist.slice(-60):[];S.redo=Array.isArray(sv0.redo)?sv0.redo.slice(-30):[]}S.pen=0;S.mist=sv0.mist||0;S.hints=sv0.hints||0;restoreHintUsage(sv0);S._saveAt=sv0.at||0;{const oldEl=+sv0.el||0,safeEl=oldEl>=0&&oldEl<=MAX_REASONABLE_MS?oldEl:0;S.start=Date.now()-safeEl}S.pauseAt=0;S.resumed=true}catch(e){}}
   $("#msg").textContent=S.done?(S.arch?"Al klaar in ":"Vandaag al klaar in ")+fmt(S.secs):S.resumed?"Verder waar je was gebleven":(!practice&&type===featOf(S.date))?(PHONE?"⭐ Van de dag":"⭐ Puzzel van de dag"+(S.hard?" (weekend 💪)":"")):S.arch?"Dagpuzzel van "+dnl(S.date)+(S.hard?" 💪":""):S.hard?"Weekendpuzzel: wat pittiger 💪":"";setT(S.resumed?fmt(Math.round(playMs()/1000)):fmt(S.secs));
   try{updTabs()}catch(e){}render();ub();setTimeout(()=>pingOnline(true),0)},30)}
 
@@ -217,11 +217,11 @@ function binDown(e){const mb=mouseLR(e);if(S.done||S.type!=="bin"||e._closed||mb
  const g=gridGeo(S.p.W);G2={x:g.x,y:g.y,cs:g.pw,W:S.p.W,H:S.p.H};
  /* Op de tellers naast het veld drukken/slepen: die rij (of kolom) vergelijken met de andere, zonder iets in te vullen. */
  const k=e.target.closest&&e.target.closest(".cnt");
- if(k){if(mb==="r")return;const ri=S.rowc.indexOf(k),ci=S.colc.indexOf(k);if(ri<0&&ci<0)return;e.preventDefault();clearHint();
+ if(k){if(mb==="r")return;const ri=S.rowc.indexOf(k),ci=S.colc.indexOf(k);if(ri<0&&ci<0)return;e.preventDefault();invalidateHint();
   drag2={line:ri>=0?"r":"c",pid:e.pointerId,moved:true};try{$("#grid").setPointerCapture(e.pointerId)}catch(x){}
   S.pick={t:drag2.line,at:ri>=0?ri:ci};binCompare();paintBin();return}
  const i=binCell(e.clientX,e.clientY);if(i<0)return;
- e.preventDefault();if(!S.start&&S.p.giv[i]<0)S.start=Date.now();clearHint();
+ e.preventDefault();if(!S.start&&S.p.giv[i]<0)S.start=Date.now();invalidateHint();
  const N=S.p.W,r=i/N|0,c=i%N,dbl=mb!=="r"&&binLastTap.i===i&&binLastTap.note===!!potlood&&e.timeStamp-binLastTap.t<380;
  let dblBase=null;
  if(dbl&&binLastTap.h===S.hist.length&&S.hist.length){const h=S.hist[S.hist.length-1];
@@ -280,7 +280,7 @@ function starDown(e){const mb=mouseLR(e);if(S.done||S.type!=="star"||e._closed||
   if(potlood&&h&&h.note&&h.i===i){S.hist.pop();noteRaw(i,h.from);S.redo=[]}
   else if(!potlood&&Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.redo=[];S.cur=dblBase.slice();paintAll()}}
  if(dbl)starLastTap={t:0,i:-1,h:0,note:false};else if(mb==="r")starLastTap={t:0,i:-1,h:0,note:false};
- e.preventDefault();if(!S.start)S.start=Date.now();clearHint();
+ e.preventDefault();if(!S.start)S.start=Date.now();invalidateHint();
  if(potlood){if(disp(i)!==0)return;const raw=noteVal(i),target=(mb==="r"||dbl)?2:1,mode=dbl?"add":raw===target?"del":"add";
   drag={note:true,directNote:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map(),dbl};
   noteDragWrite(drag,i,dbl?2:mode==="del"?0:target);return}
@@ -347,7 +347,7 @@ function nonoDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="nono"||S.done||e.
  S.ng=gridGeo(S.p.W);const i=nonoAt(e.clientX,e.clientY);if(i<0)return;e._nono=true;
  const dbl=mb!=="r"&&lastTap.i===i&&e.timeStamp-lastTap.t<380;if(dbl)lastTap={t:0,i:-1};else if(mb==="r")lastTap={t:0,i:-1};
  if(dbl&&S.hist&&S.hist.length){const pre=S.hist[S.hist.length-1];if(Array.isArray(pre)&&pre.length===S.cur.length){const was=S.cur.slice();S.cur=S.hist.pop().slice();S.redo=[];was.forEach((v,j)=>{if(v!==S.cur[j])nonoPaint(j,S.cur[j])});ub()}}
- if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],cross=S.p.color?-1:2,fill=S.p.color?nonoColorMode:1,active=S.p.color?(nonoMode==="x"?cross:fill):(nonoMode==="x"?cross:fill),val=dbl?cross:mb==="r"?(active===cross?fill:cross):active;
+ if(!S.start)S.start=Date.now();invalidateHint();begin();const old=S.cur[i],cross=S.p.color?-1:2,fill=S.p.color?nonoColorMode:1,active=S.p.color?(nonoMode==="x"?cross:fill):(nonoMode==="x"?cross:fill),val=dbl?cross:mb==="r"?(active===cross?fill:cross):active;
  nd={i0:i,last:i,moved:false,pid:e.pointerId,path:[i],prev:new Map(),old,val,mode:old===val?"del":"add",dbl};
  const nv=dbl?val:(old===val?0:val);nonoPaint(i,nv);if(nv!==old)nd.prev.set(i,old)}
 function nonoMove(e){if(!nd||S.type!=="nono"||e.pointerId!==nd.pid)return;const i=nonoAt(e.clientX,e.clientY);if(i<0||i===nd.last)return;const N=S.p.W;nd.moved=true;
@@ -394,11 +394,11 @@ function finish(){S.secs=Math.max(1,Math.round(playMs()/1000));S.done=true;clear
  const bdg=badges({mist:S.mist||0,hints:S.hints||0},S.type);$("#msg").textContent=(S.practice?"Opgelost! 🎉":"Klaar! 🎉"+(TSHOW?" "+fmt(S.secs):""))+(bdg?" "+bdg:"");if(S.practice)$("#next").classList.add("pulse");
  if(S.type!=="m24")render();
  celebrate();
- if(S.practice){const sid=String(S.seed).replace(/\W/g,"").slice(-8),row={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date:S.date,type:"v~"+S.type+S.sf+"~"+sid,secs:S.secs,uid,mist:S.mist||0,hints:S.hints||0};
-  const fl=freeLoc();fl.push({date:row.date,type:row.type,secs:row.secs,group:row.group});lsSet("pdfree",JSON.stringify(fl.slice(-400)));
+ if(S.practice){const sid=String(S.seed).replace(/\W/g,"").slice(-8),row={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date:S.date,type:"v~"+S.type+S.sf+"~"+sid,secs:S.secs,uid,mist:S.mist||0,hints:S.hints||0,hintSteps:hintTotals()};
+  const fl=freeLoc();fl.push({date:row.date,type:row.type,secs:row.secs,group:row.group,mist:row.mist,hints:row.hints,hintSteps:row.hintSteps});lsSet("pdfree",JSON.stringify(fl.slice(-400)));
   lastRows=lastRows.filter(r=>!(r.uid===uid&&r.type===row.type));lastRows.push(row);renderStats();
   dbSave(row);setTimeout(()=>{if(S.done&&S.practice)showFinFree(S.type+S.sf)},900);return}
- {const sk=S.date+S.type+S.sf;store[sk]=S.secs;SG[sk]=$("#group").value.trim();save();saveSG();XS[sk]={mist:S.mist||0,hints:S.hints||0}}xsSave();
+ {const sk=S.date+S.type+S.sf;store[sk]=S.secs;SG[sk]=$("#group").value.trim();save();saveSG();XS[sk]={mist:S.mist||0,hints:S.hints||0,hintSteps:hintTotals()}}xsSave();
  const row=myRow(S.date,S.type+S.sf);
  lastRows=lastRows.filter(r=>!(r.uid===uid&&r.date===row.date&&r.type===row.type));lastRows.push(row);board(lastRows);
  dbSave(row).catch(()=>{$("#msg").textContent+=" (scorebord niet bereikbaar)"});
@@ -437,12 +437,12 @@ function starTech(st,N,U,maxK){const units=[];
  const room=(cs,need)=>{if(need<=0)return true;if(!cs.length)return false;if(need<2)return true;for(let x=0;x<cs.length;x++)for(let y=x+1;y<cs.length;y++)if(!near(cs[x],cs[y]))return true;return false};
  const SW=n=>n===1?"ster":"sterren";
  for(const u of units){const stars=u.cells.filter(i=>st[i]===2),unk=u.cells.filter(i=>st[i]===0);if(!unk.length)continue;const nm=unitName(u.kind,u.k);
-  if(stars.length===STK)return{set:1,cells:unk,why:u.cells,kind:"tech",btn:"Zet de kruisjes voor me",text:`In ${nm} ${STK>1?"staan al "+STK+" sterren":"staat al een ster"}. Dan kunnen alle andere vakjes daarin geen ster meer zijn: zet er kruisjes.`};
+  if(stars.length===STK)return{set:1,cells:unk,why:u.cells,proof:{rule:"complete",unit:u,stars:stars.length,open:unk.length},kind:"tech",btn:"Zet de kruisjes voor me",text:`In ${nm} ${STK>1?"staan al "+STK+" sterren":"staat al een ster"}. Dan kunnen alle andere vakjes daarin geen ster meer zijn: zet er kruisjes.`};
   const need=STK-stars.length;
-  if(unk.length===need)return{set:2,cells:unk,why:u.cells,kind:"tech",btn:"Zet de "+(need===1?"ster":"sterren")+" voor me",text:`In ${nm} ${need===1?"moet":"moeten"} nog ${need} ${SW(need)} komen en er ${unk.length===1?"is":"zijn"} nog maar ${unk.length} vakje${unk.length===1?"":"s"} over. ${need===1?"Dat vakje is":"Die vakjes zijn"} dus ${need===1?"een ster":"sterren"}.`}}
+  if(unk.length===need)return{set:2,cells:unk,why:u.cells,proof:{rule:"remaining",unit:u,stars:stars.length,open:unk.length},kind:"tech",btn:"Zet de "+(need===1?"ster":"sterren")+" voor me",text:`In ${nm} ${need===1?"moet":"moeten"} nog ${need} ${SW(need)} komen en er ${unk.length===1?"is":"zijn"} nog maar ${unk.length} vakje${unk.length===1?"":"s"} over. ${need===1?"Dat vakje is":"Die vakjes zijn"} dus ${need===1?"een ster":"sterren"}.`}}
  for(const u of units){const stars=u.cells.filter(i=>st[i]===2),unk=u.cells.filter(i=>st[i]===0);if(STK-stars.length!==2||unk.length<3)continue;
   for(const x of unk)if(!room(unk.filter(j=>j!==x),2)){const nm=unitName(u.kind,u.k);
-   return{set:2,cells:[x],why:u.cells,kind:"tech",btn:"Zet de ster voor me",text:`In ${nm} moeten nog twee sterren komen. Kijk naar de vrije vakjes zonder dit vakje: die raken elkaar allemaal, dus daar past maar één ster in. De tweede ster moet dus hier staan.`}}}
+   return{set:2,cells:[x],why:u.cells,proof:{rule:"separate",unit:u,stars:stars.length,open:unk.length},kind:"tech",btn:"Zet de ster voor me",text:`In ${nm} moeten nog twee sterren komen. Kijk naar de vrije vakjes zonder dit vakje: die raken elkaar allemaal, dus daar past maar één ster in. De tweede ster moet dus hier staan.`}}}
  function conf(k){for(const kind of["r","c"]){const lines=kind==="r"?U.rows:U.cols;
   for(const comb of combos(N,k)){const inL=new Set();comb.forEach(x=>lines[x].forEach(i=>inL.add(i)));
    const cand=[...inL].filter(i=>st[i]!==1),touched=new Set(cand.map(i=>U.regOf[i])),inside=[];
@@ -450,10 +450,10 @@ function starTech(st,N,U,maxK){const units=[];
    const ln=lineNames(kind,comb),per=kind==="r"?"rij":"kolom",why=[...inL];
    if(inside.length===k){const tg=cand.filter(i=>st[i]===0&&!inside.includes(U.regOf[i]));
     if(tg.length){const rn=regNames(inside),one=k===1,txt=one?(STK===1?`Alle vrije vakjes van ${rn} liggen in ${ln}. De ster van dat gebied komt dus in ${ln}, en dat is meteen de enige ster van ${ln}.`:`Alle vrije vakjes van ${rn} liggen in ${ln}. De twee sterren van dat gebied komen dus in ${ln}, en meer dan twee sterren mag ${ln} niet hebben.`):`Alle vrije vakjes van ${rn} liggen in ${ln}. Samen hebben die gebieden ${STK*k} sterren nodig, en ${ln} hebben er samen ook precies ${STK*k}.`;
-     return{set:1,cells:tg,why,kind:"tech",btn:"Zet de kruisjes voor me",text:txt+` Alle andere vakjes in ${ln} worden dus kruisjes.`}}}
+     return{set:1,cells:tg,why,proof:{rule:"regionsInLines",kind,lines:comb,regions:inside},kind:"tech",btn:"Zet de kruisjes voor me",text:txt+` Alle andere vakjes in ${ln} worden dus kruisjes.`}}}
    if(touched.size===k){const tg=[];touched.forEach(g=>U.regs[g].forEach(i=>{if(st[i]===0&&!inL.has(i))tg.push(i)}));
     if(tg.length){const rn=regNames([...touched]),one=k===1,txt=one?(STK===1?`In ${ln} kan alleen nog een ster komen in ${rn}. De ster van ${ln} ligt dus in dat gebied, en dat is meteen de enige ster van dat gebied.`:`In ${ln} kunnen alleen nog sterren komen in ${rn}. De twee sterren van ${ln} liggen dus allebei in dat gebied, en meer dan twee sterren heeft dat gebied niet.`):`In ${ln} kunnen alleen nog sterren komen in ${rn}. Die ${kind==="r"?"rijen":"kolommen"} hebben samen ${STK*k} sterren nodig, en die gebieden hebben er samen ook precies ${STK*k}.`;
-     return{set:1,cells:tg,why,kind:"tech",btn:"Zet de kruisjes voor me",text:txt+` De vakjes van ${one?"dat gebied":"die gebieden"} buiten ${ln} worden dus kruisjes.`}}}}}
+     return{set:1,cells:tg,why,proof:{rule:"linesInRegions",kind,lines:comb,regions:[...touched]},kind:"tech",btn:"Zet de kruisjes voor me",text:txt+` De vakjes van ${one?"dat gebied":"die gebieden"} buiten ${ln} worden dus kruisjes.`}}}}}
   return null}
  function look(pass){for(let x=0;x<N*N;x++){if(st[x]!==0)continue;const t=st.slice();t[x]=2;crossAround(t,N,x);
    const own=units.filter(u=>u.cells.includes(x)),full=[];
@@ -466,7 +466,7 @@ function starTech(st,N,U,maxK){const units=[];
     else why=`Maar ${nm} heeft nog ${nw(need)} ${SW(need)} nodig, en dan is daar geen enkel vrij vakje meer over.`;
     const fn=full.map(f=>unitName(f.kind,f.k)),ext=full.length?` Bovendien ${full.length>1?"hebben":"heeft"} ${lst(fn)} dan al ${STK} sterren, dus worden ook ${full.length>1?"hun":"de"} andere vakjes${full.length>1?"":" van "+fn[0]} kruisjes.`:"";
     const ghost=[];for(let j=0;j<N*N;j++)if(st[j]===0&&t[j]===1)ghost.push(j);
-    return{set:1,cells:[x],why:u.cells,ghost,kind:"tech",btn:"Zet het kruisje voor me",text:`Stel dat hier een ster komt. Dan worden alle vakjes eromheen kruisjes (de lichte oranje kruisjes).${ext} ${why} Hier kan dus geen ster: zet een kruisje.`}}}
+    return{set:1,cells:[x],why:u.cells,ghost,proof:{rule:"trial",unit:u,need,available:rest.length,full:full.map(f=>({kind:f.kind,k:f.k}))},kind:"tech",btn:"Zet het kruisje voor me",text:`Stel dat hier een ster komt. Dan worden alle vakjes eromheen kruisjes (de lichte oranje kruisjes).${ext} ${why} Hier kan dus geen ster: zet een kruisje.`}}}
   return null}
  /* Tellen over 1, 2 of 3 rijen/kolommen gaat voor: dat is de mooiste stap. Daarna pas "stel dat hier een ster komt". */
  for(let k=1;k<=maxK;k++){const r=conf(k);if(r){r.k=k;return r}}
@@ -485,9 +485,9 @@ function starHint(){const p=S.p,N=p.N;if(!S.U)S.U=starUnits(p);const U=S.U;
  let best=null;
  for(let i=0;i<N*N&&!(best&&best.n<=2);i++){if(st[i]!==0)continue;
   for(const v of[2,1]){const t=st.slice();t[i]=v;if(v===2)crossAround(t,N,i);const r=starProp(t,N,U);if(r&&(!best||r.n<best.n))best={n:r.n,w:r.w,steps:r.steps,i,v}}}
- if(best){const star=best.v===1,wy=starWhy(!star,best);return{set:star?2:1,cells:[best.i],why:[],kind:"contra",btn:star?"Zet de ster voor me":"Zet het kruisje voor me",intro:wy.intro,steps:wy.steps,outro:wy.outro,text:wy.intro+" "+wy.steps.join(" ")+" "+wy.outro}}
+ if(best){const star=best.v===1,wy=starWhy(!star,best);return{set:star?2:1,cells:[best.i],why:[],proof:{rule:"chain",conflict:best.w,count:best.steps.length},kind:"contra",btn:star?"Zet de ster voor me":"Zet het kruisje voor me",intro:wy.intro,steps:wy.steps,outro:wy.outro,text:wy.intro+" "+wy.steps.join(" ")+" "+wy.outro}}
  {const t0=Date.now();for(let i=0;i<N*N&&Date.now()-t0<1500;i++){if(st[i]!==0)continue;
-   for(const v of[2,1]){const t=st.slice();t[i]=v;if(v===2)crossAround(t,N,i);const r=starProp(t,N,U,4);if(r){const star=v===1,wy=starWhy(!star,r);return{set:star?2:1,cells:[i],why:[],kind:"contra",btn:star?"Zet de ster voor me":"Zet het kruisje voor me",intro:wy.intro,steps:wy.steps,outro:wy.outro,text:wy.intro+" "+wy.steps.join(" ")+" "+wy.outro}}}}}
+   for(const v of[2,1]){const t=st.slice();t[i]=v;if(v===2)crossAround(t,N,i);const r=starProp(t,N,U,4);if(r){const star=v===1,wy=starWhy(!star,r);return{set:star?2:1,cells:[i],why:[],proof:{rule:"chain",conflict:r.w,count:r.steps.length},kind:"contra",btn:star?"Zet de ster voor me":"Zet het kruisje voor me",intro:wy.intro,steps:wy.steps,outro:wy.outro,text:wy.intro+" "+wy.steps.join(" ")+" "+wy.outro}}}}}
  {const pick=[];for(let i=0;i<N*N;i++)if(st[i]===0)pick.push(i);
   for(const i of pick){const isStar=p.sol[i]===1,bad=isStar?1:2;const t=st.slice();t[i]=bad;if(bad===2)crossAround(t,N,i);
    if(!starSolveFrom(t,p)){return{set:isStar?2:1,cells:[i],why:[],kind:"deep",btn:isStar?"Zet de ster voor me":"Zet het kruisje voor me",
@@ -499,16 +499,16 @@ const sy=v=>v?"○":"✕";
 function binHint(){const W=S.p.W,H=S.p.H,cur=S.cur,sol=S.p.sol;
  for(let i=0;i<W*H;i++)if(cur[i]>=0&&cur[i]!==sol[i])return{cells:[i],why:[],set:-1,kind:"fix",btn:"Wis dit vakje",text:`Let op: dit vakje klopt niet. De ${sy(cur[i])} die hier staat zorgt ergens voor een tegenspraak. Wis hem en kijk opnieuw.`};
  const lines=[];for(let o=0;o<2;o++){const nl=o?W:H,len=o?H:W;for(let x=0;x<nl;x++){const ci=[];for(let k=0;k<len;k++)ci.push(o?k*W+x:x*W+k);lines.push({o,x,ci,len,v:ci.map(i=>cur[i])})}}
- const nm=l=>(l.o?"kolom ":"rij ")+(l.x+1),mk=(l,ks,val,text)=>({cells:ks.map(k=>l.ci[k]),why:l.ci,set:val,kind:"tech",btn:"Vul het voor me in",text});
+ const nm=l=>(l.o?"kolom ":"rij ")+(l.x+1),mk=(l,ks,val,text,proof)=>({cells:ks.map(k=>l.ci[k]),why:l.ci,set:val,kind:"tech",btn:"Vul het voor me in",text,proof:{...proof,line:l}});
  for(const l of lines)for(let k=0;k<l.len-1;k++){const a=l.v[k];if(a<0||l.v[k+1]!==a)continue;const t=[];if(k>0&&l.v[k-1]<0)t.push(k-1);if(k+2<l.len&&l.v[k+2]<0)t.push(k+2);
-  if(t.length)return mk(l,t,1-a,`In ${nm(l)} staan twee keer ${sy(a)} naast elkaar. Een derde ${sy(a)} erbij mag niet, dus direct ${l.o?"boven of onder":"links of rechts van"} dit paar komt ${sy(1-a)}.`)} for(const l of lines)for(let k=0;k<l.len-2;k++){const a=l.v[k];if(a>=0&&l.v[k+2]===a&&l.v[k+1]<0)return mk(l,[k+1],1-a,`In ${nm(l)} staat twee keer ${sy(a)} met één vakje ertussen. Staat daar ook ${sy(a)}, dan zijn het er drie op een rij. Dat vakje wordt dus ${sy(1-a)}.`)}
+  if(t.length)return mk(l,t,1-a,`In ${nm(l)} staan twee keer ${sy(a)} naast elkaar. Een derde ${sy(a)} erbij mag niet, dus direct ${l.o?"boven of onder":"links of rechts van"} dit paar komt ${sy(1-a)}.`,{rule:"pair",symbol:a})} for(const l of lines)for(let k=0;k<l.len-2;k++){const a=l.v[k];if(a>=0&&l.v[k+2]===a&&l.v[k+1]<0)return mk(l,[k+1],1-a,`In ${nm(l)} staat twee keer ${sy(a)} met één vakje ertussen. Staat daar ook ${sy(a)}, dan zijn het er drie op een rij. Dat vakje wordt dus ${sy(1-a)}.`,{rule:"gap",symbol:a})}
  for(const l of lines)for(const a of[0,1]){const c=l.v.filter(x=>x===a).length,e=l.v.map((x,k)=>x<0?k:-1).filter(k=>k>=0);
-  if(c===l.len/2&&e.length)return mk(l,e,1-a,`In ${nm(l)} staan al ${l.len/2} keer ${sy(a)}. Meer mogen het er niet zijn, dus alle lege vakjes in deze ${l.o?"kolom":"rij"} worden ${sy(1-a)}.`)}
+  if(c===l.len/2&&e.length)return mk(l,e,1-a,`In ${nm(l)} staan al ${l.len/2} keer ${sy(a)}. Meer mogen het er niet zijn, dus alle lege vakjes in deze ${l.o?"kolom":"rij"} worden ${sy(1-a)}.`,{rule:"balance",symbol:a})}
  for(const l of lines){const h=l.len/2,w=l.o?"kolom":"rij";for(let e=0;e<l.len;e++){if(l.v[e]>=0)continue;for(const a of[0,1]){const c=l.v.filter(x=>x===a).length;if(c+1!==h)continue;const t=l.v.map((x,j)=>j===e?a:x<0?1-a:x);let k3=-1;for(let k=0;k+2<t.length;k++)if(t[k]===t[k+1]&&t[k]===t[k+2]){k3=k;break}
-   if(k3>=0)return mk(l,[e],1-a,`In ${nm(l)} staan al ${c} keer ${sy(a)}. Er mogen er ${h} zijn, dus er kan nog maar één ${sy(a)} bij. Stel dat die hier komt: dan worden alle andere lege vakjes ${sy(1-a)}, en dan staan er drie keer ${sy(t[k3])} naast elkaar. Dat mag niet. Hier komt dus ${sy(1-a)}.`)}}}
+   if(k3>=0)return mk(l,[e],1-a,`In ${nm(l)} staan al ${c} keer ${sy(a)}. Er mogen er ${h} zijn, dus er kan nog maar één ${sy(a)} bij. Stel dat die hier komt: dan worden alle andere lege vakjes ${sy(1-a)}, en dan staan er drie keer ${sy(t[k3])} naast elkaar. Dat mag niet. Hier komt dus ${sy(1-a)}.`,{rule:"balanceConflict",symbol:a})}}}
  for(const l of lines){const E=[];l.v.forEach((x,j)=>{if(x<0)E.push(j)});if(E.length!==2)continue;
   for(const m of lines){if(m===l||m.o!==l.o||m.v.includes(-1))continue;if(l.v.every((x,j)=>x<0||x===m.v[j])&&m.v[E[0]]!==m.v[E[1]]){const w=l.o?"kolom":"rij";
-   return{cells:[l.ci[E[0]]],why:[...l.ci,...m.ci],set:1-m.v[E[0]],kind:"tech",btn:"Vul het voor me in",text:`Vergelijk ${nm(l)} met ${nm(m)}: alle ingevulde vakjes zijn gelijk en ${nm(l)} heeft nog 2 lege vakjes. Twee ${l.o?"kolommen":"rijen"} mogen nooit precies hetzelfde zijn. Vul je de lege vakjes in zoals in ${nm(m)}, dan zijn ze gelijk. Daarom komt hier ${sy(1-m.v[E[0]])} (en in het andere lege vakje ${sy(1-m.v[E[1]])}).`}}}}
+   return{cells:[l.ci[E[0]]],why:[...l.ci,...m.ci],proof:{rule:"different",line:l,other:m},set:1-m.v[E[0]],kind:"tech",btn:"Vul het voor me in",text:`Vergelijk ${nm(l)} met ${nm(m)}: alle ingevulde vakjes zijn gelijk en ${nm(l)} heeft nog 2 lege vakjes. Twee ${l.o?"kolommen":"rijen"} mogen nooit precies hetzelfde zijn. Vul je de lege vakjes in zoals in ${nm(m)}, dan zijn ze gelijk. Daarom komt hier ${sy(1-m.v[E[0]])} (en in het andere lege vakje ${sy(1-m.v[E[1]])}).`}}}}
  let best=null;
  for(const l of lines){const BL=BLof(l.len),FULL=(1<<l.len)-1;let km=0,vm=0;l.v.forEach((x,k)=>{if(x>=0){km|=1<<k;if(x)vm|=1<<k}});if(km===FULL)continue;
   const full=new Set();lines.filter(m=>m.o===l.o&&m!==l&&!m.v.includes(-1)).forEach(m=>{let q=0;m.v.forEach((x,k)=>{if(x)q|=1<<k});full.add(q)});
@@ -516,7 +516,7 @@ function binHint(){const W=S.p.W,H=S.p.H,cur=S.cur,sol=S.p.sol;
   if(!n)continue;
   for(let k=0;k<l.len;k++){if(km>>k&1)continue;const f=(and>>k&1)?1:!(or>>k&1)?0:-1;if(f<0)continue;if(!best||n<best.n)best={n,l,k,f}}}
  if(best){const{n,l,k,f}=best,w=l.o?"kolom":"rij";
-  return mk(l,[k],f,`Kijk naar ${nm(l)}. ${n===1?"Er is nog maar 1 geldige manier":"Er zijn nog maar "+n+" geldige manieren"} om deze ${w} in te vullen (nooit drie dezelfde naast elkaar, evenveel ✕ als ○ en niet gelijk aan een andere volledige ${w}). ${n===1?"Daarin":"In alle "+n}${n===1?" staat":" staat"} op dit vakje ${sy(f)}.`)}
+  return mk(l,[k],f,`Kijk naar ${nm(l)}. ${n===1?"Er is nog maar 1 geldige manier":"Er zijn nog maar "+n+" geldige manieren"} om deze ${w} in te vullen (nooit drie dezelfde naast elkaar, evenveel ✕ als ○ en niet gelijk aan een andere volledige ${w}). ${n===1?"Daarin":"In alle "+n}${n===1?" staat":" staat"} op dit vakje ${sy(f)}.`,{rule:"options",count:n})}
  const j=sol.findIndex((v,i)=>cur[i]<0);
  return j>=0?{cells:[j],why:[],set:sol[j],kind:"reveal",btn:"Vul het voor me in",text:"Hier kan ik geen korte redenering voor vinden. Dit vakje wordt een "+sy(sol[j])+"."}:null}
 
@@ -533,15 +533,15 @@ function colorNonoHint(){const p=S.p,W=p.W,H=p.H,cur=S.cur,sol=p.sol;
  const lines=[];for(let r=0;r<H;r++)lines.push({nm:"rij "+(r+1),cl:p.rc[r],ci:Array.from({length:W},(_,x)=>r*W+x)});for(let x=0;x<W;x++)lines.push({nm:"kolom "+(x+1),cl:p.cc[x],ci:Array.from({length:H},(_,r)=>r*W+x)});
  let best=null;const take=h=>{if(!best||h.pr<best.pr||(h.pr===best.pr&&h.cells.length>best.cells.length))best=h};
  for(const l of lines){const v=l.ci.map(i=>cur[i]);if(!v.includes(0))continue;const A=cnLine(l.cl,v);if(!A.cnt||A.overflow)continue;const groups=new Map();A.fix.forEach((z,k)=>{if(v[k]===0&&z!==0){if(!groups.has(z))groups.set(z,[]);groups.get(z).push(k)}});
-  for(const [set,ks] of groups){const cl=cnText(l.cl),one=ks.length===1;let text="",pr=A.cnt===1?0:set>0?3:4,cells=ks.map(k=>l.ci[k]);
+  for(const [set,ks] of groups){const cl=cnText(l.cl),one=ks.length===1;let proof={rule:"options",line:l,count:A.cnt},text="",pr=A.cnt===1?0:set>0?3:4,cells=ks.map(k=>l.ci[k]);
    /* Overlap: markeer alleen vakjes die aantoonbaar door hetzelfde gekleurde blok bedekt worden. */
    if(set>0){for(let j=0;j<l.cl.length&&!text;j++){const q=l.cl[j];if(q.c!==set)continue;const lo=A.mx[j],hi=A.mn[j]+q.n-1,sub=ks.filter(k=>k>=lo&&k<=hi);if(!sub.length)continue;
      cells=sub.map(k=>l.ci[k]);const één=cells.length===1,ord=l.cl.length>1?(ORD[j]||(j+1)+"e")+" blok":"blok";
-     text="Kijk naar "+l.nm+" ("+cl+"). Het "+ord+" ("+q.n+" "+NCN[set]+") kan beginnen tussen vak "+(A.mn[j]+1)+" en "+(A.mx[j]+1)+". Hoe je het ook schuift, "+(één?"dit vakje blijft":"deze vakjes blijven")+" binnen dat blok. "+(één?"Kleur het ":"Kleur ze ")+NCN[set]+".";pr=1}}
-   else if(set===-1){const sub=ks.filter(k=>l.cl.every((q,j)=>k<A.mn[j]||k>A.mx[j]+q.n-1));if(sub.length){cells=sub.map(k=>l.ci[k]);const één=cells.length===1;text="Kijk naar "+l.nm+" ("+cl+"). Geen enkel gekleurd blok kan "+(één?"dit vakje":"deze vakjes")+" bereiken. "+(één?"Hier komt dus een kruisje.":"Hier komen dus kruisjes.");pr=2}}
+     text="Kijk naar "+l.nm+" ("+cl+"). Het "+ord+" ("+q.n+" "+NCN[set]+") kan beginnen tussen vak "+(A.mn[j]+1)+" en "+(A.mx[j]+1)+". Hoe je het ook schuift, "+(één?"dit vakje blijft":"deze vakjes blijven")+" binnen dat blok. "+(één?"Kleur het ":"Kleur ze ")+NCN[set]+".";pr=1;proof={rule:"overlap",line:l,count:A.cnt,block:j,length:q.n,min:A.mn[j],max:A.mx[j],color:q.c}}}
+   else if(set===-1){const sub=ks.filter(k=>l.cl.every((q,j)=>k<A.mn[j]||k>A.mx[j]+q.n-1));if(sub.length){cells=sub.map(k=>l.ci[k]);const één=cells.length===1;text="Kijk naar "+l.nm+" ("+cl+"). Geen enkel gekleurd blok kan "+(één?"dit vakje":"deze vakjes")+" bereiken. "+(één?"Hier komt dus een kruisje.":"Hier komen dus kruisjes.");pr=2;proof={rule:"outside",line:l,count:A.cnt}}}
    if(!text){if(A.cnt===1)text="Kijk naar "+l.nm+" ("+cl+"). Met wat er al staat, passen de gekleurde blokken nog maar op één manier. ";else text="Kijk naar "+l.nm+" ("+cl+"). Er zijn nog "+A.cnt+" geldige manieren om de blokken te plaatsen. In al die manieren ";
     if(set===-1)text+=(one?"blijft dit vakje leeg. Zet hier dus een kruisje.":"blijven deze vakjes leeg. Zet hier dus kruisjes.");else text+=(one?"is dit vakje altijd ":"zijn deze vakjes altijd ")+NCN[set]+". "+(one?"Kleur het ":"Kleur ze ")+NCN[set]+"."}
-   take({pr,set,cells,why:l.ci,text})}}
+   take({pr,set,cells,why:l.ci,text,proof})}}
  if(!best)return null;best.kind="tech";best.btn=best.set===-1?"Zet het kruisje voor me":"Kleur het "+NCN[best.set]+" voor me";return best}
 function nonoHint(){if(S.p.color)return colorNonoHint();const p=S.p,W=p.W,H=p.H,cur=S.cur,sol=p.sol;
  for(let i=0;i<W*H;i++)if((cur[i]===1&&!sol[i])||(cur[i]===2&&sol[i]))return{cells:[i],why:[],set:0,kind:"fix",btn:"Wis dit vakje",text:`Let op: dit vakje klopt niet. ${cur[i]===1?"Het hoort leeg te blijven":"Hier hoort juist een gevuld vakje"}, dus hiermee loopt de puzzel vast. Wis het en kijk opnieuw.`};
@@ -550,17 +550,17 @@ function nonoHint(){if(S.p.color)return colorNonoHint();const p=S.p,W=p.W,H=p.H,
  let best=null;const consider=h=>{if(!best||h.pr<best.pr||(h.pr===best.pr&&h.cells.length>best.cells.length))best=h};
  for(const l of lines){const v=l.ci.map(i=>cur[i]);if(!v.includes(0))continue;const res=ls(l.cl,v),nf=[],nx=[];res.forEach((x,k)=>{if(v[k]===0&&x===1)nf.push(k);if(v[k]===0&&x===2)nx.push(k)});if(!nf.length&&!nx.length)continue;
   const cs=l.cl.length?l.cl.join(" "):"0",nm=l.nm+" ("+cs+")";
-  if(!l.cl.length){consider({pr:0,set:2,cells:nx.map(k=>l.ci[k]),why:l.ci,text:`${cap(l.nm)} heeft een 0: daar komt geen enkel gevuld vakje. Alles wordt een kruisje.`});continue}
-  if(lc(v.map(x=>x===1?1:0)).join()===l.cl.join()&&nx.length){consider({pr:0,set:2,cells:nx.map(k=>l.ci[k]),why:l.ci,text:`In ${nm} staan alle blokken al compleet. De andere vakjes in deze ${l.w} worden dus kruisjes.`});continue}
+  if(!l.cl.length){consider({pr:0,set:2,cells:nx.map(k=>l.ci[k]),why:l.ci,proof:{rule:"empty",line:l},text:`${cap(l.nm)} heeft een 0: daar komt geen enkel gevuld vakje. Alles wordt een kruisje.`});continue}
+  if(lc(v.map(x=>x===1?1:0)).join()===l.cl.join()&&nx.length){consider({pr:0,set:2,cells:nx.map(k=>l.ci[k]),why:l.ci,proof:{rule:"complete",line:l},text:`In ${nm} staan alle blokken al compleet. De andere vakjes in deze ${l.w} worden dus kruisjes.`});continue}
   const A=nonoArr(l.cl,v),okA=A.cnt>0&&A.cnt<=200000;
   if(nf.length&&okA)for(let k=0;k<l.cl.length;k++){const L=A.mn[k],R=A.mx[k],len=l.cl[k],a=R,b=L+len-1;if(a>b)continue;const t=nf.filter(x=>x>=a&&x<=b);if(!t.length)continue;
    const span=[];for(let x=L;x<R+len;x++)span.push(l.ci[x]);const bn=l.cl.filter(x=>x===len).length>1?`het ${ORD[k]||(k+1)+"e"} blok (${len})`:`het blok van ${len}`,nt=b-a+1;
-   consider({pr:1,set:1,cells:t.map(x=>l.ci[x]),why:span,text:L===R?`Kijk naar ${nm}. Gezien wat er al staat, past ${bn} maar op één plek: het blauw omrande stuk. Vul het helemaal.`
+   consider({pr:1,set:1,cells:t.map(x=>l.ci[x]),why:span,proof:{rule:"overlap",line:l,block:k,length:len,min:L,max:R,count:A.cnt},text:L===R?`Kijk naar ${nm}. Gezien wat er al staat, past ${bn} maar op één plek: het blauw omrande stuk. Vul het helemaal.`
     :`Kijk naar ${nm}. ${cap(bn)} ligt ergens in het blauw omrande stuk van ${R-L+len} vakjes. Schuif je het helemaal naar het begin of helemaal naar het eind, dan bedekt het altijd ${nt===1?"dit vakje":"deze "+nt+" vakjes"}. ${t.length===nt?(nt===1?"Dat vakje is dus gevuld.":"Die zijn dus gevuld."):(t.length===1?"Het vakje daarvan dat nog leeg is, is dus gevuld.":"De vakjes daarvan die nog leeg zijn, zijn dus gevuld.")}`})}
   if(nx.length&&okA){const reach=new Set();for(let k=0;k<l.cl.length;k++)for(let x=A.mn[k];x<A.mx[k]+l.cl[k];x++)reach.add(x);const t=nx.filter(x=>!reach.has(x));
-   if(t.length)consider({pr:2,set:2,cells:t.map(x=>l.ci[x]),why:l.ci,text:`Kijk naar ${nm}. Hoe ver je de blokken ook schuift (passend bij wat er al staat), ${t.length===1?"dit vakje bereikt":"deze vakjes bereikt"} geen enkel blok. ${t.length===1?"Het wordt een kruisje":"Ze worden kruisjes"}.`})}
+   if(t.length)consider({pr:2,set:2,cells:t.map(x=>l.ci[x]),why:l.ci,proof:{rule:"outside",line:l,count:A.cnt},text:`Kijk naar ${nm}. Hoe ver je de blokken ook schuift (passend bij wat er al staat), ${t.length===1?"dit vakje bereikt":"deze vakjes bereikt"} geen enkel blok. ${t.length===1?"Het wordt een kruisje":"Ze worden kruisjes"}.`})}
   const set=nf.length?1:2,ks=nf.length?nf:nx;
-  consider({pr:3,set,cells:[l.ci[ks[0]]],why:l.ci,text:`Kijk naar ${nm}. Probeer alle manieren om de blokken ${cs} in deze ${l.w} te leggen die passen bij wat er al staat${okA&&A.cnt<=30?` (dat zijn er ${A.cnt})`:""}. In elke manier is dit vakje ${set===1?"gevuld":"leeg"}.`})}
+  consider({pr:3,set,cells:[l.ci[ks[0]]],why:l.ci,proof:{rule:"options",line:l,count:okA?A.cnt:null},text:`Kijk naar ${nm}. Probeer alle manieren om de blokken ${cs} in deze ${l.w} te leggen die passen bij wat er al staat${okA&&A.cnt<=30?` (dat zijn er ${A.cnt})`:""}. In elke manier is dit vakje ${set===1?"gevuld":"leeg"}.`})}
  if(!best)return null;return Object.assign({kind:"tech",btn:best.set===1?"Vul het voor me in":"Zet de kruisjes voor me"},best)}
 function paintNonoHint(){const h=S.hint;S.cells.forEach((d,i)=>{if(!d)return;d.classList.toggle("ht",!!(h&&h.cells.includes(i)));d.classList.toggle("hr",!!(h&&!h.cells.includes(i)&&h.why.includes(i)))})}
 function repaintHint(){if(S.type==="plus")paintPlusHint();else if(S.type==="bin")paintBin();else if(S.type==="star")render();else if(S.type==="hex")rHex();else if(S.type==="nono")paintNonoHint();else if(S.type==="mur")paintMur()}
@@ -571,22 +571,21 @@ let hintHideT=0;
 /* iPad: verplaats/schaal alleen de buitenste speelcontainer. De puzzel zelf wordt niet opnieuw gerenderd. */
 function layoutSideHint(on){const pb=$("#playbox");if(pb)pb.style.transform=""}
 
-function hideHint(){S.hint=null;const b=$("#hint");clearTimeout(hintHideT);const wasPad=HINTPAD,wasSide=HINTSIDE,visible=!!(b&&b.innerHTML.trim()&&getComputedStyle(b).display!=="none");
+function hideHint(){S.hint=null;document.body.classList.remove("hintdock");const b=$("#hint");clearTimeout(hintHideT);const wasPad=HINTPAD,wasSide=HINTSIDE,visible=!!(b&&b.innerHTML.trim()&&getComputedStyle(b).display!=="none");
  if(wasSide){HINTSIDE=0;document.body.classList.remove("hintside");layoutSideHint(false);resetPuzzleFit();if(S.p)render()}
  const done=()=>{if(!b)return;b.classList.remove("closing");b.style.display="none";b.innerHTML="";if(wasPad){HINTPAD=0;resetPuzzleFit();if(S.p)render()}if(wasSide)b.classList.remove("side")};
  if(visible&&!matchMedia("(prefers-reduced-motion: reduce)").matches){b.classList.add("closing");hintHideT=setTimeout(done,135)}else done()}
 function clearHint(){if(!S.hint)return;hideHint();repaintHint()}
-document.addEventListener("pointerdown",e=>{if(S.hint&&!e.target.closest("#hint,#hintb"))clearHint()},true);
+/* Een bordgebaar mag de geometrie niet veranderen voordat de cel is bepaald. */
+function invalidateHint(){const h=S.hint;if(!h||h.stale)return;h.stale=true;h.cells=[];h.why=[];h.ghost=[];h.cards=[];h.hexLines=[];
+ const b=$("#hint"),next=b.querySelector(".hintnext"),back=b.querySelector(".hintback");
+ if(next){next.textContent="Vernieuw hint voor dit bord";next.onclick=()=>{clearHint();hintGo()}}
+ if(back)back.hidden=true;
+ const legend=b.querySelector(".hintlegend");if(legend)legend.textContent="Het bord is gewijzigd. Vernieuw de hint voor een actuele aanwijzing.";
+ repaintHint()}
 function hintGo(){if(S.hint){clearHint();return}if(S.done||!S.p||!HINTT.includes(S.type))return;
  const h=S.type==="star"?starHint():S.type==="bin"?binHint():S.type==="nono"?nonoHint():S.type==="plus"?plusHint():S.type==="mur"?murHint():hexHint();if(!h)return;S.hint=h;
- const hk=h.text+"|"+h.cells.join(",");if(S.lastHk!==hk){S.lastHk=hk;S.hints=(S.hints||0)+1;if(h.kind==="fix")S.mist=(S.mist||0)+1}if(!S.start)S.start=Date.now();
- const b=$("#hint");clearTimeout(hintHideT);b.classList.remove("closing");b.innerHTML="";const xb=document.createElement("button");xb.className="hx";xb.textContent="✕";xb.setAttribute("aria-label","Sluiten");xb.onclick=()=>clearHint();const hh=document.createElement("div");hh.className="hht";hh.textContent="💡 Hint";b.append(xb,hh);const t=document.createElement("div");if(h.steps){t.textContent=h.intro;b.append(t);const ol=document.createElement("ol");ol.style.cssText="margin:6px 0 6px;padding-left:22px";h.steps.forEach(x=>{const li=document.createElement("li");li.textContent=x;ol.append(li)});b.append(ol);const o2=document.createElement("div");o2.style.fontWeight="700";o2.textContent=h.outro;b.append(o2)}else{t.textContent=h.text;b.append(t)}
- const l=document.createElement("div");l.className="mut";l.textContent=S.type==="hex"?"Rode rand: hier gebeurt de stap. Paarse rand: hier kijk je naar.":"Oranje rand: hier gebeurt de stap. Blauwe rand: hier kijk je naar.";b.append(l);
- const bt=document.createElement("button");bt.textContent=h.btn;bt.style.marginTop="6px";bt.onclick=doStep;b.append(bt);b.style.display="block";
- if(PHONE){const pb=$("#pbot").getBoundingClientRect();Object.assign(b.style,{transform:"none",left:"6px",right:"auto",width:(innerWidth-12)+"px",bottom:"auto",top:"0px"});
-  const H=b.offsetHeight;HINTPAD=H+8;resetPuzzleFit();render();b.style.top=Math.round(pb.top-H-6)+"px";return}
- if(document.body.classList.contains("tablet")){b.classList.add("side");Object.assign(b.style,{transform:"",left:"",top:"",width:"",bottom:"",right:""});if(!HINTSIDE){HINTSIDE=1;document.body.classList.add("hintside");resetPuzzleFit();render()}repaintHint();return}
- repaintHint();placeHint()}
+ S.hint=prepareHint(h);showHintLevel(S.hint,1,false)}
 /* Zet de hintkaart op de plek waar hij het minst bedekt van de vakjes waar de hint over gaat
    (het vakje van de stap telt het zwaarst, dan de lichte kruisjes, dan de blauw/paars omrande vakjes).
    We proberen 9 plekken (boven/midden/onder x links/midden/rechts) en meten de echte hoogte van de kaart. */
@@ -606,8 +605,8 @@ function placeHint(){const b=$("#hint"),h=S.hint;if(!h||b.style.display==="none"
    cands.push({W,x,y,sc,pref})}}
  cands.sort((p,q)=>p.sc-q.sc||p.pref-q.pref);const c=cands[0];
  Object.assign(b.style,{width:c.W+"px",left:Math.round(c.x)+"px",top:Math.round(c.y)+"px"})}
-addEventListener("resize",()=>{if(S&&S.hint)setTimeout(()=>{if(HINTSIDE){resetPuzzleFit();render()}else placeHint()},50)});
-function doStep(){const h=S.hint;if(!h||S.done)return;
+addEventListener("resize",()=>{if(S&&S.hint)setTimeout(()=>{if(S.hint)showHintLevel(S.hint,S.hint.level,false)},50)});
+function doStep(){const active=S.hint;if(!active||active.stale||active.level!==3||S.done)return;const h=active.move;
  if(S.type==="hex"){h.cells.forEach(i=>S.hx.rev.add(i));if(!S.start)S.start=Date.now();hideHint();hexAfter();return}
  if(S.type==="mur"){if(h.kind==="kill"){hideHint();paintMur();return}begin();const i=h.cells[0];if(h.set>=0){const o=S.cur.indexOf(h.set);if(o>=0)S.cur[o]=-1}S.cur[i]=h.set;commit();if(!S.start)S.start=Date.now();hideHint();if(h.set>=0&&S.ms===h.set)S.ms=murNext(h.set);paintMur();persist();check();return}
  begin();h.cells.forEach(i=>{S.cur[i]=h.set});if(S.type==="nono")nonoAuto(h.cells);if(S.type==="plus"&&h.kind!=="fix")plusAuto(h.cells);commit();
@@ -635,8 +634,8 @@ function rHex(){if(!S.p||S.type!=="hex"||!S.hx)return;{const hs=$("#hexstat");if
  let tx="";const zcnt=new Map();Object.keys(cs).forEach(k=>{if(cs[k]===1&&k[0]==="z"){const zc=P.zone[+k.slice(1)];if(zc){zc.pos.forEach(j=>zcnt.set(j,(zcnt.get(j)||0)+1));zcnt.set(+k.slice(1),(zcnt.get(+k.slice(1))||0)+1)}}});
  P.cells.forEach((c,i)=>{const[x,y]=px(c.q,c.r),rv=S.hx.rev.has(i),bl=P.sol[i]===1,ts=zcnt.has(i)?` stroke="rgba(15,25,45,${zcnt.get(i)>1?.6:.42})" stroke-width="${(sz*.075).toFixed(1)}" paint-order="stroke" stroke-linejoin="round"`:"";
   let fill=rv?(bl?K.blu:K.blk):K.hid;if(S.flash===i)fill="#e5484d";
-  let stroke=K.bd,sw=2.2;if(H&&H.cells.includes(i)){stroke="#ff2d6f";sw=5}else if(H&&H.why.includes(i)){stroke="#7c3aed";sw=5}
-  s+=`<g data-i="${i}" class="${S.popH===i?"pop":S.flash===i?"shake":""}" style="cursor:${rv?"default":"pointer"}"><polygon points="${hp(x,y,sz*1.0)}" fill="transparent" stroke="none"/><polygon pointer-events="none" points="${hp(x,y,sz*.93)}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="miter"/>`;
+  let stroke=K.bd,sw=2.2,dash="";const target=H&&H.cells.includes(i);if(target){stroke=D?"#b9d9df":"#315b65";sw=3}else if(H&&H.why.includes(i)){stroke=D?"#e2d4b5":"#685637";sw=2.5;dash=' stroke-dasharray="3 3"'}
+  s+=`<g data-i="${i}" class="${S.popH===i?"pop":S.flash===i?"shake":""}" style="cursor:${rv?"default":"pointer"}"><polygon points="${hp(x,y,sz*1.0)}" fill="transparent" stroke="none"/><polygon pointer-events="none" points="${hp(x,y,sz*.93)}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"${dash} stroke-linejoin="miter"/>${target?`<polygon pointer-events="none" points="${hp(x,y,sz*.80)}" fill="none" stroke="${stroke}" stroke-width="1.5"/>`:""}`;
   if(rv&&bl&&hexZn(P,i))tx+=`<text x="${x}" y="${y+sz*.26}" text-anchor="middle" font-size="${sz*.78}" font-weight="700" fill="#fff" fill-opacity="${cs["z"+i]===2?.4:1}"${ts} pointer-events="none">${P.zone[i].cnt}</text>`;
   if(rv&&!bl)tx+=`<text x="${x}" y="${y+sz*.26}" text-anchor="middle" font-size="${sz*.78}" font-weight="700" fill="#fff"${ts} pointer-events="none">${hexQ(P,i)?"?":clueTxt(P.ring[i])}</text>`;
   s+="</g>"});
@@ -658,7 +657,7 @@ function rHex(){if(!S.p||S.type!=="hex"||!S.hx)return;{const hs=$("#hexstat");if
  if(zp)zv+=`<path d="${zp}" stroke="rgba(20,30,50,${D?.5:.28})" stroke-width="${(sz*.17).toFixed(1)}" stroke-linecap="round" fill="none" pointer-events="none"/><path d="${zp}" stroke="#fff" stroke-width="${(sz*.08).toFixed(1)}" stroke-linecap="round" fill="none" pointer-events="none"/>`;
  s+=`<g class="ovl">${zv}${ov}</g><g class="txl">${tx}</g>`;
  window._tp=[];P.lineShow.forEach(j=>{const l=P.lines[j],[x,y]=px(l.vq,l.vr),ang0=l.d===0?-90:l.d===1?30:-30,ang=TR?90-ang0:ang0,fwd=l.d!==1,sg=fwd?1:-1,rad=ang*Math.PI/180,ux=Math.cos(rad)*sg,uy=Math.sin(rad)*sg,a0=sz*.1*sg,a1=sz*.7*sg,hd=sz*.17;const tp=LP[j];window._tp.push(tp);
-  s+=`<g data-l="${j}" style="cursor:pointer"><circle cx="${tp[0].toFixed(1)}" cy="${tp[1].toFixed(1)}" r="${sz*.6}" fill="transparent"/><text x="${tp[0].toFixed(1)}" y="${(tp[1]+sz*.22).toFixed(1)}" text-anchor="middle" font-size="${sz*.6}" font-weight="700" fill-opacity="${cs["l"+j]===2?.35:1}" style="fill:${K.lab}">${clueTxt(l.clue)}</text>${(()=>{const sh=shared(j),b0=sh?.5:.4,sx=tp[0]+ux*sz*b0,sy=tp[1]+uy*sz*b0,ex=x+ux*sz*.85,ey=y+uy*sz*.85,h=sz*.17,px2=-uy,py2=ux;return`<path d="M${sx.toFixed(1)} ${sy.toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} M${(ex-ux*h+px2*h).toFixed(1)} ${(ey-uy*h+py2*h).toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${(ex-ux*h-px2*h).toFixed(1)} ${(ey-uy*h-py2*h).toFixed(1)}" style="stroke:${K.arr};fill:none" stroke-width="2.5" stroke-opacity="${cs["l"+j]===2?.35:1}" stroke-linecap="round" stroke-linejoin="round"/>`})()}</g>`});
+  s+=`<g data-l="${j}" style="cursor:pointer">${H&&H.hexLines&&H.hexLines.includes(j)?`<ellipse class="hint-line" cx="${tp[0].toFixed(1)}" cy="${tp[1].toFixed(1)}" rx="${sz*.75}" ry="${sz*.5}" fill="none" stroke="${D?"#e2d4b5":"#685637"}" stroke-width="2" stroke-dasharray="3 3" pointer-events="none"/>`:""}<circle cx="${tp[0].toFixed(1)}" cy="${tp[1].toFixed(1)}" r="${sz*.6}" fill="transparent"/><text x="${tp[0].toFixed(1)}" y="${(tp[1]+sz*.22).toFixed(1)}" text-anchor="middle" font-size="${sz*.6}" font-weight="700" fill-opacity="${cs["l"+j]===2?.35:1}" style="fill:${K.lab}">${clueTxt(l.clue)}</text>${(()=>{const sh=shared(j),b0=sh?.5:.4,sx=tp[0]+ux*sz*b0,sy=tp[1]+uy*sz*b0,ex=x+ux*sz*.85,ey=y+uy*sz*.85,h=sz*.17,px2=-uy,py2=ux;return`<path d="M${sx.toFixed(1)} ${sy.toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} M${(ex-ux*h+px2*h).toFixed(1)} ${(ey-uy*h+py2*h).toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${(ex-ux*h-px2*h).toFixed(1)} ${(ey-uy*h-py2*h).toFixed(1)}" style="stroke:${K.arr};fill:none" stroke-width="2.5" stroke-opacity="${cs["l"+j]===2?.35:1}" stroke-linecap="round" stroke-linejoin="round"/>`})()}</g>`});
  const ph=S.popH;S.popH=-1;const tp2=document.createElement("template");tp2.innerHTML=s+`<rect class="hit" x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" fill="transparent"/></svg>`;const nw=tp2.content.firstElementChild,old=w.firstElementChild;
  if(old&&old.nodeName===nw.nodeName)hexSync(old,nw);else{w.textContent="";w.append(nw)}
  const oldSh=w.querySelector(".shards");if(oldSh)oldSh.remove();
@@ -676,7 +675,7 @@ function hexSync(a,b){if(a.nodeType!==b.nodeType||a.nodeName!==b.nodeName){a.rep
  for(let i=0;i<a.childNodes.length;i++)hexSync(a.childNodes[i],b.childNodes[i])}
 function hexAfter(){pingBusy();if(S.p.sol.every((v,i)=>!v||S.hx.rev.has(i))){finish();return}rHex()}
 function hexClue(k,forcedMode){if(!S.cs)S.cs={};const c=S.cs[k]||0,mode=forcedMode||hexMode;if(mode==="b"){if(c===1)delete S.cs[k];else S.cs[k]=1}else{if(c===2)delete S.cs[k];else S.cs[k]=2}rHex()}
-function hexTap(i,forcedMode){if(S.done)return;if(S.hx.rev.has(i)){if(hexZn(S.p,i))hexClue("z"+i,forcedMode);return}S.zh=-1;S.hl=-1;if(!S.start)S.start=Date.now();clearHint();const mode=forcedMode||hexMode;
+function hexTap(i,forcedMode){if(S.done)return;if(S.hx.rev.has(i)){if(hexZn(S.p,i))hexClue("z"+i,forcedMode);return}S.zh=-1;S.hl=-1;if(!S.start)S.start=Date.now();invalidateHint();const mode=forcedMode||hexMode;
  if(S.p.sol[i]===(mode==="b"?1:0)){S.hx.rev.add(i);S.popH=i;hexAfter()}
  else{S.mist++;S.flash=i;rHex();setTimeout(()=>{S.flash=-1;if(S.type==="hex"&&!S.done)rHex()},450)}}
 function hexHint(){const P=S.p,rev=S.hx.rev,n=P.n,cons=[];
@@ -685,13 +684,13 @@ function hexHint(){const P=S.p,rev=S.hx.rev,n=P.n,cons=[];
  const GC={pos:P.sol.map((_,i)=>i),cyc:false,cnt:P.sol.reduce((x,y)=>x+y,0),type:0};cons.push({c:GC,kind:"rest",id:-1});
  for(const o of cons){const c=o.c,hid=[];let k=0;for(const p of c.pos){if(p<0)continue;if(rev.has(p)){if(P.sol[p])k++}else hid.push(p)}
   if(!hid.length||(k!==c.cnt&&k+hid.length!==c.cnt))continue;
-  if(o.kind==="rest"){const r=c.cnt-k;return{cells:hid,why:[],rest:true,kind:"tech",btn:"Doe de stap voor me",text:`Kijk naar de teller "nog te vinden": er ${r===1?"moet nog 1 blauw vakje":"moeten nog "+r+" blauwe vakjes"} gevonden worden, en er ${hid.length===1?"is":"zijn"} nog precies ${hid.length} onbekend${hid.length===1?" vakje":"e vakjes"} over. ${hid.length===1?"Dat vakje is dus blauw.":"Ze zijn dus allemaal blauw."}`}}
+  if(o.kind==="rest"){const r=c.cnt-k;return{cells:hid,why:[],rest:true,proof:{rule:"count",clues:[o]},kind:"tech",btn:"Doe de stap voor me",text:`Kijk naar de teller "nog te vinden": er ${r===1?"moet nog 1 blauw vakje":"moeten nog "+r+" blauwe vakjes"} gevonden worden, en er ${hid.length===1?"is":"zijn"} nog precies ${hid.length} onbekend${hid.length===1?" vakje":"e vakjes"} over. ${hid.length===1?"Dat vakje is dus blauw.":"Ze zijn dus allemaal blauw."}`}}
   const black=k===c.cnt,t=clueTxt(c),ring=o.kind==="ring",many=hid.length>1,
    why=o.kind==="line"?P.lines[o.id].idx.filter(p=>rev.has(p)):[o.id],zn=o.kind==="zone",
    intro=zn?`Het getal ${t} bij dit blauwe vakje zegt hoeveel vakjes in het gebied eromheen (tot twee vakjes ver, het vakje zelf telt niet mee) blauw zijn.`:`Het getal ${t} bij ${ring?"dit zwarte vakje":"deze lijn"} zegt hoeveel ${ring?"van de buren":"vakjes in de lijn"} blauw zijn.`,
    body=black?` Daarvan ${k===1?"is er":"zijn er"} al ${k} gevonden, dus ${many?"de overige "+hid.length+" vakjes zijn":"het laatste onbekende vakje is"} zwart.`
     :` Er ${k===1?"is":"zijn"} al ${k} gevonden, er ${hid.length===1?"is":"zijn"} nog ${hid.length} onbekend${hid.length===1?" vakje":"e vakjes"} over en er moeten er nog ${hid.length} blauw zijn. ${many?"Ze zijn dus allemaal blauw.":"Dat vakje is dus blauw."}`;
-  return{cells:hid,why,kind:"tech",btn:"Doe de stap voor me",text:intro+body}}
+  return{cells:hid,why,proof:{rule:"count",clues:[o]},kind:"tech",btn:"Doe de stap voor me",text:intro+body}}
  /* Lokaal zoeken: eerst één aanwijzing, dan twee die vakjes delen, dan drie. Zo vinden we snel de kleinste uitleg. */
  const a=Array(n).fill(-1);rev.forEach(i=>{a[i]=P.sol[i]});
  const act=cons.filter(o=>o.c.pos.some(p=>p>=0&&a[p]<0)),cof=new Map();act.forEach(o=>o.c.pos.forEach(p=>{if(p>=0&&a[p]<0){if(!cof.has(p))cof.set(p,[]);if(!cof.get(p).includes(o))cof.get(p).push(o)}}));
@@ -702,12 +701,13 @@ function hexHint(){const P=S.p,rev=S.hx.rev,n=P.n,cons=[];
  for(const[i,cs0]of cof){for(const o of cs0)if(bad(i,[o])){best={i,f:P.sol[i],keep:[o]};break}if(best)break}
  if(!best){let sc=-1e9;for(const[i,cs0]of cof){for(const o1 of ordK(cs0)){for(const o2 of nb(o1))if(bad(i,[o1,o2])){const v=zlk(o1)+zlk(o2);if(v>sc){sc=v;best={i,f:P.sol[i],keep:[o1,o2]}}break}}if(sc>=2)break}}
  if(!best)outer:for(const[i,cs0]of cof)for(const o1 of ordK(cs0)){const n1=nb(o1);for(let x=0;x<n1.length;x++){const o2=n1[x],n3=new Set(n1.slice(x+1));nb(o2).forEach(o=>{if(o!==o1)n3.add(o)});for(const o3 of n3)if(bad(i,[o1,o2,o3])){best={i,f:P.sol[i],keep:[o1,o2,o3]};break outer}}}
- if(!best){const cs=cons.map(o=>o.c);for(let i=0;i<n&&!best;i++){if(rev.has(i))continue;const t=a.slice();t[i]=1-P.sol[i];if(!hexSat(t,cs))best={i,f:P.sol[i],keep:cons.slice(0,4)}}}
+ if(!best){const cs=cons.map(o=>o.c);for(let i=0;i<n&&!best;i++){if(rev.has(i))continue;const t=a.slice();t[i]=1-P.sol[i];if(!hexSat(t,cs))best={i,f:P.sol[i],keep:cons.slice(0,4),global:true}}}
  if(best){const{i,f,keep}=best;
-  const why=[...new Set(keep.flatMap(whyOf))].filter(p=>p!==i),col=v=>v?"blauw":"zwart",Col=v=>v?"Blauw":"Zwart";
+  const why=[...new Set((best.global?cons:keep).flatMap(whyOf))].filter(p=>p!==i),col=v=>v?"blauw":"zwart",Col=v=>v?"Blauw":"Zwart";
   const nmC=o=>{const t=clueTxt(o.c);if(o.kind==="rest")return'de teller "nog te vinden"';return o.kind==="line"?`de lijn met ${t}`:o.kind==="zone"?`het getal ${t} op het blauwe vakje`:`het getal ${t} op het zwarte vakje`};
   const unk=o=>o.c.pos.filter(p=>p>=0&&!rev.has(p)),need=o=>o.c.cnt-o.c.pos.filter(p=>p>=0&&rev.has(p)&&P.sol[p]).length;
-  const res=(cells,text,ex)=>({cells,f,nk:keep.length,rest:keep.some(o=>o.kind==="rest"),why:[...new Set([...why,...(ex||[])])].filter(p=>!cells.includes(p)),kind:"deduce",btn:"Doe de stap voor me",text:text+` Kies ${Col(f)} en tik erop.`});
+  const res=(cells,text,ex)=>({cells,f,proof:{rule:best.global?"global":"constraints",clues:best.global?cons:keep},nk:keep.length,rest:best.global||keep.some(o=>o.kind==="rest"),why:[...new Set([...why,...(ex||[])])].filter(p=>!cells.includes(p)),kind:"deduce",btn:"Doe de stap voor me",text:text+` Kies ${Col(f)} en tik erop.`});
+  if(best.global)return res([i],`Deze stap volgt uit de combinatie van alle zichtbare aanwijzingen en de teller "nog te vinden". Er is geen korte lokale afleiding beschikbaar. De oplosser stelt vast dat dit vakje ${col(f)} is.`);
   if(keep.length===1){const o=keep[0],t=clueTxt(o.c),nm=nmC(o),where=o.kind==="line"?"in de lijn":o.kind==="zone"?"in het gebied eromheen":"rondom";
    if(o.c.type===1)return res([i],`Kijk naar ${nm}. De haakjes in ${t} betekenen: de ${o.c.cnt} blauwe vakjes ${where} liggen aan elkaar, als één groepje. Als dit vakje ${col(1-f)} zou zijn, kan dat groepje niet meer aaneengesloten liggen. Dit vakje is dus ${col(f)}.`);
    if(o.c.type===2)return res([i],`Kijk naar ${nm}. De streepjes in ${t} betekenen: de ${o.c.cnt} blauwe vakjes ${where} liggen níet allemaal aan elkaar, er zijn minstens twee groepjes. Als dit vakje ${col(1-f)} zou zijn, zouden ze wél één groepje vormen. Dit vakje is dus ${col(f)}.`)}
@@ -834,7 +834,7 @@ function plusDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="plus"||S.done||e.
  if(e.target.closest&&e.target.closest("#psum")){if(mb==="r")return;plusPeek(true);return}
  const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){if(mb==="r")return;plusLine(ck.dataset.ln);return}
  S.ng=gridGeo(S.p.W);const i=gridHit(S.ng,e.clientX,e.clientY,S.p.W,S.p.H);if(i<0)return;e._nono=true;
- if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],active=plusMode==="o"?1:2,val=mb==="r"?(active===1?2:1):active;
+ if(!S.start)S.start=Date.now();invalidateHint();begin();const old=S.cur[i],active=plusMode==="o"?1:2,val=mb==="r"?(active===1?2:1):active;
  pd={last:i,pid:e.pointerId,path:[i],prev:new Map(),val,mode:old===val?"del":"add"};
  const nv=old===val?0:val;plusPaint(i,nv);if(nv!==old)pd.prev.set(i,old)}
 function plusMove(e){if(!pd||S.type!=="plus"||e.pointerId!==pd.pid)return;const W=S.p.W,i=gridHit(S.ng,e.clientX,e.clientY,W,S.p.H);if(i<0||i===pd.last)return;
@@ -852,7 +852,7 @@ function plusAuto(ch){}
 /* Tik op een som: er komt een schuine streep door (zelf bijhouden welke rij of kolom klaar is). Nog eens tikken haalt hem weg. */
 /* Tik op een som: er komt een schuine streep door, en alle open getallen in die rij of kolom worden weggestreept
    (omcirkelde getallen blijven staan). Nog eens tikken haalt alleen de streep weg; ↶ zet de weggestreepte getallen terug. */
-function plusLine(id){const p=S.p,W=p.W,H=p.H,k=id[0]==="r"?+id.slice(1):H+ +id.slice(1);clearHint();if(!S.start)S.start=Date.now();
+function plusLine(id){const p=S.p,W=p.W,H=p.H,k=id[0]==="r"?+id.slice(1):H+ +id.slice(1);invalidateHint();if(!S.start)S.start=Date.now();
  const cells=k<H?Array.from({length:W},(_,c)=>k*W+c):Array.from({length:H},(_,r)=>r*W+(k-H));
  if(!cells.some(i=>S.cur[i]===0))return;
  begin();cells.forEach(i=>{if(S.cur[i]===0)plusPaint(i,2)});commit();plusLab(k);persist();check()}
@@ -885,22 +885,22 @@ function plusHint(){plusSetup();const p=S.p,cur=S.cur,num=p.num;
   const nm=plusName(u),T=u.t,hasO=u.cells.some(i=>cur[i]===1),hasX=u.cells.some(i=>cur[i]===2),need=L.need,m=L.U.length;
   const og=hasO?"open getallen":hasX?"getallen die er nog staan":"getallen";
   const intro=hasO?`${cap(nm)} moet samen ${T} zijn. De omcirkelde getallen zijn samen al ${L.K}, dus de open getallen moeten samen nog ${need} maken.`:`${cap(nm)} moet samen ${T} zijn.`;
-  const H={unit:k,why:u.cells};
-  if(need===0){consider(Object.assign({sc:m/100,set:2,cells:L.U,btn:"Streep ze weg voor me",text:`De omcirkelde getallen in ${nm} zijn samen al ${T}: precies genoeg. Alle andere getallen in ${nm} moeten dus weg.`},H));return}
-  if(need===L.s0){consider(Object.assign({sc:m/100,set:1,cells:L.U,btn:"Omcirkel ze voor me",text:hasO?`${intro} De open getallen zijn samen ook precies ${need}. Ze moeten dus allemaal blijven staan.`:`${cap(nm)} moet samen ${T} zijn, en de ${og} zijn samen precies ${T}. Ze moeten dus allemaal blijven staan.`},H));return}
+  const H={unit:k,why:u.cells,proof:{rule:"combinations",count:L.n}};
+  if(need===0){H.proof.rule="complete";consider(Object.assign({sc:m/100,set:2,cells:L.U,btn:"Streep ze weg voor me",text:`De omcirkelde getallen in ${nm} zijn samen al ${T}: precies genoeg. Alle andere getallen in ${nm} moeten dus weg.`},H));return}
+  if(need===L.s0){H.proof.rule="remaining";consider(Object.assign({sc:m/100,set:1,cells:L.U,btn:"Omcirkel ze voor me",text:hasO?`${intro} De open getallen zijn samen ook precies ${need}. Ze moeten dus allemaal blijven staan.`:`${cap(nm)} moet samen ${T} zijn, en de ${og} zijn samen precies ${T}. Ze moeten dus allemaal blijven staan.`},H));return}
   const big=L.U.filter(i=>num[i]>need);
-  if(big.length){consider(Object.assign({sc:1+m/100,set:2,cells:big,btn:"Streep "+(big.length===1?"hem":"ze")+" weg voor me",text:`${intro} ${cap(de(big))} ${big.length===1?"is":"zijn"} groter dan ${need}, dus ${big.length===1?"die past":"die passen"} er niet meer in. Wegstrepen.`},H));return}
+  if(big.length){H.proof.rule="tooLarge";H.proof.excluded=big.length;consider(Object.assign({sc:1+m/100,set:2,cells:big,btn:"Streep "+(big.length===1?"hem":"ze")+" weg voor me",text:`${intro} ${cap(de(big))} ${big.length===1?"is":"zijn"} groter dan ${need}, dus ${big.length===1?"die past":"die passen"} er niet meer in. Wegstrepen.`},H));return}
   const mk=keep.filter(i=>L.s0-num[i]<need).sort((a,b)=>num[b]-num[a]);
-  if(mk.length){const i=mk[0];consider(Object.assign({sc:2+m/100,set:1,cells:[i],btn:"Omcirkel hem voor me",text:`${intro} Zonder de ${num[i]} zijn de andere ${og} samen maar ${L.s0-num[i]}, en dat is minder dan ${need}. De ${num[i]} moet dus blijven staan.`},H));return}
+  if(mk.length){const i=mk[0];H.proof.rule="essential";consider(Object.assign({sc:2+m/100,set:1,cells:[i],btn:"Omcirkel hem voor me",text:`${intro} Zonder de ${num[i]} zijn de andere ${og} samen maar ${L.s0-num[i]}, en dat is minder dan ${need}. De ${num[i]} moet dus blijven staan.`},H));return}
   /* Combinaties: bij weinig manieren noemen we ze allemaal, anders "stel dat ..." voor één getal. */
   const ways=new Map();for(let x=0;x<1<<m;x++)if(L.S[x]===need){const vs=[];L.U.forEach((i,b)=>{if(x>>b&1)vs.push(num[i])});vs.sort((a,b)=>b-a);ways.set(vs.length===1?"alleen de "+vs[0]:vs.join(" + "),1)}
-  const vals=L.U.map(i=>num[i]).join(", "),wl=[...ways.keys()],nW=wl.length;
+  const vals=L.U.map(i=>num[i]).join(", "),wl=[...ways.keys()],nW=wl.length;H.proof.count=nW;
   if(nW<=3){const pre=`${intro} Met de ${og} (${vals}) kun je ${need} maar op ${nW===1?"één manier":nwS(nW)+" manieren"} maken: ${lst(wl)}.`;
    if(rem.length)consider(Object.assign({sc:3+m/100+nW/1000,set:2,cells:rem,btn:"Streep "+(rem.length===1?"hem":"ze")+" weg voor me",text:`${pre} ${cap(de(rem))} ${rem.length===1?"zit":"zitten"} ${nW===1?"daar niet in":nW===2?"in geen van beide":"in geen van de drie"}, dus ${rem.length===1?"die moet":"die moeten"} weg.`},H));
    else consider(Object.assign({sc:3+m/100+nW/1000,set:1,cells:keep,btn:"Omcirkel "+(keep.length===1?"hem":"ze")+" voor me",text:`${pre} ${cap(de(keep))} ${keep.length===1?"zit":"zitten"} ${nW===1?"daarin":nW===2?"in allebei":"in alle drie"}, dus ${keep.length===1?"die blijft":"die blijven"} staan.`},H));return}
   const i=rem.length?rem[0]:keep[0],v=num[i],oth=L.U.filter(j=>j!==i).map(j=>num[j]),ov=oth.join(", ");
-  if(rem.length)consider(Object.assign({sc:3.5+m/100,set:2,cells:[i],btn:"Streep hem weg voor me",text:`${intro} Stel dat de ${v} blijft staan. Dan moeten de andere ${og} (${ov}) samen nog ${need-v} maken. Dat lukt met geen enkele combinatie${plusWhyNot(oth,need-v)}. De ${v} moet dus weg.`},H));
-  else consider(Object.assign({sc:3.5+m/100,set:1,cells:[i],btn:"Omcirkel hem voor me",text:`${intro} Stel dat de ${v} weg zou gaan. Dan moeten de andere ${og} (${ov}) samen ${need} maken. Dat lukt met geen enkele combinatie${plusWhyNot(oth,need)}. De ${v} moet dus blijven staan.`},H))});
+  if(rem.length){H.proof.rule="cannotInclude";consider(Object.assign({sc:3.5+m/100,set:2,cells:[i],btn:"Streep hem weg voor me",text:`${intro} Stel dat de ${v} blijft staan. Dan moeten de andere ${og} (${ov}) samen nog ${need-v} maken. Dat lukt met geen enkele combinatie${plusWhyNot(oth,need-v)}. De ${v} moet dus weg.`},H))}
+  else{H.proof.rule="cannotExclude";consider(Object.assign({sc:3.5+m/100,set:1,cells:[i],btn:"Omcirkel hem voor me",text:`${intro} Stel dat de ${v} weg zou gaan. Dan moeten de andere ${og} (${ov}) samen ${need} maken. Dat lukt met geen enkele combinatie${plusWhyNot(oth,need)}. De ${v} moet dus blijven staan.`},H))}});
  if(!best){const j=p.sol.findIndex((v,i)=>cur[i]===0&&!v);if(j<0)return null;return{cells:[j],why:[],set:2,kind:"reveal",btn:"Streep hem weg voor me",text:`Hier kan ik geen korte redenering voor vinden. Deze ${num[j]} moet weg.`}}
  return Object.assign({kind:"tech"},best)}
 
@@ -911,13 +911,13 @@ function ub0(){const set=(id,v)=>{$(id).disabled=!!v};const off=!S.p||S.done;{co
 function begin(){S.gs=S.cur.slice()}
 function commit(){if(S.gs&&S.gs.join()!==S.cur.join()){S.hist.push(S.gs);S.redo=[];pingBusy()}S.gs=null;ub();paintNotes()}
 function initCur(){const p=S.p;return S.type==="bin"?p.giv.slice():Array(S.type==="kak"||S.type==="nono"||S.type==="plus"?p.W*p.H:p.N*p.N).fill(S.type==="mur"?-1:0)}
-function undo(){if(S.done||!S.p||!S.hist.length)return;clearHint();
+function undo(){if(S.done||!S.p||!S.hist.length)return;invalidateHint();
  if(S.type==="m24"){S.redo.push(S.tiles);S.tiles=S.hist.pop();S.a=-1;S.op="";rM24();return}
  const h=S.hist.pop();
  if(h&&h.notes){S.redo.push(h);noteApplyChanges(h.changes,false);paintNotes();persist();ub();return}
  if(h&&h.note){S.redo.push(h);noteApplyChanges([h],false);paintNotes();persist();ub();return}
  S.redo.push(S.cur.slice());S.cur=h;S.rd=S.cd=S.pick=null;render();persist()}
-function redo(){if(S.done||!S.p||!S.redo.length)return;clearHint();
+function redo(){if(S.done||!S.p||!S.redo.length)return;invalidateHint();
  if(S.type==="m24"){S.hist.push(S.tiles);S.tiles=S.redo.pop();S.a=-1;S.op="";rM24();return}
  const h=S.redo.pop();
  if(h&&h.notes){S.hist.push(h);noteApplyChanges(h.changes,true);paintNotes();persist();ub();return}
@@ -971,12 +971,12 @@ function noteRaw(i,v){if(!S.nt)S.nt={};const old=noteVal(i);if(old===v)return nu
 function noteApplyChanges(changes,to){if(!S.nt)S.nt={};for(const c of changes){const v=to?c.to:c.from;if(v)S.nt[c.i]=v;else delete S.nt[c.i]}}
 function noteSet(i,v){const c=noteRaw(i,v);if(!c)return;
  /* Eén tik blijft één undo-stap; een nieuwe sleepactie wordt hieronder als één groep bewaard. */
- S.hist.push({note:1,...c});S.redo=[];pingBusy();if(!S.start)S.start=Date.now();clearHint();paintNotes();persist();ub()}
+ S.hist.push({note:1,...c});S.redo=[];pingBusy();if(!S.start)S.start=Date.now();invalidateHint();paintNotes();persist();ub()}
 function noteDragWrite(d,i,v){if(!d.nchanges)d.nchanges=new Map();const old=noteVal(i);if(old===v)return;let c=d.nchanges.get(i);if(!c){c={i,from:old,to:v};d.nchanges.set(i,c)}else c.to=v;noteRaw(i,v);paintNotes()}
 function noteDragRestore(d,i){const c=d.nchanges&&d.nchanges.get(i);if(c){noteRaw(i,c.from);c.to=c.from}}
 function noteFinish(d,group){const ch=d&&d.nchanges?[...d.nchanges.values()].filter(c=>c.from!==c.to):[];if(!ch.length){paintNotes();persist();ub();return}
- S.hist.push(group?{notes:1,changes:ch}:{note:1,...ch[0]});S.redo=[];pingBusy();if(!S.start)S.start=Date.now();clearHint();paintNotes();persist();ub()}
-function clearAllNotes(){if(S.done||!S.p||!S.nt)return;const ch=Object.keys(S.nt).filter(k=>S.nt[k]).map(k=>({i:+k,from:S.nt[k],to:0}));if(!ch.length)return;S.hist.push({notes:1,changes:ch});S.redo=[];S.nt={};clearHint();paintNotes();persist();ub()}
+ S.hist.push(group?{notes:1,changes:ch}:{note:1,...ch[0]});S.redo=[];pingBusy();if(!S.start)S.start=Date.now();invalidateHint();paintNotes();persist();ub()}
+function clearAllNotes(){if(S.done||!S.p||!S.nt)return;const ch=Object.keys(S.nt).filter(k=>S.nt[k]).map(k=>({i:+k,from:S.nt[k],to:0}));if(!ch.length)return;S.hist.push({notes:1,changes:ch});S.redo=[];S.nt={};invalidateHint();paintNotes();persist();ub()}
 function paintNotes(){if(!S.p||!S.nt)return;const t=S.type;
  if(t==="mur"){if(!S.mcells)return;const dark=isDark(),N=S.p.N,rc=Array(N).fill(0),cc=Array(N).fill(0);S.cur.forEach((v,i)=>{if(v>=0){rc[i/N|0]++;cc[i%N]++}});
   /* Aantekeningen in vakjes die vanzelf zijn afgekruist (rij of kolom van een geplaatst persoon) even verbergen; haal je die persoon weg, dan komen ze terug. */
@@ -1047,7 +1047,7 @@ function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const 
  const fit=()=>{const t=cl.getBoundingClientRect().top;if(PHONE)cl.style.maxHeight=Math.max(120,innerHeight-t-pbh-HINTPAD-8)+"px";else if(wide)cl.style.maxHeight=Math.max(260,availBot()+14-t-14)+"px"};fit();
  paintMur()}
 function murNext(from){const N=S.p.N,pl=new Set(S.cur.filter(v=>v>=0));for(let k=1;k<=N;k++){const s=(from+k)%N;if(!pl.has(s))return s}return -1}
-function murTap(i){if(S.done||!S.mcells)return;const v=S.cur[i];
+function murTap(i){if(S.done||!S.mcells)return;invalidateHint();const v=S.cur[i];
  /* Potlood: kleine letter van de gekozen persoon in het vakje (nog eens tikken haalt hem weg). */
  if(potlood){if(S.mxm){if(v===-1&&!murBlocked(S.p,i))noteSet(i,(S.nt[i]||0)^MNX);return}
   if(v!==-1||murBlocked(S.p,i)||!(S.ms>=0)){const m=$("#msg");if(!(S.ms>=0)||S.mxm){m.textContent="Kies eerst iemand of ✕ onderaan voor een aantekening.";setTimeout(()=>{if(m.textContent.startsWith("Kies eerst"))m.textContent=""},2000)}return}
@@ -1067,7 +1067,7 @@ function paintMur(){const p=S.p,N=p.N,dark=isDark();if(!S.mcells||!S.mcells.leng
  S.cur.forEach((v,i)=>{const d=S.mcells[i],sl=d.querySelector(".slot"),was=d.dataset.v||"",nv=v>=0?""+v:"";
   if(was!==nv){d.dataset.v=nv;sl.innerHTML=v>=0?murTok(p,v,dark):"";if(v>=0)popEl(sl)}
   d.classList.toggle("on",v>=0);d.classList.toggle("xm",v===-2);d.classList.toggle("xx",v<0&&!murBlocked(p,i)&&(v===-2||(autoCrossOn()&&(rc[i/N|0]>0||cc[i%N]>0))));
-  d.classList.toggle("conf",v>=0&&(rc[i/N|0]>1||cc[i%N]>1));d.classList.toggle("ht",!!H&&H.cells.includes(i))});
+  d.classList.toggle("conf",v>=0&&(rc[i/N|0]>1||cc[i%N]>1));d.classList.toggle("hr",!!H&&H.why.includes(i));d.classList.toggle("ht",!!H&&H.cells.includes(i))});
  document.querySelectorAll("#mpal .pb").forEach(b=>{if(b.dataset.s==="x"){b.classList.toggle("on",!!S.mxm&&!S.done);return}const s=+b.dataset.s;b.classList.toggle("on",S.ms===s&&!S.mxm&&!S.done);b.classList.toggle("placed",placed.has(s))});
  const mg=$("#mgrid");if(mg){mg.classList.toggle("mxmode",!!S.mxm&&!S.done);mg.classList.toggle("pmode",!S.mxm&&!S.done)}
  document.querySelectorAll("#mclues li").forEach(li=>{const c=+li.dataset.c;li.classList.toggle("str",S.str.has(c));li.classList.toggle("hr",!!H&&!!H.cards&&H.cards.includes(c))});
@@ -1103,7 +1103,7 @@ function murHint(){const p=S.p,N=p.N,V=p.V,M=murM(p),nm=s=>p.ppl[s],cell=i=>`rij
    else if(c==="L"){steps.push(`In ${LN[+f[1]]} ${+f[2]+1} en ${+f[3]+1} moeten twee mensen staan, en alleen ${nm(+f[4])} en ${nm(+f[5])} kunnen daar nog komen.`)}}
   if(occ.length){const t=occ.map(o=>{const x=fix[o]>=0?fix[o]:r.D[o][0];return`${nm(o)} (rij ${(x/N|0)+1}, kolom ${x%N+1}${fix[o]>=0?"":", dat volgt uit de aanwijzingen"})`});steps.unshift(`Deze rijen en kolommen zijn al bezet: ${list(t)}. Daar kan ${nm(hit)} niet meer staan.`)}
   const bk=[...Array(N*N).keys()].filter(i=>!murFree(i,M)&&((i/N|0)===(at/N|0)||i%N===at%N||p.reg[i]===p.reg[at]));if(bk.length&&steps.length<7)steps.push(`Op ${[...new Set(bk.map(i=>p.obj[i]))].map(t=>MOBJ[t].e).join(" ")} kan niemand staan.`);
-  return{kind:"set",cells:[at],set:hit,cards,intro:`${nm(hit)} kan nog maar op één plek staan. Zo kom je daarop:`,steps:steps.slice(0,7),outro:`Dus ${nm(hit)} ${hit===V?"lag":"stond"} op ${cell(at)}.`,text:`${nm(hit)} staat op ${cell(at)}.`,btn:`Zet ${nm(hit)} hier voor me`}}
+  return{kind:"set",cells:[at],set:hit,cards,proof:{W:r.W,fix},intro:`${nm(hit)} kan nog maar op één plek staan. Zo kom je daarop:`,steps:steps.slice(0,7),outro:`Dus ${nm(hit)} ${hit===V?"lag":"stond"} op ${cell(at)}.`,text:`${nm(hit)} staat op ${cell(at)}.`,btn:`Zet ${nm(hit)} hier voor me`}}
  const s=fix.findIndex(x=>x<0);return{kind:"set",cells:[p.sol[s]],cards:[s],set:s,text:`Dit is een lastige stap. ${nm(s)} staat op ${cell(p.sol[s])}.`,btn:`Zet ${nm(s)} hier voor me`}}
 /* ---- Foutloos en zonder hint; elkaars voortgang ---- */
 const MGV="m4",PGV="p2";const HINTT=["star","bin","nono","hex","plus","mur"],BASEF=["name","group","date","type","secs","uid"];
@@ -1120,13 +1120,14 @@ const pIdx=r=>{const a=groupPlayers(),k=a.indexOf(r.uid);return k<0?99:k};
 const othersTxt=()=>{const o=groupPlayers().filter(p=>uidOf(p)!==uid).map(playerName);return o.length===1?o[0]:"de anderen"};
 const badges=(r,t)=>{t=String(t).split(".")[0];const a=[];if(r.mist===0)a.push("🎯");if(HINTT.includes(t)&&r.hints===0)a.push("💡");return a.join(" ")};
 const badgeLong=(r,t)=>{t=String(t).split(".")[0];const a=[];if(r.mist===0)a.push("🎯 foutloos");else if(r.mist>0)a.push(r.mist===1?"1 fout gezien":r.mist+" fouten gezien");
- if(HINTT.includes(t)){if(r.hints===0)a.push("💡 zonder hint");else if(r.hints>0)a.push(r.hints===1?"1 hint":r.hints+" hints")}return a.join(" · ")};
-const quickBadges=(r,t)=>{if(!r)return"";t=String(t).split(".")[0];const a=[];if(r.mist!=null)a.push(r.mist===0?'<span class="rq good" title="Foutloos">🎯</span>':'<span class="rq" title="'+r.mist+(r.mist===1?" fout":" fouten")+'">❌ '+r.mist+'</span>');if(HINTT.includes(t)&&r.hints!=null)a.push(r.hints===0?'<span class="rq good" title="Zonder hint">💡</span>':'<span class="rq" title="'+r.hints+(r.hints===1?" hint":" hints")+'">💡 '+r.hints+'</span>');return a.join("")};
-function ownDayResult(date,t){const ty=t+sfx(dagLv(t,date)),g=($("#group").value||"").trim().toLowerCase(),sync=lastRows.find(x=>x.uid===uid&&x.date===date&&x.type===ty&&(x.group||"").toLowerCase()===g);let r=localDoneInGroup(date+ty,g)?myRow(date,ty):sync?Object.assign({},sync):null;if(r&&sync){if(r.mist==null&&sync.mist!=null)r.mist=sync.mist;if(r.hints==null&&sync.hints!=null)r.hints=sync.hints;if(!r.secs&&sync.secs)r.secs=sync.secs}if(r){r.type=ty;r.secs=r.secs||store[date+ty]||0}return r}
+ if(HINTT.includes(t)){if(r.hints===0)a.push("💡 zonder hint");else if(r.hints>0)a.push(hintSummary(r))}return a.join(" · ")};
+const quickBadges=(r,t)=>{if(!r)return"";t=String(t).split(".")[0];const a=[];if(r.mist!=null)a.push(r.mist===0?'<span class="rq good" title="Foutloos">🎯</span>':'<span class="rq" title="'+r.mist+(r.mist===1?" fout":" fouten")+'">❌ '+r.mist+'</span>');if(HINTT.includes(t)&&r.hints!=null)a.push(r.hints===0?'<span class="rq good" title="Zonder hint">💡</span>':'<span class="rq" title="'+hintSummary(r)+'">💡 '+r.hints+'</span>');return a.join("")};
+function ownDayResult(date,t){const ty=t+sfx(dagLv(t,date)),g=($("#group").value||"").trim().toLowerCase(),sync=lastRows.find(x=>x.uid===uid&&x.date===date&&x.type===ty&&(x.group||"").toLowerCase()===g);let r=localDoneInGroup(date+ty,g)?myRow(date,ty):sync?Object.assign({},sync):null;if(r&&sync){if(r.mist==null&&sync.mist!=null)r.mist=sync.mist;if(r.hints==null&&sync.hints!=null)r.hints=sync.hints;if(!r.hintSteps&&sync.hintSteps)r.hintSteps=sync.hintSteps;if(!r.secs&&sync.secs)r.secs=sync.secs}if(r){r.type=ty;r.secs=r.secs||store[date+ty]||0}return r}
 function myRow(date,type){const x=XS[date+type]||{},r={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date,type,secs:store[date+type]||1,uid};
- if(x.mist!=null)r.mist=x.mist;if(x.hints!=null)r.hints=x.hints;return r}
+ if(x.mist!=null)r.mist=x.mist;if(x.hints!=null)r.hints=x.hints;if(x.hintSteps)r.hintSteps=x.hintSteps;return r}
 function dbSave(row){if(!window.PD_DB)return Promise.resolve();
- return window.PD_DB.save(row).catch(e=>{const b={};BASEF.forEach(k=>b[k]=row[k]);OLDRULES=true;board(lastRows);return window.PD_DB.save(b)})}
+ return window.PD_DB.save(row).catch(e=>{const compatible=Object.assign({},row);delete compatible.hintSteps;
+ return window.PD_DB.save(compatible).catch(()=>{const b={};BASEF.forEach(k=>b[k]=row[k]);OLDRULES=true;board(lastRows);return window.PD_DB.save(b)})})}
 function resRow(r,td){if(r.uid===uid&&XS[r.date+r.type]){const x=XS[r.date+r.type];r=Object.assign({},r,{mist:x.mist!=null?x.mist:r.mist,hints:x.hints!=null?x.hints:r.hints})}
  const d=document.createElement("div");d.className="row";const a=document.createElement("span"),b=document.createElement("span");a.textContent=playerNameUid(r.uid,r.name)+" ✓ "+badges(r,r.type);b.className="mut";b.textContent=TSHOW?fmt(r.secs):"";d.append(a,b);return d}
 /* Puzzel van de dag: elke dag één vaste soort, voor iedereen dezelfde. De andere dagpuzzels kunnen, maar hoeven niet. */
@@ -1174,7 +1175,7 @@ function showFinFree(type){const f=$("#fin"),t=type.split(".")[0],lv=+(type.spli
  const sub=document.createElement("div");sub.className="mut";sub.textContent="Vrij puzzelen · "+FREE_NAME(t,S&&S.nv?S.nv:"classic")+(LVN[t]?" · "+lvLabel(lv):"");f.append(sub);picLine(f);
  const bl=badgeLong(XS_FREE(),t);if(bl){const b=document.createElement("div");b.className="fb";b.textContent=bl;f.append(b)}
  finActs(f,true,S.date,t);finShow(f)}
-const XS_FREE=()=>({mist:S.mist||0,hints:S.hints||0});
+const XS_FREE=()=>({mist:S.mist||0,hints:S.hints||0,hintSteps:hintTotals()});
 document.addEventListener("pointerdown",e=>{const f=$("#fin");if(f&&!f.hidden&&!e.target.closest("#fin")){f.hidden=true}},true);
 /* ---- Reeksen en weekstand ---- */
 const addDays=(ds,n)=>{const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d+n).toLocaleDateString("sv")};
@@ -1182,7 +1183,7 @@ const dnl=ds=>{const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d).t
 function allRows(){const g=$("#group").value.trim().toLowerCase(),seen=new Set(),out=[];
  const add=r=>{if(!TYPES[baseT(r)])return;const k=r.uid+"|"+r.date+"|"+r.type;if(seen.has(k))return;seen.add(k);out.push(r)};
  lastRows.filter(r=>(r.group||"").toLowerCase()===g).forEach(add);
- freeLoc().filter(r=>String(r.group||legacyGroup()).toLowerCase()===g).forEach(r=>add({name:$("#name").value||"Speler",group:g,date:r.date,type:r.type,secs:r.secs,uid}));
+ freeLoc().filter(r=>String(r.group||legacyGroup()).toLowerCase()===g).forEach(r=>add({...r,name:$("#name").value||"Speler",group:g,uid}));
  for(const k in store){const m=/^(\d{4}-\d\d-\d\d)(.+)$/.exec(k);if(m&&scoreGroup(k).toLowerCase()===g)add({name:$("#name").value||"Speler",group:g,date:m[1],type:m[2],secs:store[k],uid})}
  return out}
 function streakOf(rows,u){const ds=new Set(rows.filter(r=>r.uid===u).map(r=>r.date));let d=dstr();if(!ds.has(d))d=addDays(d,-1);let n=0;while(ds.has(d)){n++;d=addDays(d,-1)}return n}
@@ -1286,7 +1287,7 @@ function mergeRows(oud,nieuw){const m=new Map();const k=r=>(r.group||"")+"|"+r.u
    (bijv. andere browser, beginscherm-app tegenover Safari, gewiste gegevens), ook hier als klaar markeren. */
 function pullMine(rows){let ch=false,g=$("#group").value.trim().toLowerCase();
  rows.forEach(r=>{if(r.uid!==uid||(r.group||"").toLowerCase()!==g||!r.date||!r.type||String(r.type).startsWith("v~")||!(r.secs>0))return;const k=r.date+r.type;
-  if(!store[k]||scoreGroup(k)!==(r.group||legacyGroup())){store[k]=r.secs;SG[k]=r.group||legacyGroup();ch=true;if(!XS[k]&&(r.mist!=null||r.hints!=null)){XS[k]={};if(r.mist!=null)XS[k].mist=r.mist;if(r.hints!=null)XS[k].hints=r.hints}}});
+  if(!store[k]||scoreGroup(k)!==(r.group||legacyGroup())){store[k]=r.secs;SG[k]=r.group||legacyGroup();ch=true;if(!XS[k]&&(r.mist!=null||r.hints!=null)){XS[k]={};if(r.mist!=null)XS[k].mist=r.mist;if(r.hints!=null)XS[k].hints=r.hints;if(r.hintSteps)XS[k].hintSteps=r.hintSteps}}});
  if(!ch)return;save();saveSG();try{xsSave()}catch(e){}
  if(S.p&&!S.practice&&!S.done&&localDoneInGroup(S.date+S.type+S.sf,g)){progDel(progKey(S.type,false,S.date,S.sf));load(S.type,false,false,S.date)}}
 /* Tijden die nog niet op het scorebord staan (bijv. offline gespeeld) alsnog versturen. */
@@ -1370,8 +1371,8 @@ function persist(forceCloud){if(!S.p||S.done||!S.start||!S.seed)return;const a=p
  for(const k in a)if(k.startsWith("d:")&&k.split(":")[1]<addDays(today,-8)){delete a[k];pruned=true}
  const k=progKey(S.type,S.practice,S.date,S.sf),pc=progressPct();
  /* Een onaangeraakte of weer volledig leeggemaakte puzzel is geen lopende puzzel. */
- if(pc<=0){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;return}
- const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,pc,group:$("#group").value.trim()};
+ if(pc<=0&&!(S.hints>0)&&!(S.mist>0)){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;return}
+ const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,hintLedger:S.hintLedger||{},hintLegacy:S.hintLegacy||0,seenErrors:S.seenErrors||{},pc,group:$("#group").value.trim()};
  if(S.hx){e.rev=[...S.hx.rev];e.cs=S.cs||{}}else if(S.type==="m24")e.r=S.r;else if(S.cur)e.cur=S.cur;if(S.str)e.str=[...S.str];if(S.nt&&Object.keys(S.nt).length)e.nt=S.nt;
  /* Hervatten moet ook echt hervatten: bewaar een begrensde undo/redo-geschiedenis.
     Maak 24 heeft een eigen ronde-state en laten we hier bewust buiten. */
@@ -1394,7 +1395,7 @@ function wrongCells(){const{type,p,cur}=S,o=[];if(!cur)return o;cur.forEach((v,i
  else if(type==="mur"){if(v>=0&&p.sol[v]!==i||v===-2&&p.sol.includes(i))o.push(i)}});return o}
 function doCheck(){if(S.done||!S.p||!["bin","star","nono","kak","mur","plus"].includes(S.type))return;const bad=wrongCells(),m=$("#msg");
  const els=bad.map(i=>S.type==="kak"?$("#grid").children[i]:S.type==="mur"?S.mcells[i]:S.cells[i]).filter(Boolean);els.forEach(d=>d.classList.add("bad"));
- if(bad.length)S.mist=(S.mist||0)+1;
+ if(bad.length)registerErrors(bad);persist();
  const t=bad.length?(bad.length===1?"1 vakje klopt niet":bad.length+" vakjes kloppen niet"):"Alles wat je hebt ingevuld klopt";
  m.classList.remove("good","warn");m.classList.add(bad.length?"warn":"good");m.textContent=t;setTimeout(()=>{els.forEach(d=>d.classList.remove("bad"));if(m.textContent===t){m.textContent="";m.classList.remove("good","warn")}},2800)}
 $("#chk").onclick=doCheck;
@@ -1571,9 +1572,9 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  const dayPeopleDetail=t=>`<div class="ddpeople">${groupPlayers().map(name=>{const r=dayResultFor(name,t),o=dayOtherResultFor(name,t);return`<span class="ddperson ${r?"done":o?"otherdone":""}"><b>${playerName(name)}</b>${r?`<i>✓</i><span>⏱ ${fmt(r.secs||0)}</span>${quickBadges(r,t)}`:"<span>Deze variant nog niet</span>"}${o?`<span class="ddother">${otherIcon} ${otherLabel} ✓</span>`:""}</span>`}).join("")}</div>`;
  const dayPeerCompact=t=>{const peers=groupPlayers().filter(name=>uidOf(name)!==uid);return peers.length?`<span class="daypeer">${peers.map(name=>{const u=uidOf(name),r=dayResultFor(name,t),o=dayOtherResultFor(name,t),ty=dayTypeDevice(t,td,PHONE),busy=!r&&!!busyOf(u,td,ty),cls=r?"done":busy?"busy":o?"otherdone":"";return`<span class="${cls}" title="${playerName(name)}: ${r?"deze variant klaar":busy?"bezig met deze variant":o?otherLabel+"-variant klaar":"nog niet klaar"}${r&&o?" · "+otherLabel+" ook klaar":""}"><b>${playerName(name)}</b> ${r?`✓${r.mist===0?' <i class="peerico">🎯</i>':""}${HINTT.includes(t)&&r.hints===0?' <i class="peerico">💡</i>':""}`:busy?"…":o?`<i class="peerdev">${otherIcon}✓</i>`:"—"}</span>`}).join("")}</span>`:""};
  const dayMistBadge=r=>!r||r.mist==null?"":r.mist===0?`<span class="rq good" title="Foutloos">🎯</span>`:`<span class="rq" title="${r.mist} ${r.mist===1?"fout":"fouten"}">❌ ${r.mist}</span>`;
- const dayHintBadge=(r,t)=>!r||!HINTT.includes(t)||r.hints==null?"":r.hints===0?`<span class="rq good" title="Zonder hint">💡</span>`:`<span class="rq" title="${r.hints} ${r.hints===1?"hint":"hints"}">💡 ${r.hints}</span>`;
+ const dayHintBadge=(r,t)=>!r||!HINTT.includes(t)||r.hints==null?"":r.hints===0?`<span class="rq good" title="Zonder hint">💡</span>`:`<span class="rq" title="${hintSummary(r)}">💡 ${r.hints}</span>`;
  const detailMetric=(ic,lab,val,good)=>`<div class="ddmetric ${good?"good":""}"><span>${ic}</span><b>${val}</b><small>${lab}</small></div>`;
- const dayDetail=(t,r)=>{const err=r&&r.mist!=null?r.mist:null,hi=r&&HINTT.includes(t)&&r.hints!=null?r.hints:null;return`<div class="daydetail"><div class="ddmain"><div class="ddstatus"><span class="ddcheck">✓</span><div><b>Opgelost</b><small>${dnl(td)}${t==="nono"?" · "+(nonoDayVariant(td)==="color"?"Kleur":"Klassiek"):""}</small></div></div><div class="ddmetrics">${detailMetric("⏱","Tijd",fmt(r&&r.secs||0),false)}${detailMetric(err===0?"🎯":"❌","Fouten",err==null?"–":err,err===0)}${HINTT.includes(t)?detailMetric("💡","Hints",hi==null?"–":hi,hi===0):""}</div><button class="dayview" data-view-t="${t}">Puzzel bekijken ›</button></div>${dayPeopleDetail(t)}</div>`};
+ const dayDetail=(t,r)=>{const err=r&&r.mist!=null?r.mist:null,hi=r&&HINTT.includes(t)&&r.hints!=null?r.hints:null;return`<div class="daydetail"><div class="ddmain"><div class="ddstatus"><span class="ddcheck">✓</span><div><b>Opgelost</b><small>${dnl(td)}${t==="nono"?" · "+(nonoDayVariant(td)==="color"?"Kleur":"Klassiek"):""}</small></div></div><div class="ddmetrics">${detailMetric("⏱","Tijd",fmt(r&&r.secs||0),false)}${detailMetric(err===0?"🎯":"❌","Fouten",err==null?"–":err,err===0)}${HINTT.includes(t)?detailMetric("💡","Hulp",hi==null?"–":hintSummary(r),hi===0):""}</div><button class="dayview" data-view-t="${t}">Puzzel bekijken ›</button></div>${dayPeopleDetail(t)}</div>`};
  const doneToday=t=>myDone(td,t),dayRow=t=>{const k=doneToday(t),m=busyMeta(t),pc=m&&m.e.pc!=null?m.e.pc:null,r=k?ownDayResult(td,t):null,o=dayOtherResultFor(me,t),sub=t==="nono"?(nonoDayVariant(td)==="color"?"Kleur":"Klassiek"):"",other=o?`<small class="otherday">${otherIcon} ${otherLabel} ✓</small>`:"";
   return`<div class="dayitem ${t===ft?"featured ":""}${HDOPEN===t?"open":""}" style="--dayc:${TCOL[t]||"var(--pc)"}"><button class="hdrow ${k?"ok":m?"busy":""}" data-day-t="${t}"${m?` data-pk="${m.k}"`:""}><span class="dot"></span>${tIcon(t,false)}<span class="dname">${TYPES[t]}${t===ft?`<small class="featlabel">⭐ Puzzel van de dag${sub?" · "+sub:""}</small>`:sub?`<small>${sub}</small>`:""}${other}</span>${dayPeerCompact(t)}<span class="dstate ${k?"done":"pending"}">${k?`<span class="dtime">⏱ ${fmt((r&&r.secs)||store[k]||0)}</span><span class="dmist">${dayMistBadge(r)}</span><span class="dhint">${dayHintBadge(r,t)}</span>`:`<span class="dpending">${pc!=null?progRing(pc,t):""}<b>${m?"Verder":"Start"}${pc!=null?" · "+pc+"%":""}</b></span>`}<span class="darrow">${k&&HDOPEN===t?"⌃":"›"}</span></span></button>${k&&HDOPEN===t?dayDetail(t,r):""}</div>`};
  const freeTiles=types.flatMap(t=>t==="nono"?[{t,nv:"classic",name:"Nonogram"},{t,nv:"color",name:"Kleurnonogram"}]:[{t,nv:"",name:TYPES[t]}]),freeTile=x=>{const t=x.t,nv=x.nv,sub=LVN[t]?"Kies niveau":"Nieuwe puzzel";return`<button class="tile free" data-free-t="${t}" data-free-nv="${nv}" style="--tc:${TCOL[t]}">${tIcon(t,1,nv)}<span>${x.name}</span><small class="tcount">${sub}</small></button>`};

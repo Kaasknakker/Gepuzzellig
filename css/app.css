@@ -1053,3 +1053,38 @@ body.phone #authbtn{width:100%;text-align:left}
 #autocross[aria-checked="true"] .autocrossstate::after{background:var(--pc)}
 #autocross[aria-checked="true"] .autocrossstate::before{transform:translate(18px,-50%)}
 @media(prefers-reduced-motion:reduce){#autocross .autocrossstate::before,#autocross .autocrossstate::after{transition:none}}
+/* Hintvoorbeeld: lokale semantische kleuren; persoonlijke/groepsaccenten blijven intact. */
+#hint{--hint-ink:color-mix(in srgb,var(--fg) 82%,#40818a);--hint-soft:color-mix(in srgb,var(--card) 94%,#40818a);border:1px solid var(--line);border-radius:16px;background:var(--hint-soft);box-shadow:0 8px 24px #0002;padding:18px 54px 18px 18px;line-height:1.5;font-weight:400}
+#hint .hht{font-size:18px;line-height:1.3;font-weight:700;color:var(--fg);margin:0 0 8px}
+#hint .hintprogress,#hint .hintusage{font-size:12px;line-height:1.5;color:var(--mut)}
+#hint .hintbody{font-size:15px;margin:12px 0;overflow-wrap:anywhere}
+#hint .hintlegend{font-size:12px;color:var(--fg);margin:12px 0}
+#hint button:not(.hx){min-height:44px;border-radius:10px;font-size:14px;line-height:1.4;padding:10px 12px;font-weight:600;box-shadow:none;transform:none}
+#hint .hintnext{background:var(--hint-ink);color:var(--card);border:1px solid var(--hint-ink);width:100%}
+#hint .hintback{background:transparent;color:var(--fg);border:1px solid var(--line);width:100%;margin:8px 0}
+#hint .hintusage{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+#hint button:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
+#hintb{background:var(--card);color:var(--fg);border:1px solid var(--line);box-shadow:none;font-weight:700}
+body:not(.phone){--hintw:350px;--hintgap:24px}
+body:not(.phone).hintside #stage{margin-right:calc(var(--hintw) + var(--hintgap))}
+body:not(.phone) #hint.side,body.tablet #hint.side{position:fixed!important;top:74px!important;right:max(12px,env(safe-area-inset-right))!important;left:auto!important;bottom:auto!important;width:var(--hintw)!important;max-height:calc(100dvh - 160px)!important;transform:none!important;overflow:auto;border:1px solid var(--line);border-radius:16px}
+body.tablet #hint.side button:not(.hx){margin-top:0}
+body.phone #hint{font-size:14px;max-height:42dvh;padding:12px 54px 12px 14px}
+body.phone #hint .hintbody{font-size:14px;margin:8px 0}
+.c.hr,.mc.hr{outline:2px dashed color-mix(in srgb,var(--fg) 75%,#aa8a51);outline-offset:-3px;box-shadow:none}
+.c.ht,.mc.ht{outline:3px double color-mix(in srgb,var(--fg) 80%,#40818a);outline-offset:-4px;box-shadow:none}
+.c.gx{color:color-mix(in srgb,var(--fg) 60%,transparent)!important}
+#mclues li.hr{box-shadow:none;outline:2px dashed color-mix(in srgb,var(--fg) 75%,#aa8a51);outline-offset:-2px;background:color-mix(in srgb,var(--card) 94%,#aa8a51)}
+@media(prefers-reduced-motion:reduce){#hint,#hint.closing{animation:none!important;transition:none!important}}
+body.hintdock #hint{max-height:42dvh}
+body.hintdock #stage{max-height:var(--hint-board-height);overflow:auto;overscroll-behavior:contain;align-items:safe center}
+body.hintdock #playbox{flex-shrink:0}
+body.hintdock #hint.side{border-top-width:1px}
+.ddmetric b{overflow-wrap:anywhere}
+body.phone.hintdock #hint{max-height:33dvh}
+body.hintdock #stage{min-height:0}
+html.tap body.hintdock #stage{touch-action:pan-x pan-y}
+/* Houd ook een breed bord binnen de vrije ruimte tussen bediening en hint. */
+body.hintside #stage{overflow:auto;overscroll-behavior:contain;align-items:safe center;min-height:0}
+body.hintside #playbox{flex-shrink:0}
+html.tap body.hintside #stage{touch-action:pan-x pan-y}
