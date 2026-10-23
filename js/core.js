@@ -1388,7 +1388,7 @@ const cloudProgOk=()=>!PHONE&&uid&&uid!=="x"&&window.PD_DB&&window.PD_DB.savePro
 let cloudProgLast={},cloudProgPullAt=0,cloudProgPulling=false;
 function progressRelevant(k){return !k.startsWith("d:")||k.split(":")[1]>=addDays(dstr(),-8)}
 function progressSolved(k,e){const g=String(e&&e.group||legacyGroup()).toLowerCase();if(k.startsWith("d:")){const a=k.split(":"),sk=a[1]+a.slice(2).join(":");return localDoneInGroup(sk,g)}if(k.startsWith("p:")&&e&&e.seed){const sid=String(e.seed).replace(/\W/g,"").slice(-8);return freeLoc().some(r=>String(r.group||legacyGroup()).toLowerCase()===g&&String(r.type).endsWith("~"+sid))}return false}
-function progressPct(){if(!S||!S.p)return 0;const p=S.p,cur=S.cur,ratio=(a,b)=>b?Math.max(0,Math.min(99,Math.round(100*a/b))):0;
+function progressPct(){if(!S||!S.p)return 0;const p=S.p,cur=S.cur,ratio=(a,b)=>b?Math.max(a>0?1:0,Math.min(99,Math.round(100*a/b))):0;
  if(S.type==="bin"&&cur){let a=0,b=0;for(let i=0;i<cur.length;i++)if(!p.giv||p.giv[i]<0){b++;if(cur[i]>=0)a++}return ratio(a,b)}
  if(["star","nono","plus"].includes(S.type)&&cur)return ratio(cur.filter(v=>v!==0).length,cur.length);
  if(S.type==="kak"&&cur){let a=0,b=0;for(let i=0;i<cur.length;i++)if(p.w&&p.w[i]){b++;if(cur[i]>0)a++}return ratio(a,b)}
@@ -1411,8 +1411,8 @@ function pullCloudProgress(force){if(PHONE||!uid||uid==="x"||!window.PD_DB||!win
 function persist(forceCloud){if(S.discarded||!S.p||S.done||!S.start||!S.seed)return;const a=progAll(),today=dstr();let pruned=false;
  for(const k in a)if(k.startsWith("d:")&&k.split(":")[1]<addDays(today,-8)){delete a[k];pruned=true}
  const k=progKey(S.type,S.practice,S.date,S.sf),pc=progressPct();
- /* Een onaangeraakte of weer volledig leeggemaakte puzzel is geen lopende puzzel. */
- if(pc<=0&&!(S.nt&&Object.values(S.nt).some(Boolean))&&!(S.cs&&Object.values(S.cs).some(Boolean))&&!(S.str&&S.str.size)&&!(S.hints>0)&&!(S.mist>0)){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;UX.saves.delete(k);UX.paintStorage();return}
+ /* Alleen bordinvoer of eigen aantekeningen maken dit een lopende puzzel; hints bekijken en controleren niet. */
+ if(pc<=0&&!(S.nt&&Object.values(S.nt).some(Boolean))&&!(S.cs&&Object.values(S.cs).some(Boolean))&&!(S.str&&S.str.size)){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;UX.saves.delete(k);UX.paintStorage();return}
  const e={seed:S.seed,gv:GV,mv:S.mv||MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,hintLedger:S.hintLedger||{},hintLegacy:S.hintLegacy||0,seenErrors:S.seenErrors||{},pc,group:$("#group").value.trim()};
  if(S.type==="bin")e.bv=S.bv||BGV;if(S.type==="hex")e.hv=S.hv||HGV;
  if(S.hx){e.rev=[...S.hx.rev];e.cs=S.cs||{}}else if(S.type==="m24")e.r=S.r;else if(S.cur)e.cur=S.cur;if(S.str)e.str=[...S.str];if(S.nt&&Object.keys(S.nt).length)e.nt=S.nt;

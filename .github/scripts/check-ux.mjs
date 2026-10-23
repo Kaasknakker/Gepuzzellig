@@ -23,9 +23,26 @@ for(const type of ['bin','star','mur'])for(const practice of [false,true]){
  context.S.cur=[type==='star'?1:0];context.persist();context.S.cur=[type==='star'?0:-1];context.persist();assert.equal(saved[key].pc,0);assert(saved[key].nt);count++;
  context.S.nt={};context.persist();assert.equal(saved[key],undefined);assert(clears.includes(key));count++;
  context.S.nt={0:0};context.persist();assert.equal(saved[key],undefined);count++;
- context.S.hints=1;context.persist();assert(saved[key]);count++;
+ context.S.hints=1;context.S.hintLedger={test:3};context.S.mist=1;context.persist();assert.equal(saved[key],undefined);count++;
+ context.S.cur=[type==='star'?1:0];context.persist();assert(saved[key]);assert.equal(saved[key].hints,1);assert.equal(saved[key].hintLedger.test,3);count++;
 }
 context.S={type:'hex',practice:true,p:{cells:[{},{}],rev0:[]},hx:{rev:new Set()},cs:{l0:1},start:1,seed:'hex',sf:'',hist:[{hexClue:'l0',from:0}]};saved={};context.persist();assert.equal(saved['p:hex'].cs.l0,1);assert.equal(saved['p:hex'].pc,0);count++;
+// Alleen hints bekijken mag geen hervatbare puzzel maken, ook niet op niveau 3.
+for(const type of ['bin','star','nono','hex','plus','mur'])for(const practice of [false,true]){
+ saved={};pushes=[];clears=[];
+ const empty=type==='bin'||type==='mur'?-1:0;
+ context.S={type,practice,p:{giv:[-1,-1],cells:[{},{}],rev0:[0]},cur:[empty,empty],start:1,seed:'hint-only',sf:'',date:'2026-10-23',nt:{},hist:[],redo:[]};
+ if(type==='hex'){delete context.S.cur;context.S.hx={rev:new Set([0])}}
+ const key=context.progKey(type,practice,context.S.date,'');
+ for(const level of [1,2,3]){context.S.hints=1;context.S.hintLedger={proof:level};context.persist(true);assert.equal(saved[key],undefined,type);assert.equal(pushes.length,0);count++}
+ // Een bestaande hint-only opslag wordt bij opnieuw opslaan ook uit de cloud gewist.
+ saved[key]={seed:'hint-only',pc:0,hints:1};context.persist(true);assert.equal(saved[key],undefined);assert(clears.includes(key));count++;
+ // De uitgevoerde hintzet wordt wel bewaard, met de gebruikte hintregistratie.
+ if(type==='hex')context.S.hx.rev.add(1);else context.S.cur[0]=type==='mur'?0:1;
+ context.persist(true);assert(saved[key],type);assert.equal(saved[key].hintLedger.proof,3);assert.equal(pushes.length,1);count++;
+}
+// Ook de eerste zet op een groot bord moet tellen, ondanks afronding naar 0%.
+context.S={type:'bin',practice:true,p:{giv:Array(252).fill(-1)},cur:Array(252).fill(-1),start:1,seed:'large',sf:''};context.S.cur[0]=0;saved={};context.persist();assert.equal(saved['p:bin'].pc,1);count++;
 function check(inp,ans,want,soort='getal'){if(arguments.length<3)want=true;assert.equal(context.raadCheck({soort,ans},inp),want,String(inp));count++}
 for(const [inp,ans]of [['12',12],['12,5',12.5],['12.5',12.5],['1.234',1234],['1.234.567,89',1234567.89],['1 234,5',1234.5],['1\u00a0234',1234],['-12',-12],['−12',-12],['+12',12],[',5',.5],['.5',.5],['€ 12,50',12.5],['12,50 €',12.5],[0,0]])check(inp,ans);
 for(const inp of ['12abc','12+4','12/1','12 km','1,2,3','1.23,45','1 2','€','1e2','Infinity','NaN','12€3','12,','1..234'])check(inp,12,undefined);
