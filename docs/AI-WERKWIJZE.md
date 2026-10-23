@@ -14,6 +14,17 @@ Voorbeeld: `Gepuzzellig start` gevolgd door `bugtemplate: op de iPad doet de ter
 4. Controleer na publicatie de GitHub-checks en de bijbehorende deployment voor de exacte commit. Meld expliciet wanneer een check of deployment ontbreekt, is overgeslagen, nog loopt of niet te verifiëren is; claim dan geen succesvolle controle. Volg de bestaande deploy-inrichting en start geen ongerelateerde deploys.
 5. Rapporteer kort wat is aangepast, wat is gecontroleerd en wat eventueel openstaat.
 
+## Gericht en zuinig werken
+
+Deze afspraken gelden voor alle Gepuzzellig-chats die deze werkwijze volgen.
+
+- Beperk onderzoek tot de concrete opdracht. Pak bij losse verbeterpunten één afgebakend punt tegelijk aan; bij een expliciet gevraagde brede review mag het onderzoek breder zijn.
+- Hergebruik eerdere bevindingen en controles waar ze nog geldig zijn. Controleer relevante verschillen met de actuele `main`, zonder het hele onderzoek opnieuw te doen.
+- Zoek eerst gericht naar relevante bestanden, functies en regels. Lees alleen de benodigde delen; voorkom grote, ongefilterde code- en tooluitvoer die wordt afgekapt.
+- Gebruik alleen hulpmiddelen, browsercontroles en aanvullende bronnen die nodig zijn voor de opdracht. Voer noodzakelijke controles volledig uit; herhaal of verbreed ze alleen bij nieuwe wijzigingen, fouten of concrete onzekerheden.
+- Houd voortgangsberichten en eindrapportages kort en begrijpelijk. Maak alleen een uitgebreid rapport wanneer de opdracht daar aanleiding toe geeft.
+- Rond het afgesproken werk zelfstandig af. Zuinig werken betekent geen noodzakelijke stappen overslaan of voor iedere deelstap opnieuw toestemming vragen.
+
 ## Labels
 
 | Label | Aanvullende werkwijze |
