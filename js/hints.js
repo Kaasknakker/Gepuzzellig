@@ -94,20 +94,28 @@ function murGuidance(move){
  }
  if(!used.length&&!direct.length)parts.push("Voor "+name+" kan ik op dit moment geen korte afleiding geven. Je kunt de eigen aanwijzingen vergelijken; de concrete plaats is alleen in de volgende stap beschikbaar.");
  else parts.push("Houd voor "+name+" alleen plekken over die aan al deze voorwaarden voldoen. Vakjes met een voorwerp waarop je niet kunt zitten vallen af. Zo beperk je de mogelijkheden zonder te gokken.");
- return {direction,reason:[...new Set(parts)].join(" "),lookCards:owners.length?[...new Set(primary.map(c=>c.p))]:[person],reasonCards:[...new Set([person,...used.map(c=>c.p)])]};
+ const briefFacts=(own.length?own:used).slice(0,2).map(c=>nm(c.p)+": “"+c.text+"”"),event=direct.find(e=>["T","P","L","H","V0","V1","V2","V3"].includes(e.kind));
+ const briefRule=event?(event.kind==="T"?"Probeer een mogelijke plek: kan "+(+event.f[2]>=0?nm(+event.f[2]):"iedereen")+" dan nog ergens staan?":event.kind==="P"||event.kind==="L"?"Vergelijk de twee rijen of kolommen die deze personen samen nodig hebben.":event.kind==="H"?"Controleer wie nog in "+(event.f[1]==="0"?"rij ":"kolom ")+(+event.f[2]+1)+" past.":"Bij het slachtoffer hoort precies één andere persoon."):occupied.length?"Een rij of kolom waar al iemand staat valt af.":"Voorwerpen zonder zitplek vallen af.";
+ const reasonSteps=[...briefFacts,briefRule];if(reasonSteps.length<3)reasonSteps.push("Schrap voor "+name+" de plekken die niet aan deze voorwaarden voldoen.");
+ const shortDirection="Bekijk "+(primary.length>1?"de gemarkeerde kaartjes rond ":"het kaartje van ")+(owners[0]||name)+".";
+ return {shortDirection,reasonSteps,direction,reason:[...new Set(parts)].join(" "),lookCards:owners.length?[...new Set(primary.map(c=>c.p))]:[person],reasonCards:[...new Set([person,...used.map(c=>c.p)])]};
 }
 function prepareHint(move){
  const t=S.type;
- let scope=[],reasonScope,direction="",reason="",cards=[],unit,lookCards,reasonCards,lookHexLines,reasonHexLines;
+ let scope=[],reasonScope,direction="",reason="",cards=[],unit,lookCards,reasonCards,lookHexLines,reasonHexLines,briefSource;
  if(t==="mur"){
-  const guide=murGuidance(move);({direction,reason,lookCards,reasonCards}=guide);cards=lookCards;
+  const guide=murGuidance(move);briefSource=guide;({direction,reason,lookCards,reasonCards}=guide);cards=lookCards;
   if(move.kind!=="fix")move.cards=reasonCards;
   if(!move.steps&&move.kind==="set")reason+=" Voor deze stap is geen korte, controleerbare uitleg beschikbaar. De volgende stap toont de uitkomst van de oplosser.";
  }else{
   ({scope,reasonScope,direction,reason,unit,lookHexLines,reasonHexLines}=puzzleGuidance(move));
  }
  const key=JSON.stringify([t,move.kind||"tech",move.set==null?null:move.set,move.cells,move.kind==="fix"?move.cells.map(j=>S.cur[j]):null]);
- return {move,key,level:1,scope,direction,reason,cards,unit,lookCards,reasonCards,reasonScope:reasonScope||scope,lookHexLines,reasonHexLines,cells:[],why:scope};
+ const guide={scope,direction,reason,unit,lookCards,reasonCards};
+ if(t==="mur")Object.assign(guide,briefSource);
+ const brief=compactGuidance(move,guide);
+ if(t==="hex"&&move.proof&&move.proof.clues&&move.proof.clues.length===2){scope=reasonScope;lookHexLines=reasonHexLines}
+ return {move,key,level:1,scope,direction,reason,...brief,cards,unit,lookCards,reasonCards,reasonScope:reasonScope||scope,lookHexLines,reasonHexLines,cells:[],why:scope};
 }
 function projectHint(h){
  const full=h.level===3,m=h.move;
@@ -126,25 +134,18 @@ function hintConcrete(h){
  }else out+=" De doorgetrokken dubbele rand wijst de te openen vakjes aan.";
  return out;
 }
-function showHintLevel(h,level,focusNext){
- h.level=level;if(!h.stale){projectHint(h);registerHint(h,level)}
- if(!S.start)S.start=Date.now();
- const b=$("#hint"),action=b.querySelector(".hintnext");clearTimeout(hintHideT);b.classList.remove("closing");b.replaceChildren();
- const add=(tag,cls,text)=>{const e=document.createElement(tag);e.className=cls;e.textContent=text;b.append(e);return e};
- const close=add("button","hx","✕");close.setAttribute("aria-label","Hint sluiten");close.onclick=()=>clearHint();
- const names=["Kijkrichting","Redenering","Concrete zet"];
- const title=add("h2","hht","💡 "+names[level-1]);title.id="hinttitle";b.setAttribute("aria-labelledby",title.id);
- add("div","hintprogress","Stap "+level+" van 3 · "+names.slice(0,level).join(" → "));
- add("p","hintbody",level===1?h.direction:level===2?h.reason:hintConcrete(h));
- add("p","hintlegend",h.stale?"Het bord is gewijzigd. Vernieuw de hint voor een actuele aanwijzing.":level<3?"┄ Gestippelde rand: kijkgebied of aanwijzing. De zet is nog verborgen.":"┄ Gestippeld: kijkgebied · ═ Dubbele rand: hier gebeurt de zet.");
- // Behoud de knopidentiteit: de bestaande Pencil-afhandeling moet een
- // nageleverde compatibiliteitsklik op dezelfde knop kunnen tegenhouden.
- const next=action||document.createElement("button");next.className="hintnext";b.append(next);
- if(h.stale){next.textContent="Vernieuw hint voor dit bord";next.onclick=()=>{clearHint();hintGo()}}
- else if(level<3){next.textContent=level===1?"Meer hulp: redenering":"Meer hulp: concrete zet";next.onclick=()=>showHintLevel(h,level+1,true)}
- else{next.textContent=h.move.btn;next.onclick=doStep}
- if(level>1&&!h.stale){const back=add("button","hintback","← "+names[level-2]);back.onclick=()=>showHintLevel(h,level-1,true)}
- add("div","hintusage",hintSummary({hints:S.hints,hintSteps:hintTotals()}));
+function hintConclusion(h){
+ const m=h.move,one=m.cells.length===1,where=one?"het dubbel omrande vakje":"de dubbel omrande vakjes";
+ if(m.kind==="fix")return "Herstel de invoer in "+where+".";
+ if(S.type==="bin")return "Vul "+where+" met "+sy(m.set)+".";
+ if(S.type==="star")return m.set===2?(one?"Plaats een ster in ":"Plaats sterren in ")+where+".":"Zet kruisjes in "+where+".";
+ if(S.type==="nono")return S.p.color?m.set>0?"Kleur "+where+" "+NCN[m.set]+".":"Zet kruisjes in "+where+".":m.set===1?"Vul "+where+".":"Zet kruisjes in "+where+".";
+ if(S.type==="plus")return (m.set===1?"Omcirkel de dubbel omrande getallen.":"Streep de dubbel omrande getallen weg.");
+ if(S.type==="hex"){const color=m.f==null?S.p.sol[m.cells[0]]:m.f;return "Open "+where+" als "+(color?"blauw":"zwart")+"."}
+ if(S.type==="mur")return m.kind==="kill"?m.text:"Plaats "+S.p.ppl[m.set]+" op "+where+".";
+ return m.text;
+}
+function layoutHintCard(h){const b=$("#hint");
  b.style.display="block";
  const dock=PHONE||innerWidth<1100;
  document.body.classList.toggle("hintdock",dock);
@@ -168,5 +169,32 @@ function showHintLevel(h,level,focusNext){
   const cell=S.type==="mur"?S.mcells&&S.mcells[i]:S.type==="hex"?$("#hexsvg").querySelector('g[data-i="'+i+'"]'):S.cells&&S.cells[i];
   if(cell){const r=cell.getBoundingClientRect(),v=stage.getBoundingClientRect();if(r.bottom>v.bottom)stage.scrollTop+=r.bottom-v.bottom+6;else if(r.top<v.top)stage.scrollTop-=v.top-r.top+6}
  }
+}
+function showHintLevel(h,level,focusNext){
+ h.level=level;if(!h.stale){projectHint(h);registerHint(h,level)}
+ if(!S.start)S.start=Date.now();
+ const b=$("#hint"),action=b.querySelector(".hintnext");clearTimeout(hintHideT);b.classList.remove("closing");b.replaceChildren();
+ const add=(tag,cls,text)=>{const e=document.createElement(tag);e.className=cls;e.textContent=text;b.append(e);return e};
+ const close=add("button","hx","✕");close.setAttribute("aria-label","Hint sluiten");close.onclick=()=>clearHint();
+ const names=["Klein duwtje","Uitleg","Volledige hint"];
+ const title=add("h2","hht","💡 "+names[level-1]);title.id="hinttitle";b.setAttribute("aria-labelledby",title.id);
+ add("div","hintprogress","Stap "+level+" van 3");
+ if(level===2){const steps=add("ol","hintbody hintsteps","");for(const text of h.reasonSteps){const li=document.createElement("li");li.textContent=text;steps.append(li)}}
+ else add("p","hintbody",level===1?h.shortDirection:hintConclusion(h));
+ if(level>1){const details=add("details","hintdetails","");details.open=!!(h.detailsOpen&&h.detailsOpen[level]);
+  const summary=document.createElement("summary");summary.textContent="Meer uitleg";details.append(summary);
+  const body=document.createElement("p");body.className="hintbody";body.textContent=level===2?h.reason:hintConcrete(h);details.append(body);
+  details.addEventListener("toggle",()=>{h.detailsOpen=h.detailsOpen||{};h.detailsOpen[level]=details.open;if(S.hint===h&&b.isConnected&&b.contains(details)&&(PHONE||innerWidth<1100))layoutHintCard(h)});
+ }
+ add("p","hintlegend",h.stale?"Het bord is gewijzigd. Vernieuw de hint voor een actuele aanwijzing.":level<3?"┄ Gestippeld: kijkgebied.":"═ Dubbele rand: hier komt de zet.");
+ // Behoud de knopidentiteit: de bestaande Pencil-afhandeling moet een
+ // nageleverde compatibiliteitsklik op dezelfde knop kunnen tegenhouden.
+ const next=action||document.createElement("button");next.className="hintnext";b.append(next);
+ if(h.stale){next.textContent="Vernieuw hint voor dit bord";next.onclick=()=>{clearHint();hintGo()}}
+ else if(level<3){next.textContent=level===1?"Geef wat meer uitleg":"Toon de volledige hint";next.onclick=()=>showHintLevel(h,level+1,true)}
+ else{next.textContent=h.move.btn;next.onclick=doStep}
+ if(level>1&&!h.stale){const back=add("button","hintback","← "+names[level-2]);back.onclick=()=>showHintLevel(h,level-1,true)}
+ add("div","hintusage",hintSummary({hints:S.hints,hintSteps:hintTotals()}));
+ layoutHintCard(h);
  persist(true);if(focusNext)next.focus({preventScroll:true});
 }

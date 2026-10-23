@@ -30,6 +30,10 @@ for(const type of Object.keys(generators))for(const level of [1,2,3,4,5,6]){
   if(!move)break;
   assert.notEqual(move.kind,'fix','De correcte proefinvoer mag geen correctiehint opleveren: '+type);
   const h=prepareHint(move),q=move.proof;
+  assert.ok(h.shortDirection.length>10);assert.ok(h.shortDirection.split(/\s+/).length<=30,'kort duwtje: '+h.shortDirection);
+  assert.ok(h.reasonSteps.length>=1&&h.reasonSteps.length<=3);
+  for(const line of h.reasonSteps){assert.ok(line.split(/\s+/).length<=40,'korte stap: '+line);assert.ok(!/undefined|NaN/.test(line))}
+
   if(move.kind!=='deep'&&move.kind!=='reveal')assert.ok(q,type+' mist de echte afleiding');
   if(q)rules.add(type+':'+q.rule);
   projectHint(h);assert.equal(h.cells.length,0);assert.ok(h.direction.length>20);assert.ok(h.reason.length>40);
@@ -98,7 +102,7 @@ extra.level=2;projectHint(extra);assert.equal(extra.why.length,8);assert.ok(extr
 S={type:'hex',p:{n:3,sol:[0,1,0]},hx:{rev:new Set([0])}};
 const hexMove={cells:[1],kind:'deduce',why:[0],proof:{rule:'constraints',clues:[{kind:'ring',id:0,c:{cnt:1,type:1,pos:[1,2]}}]}};
 const before=prepareHint(hexMove);S.p.sol[1]=0;S.p.sol[2]=1;
-const after=prepareHint(hexMove);assert.equal(before.direction,after.direction);assert.equal(before.reason,after.reason);
+const after=prepareHint(hexMove);assert.equal(before.direction,after.direction);assert.equal(before.reason,after.reason);assert.equal(before.shortDirection,after.shortDirection);assert.deepEqual(before.reasonSteps,after.reasonSteps);
 assert.ok(before.reason.includes('haakjes'));assert.ok(before.scope.every(i=>S.hx.rev.has(i)));
 const global=prepareHint({...hexMove,proof:{...hexMove.proof,rule:'global'}});
 assert.ok(global.reason.includes('geen korte lokale afleiding'));assert.equal(global.cells.length,0);

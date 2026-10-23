@@ -64,6 +64,9 @@ for(const lv of [1,2,3,4,5,6]){
  for(let step=0;step<p.N;step++){
   const move=murHint(),h=prepareHint(move);projectHint(h);hints.push(h);
   assert.ok(move.proof);assert.ok(h.lookCards.some(s=>h.direction.includes(p.ppl[s])));
+  assert.ok(h.shortDirection.split(/\s+/).length<=30);assert.ok(h.reasonSteps.length>=1&&h.reasonSteps.length<=3);
+  if(step<2)assert.ok(h.reasonSteps.some(s=>s.includes('“')));for(const step of h.reasonSteps)assert.ok(!/undefined|NaN/.test(step));
+
   if(step<2)assert.ok(h.reason.includes('“'));assert.equal(h.cells.length,0);assert.equal(h.why.length,0);
   const exact='rij '+((move.cells[0]/p.N|0)+1)+', kolom '+(move.cells[0]%p.N+1);
   assert.ok(!h.direction.includes(exact));assert.ok(!h.reason.includes(exact));

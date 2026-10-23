@@ -1156,3 +1156,11 @@ body.hintside[data-t=hex] #hexw,body.hintdock[data-t=hex] #hexw{padding:10px}
 
 /* Info-knopje naar het verhaal (alleen groep Rekensukkels). */
 .scorestory{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-weight:900;font-style:italic;font-family:Georgia,serif;font-size:16px}
+
+/* Hints: korte gedachten op losse regels, met optionele verdieping. */
+#hint .hintsteps{padding-left:1.4em;display:grid;gap:7px}
+#hint .hintsteps li{padding-left:3px}
+#hint .hintdetails{border-top:1px solid var(--line);margin:10px 0}
+#hint .hintdetails summary{min-height:44px;display:list-item;align-content:center;cursor:pointer;font-size:14px;font-weight:700;padding:10px 0}
+#hint .hintdetails summary:focus-visible{outline:3px solid var(--acc);outline-offset:2px;border-radius:4px}
+#hint .hintdetails .hintbody{font-size:14px;line-height:1.55;margin:4px 0 12px}

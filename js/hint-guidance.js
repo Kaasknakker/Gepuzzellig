@@ -144,3 +144,72 @@ function puzzleGuidance(move){
  }
  return S.type==="bin"?binGuidance(move,scope):S.type==="nono"?nonoGuidance(move,scope):S.type==="plus"?plusGuidance(move,scope):starGuidance(move,scope);
 }
+
+/* Korte leeslaag: één kijkvraag en hooguit drie losse gedachten.
+   De volledige afleiding blijft bewaard voor ‘Meer uitleg’. Geen doelvakjes
+   of verborgen oplossingswaarden lezen bij het maken van deze teksten. */
+function compactGuidance(move,guide){
+ const p=S.p,q=move.proof||{},rule=q.rule;
+ const result=(direction,...steps)=>({shortDirection:direction,reasonSteps:steps.filter(Boolean)});
+ if(move.kind==='fix')return result('Controleer de gemarkeerde eerdere keuzes.','Vergelijk je invoer met de aanwijzingen in dit kijkgebied.','Open de volledige hint om te zien welke keuze je kunt herstellen.');
+ if(S.type==='mur'){
+  if(move.kind==='kill')return result('Wie stond alleen bij het slachtoffer?','Het slachtoffer was alleen met de moordenaar.','Bekijk wie er in dezelfde ruimte stond.');
+  if(!move.proof)return result('Vergelijk de gemarkeerde kaartjes.','Voor deze stap is geen korte afleiding beschikbaar.','De volledige hint kan je de concrete plek tonen.');
+  return {shortDirection:guide.shortDirection||'Vergelijk de gemarkeerde kaartjes.',reasonSteps:guide.reasonSteps||['Combineer de aanwijzingen op deze kaartjes.','Schrap plekken die daarmee in strijd zijn.']};
+ }
+ if(S.type==='bin'){
+  const l=q.line;if(!l)return result('Bekijk de gemarkeerde rij of kolom.','Voor deze stap is geen korte afleiding beschikbaar.');
+  const name=(l.o?'kolom ':'rij ')+(l.x+1),symbol=sy(q.symbol),empty=l.v.filter(v=>v<0).length;
+  if(rule==='pair')return result('Zoek in '+name+' twee gelijke tekens naast elkaar.','In '+name+' staat '+symbol+symbol+'.','Drie gelijke tekens achter elkaar mogen niet.','Bekijk de lege plekken naast dit paar.');
+  if(rule==='gap')return result('Bekijk het gat tussen twee gelijke tekens in '+name+'.','In '+name+' staat '+symbol+' · '+symbol+'.','Het middelste teken mag daarvan geen drietal maken.');
+  if(rule==='balance')return result('Tel de '+symbol+' in '+name+'.','Er staan al '+l.len/2+' keer '+symbol+'.','Van elk teken moeten er precies '+l.len/2+' in deze lijn staan.','Er kan dus geen '+symbol+' meer bij.');
+  if(rule==='balanceConflict')return result('Combineer het tellen in '+name+' met de regel over drietallen.','Er kan nog maar één '+symbol+' bij in '+name+'.','Probeer die in gedachten; de overige lege plekken krijgen dan '+sy(1-q.symbol)+'.','Een plek die zo een drietal veroorzaakt valt af.');
+  if(rule==='different'){const other=(q.other.o?'kolom ':'rij ')+(q.other.x+1);return result('Vergelijk '+name+' met '+other+'.','De ingevulde tekens zijn gelijk; '+name+' heeft nog '+empty+' lege vakjes.','Twee volledige lijnen mogen niet hetzelfde zijn.','Een aanvulling die '+other+' kopieert valt af.')}
+  return result('Vergelijk de mogelijke aanvullingen van '+name+'.','Er '+(q.count===1?'is nog één geldige aanvulling.':'zijn nog '+q.count+' geldige aanvullingen.'),'Wat in elke aanvulling hetzelfde is, staat vast.');
+ }
+ if(S.type==='nono'){
+  const l=q.line,name=l?l.nm:hintLine(guide.scope,p.W);
+  if(rule==='empty')return result('Bekijk de aanwijzing bij '+name+'.','De aanwijzing is 0.','Er past dus geen gevuld blok in deze lijn.');
+  if(rule==='complete')return result('Vergelijk de blokken in '+name+' met de aanwijzing.','De blokken hebben al de juiste lengtes en volgorde.','Extra vulling zou een blok verlengen of toevoegen.');
+  if(rule==='overlap'){const block=ORD[q.block]||(q.block+1)+'e',span=q.max-q.min+q.length,overlap=q.length-(q.max-q.min);return result('Hoe ver kan het '+block+' blok in '+name+' schuiven?','Dit blok is '+q.length+' vakjes lang'+(q.color?' en '+NCN[q.color]:'')+'.','Het past alleen binnen een strook van '+span+' vakjes.',q.min===q.max?'Het kan daarin niet meer verschuiven.':'De uiterste plaatsingen overlappen nog '+hintCount(overlap,'vakje','vakjes')+'.')}
+  if(rule==='outside')return result('Bekijk hoe ver de blokken in '+name+' kunnen reiken.','Schuif de blokken zo ver mogelijk naar beide kanten.','Een plek die geen enkel blok kan bereiken blijft leeg.');
+  return result('Vergelijk de passende blokken in '+name+'.',q.count==null?'Gebruik wat al ingevuld is om plaatsingen uit te sluiten.':'Er '+(q.count===1?'is nog één passende plaatsing.':'zijn nog '+q.count+' passende plaatsingen.'),'Een vakje staat pas vast als alle plaatsingen daar hetzelfde geven.');
+ }
+ if(S.type==='plus'){
+  const u=move.unit!=null?S.pu[move.unit]:null;if(!u)return result('Bekijk de gemarkeerde som.','Voor deze stap is geen korte afleiding beschikbaar.');
+  const L=plusLook(u,S.cur,p.num),name=plusName(u),start='De som is '+u.t+'; er staat al '+L.K+' vast, dus er ontbreekt '+L.need+'.';
+  if(rule==='complete')return result('Vergelijk het omcirkelde totaal met de som in '+name+'.','De gevraagde som van '+u.t+' is al bereikt.','Elk extra getal maakt het totaal te groot.');
+  if(rule==='remaining')return result('Tel de open getallen in '+name+' bij elkaar op.',start,'De open getallen zijn samen precies '+L.s0+'.','Weglaten maakt het totaal te klein.');
+  if(rule==='tooLarge')return result('Vergelijk de open getallen in '+name+' met wat nog ontbreekt.',start,'Een getal groter dan '+L.need+' kan niet meedoen.');
+  if(rule==='essential')return result('Laat in '+name+' eens een getal buiten de som.',start,'De open getallen zijn samen '+L.s0+'.','Blijft zonder een getal minder dan '+L.need+' over, dan is dat getal nodig.');
+  return result('Vergelijk de getalcombinaties voor '+name+'.',start,rule==='cannotInclude'?'Probeer een getal mee te tellen: kunnen de andere getallen het restant nog maken?':rule==='cannotExclude'?'Laat een getal weg: kunnen de andere getallen de som dan nog maken?':'Bekijk welke getallen in alle combinaties voorkomen en welke nooit.','Een keuze die geen passende combinatie overlaat valt af.');
+ }
+ if(S.type==='star'){
+  const K=p.K||2,u=q.unit,name=u?unitName(u.kind,u.k):null;
+  if(rule==='trial')return result('Vergelijk de gemarkeerde vrije plekken en hun buren.','Een tijdelijke ster sluit de buurvakjes uit.','Daarna heeft '+name+' nog '+hintCount(q.need,'ster','sterren')+' nodig, met '+hintCount(q.available,'vrije plek','vrije plekken')+'.',q.available?'Als die plekken elkaar raken past daar hooguit één ster.':'Er blijft geen plek voor een ster over.');
+  if(u){const start='In '+name+' '+(q.stars===1?'staat ':'staan ')+hintCount(q.stars,'ster','sterren')+'; '+hintCount(q.open,'plek is','plekken zijn')+' nog vrij.';
+   if(rule==='complete')return result('Tel de sterren in '+name+'.',start,'Het vereiste aantal van '+K+' is al bereikt.');
+   if(rule==='remaining')return result('Vergelijk de vrije plekken in '+name+' met de ontbrekende sterren.',start,'Er '+(K-q.stars===1?'ontbreekt':'ontbreken')+' nog '+hintCount(K-q.stars,'ster','sterren')+': evenveel als er plekken vrij zijn.');
+   if(rule==='separate')return result('Welke vrije plekken in '+name+' raken elkaar?',start,'Sterren mogen elkaar ook schuin niet raken.','In een groep onderling aangrenzende plekken past hooguit één ster.');
+  }
+  if(rule==='regionsInLines'||rule==='linesInRegions')return result('Vergelijk de gemarkeerde gebieden en lijnen.','De '+q.regions.length+' gebieden hebben samen '+q.regions.length*K+' sterren nodig.','De '+q.lines.length+' lijnen hebben samen '+q.lines.length*K+' sterren nodig.','Dezelfde sterren tellen in beide totalen mee.');
+  if(rule==='chain')return result('Probeer bij de gemarkeerde plekken in gedachten een ster.','Volg het uitsluiten van de buurvakjes.','Dan ontstaat deze tegenspraak: “'+q.conflict+'”.','Een aanname die dit veroorzaakt valt af.');
+  return result('Bekijk de vrije plekken in het gemarkeerde gebied.','Voor deze stap is geen korte afleiding beschikbaar.');
+ }
+ if(S.type==='hex'){
+  const clues=q.clues||[],rev=S.hx.rev,label=o=>o.kind==='rest'?'de teller':o.kind==='line'?'de lijn met '+clueTxt(o.c):'het '+(o.kind==='zone'?'blauwe':'zwarte')+' getal '+clueTxt(o.c);
+  const stats=o=>{const unknown=o.c.pos.filter(i=>i>=0&&!rev.has(i)),found=o.c.pos.filter(i=>i>=0&&rev.has(i)).reduce((n,i)=>n+p.sol[i],0);return{unknown,need:o.c.cnt-found}};
+  const typed=o=>o.c.type===1?'Bij '+clueTxt(o.c)+' moeten de blauwe vakjes één groepje vormen.':'Bij '+clueTxt(o.c)+' moeten de blauwe vakjes minstens twee groepjes vormen.';
+  if(!clues.length||rule==='global')return result('Vergelijk de gemarkeerde aanwijzingen met de teller.','Voor deze stap is geen korte lokale afleiding beschikbaar.');
+  const first=clues.find(o=>o.kind!=='rest')||clues[0],A=stats(first),numeric=o=>{const v=stats(o);return 'Bij '+label(o)+': nog '+v.need+' blauw bij '+hintCount(v.unknown.length,'onbekend vakje','onbekende vakjes')+'.'};
+  if(clues.length>2)return result('Vergelijk de drie gemarkeerde aanwijzingen.',numeric(first),'Gebruik de andere aanwijzingen om verdelingen uit te sluiten.','Alle getallen en voorgeschreven groepjes moeten tegelijk kloppen.');
+  if(clues.length===1){if(first.c.type)return result('Bekijk de groepjes bij '+label(first)+'.',numeric(first),typed(first),'Vergelijk welke plekken in alle toegestane groepjes dezelfde kleur houden.');return result('Tel wat nog nodig is bij '+label(first)+'.',numeric(first),A.need===0?'Het gevraagde aantal is al bereikt.':'Er zijn precies genoeg onbekende vakjes voor het ontbrekende aantal.')}
+  const second=clues.find(o=>o!==first),B=stats(second),direction='Vergelijk '+label(first)+' met '+label(second)+'.';
+  if(second.kind==='rest')return result(direction,'De teller zegt: nog '+B.need+' blauwe vakjes.',label(first)[0].toUpperCase()+label(first).slice(1)+' heeft er zelf nog '+A.need+' nodig.',first.c.type?typed(first):'Buiten die onbekende vakjes blijven dus '+(B.need-A.need)+' blauwe vakjes over.');
+  const types=clues.filter(o=>o.c.type),shared=A.unknown.filter(i=>B.unknown.includes(i)).length;
+  if(types.length)return result(direction,label(first)+': nog '+A.need+' blauw; '+label(second)+': nog '+B.need+' blauw.',typed(types[0]),types.length>1?typed(types[1]):'Vergelijk de mogelijke groepjes in de '+shared+' gedeelde onbekende vakjes.');
+  const low=Math.max(0,A.need-(A.unknown.length-shared),B.need-(B.unknown.length-shared)),high=Math.min(shared,A.need,B.need);
+  return result(direction,numeric(first),numeric(second),low===high?'In de '+shared+' gedeelde vakjes zitten precies '+low+' blauwe vakjes.':'In de '+shared+' gedeelde vakjes zitten minstens '+low+' en hooguit '+high+' blauwe vakjes.');
+ }
+ return result('Bekijk de gemarkeerde aanwijzingen.','Voor deze stap is geen korte afleiding beschikbaar.');
+}

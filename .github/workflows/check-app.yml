@@ -30,6 +30,8 @@ jobs:
         run: node .github/scripts/check-hints.mjs
       - name: Puzzelspecifieke hintafleidingen controleren
         run: node .github/scripts/check-hint-guidance.mjs
+      - name: Korte hintpresentatie en uitklappen controleren
+        run: node .github/scripts/check-hint-presentation.mjs
       - name: Murdoku-oplossingen en bestaande voortgang controleren
         run: node .github/scripts/check-murdoku.mjs
       - name: Binair-moeilijkheid en compatibiliteit controleren
