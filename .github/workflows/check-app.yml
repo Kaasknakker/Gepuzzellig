@@ -1,0 +1,22 @@
+name: Check Gepuzzellig
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code ophalen
+        uses: actions/checkout@v4
+      - name: Node instellen
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: App controleren
+        run: node .github/scripts/check-app.mjs
