@@ -122,7 +122,7 @@ service cloud.firestore {
         && request.resource.data.group == resource.data.group
         && request.resource.data.date == resource.data.date
         && request.resource.data.type == resource.data.type;
-      allow delete: if false;
+      allow delete: if isOwner();
     }
 
     match /status/{id} {
@@ -134,7 +134,7 @@ service cloud.firestore {
         && resource.data.group == myGroup()
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.group == resource.data.group;
-      allow delete: if false;
+      allow delete: if isOwner();
     }
 
     match /profiles/{authUid} {
@@ -247,7 +247,7 @@ service cloud.firestore {
           && request.resource.data.updatedAt >= 0
         );
 
-      allow delete: if false;
+      allow delete: if isOwner() && resource.data.playerId != 'u-peter';
     }
 
     match /groups/{groupId} {
@@ -296,7 +296,7 @@ service cloud.firestore {
         && request.resource.data.updatedAt is int
         && request.resource.data.updatedAt >= 0;
 
-      allow delete: if false;
+      allow delete: if isOwner();
     }
 
     // Codes waarmee een bestaand Gepuzzellig-account naar een groep kan overstappen.
@@ -317,7 +317,8 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.ownerAuthUid == request.auth.uid
         && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.inviteCode == code;
 
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if isOwner();
     }
 
     // Uitnodigingen die toegang geven tot Gepuzzellig zelf.
@@ -389,7 +390,7 @@ service cloud.firestore {
           )
         );
 
-      allow delete: if false;
+      allow delete: if isOwner();
     }
   }
 }
