@@ -7,7 +7,7 @@ const safeScript=s=>s.replace(/<\/script/gi,'<\\/script');
 let html=source.replace(' data-auth-pending','').replace('<title>Gepuzzellig</title>','<title>Gepuzzellig · layoutproef</title>');
 html=html.replace(/<link[^>]+rel="manifest"[^>]*>/,'');
 html=html.replace('<head>','<head>');
-const bootstrap=`window.LAYOUT_STORAGE=(()=>{const values=new Map();return {getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k)}})();window.LAYOUT_ORIGINAL=false;window.PD_SETUP={players:['Testspeler'],group:'layoutproef',groupName:'Proefgroep'};`;
+const bootstrap=`window.LAYOUT_STORAGE=(()=>{const values=new Map();return {getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k)}})();window.LAYOUT_ORIGINAL=false;window.LAYOUT_BOTTOM=false;window.PD_SETUP={players:['Testspeler'],group:'layoutproef',groupName:'Proefgroep'};`;
 html=html.replace(/(<head[^>]*>)/,'$1<script>'+bootstrap+'</script>');
 html=html.replace(/<link rel="stylesheet" href="([^"?]+)[^"]*">/g,(_,p)=>'<style>'+read(p)+'</style>');
 html=html.replace(/<script([^>]*)src="([^"?]+)[^"]*"[^>]*><\/script>/g,(_,attrs,p)=>{
@@ -17,8 +17,9 @@ html=html.replace(/<script([^>]*)src="([^"?]+)[^"]*"[^>]*><\/script>/g,(_,attrs,
   code=code.replace('if("serviceWorker"in navigator&&','if(false&&"serviceWorker"in navigator&&');
   // Behoud de oorspronkelijke maatvoering op telefoon/tablet. Alleen zeer
   // ruime desktops en kleine Pluszle-borden krijgen een leesbaar maximum.
-  code=code.replace('Math.min(96,Math.floor((availBot()', 'Math.min(window.LAYOUT_ORIGINAL?96:S.type==="plus"?56:innerWidth>2000?(S.type==="nono"?56:72):96,Math.floor((availBot()');
+  code=code.replace('Math.min(96,Math.floor((availBot()', 'Math.min(window.LAYOUT_ORIGINAL?96:S.type==="plus"?(PHONE?96:innerWidth>2000?(S.p.W>=7?88:72):S.p.W>=7?96:S.p.W===6?88:80):innerWidth>2000?(S.type==="nono"?56:72):96,Math.floor((availBot()');
   code=code.replace('Math.min(2.45,fit)','Math.min(window.LAYOUT_ORIGINAL||innerWidth<=2000?2.45:1.7,fit)');
+  code=code.replace('b&&!PHONE&&document.body.classList.contains("tablet")&&LANDQ.matches','b&&!PHONE&&document.body.classList.contains("tablet")&&LANDQ.matches&&!window.LAYOUT_BOTTOM');
   const from='ol.onpointerdown=e=>{const li=e.target.closest&&e.target.closest("[data-c]");if(!li)return;e.preventDefault();';
   code=code.replace(from,'ol.onclick=e=>{const li=e.target.closest&&e.target.closest("[data-c]");if(!li)return;');
  }
