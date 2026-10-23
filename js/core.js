@@ -128,7 +128,7 @@ function load(type,practice,fresh,date){clearHomeSkinAccent();document.documentE
    if(sv0.cur&&S.cur&&sv0.cur.length===S.cur.length)S.cur=sv0.cur.slice();
    if(sv0.rev&&S.hx)S.hx.rev=new Set(sv0.rev);if(sv0.cs&&S.hx)S.cs=sv0.cs;
    if(type==="m24"&&sv0.r){S.r=sv0.r;setRound()}
-   if(sv0.str&&S.str)S.str=new Set(sv0.str);if(sv0.nt)S.nt=Object.assign({},sv0.nt);if(type!=="m24"){S.hist=Array.isArray(sv0.hist)?sv0.hist.slice(-60):[];S.redo=Array.isArray(sv0.redo)?sv0.redo.slice(-30):[]}S.pen=0;S.mist=sv0.mist||0;S.hints=sv0.hints||0;S._saveAt=sv0.at||0;{const oldEl=+sv0.el||0,safeEl=oldEl>=0&&oldEl<=MAX_REASONABLE_MS?oldEl:0;S.start=Date.now()-safeEl}S.pauseAt=0;S.resumed=true}catch(e){}}
+   if(sv0.str&&S.str)S.str=new Set(sv0.str);if(sv0.nt)S.nt=Object.assign({},sv0.nt);if(type!=="m24"){S.hist=Array.isArray(sv0.hist)?sv0.hist.slice(-60):[];S.redo=Array.isArray(sv0.redo)?sv0.redo.slice(-30):[]}S.pen=0;S.mist=sv0.mist||0;S.hints=sv0.hints||0;restoreHintUsage(sv0);S._saveAt=sv0.at||0;{const oldEl=+sv0.el||0,safeEl=oldEl>=0&&oldEl<=MAX_REASONABLE_MS?oldEl:0;S.start=Date.now()-safeEl}S.pauseAt=0;S.resumed=true}catch(e){}}
   $("#msg").textContent=S.done?(S.arch?"Al klaar in ":"Vandaag al klaar in ")+fmt(S.secs):S.resumed?"Verder waar je was gebleven":(!practice&&type===featOf(S.date))?(PHONE?"⭐ Van de dag":"⭐ Puzzel van de dag"+(S.hard?" (weekend 💪)":"")):S.arch?"Dagpuzzel van "+dnl(S.date)+(S.hard?" 💪":""):S.hard?"Weekendpuzzel: wat pittiger 💪":"";setT(S.resumed?fmt(Math.round(playMs()/1000)):fmt(S.secs));
   try{updTabs()}catch(e){}render();ub();setTimeout(()=>pingOnline(true),0)},30)}
 
@@ -394,11 +394,11 @@ function finish(){S.secs=Math.max(1,Math.round(playMs()/1000));S.done=true;clear
  const bdg=badges({mist:S.mist||0,hints:S.hints||0},S.type);$("#msg").textContent=(S.practice?"Opgelost! 🎉":"Klaar! 🎉"+(TSHOW?" "+fmt(S.secs):""))+(bdg?" "+bdg:"");if(S.practice)$("#next").classList.add("pulse");
  if(S.type!=="m24")render();
  celebrate();
- if(S.practice){const sid=String(S.seed).replace(/\W/g,"").slice(-8),row={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date:S.date,type:"v~"+S.type+S.sf+"~"+sid,secs:S.secs,uid,mist:S.mist||0,hints:S.hints||0};
-  const fl=freeLoc();fl.push({date:row.date,type:row.type,secs:row.secs,group:row.group});lsSet("pdfree",JSON.stringify(fl.slice(-400)));
+ if(S.practice){const sid=String(S.seed).replace(/\W/g,"").slice(-8),row={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date:S.date,type:"v~"+S.type+S.sf+"~"+sid,secs:S.secs,uid,mist:S.mist||0,hints:S.hints||0,hintSteps:hintTotals()};
+  const fl=freeLoc();fl.push({date:row.date,type:row.type,secs:row.secs,group:row.group,mist:row.mist,hints:row.hints,hintSteps:row.hintSteps});lsSet("pdfree",JSON.stringify(fl.slice(-400)));
   lastRows=lastRows.filter(r=>!(r.uid===uid&&r.type===row.type));lastRows.push(row);renderStats();
   dbSave(row);setTimeout(()=>{if(S.done&&S.practice)showFinFree(S.type+S.sf)},900);return}
- {const sk=S.date+S.type+S.sf;store[sk]=S.secs;SG[sk]=$("#group").value.trim();save();saveSG();XS[sk]={mist:S.mist||0,hints:S.hints||0}}xsSave();
+ {const sk=S.date+S.type+S.sf;store[sk]=S.secs;SG[sk]=$("#group").value.trim();save();saveSG();XS[sk]={mist:S.mist||0,hints:S.hints||0,hintSteps:hintTotals()}}xsSave();
  const row=myRow(S.date,S.type+S.sf);
  lastRows=lastRows.filter(r=>!(r.uid===uid&&r.date===row.date&&r.type===row.type));lastRows.push(row);board(lastRows);
  dbSave(row).catch(()=>{$("#msg").textContent+=" (scorebord niet bereikbaar)"});
@@ -571,7 +571,7 @@ let hintHideT=0;
 /* iPad: verplaats/schaal alleen de buitenste speelcontainer. De puzzel zelf wordt niet opnieuw gerenderd. */
 function layoutSideHint(on){const pb=$("#playbox");if(pb)pb.style.transform=""}
 
-function hideHint(){S.hint=null;const b=$("#hint");clearTimeout(hintHideT);const wasPad=HINTPAD,wasSide=HINTSIDE,visible=!!(b&&b.innerHTML.trim()&&getComputedStyle(b).display!=="none");
+function hideHint(){S.hint=null;document.body.classList.remove("hintdock");const b=$("#hint");clearTimeout(hintHideT);const wasPad=HINTPAD,wasSide=HINTSIDE,visible=!!(b&&b.innerHTML.trim()&&getComputedStyle(b).display!=="none");
  if(wasSide){HINTSIDE=0;document.body.classList.remove("hintside");layoutSideHint(false);resetPuzzleFit();if(S.p)render()}
  const done=()=>{if(!b)return;b.classList.remove("closing");b.style.display="none";b.innerHTML="";if(wasPad){HINTPAD=0;resetPuzzleFit();if(S.p)render()}if(wasSide)b.classList.remove("side")};
  if(visible&&!matchMedia("(prefers-reduced-motion: reduce)").matches){b.classList.add("closing");hintHideT=setTimeout(done,135)}else done()}
@@ -579,14 +579,7 @@ function clearHint(){if(!S.hint)return;hideHint();repaintHint()}
 document.addEventListener("pointerdown",e=>{if(S.hint&&!e.target.closest("#hint,#hintb"))clearHint()},true);
 function hintGo(){if(S.hint){clearHint();return}if(S.done||!S.p||!HINTT.includes(S.type))return;
  const h=S.type==="star"?starHint():S.type==="bin"?binHint():S.type==="nono"?nonoHint():S.type==="plus"?plusHint():S.type==="mur"?murHint():hexHint();if(!h)return;S.hint=h;
- const hk=h.text+"|"+h.cells.join(",");if(S.lastHk!==hk){S.lastHk=hk;S.hints=(S.hints||0)+1;if(h.kind==="fix")S.mist=(S.mist||0)+1}if(!S.start)S.start=Date.now();
- const b=$("#hint");clearTimeout(hintHideT);b.classList.remove("closing");b.innerHTML="";const xb=document.createElement("button");xb.className="hx";xb.textContent="✕";xb.setAttribute("aria-label","Sluiten");xb.onclick=()=>clearHint();const hh=document.createElement("div");hh.className="hht";hh.textContent="💡 Hint";b.append(xb,hh);const t=document.createElement("div");if(h.steps){t.textContent=h.intro;b.append(t);const ol=document.createElement("ol");ol.style.cssText="margin:6px 0 6px;padding-left:22px";h.steps.forEach(x=>{const li=document.createElement("li");li.textContent=x;ol.append(li)});b.append(ol);const o2=document.createElement("div");o2.style.fontWeight="700";o2.textContent=h.outro;b.append(o2)}else{t.textContent=h.text;b.append(t)}
- const l=document.createElement("div");l.className="mut";l.textContent=S.type==="hex"?"Rode rand: hier gebeurt de stap. Paarse rand: hier kijk je naar.":"Oranje rand: hier gebeurt de stap. Blauwe rand: hier kijk je naar.";b.append(l);
- const bt=document.createElement("button");bt.textContent=h.btn;bt.style.marginTop="6px";bt.onclick=doStep;b.append(bt);b.style.display="block";
- if(PHONE){const pb=$("#pbot").getBoundingClientRect();Object.assign(b.style,{transform:"none",left:"6px",right:"auto",width:(innerWidth-12)+"px",bottom:"auto",top:"0px"});
-  const H=b.offsetHeight;HINTPAD=H+8;resetPuzzleFit();render();b.style.top=Math.round(pb.top-H-6)+"px";return}
- if(document.body.classList.contains("tablet")){b.classList.add("side");Object.assign(b.style,{transform:"",left:"",top:"",width:"",bottom:"",right:""});if(!HINTSIDE){HINTSIDE=1;document.body.classList.add("hintside");resetPuzzleFit();render()}repaintHint();return}
- repaintHint();placeHint()}
+ S.hint=prepareHint(h);showHintLevel(S.hint,1,false)}
 /* Zet de hintkaart op de plek waar hij het minst bedekt van de vakjes waar de hint over gaat
    (het vakje van de stap telt het zwaarst, dan de lichte kruisjes, dan de blauw/paars omrande vakjes).
    We proberen 9 plekken (boven/midden/onder x links/midden/rechts) en meten de echte hoogte van de kaart. */
@@ -606,8 +599,8 @@ function placeHint(){const b=$("#hint"),h=S.hint;if(!h||b.style.display==="none"
    cands.push({W,x,y,sc,pref})}}
  cands.sort((p,q)=>p.sc-q.sc||p.pref-q.pref);const c=cands[0];
  Object.assign(b.style,{width:c.W+"px",left:Math.round(c.x)+"px",top:Math.round(c.y)+"px"})}
-addEventListener("resize",()=>{if(S&&S.hint)setTimeout(()=>{if(HINTSIDE){resetPuzzleFit();render()}else placeHint()},50)});
-function doStep(){const h=S.hint;if(!h||S.done)return;
+addEventListener("resize",()=>{if(S&&S.hint)setTimeout(()=>{if(S.hint)showHintLevel(S.hint,S.hint.level,false)},50)});
+function doStep(){const active=S.hint;if(!active||active.level!==3||S.done)return;const h=active.move;
  if(S.type==="hex"){h.cells.forEach(i=>S.hx.rev.add(i));if(!S.start)S.start=Date.now();hideHint();hexAfter();return}
  if(S.type==="mur"){if(h.kind==="kill"){hideHint();paintMur();return}begin();const i=h.cells[0];if(h.set>=0){const o=S.cur.indexOf(h.set);if(o>=0)S.cur[o]=-1}S.cur[i]=h.set;commit();if(!S.start)S.start=Date.now();hideHint();if(h.set>=0&&S.ms===h.set)S.ms=murNext(h.set);paintMur();persist();check();return}
  begin();h.cells.forEach(i=>{S.cur[i]=h.set});if(S.type==="nono")nonoAuto(h.cells);if(S.type==="plus"&&h.kind!=="fix")plusAuto(h.cells);commit();
@@ -635,8 +628,8 @@ function rHex(){if(!S.p||S.type!=="hex"||!S.hx)return;{const hs=$("#hexstat");if
  let tx="";const zcnt=new Map();Object.keys(cs).forEach(k=>{if(cs[k]===1&&k[0]==="z"){const zc=P.zone[+k.slice(1)];if(zc){zc.pos.forEach(j=>zcnt.set(j,(zcnt.get(j)||0)+1));zcnt.set(+k.slice(1),(zcnt.get(+k.slice(1))||0)+1)}}});
  P.cells.forEach((c,i)=>{const[x,y]=px(c.q,c.r),rv=S.hx.rev.has(i),bl=P.sol[i]===1,ts=zcnt.has(i)?` stroke="rgba(15,25,45,${zcnt.get(i)>1?.6:.42})" stroke-width="${(sz*.075).toFixed(1)}" paint-order="stroke" stroke-linejoin="round"`:"";
   let fill=rv?(bl?K.blu:K.blk):K.hid;if(S.flash===i)fill="#e5484d";
-  let stroke=K.bd,sw=2.2;if(H&&H.cells.includes(i)){stroke="#ff2d6f";sw=5}else if(H&&H.why.includes(i)){stroke="#7c3aed";sw=5}
-  s+=`<g data-i="${i}" class="${S.popH===i?"pop":S.flash===i?"shake":""}" style="cursor:${rv?"default":"pointer"}"><polygon points="${hp(x,y,sz*1.0)}" fill="transparent" stroke="none"/><polygon pointer-events="none" points="${hp(x,y,sz*.93)}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="miter"/>`;
+  let stroke=K.bd,sw=2.2,dash="";const target=H&&H.cells.includes(i);if(target){stroke=D?"#b9d9df":"#315b65";sw=3}else if(H&&H.why.includes(i)){stroke=D?"#e2d4b5":"#685637";sw=2.5;dash=' stroke-dasharray="3 3"'}
+  s+=`<g data-i="${i}" class="${S.popH===i?"pop":S.flash===i?"shake":""}" style="cursor:${rv?"default":"pointer"}"><polygon points="${hp(x,y,sz*1.0)}" fill="transparent" stroke="none"/><polygon pointer-events="none" points="${hp(x,y,sz*.93)}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"${dash} stroke-linejoin="miter"/>${target?`<polygon pointer-events="none" points="${hp(x,y,sz*.80)}" fill="none" stroke="${stroke}" stroke-width="1.5"/>`:""}`;
   if(rv&&bl&&hexZn(P,i))tx+=`<text x="${x}" y="${y+sz*.26}" text-anchor="middle" font-size="${sz*.78}" font-weight="700" fill="#fff" fill-opacity="${cs["z"+i]===2?.4:1}"${ts} pointer-events="none">${P.zone[i].cnt}</text>`;
   if(rv&&!bl)tx+=`<text x="${x}" y="${y+sz*.26}" text-anchor="middle" font-size="${sz*.78}" font-weight="700" fill="#fff"${ts} pointer-events="none">${hexQ(P,i)?"?":clueTxt(P.ring[i])}</text>`;
   s+="</g>"});
@@ -1067,7 +1060,7 @@ function paintMur(){const p=S.p,N=p.N,dark=isDark();if(!S.mcells||!S.mcells.leng
  S.cur.forEach((v,i)=>{const d=S.mcells[i],sl=d.querySelector(".slot"),was=d.dataset.v||"",nv=v>=0?""+v:"";
   if(was!==nv){d.dataset.v=nv;sl.innerHTML=v>=0?murTok(p,v,dark):"";if(v>=0)popEl(sl)}
   d.classList.toggle("on",v>=0);d.classList.toggle("xm",v===-2);d.classList.toggle("xx",v<0&&!murBlocked(p,i)&&(v===-2||(autoCrossOn()&&(rc[i/N|0]>0||cc[i%N]>0))));
-  d.classList.toggle("conf",v>=0&&(rc[i/N|0]>1||cc[i%N]>1));d.classList.toggle("ht",!!H&&H.cells.includes(i))});
+  d.classList.toggle("conf",v>=0&&(rc[i/N|0]>1||cc[i%N]>1));d.classList.toggle("hr",!!H&&H.why.includes(i));d.classList.toggle("ht",!!H&&H.cells.includes(i))});
  document.querySelectorAll("#mpal .pb").forEach(b=>{if(b.dataset.s==="x"){b.classList.toggle("on",!!S.mxm&&!S.done);return}const s=+b.dataset.s;b.classList.toggle("on",S.ms===s&&!S.mxm&&!S.done);b.classList.toggle("placed",placed.has(s))});
  const mg=$("#mgrid");if(mg){mg.classList.toggle("mxmode",!!S.mxm&&!S.done);mg.classList.toggle("pmode",!S.mxm&&!S.done)}
  document.querySelectorAll("#mclues li").forEach(li=>{const c=+li.dataset.c;li.classList.toggle("str",S.str.has(c));li.classList.toggle("hr",!!H&&!!H.cards&&H.cards.includes(c))});
@@ -1120,13 +1113,14 @@ const pIdx=r=>{const a=groupPlayers(),k=a.indexOf(r.uid);return k<0?99:k};
 const othersTxt=()=>{const o=groupPlayers().filter(p=>uidOf(p)!==uid).map(playerName);return o.length===1?o[0]:"de anderen"};
 const badges=(r,t)=>{t=String(t).split(".")[0];const a=[];if(r.mist===0)a.push("🎯");if(HINTT.includes(t)&&r.hints===0)a.push("💡");return a.join(" ")};
 const badgeLong=(r,t)=>{t=String(t).split(".")[0];const a=[];if(r.mist===0)a.push("🎯 foutloos");else if(r.mist>0)a.push(r.mist===1?"1 fout gezien":r.mist+" fouten gezien");
- if(HINTT.includes(t)){if(r.hints===0)a.push("💡 zonder hint");else if(r.hints>0)a.push(r.hints===1?"1 hint":r.hints+" hints")}return a.join(" · ")};
-const quickBadges=(r,t)=>{if(!r)return"";t=String(t).split(".")[0];const a=[];if(r.mist!=null)a.push(r.mist===0?'<span class="rq good" title="Foutloos">🎯</span>':'<span class="rq" title="'+r.mist+(r.mist===1?" fout":" fouten")+'">❌ '+r.mist+'</span>');if(HINTT.includes(t)&&r.hints!=null)a.push(r.hints===0?'<span class="rq good" title="Zonder hint">💡</span>':'<span class="rq" title="'+r.hints+(r.hints===1?" hint":" hints")+'">💡 '+r.hints+'</span>');return a.join("")};
-function ownDayResult(date,t){const ty=t+sfx(dagLv(t,date)),g=($("#group").value||"").trim().toLowerCase(),sync=lastRows.find(x=>x.uid===uid&&x.date===date&&x.type===ty&&(x.group||"").toLowerCase()===g);let r=localDoneInGroup(date+ty,g)?myRow(date,ty):sync?Object.assign({},sync):null;if(r&&sync){if(r.mist==null&&sync.mist!=null)r.mist=sync.mist;if(r.hints==null&&sync.hints!=null)r.hints=sync.hints;if(!r.secs&&sync.secs)r.secs=sync.secs}if(r){r.type=ty;r.secs=r.secs||store[date+ty]||0}return r}
+ if(HINTT.includes(t)){if(r.hints===0)a.push("💡 zonder hint");else if(r.hints>0)a.push(hintSummary(r))}return a.join(" · ")};
+const quickBadges=(r,t)=>{if(!r)return"";t=String(t).split(".")[0];const a=[];if(r.mist!=null)a.push(r.mist===0?'<span class="rq good" title="Foutloos">🎯</span>':'<span class="rq" title="'+r.mist+(r.mist===1?" fout":" fouten")+'">❌ '+r.mist+'</span>');if(HINTT.includes(t)&&r.hints!=null)a.push(r.hints===0?'<span class="rq good" title="Zonder hint">💡</span>':'<span class="rq" title="'+hintSummary(r)+'">💡 '+r.hints+'</span>');return a.join("")};
+function ownDayResult(date,t){const ty=t+sfx(dagLv(t,date)),g=($("#group").value||"").trim().toLowerCase(),sync=lastRows.find(x=>x.uid===uid&&x.date===date&&x.type===ty&&(x.group||"").toLowerCase()===g);let r=localDoneInGroup(date+ty,g)?myRow(date,ty):sync?Object.assign({},sync):null;if(r&&sync){if(r.mist==null&&sync.mist!=null)r.mist=sync.mist;if(r.hints==null&&sync.hints!=null)r.hints=sync.hints;if(!r.hintSteps&&sync.hintSteps)r.hintSteps=sync.hintSteps;if(!r.secs&&sync.secs)r.secs=sync.secs}if(r){r.type=ty;r.secs=r.secs||store[date+ty]||0}return r}
 function myRow(date,type){const x=XS[date+type]||{},r={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date,type,secs:store[date+type]||1,uid};
- if(x.mist!=null)r.mist=x.mist;if(x.hints!=null)r.hints=x.hints;return r}
+ if(x.mist!=null)r.mist=x.mist;if(x.hints!=null)r.hints=x.hints;if(x.hintSteps)r.hintSteps=x.hintSteps;return r}
 function dbSave(row){if(!window.PD_DB)return Promise.resolve();
- return window.PD_DB.save(row).catch(e=>{const b={};BASEF.forEach(k=>b[k]=row[k]);OLDRULES=true;board(lastRows);return window.PD_DB.save(b)})}
+ return window.PD_DB.save(row).catch(e=>{const compatible=Object.assign({},row);delete compatible.hintSteps;
+ return window.PD_DB.save(compatible).catch(()=>{const b={};BASEF.forEach(k=>b[k]=row[k]);OLDRULES=true;board(lastRows);return window.PD_DB.save(b)})})}
 function resRow(r,td){if(r.uid===uid&&XS[r.date+r.type]){const x=XS[r.date+r.type];r=Object.assign({},r,{mist:x.mist!=null?x.mist:r.mist,hints:x.hints!=null?x.hints:r.hints})}
  const d=document.createElement("div");d.className="row";const a=document.createElement("span"),b=document.createElement("span");a.textContent=playerNameUid(r.uid,r.name)+" ✓ "+badges(r,r.type);b.className="mut";b.textContent=TSHOW?fmt(r.secs):"";d.append(a,b);return d}
 /* Puzzel van de dag: elke dag één vaste soort, voor iedereen dezelfde. De andere dagpuzzels kunnen, maar hoeven niet. */
@@ -1174,7 +1168,7 @@ function showFinFree(type){const f=$("#fin"),t=type.split(".")[0],lv=+(type.spli
  const sub=document.createElement("div");sub.className="mut";sub.textContent="Vrij puzzelen · "+FREE_NAME(t,S&&S.nv?S.nv:"classic")+(LVN[t]?" · "+lvLabel(lv):"");f.append(sub);picLine(f);
  const bl=badgeLong(XS_FREE(),t);if(bl){const b=document.createElement("div");b.className="fb";b.textContent=bl;f.append(b)}
  finActs(f,true,S.date,t);finShow(f)}
-const XS_FREE=()=>({mist:S.mist||0,hints:S.hints||0});
+const XS_FREE=()=>({mist:S.mist||0,hints:S.hints||0,hintSteps:hintTotals()});
 document.addEventListener("pointerdown",e=>{const f=$("#fin");if(f&&!f.hidden&&!e.target.closest("#fin")){f.hidden=true}},true);
 /* ---- Reeksen en weekstand ---- */
 const addDays=(ds,n)=>{const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d+n).toLocaleDateString("sv")};
@@ -1182,7 +1176,7 @@ const dnl=ds=>{const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d).t
 function allRows(){const g=$("#group").value.trim().toLowerCase(),seen=new Set(),out=[];
  const add=r=>{if(!TYPES[baseT(r)])return;const k=r.uid+"|"+r.date+"|"+r.type;if(seen.has(k))return;seen.add(k);out.push(r)};
  lastRows.filter(r=>(r.group||"").toLowerCase()===g).forEach(add);
- freeLoc().filter(r=>String(r.group||legacyGroup()).toLowerCase()===g).forEach(r=>add({name:$("#name").value||"Speler",group:g,date:r.date,type:r.type,secs:r.secs,uid}));
+ freeLoc().filter(r=>String(r.group||legacyGroup()).toLowerCase()===g).forEach(r=>add({...r,name:$("#name").value||"Speler",group:g,uid}));
  for(const k in store){const m=/^(\d{4}-\d\d-\d\d)(.+)$/.exec(k);if(m&&scoreGroup(k).toLowerCase()===g)add({name:$("#name").value||"Speler",group:g,date:m[1],type:m[2],secs:store[k],uid})}
  return out}
 function streakOf(rows,u){const ds=new Set(rows.filter(r=>r.uid===u).map(r=>r.date));let d=dstr();if(!ds.has(d))d=addDays(d,-1);let n=0;while(ds.has(d)){n++;d=addDays(d,-1)}return n}
@@ -1286,7 +1280,7 @@ function mergeRows(oud,nieuw){const m=new Map();const k=r=>(r.group||"")+"|"+r.u
    (bijv. andere browser, beginscherm-app tegenover Safari, gewiste gegevens), ook hier als klaar markeren. */
 function pullMine(rows){let ch=false,g=$("#group").value.trim().toLowerCase();
  rows.forEach(r=>{if(r.uid!==uid||(r.group||"").toLowerCase()!==g||!r.date||!r.type||String(r.type).startsWith("v~")||!(r.secs>0))return;const k=r.date+r.type;
-  if(!store[k]||scoreGroup(k)!==(r.group||legacyGroup())){store[k]=r.secs;SG[k]=r.group||legacyGroup();ch=true;if(!XS[k]&&(r.mist!=null||r.hints!=null)){XS[k]={};if(r.mist!=null)XS[k].mist=r.mist;if(r.hints!=null)XS[k].hints=r.hints}}});
+  if(!store[k]||scoreGroup(k)!==(r.group||legacyGroup())){store[k]=r.secs;SG[k]=r.group||legacyGroup();ch=true;if(!XS[k]&&(r.mist!=null||r.hints!=null)){XS[k]={};if(r.mist!=null)XS[k].mist=r.mist;if(r.hints!=null)XS[k].hints=r.hints;if(r.hintSteps)XS[k].hintSteps=r.hintSteps}}});
  if(!ch)return;save();saveSG();try{xsSave()}catch(e){}
  if(S.p&&!S.practice&&!S.done&&localDoneInGroup(S.date+S.type+S.sf,g)){progDel(progKey(S.type,false,S.date,S.sf));load(S.type,false,false,S.date)}}
 /* Tijden die nog niet op het scorebord staan (bijv. offline gespeeld) alsnog versturen. */
@@ -1370,8 +1364,8 @@ function persist(forceCloud){if(!S.p||S.done||!S.start||!S.seed)return;const a=p
  for(const k in a)if(k.startsWith("d:")&&k.split(":")[1]<addDays(today,-8)){delete a[k];pruned=true}
  const k=progKey(S.type,S.practice,S.date,S.sf),pc=progressPct();
  /* Een onaangeraakte of weer volledig leeggemaakte puzzel is geen lopende puzzel. */
- if(pc<=0){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;return}
- const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,pc,group:$("#group").value.trim()};
+ if(pc<=0&&!(S.hints>0)&&!(S.mist>0)){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;return}
+ const e={seed:S.seed,gv:GV,mv:MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,hintLedger:S.hintLedger||{},hintLegacy:S.hintLegacy||0,seenErrors:S.seenErrors||{},pc,group:$("#group").value.trim()};
  if(S.hx){e.rev=[...S.hx.rev];e.cs=S.cs||{}}else if(S.type==="m24")e.r=S.r;else if(S.cur)e.cur=S.cur;if(S.str)e.str=[...S.str];if(S.nt&&Object.keys(S.nt).length)e.nt=S.nt;
  /* Hervatten moet ook echt hervatten: bewaar een begrensde undo/redo-geschiedenis.
     Maak 24 heeft een eigen ronde-state en laten we hier bewust buiten. */
@@ -1394,7 +1388,7 @@ function wrongCells(){const{type,p,cur}=S,o=[];if(!cur)return o;cur.forEach((v,i
  else if(type==="mur"){if(v>=0&&p.sol[v]!==i||v===-2&&p.sol.includes(i))o.push(i)}});return o}
 function doCheck(){if(S.done||!S.p||!["bin","star","nono","kak","mur","plus"].includes(S.type))return;const bad=wrongCells(),m=$("#msg");
  const els=bad.map(i=>S.type==="kak"?$("#grid").children[i]:S.type==="mur"?S.mcells[i]:S.cells[i]).filter(Boolean);els.forEach(d=>d.classList.add("bad"));
- if(bad.length)S.mist=(S.mist||0)+1;
+ if(bad.length)registerErrors(bad);persist();
  const t=bad.length?(bad.length===1?"1 vakje klopt niet":bad.length+" vakjes kloppen niet"):"Alles wat je hebt ingevuld klopt";
  m.classList.remove("good","warn");m.classList.add(bad.length?"warn":"good");m.textContent=t;setTimeout(()=>{els.forEach(d=>d.classList.remove("bad"));if(m.textContent===t){m.textContent="";m.classList.remove("good","warn")}},2800)}
 $("#chk").onclick=doCheck;
@@ -1571,9 +1565,9 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  const dayPeopleDetail=t=>`<div class="ddpeople">${groupPlayers().map(name=>{const r=dayResultFor(name,t),o=dayOtherResultFor(name,t);return`<span class="ddperson ${r?"done":o?"otherdone":""}"><b>${playerName(name)}</b>${r?`<i>✓</i><span>⏱ ${fmt(r.secs||0)}</span>${quickBadges(r,t)}`:"<span>Deze variant nog niet</span>"}${o?`<span class="ddother">${otherIcon} ${otherLabel} ✓</span>`:""}</span>`}).join("")}</div>`;
  const dayPeerCompact=t=>{const peers=groupPlayers().filter(name=>uidOf(name)!==uid);return peers.length?`<span class="daypeer">${peers.map(name=>{const u=uidOf(name),r=dayResultFor(name,t),o=dayOtherResultFor(name,t),ty=dayTypeDevice(t,td,PHONE),busy=!r&&!!busyOf(u,td,ty),cls=r?"done":busy?"busy":o?"otherdone":"";return`<span class="${cls}" title="${playerName(name)}: ${r?"deze variant klaar":busy?"bezig met deze variant":o?otherLabel+"-variant klaar":"nog niet klaar"}${r&&o?" · "+otherLabel+" ook klaar":""}"><b>${playerName(name)}</b> ${r?`✓${r.mist===0?' <i class="peerico">🎯</i>':""}${HINTT.includes(t)&&r.hints===0?' <i class="peerico">💡</i>':""}`:busy?"…":o?`<i class="peerdev">${otherIcon}✓</i>`:"—"}</span>`}).join("")}</span>`:""};
  const dayMistBadge=r=>!r||r.mist==null?"":r.mist===0?`<span class="rq good" title="Foutloos">🎯</span>`:`<span class="rq" title="${r.mist} ${r.mist===1?"fout":"fouten"}">❌ ${r.mist}</span>`;
- const dayHintBadge=(r,t)=>!r||!HINTT.includes(t)||r.hints==null?"":r.hints===0?`<span class="rq good" title="Zonder hint">💡</span>`:`<span class="rq" title="${r.hints} ${r.hints===1?"hint":"hints"}">💡 ${r.hints}</span>`;
+ const dayHintBadge=(r,t)=>!r||!HINTT.includes(t)||r.hints==null?"":r.hints===0?`<span class="rq good" title="Zonder hint">💡</span>`:`<span class="rq" title="${hintSummary(r)}">💡 ${r.hints}</span>`;
  const detailMetric=(ic,lab,val,good)=>`<div class="ddmetric ${good?"good":""}"><span>${ic}</span><b>${val}</b><small>${lab}</small></div>`;
- const dayDetail=(t,r)=>{const err=r&&r.mist!=null?r.mist:null,hi=r&&HINTT.includes(t)&&r.hints!=null?r.hints:null;return`<div class="daydetail"><div class="ddmain"><div class="ddstatus"><span class="ddcheck">✓</span><div><b>Opgelost</b><small>${dnl(td)}${t==="nono"?" · "+(nonoDayVariant(td)==="color"?"Kleur":"Klassiek"):""}</small></div></div><div class="ddmetrics">${detailMetric("⏱","Tijd",fmt(r&&r.secs||0),false)}${detailMetric(err===0?"🎯":"❌","Fouten",err==null?"–":err,err===0)}${HINTT.includes(t)?detailMetric("💡","Hints",hi==null?"–":hi,hi===0):""}</div><button class="dayview" data-view-t="${t}">Puzzel bekijken ›</button></div>${dayPeopleDetail(t)}</div>`};
+ const dayDetail=(t,r)=>{const err=r&&r.mist!=null?r.mist:null,hi=r&&HINTT.includes(t)&&r.hints!=null?r.hints:null;return`<div class="daydetail"><div class="ddmain"><div class="ddstatus"><span class="ddcheck">✓</span><div><b>Opgelost</b><small>${dnl(td)}${t==="nono"?" · "+(nonoDayVariant(td)==="color"?"Kleur":"Klassiek"):""}</small></div></div><div class="ddmetrics">${detailMetric("⏱","Tijd",fmt(r&&r.secs||0),false)}${detailMetric(err===0?"🎯":"❌","Fouten",err==null?"–":err,err===0)}${HINTT.includes(t)?detailMetric("💡","Hulp",hi==null?"–":hintSummary(r),hi===0):""}</div><button class="dayview" data-view-t="${t}">Puzzel bekijken ›</button></div>${dayPeopleDetail(t)}</div>`};
  const doneToday=t=>myDone(td,t),dayRow=t=>{const k=doneToday(t),m=busyMeta(t),pc=m&&m.e.pc!=null?m.e.pc:null,r=k?ownDayResult(td,t):null,o=dayOtherResultFor(me,t),sub=t==="nono"?(nonoDayVariant(td)==="color"?"Kleur":"Klassiek"):"",other=o?`<small class="otherday">${otherIcon} ${otherLabel} ✓</small>`:"";
   return`<div class="dayitem ${t===ft?"featured ":""}${HDOPEN===t?"open":""}" style="--dayc:${TCOL[t]||"var(--pc)"}"><button class="hdrow ${k?"ok":m?"busy":""}" data-day-t="${t}"${m?` data-pk="${m.k}"`:""}><span class="dot"></span>${tIcon(t,false)}<span class="dname">${TYPES[t]}${t===ft?`<small class="featlabel">⭐ Puzzel van de dag${sub?" · "+sub:""}</small>`:sub?`<small>${sub}</small>`:""}${other}</span>${dayPeerCompact(t)}<span class="dstate ${k?"done":"pending"}">${k?`<span class="dtime">⏱ ${fmt((r&&r.secs)||store[k]||0)}</span><span class="dmist">${dayMistBadge(r)}</span><span class="dhint">${dayHintBadge(r,t)}</span>`:`<span class="dpending">${pc!=null?progRing(pc,t):""}<b>${m?"Verder":"Start"}${pc!=null?" · "+pc+"%":""}</b></span>`}<span class="darrow">${k&&HDOPEN===t?"⌃":"›"}</span></span></button>${k&&HDOPEN===t?dayDetail(t,r):""}</div>`};
  const freeTiles=types.flatMap(t=>t==="nono"?[{t,nv:"classic",name:"Nonogram"},{t,nv:"color",name:"Kleurnonogram"}]:[{t,nv:"",name:TYPES[t]}]),freeTile=x=>{const t=x.t,nv=x.nv,sub=LVN[t]?"Kies niveau":"Nieuwe puzzel";return`<button class="tile free" data-free-t="${t}" data-free-nv="${nv}" style="--tc:${TCOL[t]}">${tIcon(t,1,nv)}<span>${x.name}</span><small class="tcount">${sub}</small></button>`};

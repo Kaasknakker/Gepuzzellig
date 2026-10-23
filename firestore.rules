@@ -45,7 +45,7 @@ service cloud.firestore {
       return hasProfile()
         && myGroup().size() > 0
         && request.resource.data.keys().hasOnly([
-          'name','group','date','type','secs','uid','mist','hints','emo','note'
+          'name','group','date','type','secs','uid','mist','hints','hintSteps','emo','note'
         ])
         && request.resource.data.keys().hasAll([
           'name','group','date','type','secs','uid'
@@ -69,6 +69,17 @@ service cloud.firestore {
         && request.resource.data.get('mist', 0) >= 0
         && request.resource.data.get('hints', 0) is int
         && request.resource.data.get('hints', 0) >= 0
+        && (!('hintSteps' in request.resource.data) || (
+          request.resource.data.hintSteps is map
+          && request.resource.data.hintSteps.keys().hasOnly(['look','reason','move','legacy'])
+          && request.resource.data.hintSteps.keys().hasAll(['look','reason','move','legacy'])
+          && request.resource.data.hintSteps.look is int && request.resource.data.hintSteps.look >= 0
+          && request.resource.data.hintSteps.reason is int && request.resource.data.hintSteps.reason >= 0
+          && request.resource.data.hintSteps.move is int && request.resource.data.hintSteps.move >= 0
+          && request.resource.data.hintSteps.legacy is int && request.resource.data.hintSteps.legacy >= 0
+          && request.resource.data.hintSteps.look + request.resource.data.hintSteps.reason
+             + request.resource.data.hintSteps.move + request.resource.data.hintSteps.legacy == request.resource.data.get('hints', 0)
+        ))
         && request.resource.data.get('emo', '') is string
         && request.resource.data.get('emo', '').size() <= 8
         && request.resource.data.get('note', '') is string

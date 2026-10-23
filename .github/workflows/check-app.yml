@@ -22,3 +22,5 @@ jobs:
         run: node .github/scripts/check-app.mjs
       - name: Automatische kruisjes controleren
         run: node .github/scripts/check-autocross.mjs
+      - name: Stapsgewijze hints controleren
+        run: node .github/scripts/check-hints.mjs
