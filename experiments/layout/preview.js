@@ -75,7 +75,7 @@ function testChooseCard(h){
 const testNS='http://www.w3.org/2000/svg',testShade=document.createElementNS(testNS,'svg');testShade.id='layoutShade';testShade.setAttribute('aria-hidden','true');testShade.setAttribute('hidden','');document.body.append(testShade);
 function testPaintShade(h){
  testShade.replaceChildren();testShade.toggleAttribute('hidden',!h||!!h.stale);if(!h||h.stale)return;
- const area=testRect($('#stage')),defs=document.createElementNS(testNS,'defs'),mask=document.createElementNS(testNS,'mask');mask.id='layoutMask';mask.setAttribute('maskUnits','userSpaceOnUse');mask.setAttribute('x','0');mask.setAttribute('y','0');mask.setAttribute('width',innerWidth);mask.setAttribute('height',innerHeight);
+ const area=testRect($('#playbox')),defs=document.createElementNS(testNS,'defs'),mask=document.createElementNS(testNS,'mask');mask.id='layoutMask';mask.setAttribute('maskUnits','userSpaceOnUse');mask.setAttribute('x','0');mask.setAttribute('y','0');mask.setAttribute('width',innerWidth);mask.setAttribute('height',innerHeight);
  const rect=(r,color)=>{const el=document.createElementNS(testNS,'rect');for(const [k,v]of Object.entries({x:r.left,y:r.top,width:r.width,height:r.height,fill:color}))el.setAttribute(k,v);return el};
  mask.append(rect(area,'white'));
  for(const r of testHintElements(h)){const left=Math.max(area.left,r.left-3),top=Math.max(area.top,r.top-3),right=Math.min(area.right,r.right+3),bottom=Math.min(area.bottom,r.bottom+3);if(right>left&&bottom>top)mask.append(rect({left,top,width:right-left,height:bottom-top},'black'))}
