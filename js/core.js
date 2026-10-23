@@ -1102,7 +1102,7 @@ function murHint(){const p=S.p,N=p.N,V=p.V,M=murM(p),nm=s=>p.ppl[s],cell=i=>`rij
   return{kind:"set",cells:[at],set:hit,cards,intro:`${nm(hit)} kan nog maar op één plek staan. Zo kom je daarop:`,steps:steps.slice(0,7),outro:`Dus ${nm(hit)} ${hit===V?"lag":"stond"} op ${cell(at)}.`,text:`${nm(hit)} staat op ${cell(at)}.`,btn:`Zet ${nm(hit)} hier voor me`}}
  const s=fix.findIndex(x=>x<0);return{kind:"set",cells:[p.sol[s]],cards:[s],set:s,text:`Dit is een lastige stap. ${nm(s)} staat op ${cell(p.sol[s])}.`,btn:`Zet ${nm(s)} hier voor me`}}
 /* ---- Foutloos en zonder hint; elkaars voortgang ---- */
-const MGV="m3",PGV="p2";const HINTT=["star","bin","nono","hex","plus","mur"],BASEF=["name","group","date","type","secs","uid"];
+const MGV="m4",PGV="p2";const HINTT=["star","bin","nono","hex","plus","mur"],BASEF=["name","group","date","type","secs","uid"];
 let XS={};try{XS=JSON.parse(lsGet("pdx")||"{}")}catch(e){XS={}}
 const xsSave=()=>lsSet("pdx",JSON.stringify(XS));
 let OLDRULES=false;
