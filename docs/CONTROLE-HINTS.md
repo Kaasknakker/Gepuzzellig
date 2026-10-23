@@ -48,6 +48,12 @@ Een lokale vergelijking met de voorgaande commit bevestigt dat dezelfde 288 zett
 
 ## Afbakening en openstaande controles
 
+### Aanvulling: stabiel bord bij hints (versie 90)
+
+Een tik buiten de hint sluit deze niet meer vóór de celbepaling. Bordbediening, notities en ongedaan/opnieuw houden het paneel en de bordgeometrie vast. Na een wijziging blijft de uitleg staan, verdwijnen de hintmarkeringen en verschijnt **Vernieuw hint voor dit bord**; een verlopen hint kan geen zet uitvoeren. De sluitknop en hintknop sluiten expliciet. Een passend scrollgebied voorkomt dat een breed bord achter de linkerbediening verdwijnt. Op kleinere liggende iPads houdt het onderpaneel rekening met de verticale linkerbediening.
+
+Gecontroleerd: 70 browsercombinaties (7 puzzelvarianten × licht/donker × desktop 1366×900, iPad 1180×820, iPad 1024×768, iPad 820×1180 en iPhone 390×844). Een echte browserklik/tik verwerkt de vooraf gekozen cel, houdt de celpositie en afmeting gelijk, houdt de hint open en telt geen extra hulp. Hint, bordgebied en bediening overlappen niet. Vernieuwen, expliciet sluiten en het blokkeren van verouderde uitvoering zijn gecontroleerd, ook na opnieuw indelen. De bestaande 42 combinaties voor doorstappen, uitvoeren, heropenen, correcties, hervatten en gesimuleerde Pencil met compatibiliteitsklik slagen eveneens. App-, kruisjes-, hint- en 288 hintafleidingscontroles slagen; de regressie voor verouderde hints is toegevoegd aan de hintcontrole. Dit blijft Chromium met gesimuleerde Apple-formaten; fysieke Safari/Pencil-controles blijven open.
+
 - De oploslogica komt uit de bestaande puzzeloplossers. Deze controle bewijst niet alle mogelijke puzzels, moeilijkheidsgraden en toekomstige generatoruitkomsten.
 - Oude resultaten worden zonder verzonnen verdeling getoond. Dit is met representatieve oude gegevens getest, niet door bestaande productieresultaten te wijzigen.
 - Fysieke iPhone/iPad, Safari, echte Apple Pencil, VoiceOver en langdurig offline gebruik moeten nog worden gecontroleerd.

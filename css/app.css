@@ -1084,3 +1084,7 @@ body.hintdock #hint.side{border-top-width:1px}
 body.phone.hintdock #hint{max-height:33dvh}
 body.hintdock #stage{min-height:0}
 html.tap body.hintdock #stage{touch-action:pan-x pan-y}
+/* Houd ook een breed bord binnen de vrije ruimte tussen bediening en hint. */
+body.hintside #stage{overflow:auto;overscroll-behavior:contain;align-items:safe center;min-height:0}
+body.hintside #playbox{flex-shrink:0}
+html.tap body.hintside #stage{touch-action:pan-x pan-y}

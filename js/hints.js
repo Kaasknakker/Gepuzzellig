@@ -126,7 +126,7 @@ function hintConcrete(h){
  return out;
 }
 function showHintLevel(h,level,focusNext){
- h.level=level;projectHint(h);registerHint(h,level);
+ h.level=level;if(!h.stale){projectHint(h);registerHint(h,level)}
  if(!S.start)S.start=Date.now();
  const b=$("#hint"),action=b.querySelector(".hintnext");clearTimeout(hintHideT);b.classList.remove("closing");b.replaceChildren();
  const add=(tag,cls,text)=>{const e=document.createElement(tag);e.className=cls;e.textContent=text;b.append(e);return e};
@@ -135,24 +135,26 @@ function showHintLevel(h,level,focusNext){
  const title=add("h2","hht","💡 "+names[level-1]);title.id="hinttitle";b.setAttribute("aria-labelledby",title.id);
  add("div","hintprogress","Stap "+level+" van 3 · "+names.slice(0,level).join(" → "));
  add("p","hintbody",level===1?h.direction:level===2?h.reason:hintConcrete(h));
- add("p","hintlegend",level<3?"┄ Gestippelde rand: kijkgebied of aanwijzing. De zet is nog verborgen.":"┄ Gestippeld: kijkgebied · ═ Dubbele rand: hier gebeurt de zet.");
+ add("p","hintlegend",h.stale?"Het bord is gewijzigd. Vernieuw de hint voor een actuele aanwijzing.":level<3?"┄ Gestippelde rand: kijkgebied of aanwijzing. De zet is nog verborgen.":"┄ Gestippeld: kijkgebied · ═ Dubbele rand: hier gebeurt de zet.");
  // Behoud de knopidentiteit: de bestaande Pencil-afhandeling moet een
  // nageleverde compatibiliteitsklik op dezelfde knop kunnen tegenhouden.
  const next=action||document.createElement("button");next.className="hintnext";b.append(next);
- if(level<3){next.textContent=level===1?"Meer hulp: redenering":"Meer hulp: concrete zet";next.onclick=()=>showHintLevel(h,level+1,true)}
+ if(h.stale){next.textContent="Vernieuw hint voor dit bord";next.onclick=()=>{clearHint();hintGo()}}
+ else if(level<3){next.textContent=level===1?"Meer hulp: redenering":"Meer hulp: concrete zet";next.onclick=()=>showHintLevel(h,level+1,true)}
  else{next.textContent=h.move.btn;next.onclick=doStep}
- if(level>1){const back=add("button","hintback","← "+names[level-2]);back.onclick=()=>showHintLevel(h,level-1,true)}
+ if(level>1&&!h.stale){const back=add("button","hintback","← "+names[level-2]);back.onclick=()=>showHintLevel(h,level-1,true)}
  add("div","hintusage",hintSummary({hints:S.hints,hintSteps:hintTotals()}));
  b.style.display="block";
  const dock=PHONE||innerWidth<1100;
  document.body.classList.toggle("hintdock",dock);
  if(dock){
   HINTSIDE=0;document.body.classList.remove("hintside");
-  const pb=$("#pbot").getBoundingClientRect();
-  b.classList.remove("side");Object.assign(b.style,{transform:"none",left:"6px",right:"auto",width:(innerWidth-12)+"px",bottom:"auto",top:"0px"});
+  const stage=$("#stage"),pb=$("#pbot").getBoundingClientRect(),rail=!PHONE&&document.body.classList.contains("tablet")&&LANDQ.matches;
+  const area=stage.getBoundingClientRect(),left=Math.max(6,area.left),right=Math.min(innerWidth-6,area.right),bottom=rail?innerHeight-12:pb.top;
+  b.classList.remove("side");Object.assign(b.style,{transform:"none",left:Math.round(left)+"px",right:"auto",width:Math.max(100,right-left)+"px",bottom:"auto",top:"0px"});
   HINTPAD=b.offsetHeight+8;
-  b.style.top=Math.max(0,Math.round(pb.top-b.offsetHeight-6))+"px";
-  const stage=$("#stage");stage.style.setProperty("--hint-board-height",Math.max(100,pb.top-b.offsetHeight-14-stage.getBoundingClientRect().top)+"px");
+  b.style.top=Math.max(0,Math.round(bottom-b.offsetHeight-6))+"px";
+  stage.style.setProperty("--hint-board-height",Math.max(100,bottom-b.offsetHeight-14-stage.getBoundingClientRect().top)+"px");
   resetPuzzleFit();render();
  }else{
   // Reserveer ook op desktop ruimte, zodat de kaart geen bord of bediening bedekt.

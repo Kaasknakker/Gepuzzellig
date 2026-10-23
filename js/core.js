@@ -217,11 +217,11 @@ function binDown(e){const mb=mouseLR(e);if(S.done||S.type!=="bin"||e._closed||mb
  const g=gridGeo(S.p.W);G2={x:g.x,y:g.y,cs:g.pw,W:S.p.W,H:S.p.H};
  /* Op de tellers naast het veld drukken/slepen: die rij (of kolom) vergelijken met de andere, zonder iets in te vullen. */
  const k=e.target.closest&&e.target.closest(".cnt");
- if(k){if(mb==="r")return;const ri=S.rowc.indexOf(k),ci=S.colc.indexOf(k);if(ri<0&&ci<0)return;e.preventDefault();clearHint();
+ if(k){if(mb==="r")return;const ri=S.rowc.indexOf(k),ci=S.colc.indexOf(k);if(ri<0&&ci<0)return;e.preventDefault();invalidateHint();
   drag2={line:ri>=0?"r":"c",pid:e.pointerId,moved:true};try{$("#grid").setPointerCapture(e.pointerId)}catch(x){}
   S.pick={t:drag2.line,at:ri>=0?ri:ci};binCompare();paintBin();return}
  const i=binCell(e.clientX,e.clientY);if(i<0)return;
- e.preventDefault();if(!S.start&&S.p.giv[i]<0)S.start=Date.now();clearHint();
+ e.preventDefault();if(!S.start&&S.p.giv[i]<0)S.start=Date.now();invalidateHint();
  const N=S.p.W,r=i/N|0,c=i%N,dbl=mb!=="r"&&binLastTap.i===i&&binLastTap.note===!!potlood&&e.timeStamp-binLastTap.t<380;
  let dblBase=null;
  if(dbl&&binLastTap.h===S.hist.length&&S.hist.length){const h=S.hist[S.hist.length-1];
@@ -280,7 +280,7 @@ function starDown(e){const mb=mouseLR(e);if(S.done||S.type!=="star"||e._closed||
   if(potlood&&h&&h.note&&h.i===i){S.hist.pop();noteRaw(i,h.from);S.redo=[]}
   else if(!potlood&&Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.redo=[];S.cur=dblBase.slice();paintAll()}}
  if(dbl)starLastTap={t:0,i:-1,h:0,note:false};else if(mb==="r")starLastTap={t:0,i:-1,h:0,note:false};
- e.preventDefault();if(!S.start)S.start=Date.now();clearHint();
+ e.preventDefault();if(!S.start)S.start=Date.now();invalidateHint();
  if(potlood){if(disp(i)!==0)return;const raw=noteVal(i),target=(mb==="r"||dbl)?2:1,mode=dbl?"add":raw===target?"del":"add";
   drag={note:true,directNote:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map(),dbl};
   noteDragWrite(drag,i,dbl?2:mode==="del"?0:target);return}
@@ -347,7 +347,7 @@ function nonoDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="nono"||S.done||e.
  S.ng=gridGeo(S.p.W);const i=nonoAt(e.clientX,e.clientY);if(i<0)return;e._nono=true;
  const dbl=mb!=="r"&&lastTap.i===i&&e.timeStamp-lastTap.t<380;if(dbl)lastTap={t:0,i:-1};else if(mb==="r")lastTap={t:0,i:-1};
  if(dbl&&S.hist&&S.hist.length){const pre=S.hist[S.hist.length-1];if(Array.isArray(pre)&&pre.length===S.cur.length){const was=S.cur.slice();S.cur=S.hist.pop().slice();S.redo=[];was.forEach((v,j)=>{if(v!==S.cur[j])nonoPaint(j,S.cur[j])});ub()}}
- if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],cross=S.p.color?-1:2,fill=S.p.color?nonoColorMode:1,active=S.p.color?(nonoMode==="x"?cross:fill):(nonoMode==="x"?cross:fill),val=dbl?cross:mb==="r"?(active===cross?fill:cross):active;
+ if(!S.start)S.start=Date.now();invalidateHint();begin();const old=S.cur[i],cross=S.p.color?-1:2,fill=S.p.color?nonoColorMode:1,active=S.p.color?(nonoMode==="x"?cross:fill):(nonoMode==="x"?cross:fill),val=dbl?cross:mb==="r"?(active===cross?fill:cross):active;
  nd={i0:i,last:i,moved:false,pid:e.pointerId,path:[i],prev:new Map(),old,val,mode:old===val?"del":"add",dbl};
  const nv=dbl?val:(old===val?0:val);nonoPaint(i,nv);if(nv!==old)nd.prev.set(i,old)}
 function nonoMove(e){if(!nd||S.type!=="nono"||e.pointerId!==nd.pid)return;const i=nonoAt(e.clientX,e.clientY);if(i<0||i===nd.last)return;const N=S.p.W;nd.moved=true;
@@ -576,7 +576,13 @@ function hideHint(){S.hint=null;document.body.classList.remove("hintdock");const
  const done=()=>{if(!b)return;b.classList.remove("closing");b.style.display="none";b.innerHTML="";if(wasPad){HINTPAD=0;resetPuzzleFit();if(S.p)render()}if(wasSide)b.classList.remove("side")};
  if(visible&&!matchMedia("(prefers-reduced-motion: reduce)").matches){b.classList.add("closing");hintHideT=setTimeout(done,135)}else done()}
 function clearHint(){if(!S.hint)return;hideHint();repaintHint()}
-document.addEventListener("pointerdown",e=>{if(S.hint&&!e.target.closest("#hint,#hintb"))clearHint()},true);
+/* Een bordgebaar mag de geometrie niet veranderen voordat de cel is bepaald. */
+function invalidateHint(){const h=S.hint;if(!h||h.stale)return;h.stale=true;h.cells=[];h.why=[];h.ghost=[];h.cards=[];h.hexLines=[];
+ const b=$("#hint"),next=b.querySelector(".hintnext"),back=b.querySelector(".hintback");
+ if(next){next.textContent="Vernieuw hint voor dit bord";next.onclick=()=>{clearHint();hintGo()}}
+ if(back)back.hidden=true;
+ const legend=b.querySelector(".hintlegend");if(legend)legend.textContent="Het bord is gewijzigd. Vernieuw de hint voor een actuele aanwijzing.";
+ repaintHint()}
 function hintGo(){if(S.hint){clearHint();return}if(S.done||!S.p||!HINTT.includes(S.type))return;
  const h=S.type==="star"?starHint():S.type==="bin"?binHint():S.type==="nono"?nonoHint():S.type==="plus"?plusHint():S.type==="mur"?murHint():hexHint();if(!h)return;S.hint=h;
  S.hint=prepareHint(h);showHintLevel(S.hint,1,false)}
@@ -600,7 +606,7 @@ function placeHint(){const b=$("#hint"),h=S.hint;if(!h||b.style.display==="none"
  cands.sort((p,q)=>p.sc-q.sc||p.pref-q.pref);const c=cands[0];
  Object.assign(b.style,{width:c.W+"px",left:Math.round(c.x)+"px",top:Math.round(c.y)+"px"})}
 addEventListener("resize",()=>{if(S&&S.hint)setTimeout(()=>{if(S.hint)showHintLevel(S.hint,S.hint.level,false)},50)});
-function doStep(){const active=S.hint;if(!active||active.level!==3||S.done)return;const h=active.move;
+function doStep(){const active=S.hint;if(!active||active.stale||active.level!==3||S.done)return;const h=active.move;
  if(S.type==="hex"){h.cells.forEach(i=>S.hx.rev.add(i));if(!S.start)S.start=Date.now();hideHint();hexAfter();return}
  if(S.type==="mur"){if(h.kind==="kill"){hideHint();paintMur();return}begin();const i=h.cells[0];if(h.set>=0){const o=S.cur.indexOf(h.set);if(o>=0)S.cur[o]=-1}S.cur[i]=h.set;commit();if(!S.start)S.start=Date.now();hideHint();if(h.set>=0&&S.ms===h.set)S.ms=murNext(h.set);paintMur();persist();check();return}
  begin();h.cells.forEach(i=>{S.cur[i]=h.set});if(S.type==="nono")nonoAuto(h.cells);if(S.type==="plus"&&h.kind!=="fix")plusAuto(h.cells);commit();
@@ -669,7 +675,7 @@ function hexSync(a,b){if(a.nodeType!==b.nodeType||a.nodeName!==b.nodeName){a.rep
  for(let i=0;i<a.childNodes.length;i++)hexSync(a.childNodes[i],b.childNodes[i])}
 function hexAfter(){pingBusy();if(S.p.sol.every((v,i)=>!v||S.hx.rev.has(i))){finish();return}rHex()}
 function hexClue(k,forcedMode){if(!S.cs)S.cs={};const c=S.cs[k]||0,mode=forcedMode||hexMode;if(mode==="b"){if(c===1)delete S.cs[k];else S.cs[k]=1}else{if(c===2)delete S.cs[k];else S.cs[k]=2}rHex()}
-function hexTap(i,forcedMode){if(S.done)return;if(S.hx.rev.has(i)){if(hexZn(S.p,i))hexClue("z"+i,forcedMode);return}S.zh=-1;S.hl=-1;if(!S.start)S.start=Date.now();clearHint();const mode=forcedMode||hexMode;
+function hexTap(i,forcedMode){if(S.done)return;if(S.hx.rev.has(i)){if(hexZn(S.p,i))hexClue("z"+i,forcedMode);return}S.zh=-1;S.hl=-1;if(!S.start)S.start=Date.now();invalidateHint();const mode=forcedMode||hexMode;
  if(S.p.sol[i]===(mode==="b"?1:0)){S.hx.rev.add(i);S.popH=i;hexAfter()}
  else{S.mist++;S.flash=i;rHex();setTimeout(()=>{S.flash=-1;if(S.type==="hex"&&!S.done)rHex()},450)}}
 function hexHint(){const P=S.p,rev=S.hx.rev,n=P.n,cons=[];
@@ -828,7 +834,7 @@ function plusDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="plus"||S.done||e.
  if(e.target.closest&&e.target.closest("#psum")){if(mb==="r")return;plusPeek(true);return}
  const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){if(mb==="r")return;plusLine(ck.dataset.ln);return}
  S.ng=gridGeo(S.p.W);const i=gridHit(S.ng,e.clientX,e.clientY,S.p.W,S.p.H);if(i<0)return;e._nono=true;
- if(!S.start)S.start=Date.now();clearHint();begin();const old=S.cur[i],active=plusMode==="o"?1:2,val=mb==="r"?(active===1?2:1):active;
+ if(!S.start)S.start=Date.now();invalidateHint();begin();const old=S.cur[i],active=plusMode==="o"?1:2,val=mb==="r"?(active===1?2:1):active;
  pd={last:i,pid:e.pointerId,path:[i],prev:new Map(),val,mode:old===val?"del":"add"};
  const nv=old===val?0:val;plusPaint(i,nv);if(nv!==old)pd.prev.set(i,old)}
 function plusMove(e){if(!pd||S.type!=="plus"||e.pointerId!==pd.pid)return;const W=S.p.W,i=gridHit(S.ng,e.clientX,e.clientY,W,S.p.H);if(i<0||i===pd.last)return;
@@ -846,7 +852,7 @@ function plusAuto(ch){}
 /* Tik op een som: er komt een schuine streep door (zelf bijhouden welke rij of kolom klaar is). Nog eens tikken haalt hem weg. */
 /* Tik op een som: er komt een schuine streep door, en alle open getallen in die rij of kolom worden weggestreept
    (omcirkelde getallen blijven staan). Nog eens tikken haalt alleen de streep weg; ↶ zet de weggestreepte getallen terug. */
-function plusLine(id){const p=S.p,W=p.W,H=p.H,k=id[0]==="r"?+id.slice(1):H+ +id.slice(1);clearHint();if(!S.start)S.start=Date.now();
+function plusLine(id){const p=S.p,W=p.W,H=p.H,k=id[0]==="r"?+id.slice(1):H+ +id.slice(1);invalidateHint();if(!S.start)S.start=Date.now();
  const cells=k<H?Array.from({length:W},(_,c)=>k*W+c):Array.from({length:H},(_,r)=>r*W+(k-H));
  if(!cells.some(i=>S.cur[i]===0))return;
  begin();cells.forEach(i=>{if(S.cur[i]===0)plusPaint(i,2)});commit();plusLab(k);persist();check()}
@@ -905,13 +911,13 @@ function ub0(){const set=(id,v)=>{$(id).disabled=!!v};const off=!S.p||S.done;{co
 function begin(){S.gs=S.cur.slice()}
 function commit(){if(S.gs&&S.gs.join()!==S.cur.join()){S.hist.push(S.gs);S.redo=[];pingBusy()}S.gs=null;ub();paintNotes()}
 function initCur(){const p=S.p;return S.type==="bin"?p.giv.slice():Array(S.type==="kak"||S.type==="nono"||S.type==="plus"?p.W*p.H:p.N*p.N).fill(S.type==="mur"?-1:0)}
-function undo(){if(S.done||!S.p||!S.hist.length)return;clearHint();
+function undo(){if(S.done||!S.p||!S.hist.length)return;invalidateHint();
  if(S.type==="m24"){S.redo.push(S.tiles);S.tiles=S.hist.pop();S.a=-1;S.op="";rM24();return}
  const h=S.hist.pop();
  if(h&&h.notes){S.redo.push(h);noteApplyChanges(h.changes,false);paintNotes();persist();ub();return}
  if(h&&h.note){S.redo.push(h);noteApplyChanges([h],false);paintNotes();persist();ub();return}
  S.redo.push(S.cur.slice());S.cur=h;S.rd=S.cd=S.pick=null;render();persist()}
-function redo(){if(S.done||!S.p||!S.redo.length)return;clearHint();
+function redo(){if(S.done||!S.p||!S.redo.length)return;invalidateHint();
  if(S.type==="m24"){S.hist.push(S.tiles);S.tiles=S.redo.pop();S.a=-1;S.op="";rM24();return}
  const h=S.redo.pop();
  if(h&&h.notes){S.hist.push(h);noteApplyChanges(h.changes,true);paintNotes();persist();ub();return}
@@ -965,12 +971,12 @@ function noteRaw(i,v){if(!S.nt)S.nt={};const old=noteVal(i);if(old===v)return nu
 function noteApplyChanges(changes,to){if(!S.nt)S.nt={};for(const c of changes){const v=to?c.to:c.from;if(v)S.nt[c.i]=v;else delete S.nt[c.i]}}
 function noteSet(i,v){const c=noteRaw(i,v);if(!c)return;
  /* Eén tik blijft één undo-stap; een nieuwe sleepactie wordt hieronder als één groep bewaard. */
- S.hist.push({note:1,...c});S.redo=[];pingBusy();if(!S.start)S.start=Date.now();clearHint();paintNotes();persist();ub()}
+ S.hist.push({note:1,...c});S.redo=[];pingBusy();if(!S.start)S.start=Date.now();invalidateHint();paintNotes();persist();ub()}
 function noteDragWrite(d,i,v){if(!d.nchanges)d.nchanges=new Map();const old=noteVal(i);if(old===v)return;let c=d.nchanges.get(i);if(!c){c={i,from:old,to:v};d.nchanges.set(i,c)}else c.to=v;noteRaw(i,v);paintNotes()}
 function noteDragRestore(d,i){const c=d.nchanges&&d.nchanges.get(i);if(c){noteRaw(i,c.from);c.to=c.from}}
 function noteFinish(d,group){const ch=d&&d.nchanges?[...d.nchanges.values()].filter(c=>c.from!==c.to):[];if(!ch.length){paintNotes();persist();ub();return}
- S.hist.push(group?{notes:1,changes:ch}:{note:1,...ch[0]});S.redo=[];pingBusy();if(!S.start)S.start=Date.now();clearHint();paintNotes();persist();ub()}
-function clearAllNotes(){if(S.done||!S.p||!S.nt)return;const ch=Object.keys(S.nt).filter(k=>S.nt[k]).map(k=>({i:+k,from:S.nt[k],to:0}));if(!ch.length)return;S.hist.push({notes:1,changes:ch});S.redo=[];S.nt={};clearHint();paintNotes();persist();ub()}
+ S.hist.push(group?{notes:1,changes:ch}:{note:1,...ch[0]});S.redo=[];pingBusy();if(!S.start)S.start=Date.now();invalidateHint();paintNotes();persist();ub()}
+function clearAllNotes(){if(S.done||!S.p||!S.nt)return;const ch=Object.keys(S.nt).filter(k=>S.nt[k]).map(k=>({i:+k,from:S.nt[k],to:0}));if(!ch.length)return;S.hist.push({notes:1,changes:ch});S.redo=[];S.nt={};invalidateHint();paintNotes();persist();ub()}
 function paintNotes(){if(!S.p||!S.nt)return;const t=S.type;
  if(t==="mur"){if(!S.mcells)return;const dark=isDark(),N=S.p.N,rc=Array(N).fill(0),cc=Array(N).fill(0);S.cur.forEach((v,i)=>{if(v>=0){rc[i/N|0]++;cc[i%N]++}});
   /* Aantekeningen in vakjes die vanzelf zijn afgekruist (rij of kolom van een geplaatst persoon) even verbergen; haal je die persoon weg, dan komen ze terug. */
@@ -1041,7 +1047,7 @@ function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const 
  const fit=()=>{const t=cl.getBoundingClientRect().top;if(PHONE)cl.style.maxHeight=Math.max(120,innerHeight-t-pbh-HINTPAD-8)+"px";else if(wide)cl.style.maxHeight=Math.max(260,availBot()+14-t-14)+"px"};fit();
  paintMur()}
 function murNext(from){const N=S.p.N,pl=new Set(S.cur.filter(v=>v>=0));for(let k=1;k<=N;k++){const s=(from+k)%N;if(!pl.has(s))return s}return -1}
-function murTap(i){if(S.done||!S.mcells)return;const v=S.cur[i];
+function murTap(i){if(S.done||!S.mcells)return;invalidateHint();const v=S.cur[i];
  /* Potlood: kleine letter van de gekozen persoon in het vakje (nog eens tikken haalt hem weg). */
  if(potlood){if(S.mxm){if(v===-1&&!murBlocked(S.p,i))noteSet(i,(S.nt[i]||0)^MNX);return}
   if(v!==-1||murBlocked(S.p,i)||!(S.ms>=0)){const m=$("#msg");if(!(S.ms>=0)||S.mxm){m.textContent="Kies eerst iemand of ✕ onderaan voor een aantekening.";setTimeout(()=>{if(m.textContent.startsWith("Kies eerst"))m.textContent=""},2000)}return}
