@@ -45,3 +45,34 @@ const hh=prepareHint({cells:[2],why:[0,1],kind:'tech',text:'Blauw'});projectHint
 assert.equal(hh.cells.length,0);assert.equal(hh.why.join(), '0');
 `,context);
 console.log('OK: hintniveaus, diepste registratie, heropenen/hervatten, oude aantallen, correcties en verborgen doelen');
+
+// De eerste twee echte Murdoku-hints moeten bij de actuele afleiding horen.
+const murContext=vm.createContext({assert,console});
+vm.runInContext(`let S={};const GROUP_INFO={},window={PD_SETUP:{group:'live'}};const $=()=>({value:'test'});`,murContext);
+for(const name of ['shared','murdoku'])vm.runInContext(fs.readFileSync('js/puzzles/'+name+'.js','utf8'),murContext);
+vm.runInContext(fs.readFileSync('js/hints.js','utf8'),murContext);
+const core=fs.readFileSync('js/core.js','utf8');
+vm.runInContext(core.slice(core.indexOf('const murM='),core.indexOf('\n',core.indexOf('const murM='))),murContext);
+vm.runInContext(core.slice(core.indexOf('function murHint(){'),core.indexOf('/* ---- Foutloos',core.indexOf('function murHint(){'))),murContext);
+vm.runInContext(`
+for(const lv of [1,2,3,4,5,6]){
+ const p=genMur(rng(hash('persoonlijke-hints-'+lv)),lv,false);
+ assert.ok(p);S={type:'mur',p,cur:Array(p.N*p.N).fill(-1),hints:0};
+ const hints=[];
+ for(let step=0;step<p.N;step++){
+  const move=murHint(),h=prepareHint(move);projectHint(h);hints.push(h);
+  assert.ok(move.proof);assert.ok(h.lookCards.some(s=>h.direction.includes(p.ppl[s])));
+  if(step<2)assert.ok(h.reason.includes('“'));assert.equal(h.cells.length,0);assert.equal(h.why.length,0);
+  const exact='rij '+((move.cells[0]/p.N|0)+1)+', kolom '+(move.cells[0]%p.N+1);
+  assert.ok(!h.direction.includes(exact));assert.ok(!h.reason.includes(exact));
+  const prerequisites=h.reason.match(/Bepaal met deze kaartjes eerst de plek van ([^.]+)\./);
+  assert.ok(!prerequisites||!prerequisites[1].includes(p.ppl[move.set]),'Een hint mag niet de eigen conclusie als voorwaarde gebruiken');
+  // De eerste twee teksten lezen geen oplossingcoördinaat uit de zet.
+  assert.equal(murGuidance({...move,cells:[(move.cells[0]+1)%(p.N*p.N)]}).reason,h.reason);
+  S.cur[move.cells[0]]=move.set;
+ }
+ assert.notEqual(hints[0].direction,hints[1].direction);
+ assert.notEqual(hints[0].reason,hints[1].reason);
+}
+`,murContext);
+console.log('OK: opeenvolgende Murdoku-hints op alle zes niveaus, zonder doelcoördinaten of cirkelredenering');

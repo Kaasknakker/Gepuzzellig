@@ -4,7 +4,7 @@ Datum: 23 oktober 2026. Uitgangspunt: nieuwste main `26b5852acfd0e1401fadb5b72cc
 
 ## Automatische controles
 
-- `node .github/scripts/check-app.mjs`: geslaagd; scripts, gezamenlijke laadvolgorde, serviceworker-syntax en consistente bestandsversie 87.
+- `node .github/scripts/check-app.mjs`: geslaagd; scripts, gezamenlijke laadvolgorde, serviceworker-syntax en consistente bestandsversie 88.
 - `node .github/scripts/check-autocross.mjs`: geslaagd; bestaande automatische kruisjes, handmatige markeringen en voorkeuren behouden.
 - `node .github/scripts/check-hints.mjs`: geslaagd; diepste geopende niveau, één hint bij doorstappen, heropenen, hervatten, oude aantallen, samenvatting en correcties zonder dubbeltelling. Controle op verborgen doelcellen bij Murdoku en Hexcells.
 - De nieuwe hintcontrole is toegevoegd aan de bestaande GitHub-check.
@@ -25,6 +25,12 @@ In deze 56 combinaties zijn openen, beide vervolgstappen, registratie als één 
 Per configuratie zijn daarnaast een foutieve invoer, Controleer, de correctiehint, opslaan/herladen en opnieuw openen doorlopen. Hetzelfde foutmoment en dezelfde hint blijven eenmaal geteld. Een gesimuleerde pen-pointerreeks plus nageleverde muisklik opent maar één extra niveau.
 
 De eerste schermcontrole vond overlap op de staande iPad bij kleurnonogram en Murdoku. Hiervoor is een onderpaneel met gereserveerde bordruimte toegevoegd. Een vervolgaanpassing houdt het doelgebied zichtbaar binnen een eventueel scrollend bordgebied; dit is opnieuw gericht op deze twee puzzels gecontroleerd.
+
+### Aanscherping na beoordeling: Murdoku
+
+De eerste versie toonde te algemene spelregels bij kijkrichting en redenering. Deze teksten gebruiken nu de echte aanwijzingen en afleidingsredenen uit de bestaande Murdoku-oplosser. Stap 1 noemt de relevante kaartjes en het soort aanwijzing; stap 2 citeert de gebruikte aanwijzingen en legt de toepasselijke uitsluitingen uit. De markering groeit van de belangrijkste kaartjes naar de aanvullende kaartjes. Alleen stap 3 markeert de doelcel.
+
+De automatische controle doorloopt opeenvolgende plaatsingen op alle zes Murdoku-niveaus. Daarbij worden verschillende eerste hints, verborgen doelcoördinaten en het voorkomen van een cirkelredenering gecontroleerd. Voorwaarden uit een hulpafleiding worden niet als uitsluiting voor een andere persoon gepresenteerd. De aangepaste kijkrichting en redenering zijn ook in de lokale webversie bekeken met een hervatte dagpuzzel.
 
 ## Afbakening en openstaande controles
 

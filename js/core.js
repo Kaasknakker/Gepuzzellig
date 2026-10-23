@@ -1096,7 +1096,7 @@ function murHint(){const p=S.p,N=p.N,V=p.V,M=murM(p),nm=s=>p.ppl[s],cell=i=>`rij
    else if(c==="L"){steps.push(`In ${LN[+f[1]]} ${+f[2]+1} en ${+f[3]+1} moeten twee mensen staan, en alleen ${nm(+f[4])} en ${nm(+f[5])} kunnen daar nog komen.`)}}
   if(occ.length){const t=occ.map(o=>{const x=fix[o]>=0?fix[o]:r.D[o][0];return`${nm(o)} (rij ${(x/N|0)+1}, kolom ${x%N+1}${fix[o]>=0?"":", dat volgt uit de aanwijzingen"})`});steps.unshift(`Deze rijen en kolommen zijn al bezet: ${list(t)}. Daar kan ${nm(hit)} niet meer staan.`)}
   const bk=[...Array(N*N).keys()].filter(i=>!murFree(i,M)&&((i/N|0)===(at/N|0)||i%N===at%N||p.reg[i]===p.reg[at]));if(bk.length&&steps.length<7)steps.push(`Op ${[...new Set(bk.map(i=>p.obj[i]))].map(t=>MOBJ[t].e).join(" ")} kan niemand staan.`);
-  return{kind:"set",cells:[at],set:hit,cards,intro:`${nm(hit)} kan nog maar op één plek staan. Zo kom je daarop:`,steps:steps.slice(0,7),outro:`Dus ${nm(hit)} ${hit===V?"lag":"stond"} op ${cell(at)}.`,text:`${nm(hit)} staat op ${cell(at)}.`,btn:`Zet ${nm(hit)} hier voor me`}}
+  return{kind:"set",cells:[at],set:hit,cards,proof:{W:r.W,fix},intro:`${nm(hit)} kan nog maar op één plek staan. Zo kom je daarop:`,steps:steps.slice(0,7),outro:`Dus ${nm(hit)} ${hit===V?"lag":"stond"} op ${cell(at)}.`,text:`${nm(hit)} staat op ${cell(at)}.`,btn:`Zet ${nm(hit)} hier voor me`}}
  const s=fix.findIndex(x=>x<0);return{kind:"set",cells:[p.sol[s]],cards:[s],set:s,text:`Dit is een lastige stap. ${nm(s)} staat op ${cell(p.sol[s])}.`,btn:`Zet ${nm(s)} hier voor me`}}
 /* ---- Foutloos en zonder hint; elkaars voortgang ---- */
 const MGV="m4",PGV="p2";const HINTT=["star","bin","nono","hex","plus","mur"],BASEF=["name","group","date","type","secs","uid"];
