@@ -11,7 +11,7 @@ Voorbeeld: `Gepuzzellig start` gevolgd door `bugtemplate: op de iPad doet de ter
 1. Haal de nieuwste `main` op en bekijk eerst de bestaande implementatie, relevante projectafspraken en afhankelijkheden.
 2. Bepaal de oorzaak of het gewenste gedrag en maak de kleinste gerichte wijziging volgens bestaande patronen. Behoud niet-gerelateerde functionaliteit en bestaand werk; vermijd onnodige herbouw of opschoning.
 3. Voer passende automatische checks uit en controleer het gewijzigde gedrag en regressierisico's. Controleer waar relevant iPad, iPhone en desktop, inclusief touch, muis en Apple Pencil.
-4. Controleer na publicatie de GitHub-checks en de bijbehorende deployment voor de exacte commit. Meld expliciet wanneer een check of deployment ontbreekt, is overgeslagen, nog loopt of niet te verifiëren is; claim dan geen succesvolle controle. Volg de bestaande deploy-inrichting en start geen ongerelateerde deploys.
+4. Controleer na publicatie van appwijzigingen de GitHub-checks en de bijbehorende deployment voor de exacte commit. Meld expliciet wanneer een check of deployment ontbreekt, is overgeslagen, nog loopt of niet te verifiëren is; claim dan geen succesvolle controle. Volg de bestaande deploy-inrichting en start geen ongerelateerde deploys.
 5. Rapporteer kort wat is aangepast, wat is gecontroleerd en wat eventueel openstaat.
 
 ## Gericht en zuinig werken
