@@ -1450,7 +1450,7 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
 function updTop(){if(!S||!S.p)return;document.querySelectorAll("#pbot .pgrp").forEach(mg=>mg.classList.toggle("leeg",![...mg.children].some(x=>getComputedStyle(x).display!=="none")));const t=S.type,ti=$("#tbTitle");document.documentElement.style.setProperty("--tc",TCOL[t]);
  const fnv=t==="nono"&&S.practice?S.nv:"",ttl=FREE_NAME(t,fnv),sub=(S.practice?"Vrij puzzelen":S.arch?"Dagpuzzel van "+dnl(S.date):"Dagpuzzel")+(t==="nono"&&!S.practice?" · "+(S.nv==="color"?"Kleur":"Klassiek"):"")+(LVN[t]?" · "+LVL[S.lvl]:"")+(!S.practice&&featOf(S.date)===t?" · ⭐":"");
  if(ti)ti.innerHTML=tIcon(t,false,fnv)+`<div><b>${ttl}</b><small>${sub}</small></div>`;updatePeerLive()}
-function showHome(){RANDOM=false;document.body.classList.remove("newpick");document.body.classList.add("home");const np=$("#npm");if(np)np.hidden=true;HVIEW="";HDOPEN="";try{if(HOMEREADY)pauseAndPersistActive(true)}catch(e){console.warn("Voortgang opslaan bij Home mislukt",e)}try{clearOnline()}catch(e){}try{clearHint()}catch(e){}const m=$("#more");if(m)m.classList.remove("open");try{toggleSide(false)}catch(e){}try{tapMode()}catch(e){}try{renderHome()}catch(e){console.error("Home renderen mislukt",e)}try{if(HOMEREADY)pageIn($("#home"))}catch(e){}window.scrollTo(0,0);if(window.PD_APPLY_SW_UPDATE)setTimeout(()=>{try{window.PD_APPLY_SW_UPDATE()}catch(e){}},0)}
+function showHome(){RANDOM=false;if(HOMEREADY)pauseAndPersistActive(true);clearOnline();HVIEW="";HDOPEN="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.remove("newpick");document.body.classList.add("home");if(window.PD_APPLY_SW_UPDATE&&window.PD_APPLY_SW_UPDATE())return;const np=$("#npm");if(np)np.hidden=true;tapMode();renderHome();if(HOMEREADY)pageIn($("#home"));window.scrollTo(0,0)}
 const dayLvDevice=(t,ds,phone)=>{if(!dagVast(ds))return null;const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay(),wk=w===0||w===6;return phone?(wk?6:5):(wk?3:2)};
 const dayTypeDevice=(t,ds,phone)=>{const l=dayLvDevice(t,ds,phone);return t+sfx(l||dagLv(t,ds))};
 function myDone(td,t){if(!dagVast(td)){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))||""}const ty=dayTypeDevice(t,td,PHONE),k=td+ty,g=($("#group").value||"").trim().toLowerCase();return localDoneInGroup(k,g)||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty&&(r.group||"").toLowerCase()===g)?k:""}
@@ -1553,8 +1553,6 @@ function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r
 function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return renderScore(h);setHomeSkin(PROFILE_STYLE);Object.keys(TYPES).forEach(latestFreeProgress);const td=dstr(),ft=featOf(td),now=new Date(),hr=now.getHours();
  const groet=hr<6?"Goedenacht":hr<12?"Goedemorgen":hr<18?"Goedemiddag":"Goedenavond",me=($("#name").value||"").trim()||"puzzelaar";
  const datum=now.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}),g=($("#group").value||"").trim().toLowerCase(),others=groupPlayers().filter(p=>uidOf(p)!==uid),types=Object.keys(TYPES);
- const personalRaadsels=g==="peter-aart-jk4hv92t";
- const raadselsCard=personalRaadsels?'<a class="hcard hraad" href="raadsels.html"><span class="ticon big" style="background:#c2255c">÷</span><div><b>Rekenraadsel van vandaag</b> <span class="hpill">proefversie</span><div class="mut">Persoonlijke testversie voor jullie groep, met kladpapier en rekenmachine.</div></div><span class="hgo">›</span></a>':"";
  const pa=progAll(),busyMeta=t=>progressList({practice:false,type:t,date:td},pa)[0]||null;
  const progRing=(p,t)=>p==null?"":`<span class="pdonut" style="--p:${p};--ring:${TCOL[t]||"var(--pc)"}"><b>${p}%</b></span>`;
  const active=progressList({},pa),dayActive=active.filter(m=>!m.practice),freeActive=active.filter(m=>m.practice),olderDay=dayActive.filter(m=>m.date!==td),homeRaw=allRows();
@@ -1580,7 +1578,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  <section class="hsection hdaily"><div class="hsecthead"><div><h3>📅 Dagelijkse puzzels</h3><span class="mut">Vandaag · ${types.filter(doneToday).length} van ${types.length} klaar</span></div><span class="hstreak">🔥 ${strk} ${strk===1?"dag":"dagen"}</span></div>
   <div class="hcard hdlist">${[ft,...types.filter(t=>t!==ft)].map(dayRow).join("")}</div>
   ${olderDay.length?`<div class="hsub"><div class="hsubhead"><b>Eerdere dagpuzzels</b><span class="mut">${olderDay.length} bezig</span></div><div class="hcontlist">${olderDay.map(resumeCard).join("")}</div></div>`:""}
-  ${raadselsCard}
+  <a class="hcard hraad" href="raadsels.html"><span class="ticon big" style="background:#c2255c">÷</span><div><b>Rekenraadsel van vandaag</b> <span class="hpill">proefversie</span><div class="mut">Eén 3F-rekenraadsel per dag, met kladpapier en rekenmachine.</div></div><span class="hgo">›</span></a>
  </section>
 
  <section class="hsection hfree"><div class="hsecthead"><div><h3>🎲 Vrij puzzelen</h3><span class="mut">Kies zelf wat je wilt maken</span></div><button id="hFree" class="hshuffle">🎲 Willekeurig</button></div>
