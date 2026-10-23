@@ -19,21 +19,40 @@ try{
    await page.evaluate(([t,l])=>{setFreePreferences(t,l);load(t,true,true)},[t,phone?6:3]);
    await page.waitForFunction(t=>S.type===t&&!!S.p,t);await page.waitForTimeout(120);
    const geometry=await page.evaluate(()=>{
-    const board=$(['hex','mur'].includes(S.type)?S.type==='hex'?'#hexsvg':'#mgrid':'#grid'),r=board.getBoundingClientRect(),area=$('#stage').getBoundingClientRect();
-    return {type:S.type,left:r.left,right:r.right,top:r.top,bottom:r.bottom,stage:area.toJSON(),cs:CS,murOverflow:S.type==='mur'&&!PHONE?getComputedStyle($('#mclues')).overflow:null};
+    const board=$(['hex','mur'].includes(S.type)?S.type==='hex'?'#hexsvg':'#mgrid':'#grid'),r=board.getBoundingClientRect(),area=testAvailableRect();
+    return {type:S.type,left:r.left,right:r.right,top:r.top,bottom:r.bottom,stage:area,cs:CS,murOverflow:S.type==='mur'&&!PHONE?getComputedStyle($('#mclues')).overflow:null};
    });
    assert(geometry.left>=-1&&geometry.right<=width+1,`${name}/${t}: bord buiten breedte: ${JSON.stringify(geometry)}`);
    if(t!=='mur')assert(geometry.bottom<=geometry.stage.bottom+2,`${name}/${t}: bord buiten speelruimte: ${JSON.stringify(geometry)}`);
    if(t==='plus'&&!phone)assert(geometry.cs<=56,'Pluszle onnodig vergroot');
    if(t==='mur'&&!phone)assert.equal(geometry.murOverflow,'visible','Murdoku scrollt op groot scherm');
+   // Vergelijk dezelfde puzzel: de proef mag geen ruimte voor een lege footer reserveren.
+   await page.locator('#testCompare').click();await page.waitForTimeout(80);
+   const original=await page.evaluate(()=>{const r=$(S.type==='hex'?'#hexsvg':S.type==='mur'?'#mgrid':'#grid').getBoundingClientRect(),p=$('#pbot').getBoundingClientRect();return {width:r.width,height:r.height,left:r.left,right:r.right,bottom:r.bottom,footer:p.height,footerTop:p.top,side:p.height>p.width}});
+   await page.locator('#testCompare').click();await page.waitForTimeout(80);
+   const restored=await page.evaluate(()=>({footer:$('#pbot').getBoundingClientRect().height,board:$(S.type==='hex'?'#hexsvg':S.type==='mur'?'#mgrid':'#grid').getBoundingClientRect().toJSON()}));
+   assert(Math.abs(restored.footer-original.footer)<1,`${name}/${t}: verhoogde lege knoppenstrook`);
+   const originalFits=original.left>=0&&original.right<=width&&original.bottom<=(original.side?height:original.footerTop)+1;
+   if(width<2000&&t!=='mur'&&t!=='plus'&&originalFits){assert(restored.board.width>=original.width*.97,`${name}/${t}: kleiner dan passend origineel`);assert(restored.board.height>=original.height*.97,`${name}/${t}: onnodig lagere puzzel`)}
    boards++;
+   if(t==='hex')assert(await page.evaluate(()=>{
+    const p=S.p,j=p.lineShow[0],z=(p.zs||[])[0]??(p.zh||[])[0];
+    const make=(clues,scope=[],lines=[])=>({level:1,scope,reasonScope:scope,why:scope,cells:[],hexLines:lines,move:{cells:[],proof:{clues}}});
+    const line={kind:'line',id:j,c:p.lines[j].clue},lh=make([line],[],[j]);
+    if(!p.lines[j].idx.every(i=>testHexCells(lh).includes(i)))return false;
+    if(z!=null){const zone={kind:'zone',id:z,c:p.zone[z]},zh=make([zone],[z]);if(![z,...zone.c.pos.filter(i=>i>=0)].every(i=>testHexCells(zh).includes(i)))return false;
+     const combined=make([line,zone],[],[j]),first=testHexCells(combined),later=testHexCells(combined,true);if(!zone.c.pos.filter(i=>i>=0).every(i=>later.includes(i)))return false;
+     if(first.some(i=>!p.lines[j].idx.includes(i)))return false;
+     const three=make([line,zone,line],[],[j]);if(!zone.c.pos.filter(i=>i>=0).every(i=>testHexCells(three).includes(i)))return false;
+    }return true;
+   }),`${name}: Hexcells moet volledige lijn/zone vrijhouden zonder volgende stap te verklappen`);
    await page.locator('#hintb').click();await page.waitForTimeout(60);
    if(await page.evaluate(()=>!!S.hint)){
     const stable=await page.evaluate(()=>({card:$('#hint').getBoundingClientRect().toJSON(),board:$(S.type==='hex'?'#hexsvg':S.type==='mur'?'#mgrid':'#grid').getBoundingClientRect().toJSON(),cur:JSON.stringify(S.cur)}));
     for(let level=1;level<=3;level++){
      if(level>1)await page.locator('#hint .hintnext').click();
-     const state=await page.evaluate(()=>({level:S.hint.level,card:$('#hint').getBoundingClientRect().toJSON(),board:$(S.type==='hex'?'#hexsvg':S.type==='mur'?'#mgrid':'#grid').getBoundingClientRect().toJSON(),cur:JSON.stringify(S.cur),overlaps:testHintElements(S.hint,true).filter(r=>testOverlap($('#hint').getBoundingClientRect(),r,0)).length,shade:!$('#layoutShade').hasAttribute('hidden')}));
-     assert.equal(state.level,level);assert.deepEqual(state.card,stable.card,`${name}/${t}: hint verspringt`);assert.deepEqual(state.board,stable.board,`${name}/${t}: bord verschuift`);assert.equal(state.cur,stable.cur,'Hint voert voortijdig zet uit');assert.equal(state.overlaps,0,`${name}/${t}: tekst bedekt benodigd gebied`);assert(state.shade,`${name}/${t}/${level}: overlay ontbreekt`);
+     const state=await page.evaluate(()=>({level:S.hint.level,card:$('#hint').getBoundingClientRect().toJSON(),board:$(S.type==='hex'?'#hexsvg':S.type==='mur'?'#mgrid':'#grid').getBoundingClientRect().toJSON(),cur:JSON.stringify(S.cur),overlaps:testHintElements(S.hint,true).filter(r=>testOverlap($('#hint').getBoundingClientRect(),r,0)).length,shade:!$('#layoutShade').hasAttribute('hidden'),hexCuts:S.type==='hex'?$('#layoutMask').querySelectorAll('polygon').length:0,hexNeeded:S.type==='hex'?testHexCells(S.hint).length:0}));
+     assert.equal(state.level,level);assert.deepEqual(state.card,stable.card,`${name}/${t}: hint verspringt`);assert.deepEqual(state.board,stable.board,`${name}/${t}: bord verschuift`);assert.equal(state.cur,stable.cur,'Hint voert voortijdig zet uit');assert.equal(state.overlaps,0,`${name}/${t}: tekst bedekt benodigd gebied`);assert(state.shade,`${name}/${t}/${level}: overlay ontbreekt`);if(t==='hex')assert.equal(state.hexCuts,state.hexNeeded,'Elk betrokken Hexcells-vakje heeft een volledig zeshoekig gat');
      assert(state.card.left>=-1&&state.card.right<=width+1&&state.card.top>=0&&state.card.bottom<=height+1,`${name}/${t}: hint buiten beeld`);
      hints++;
     }
