@@ -1126,3 +1126,27 @@ html.tap body.hintside #stage{touch-action:pan-x pan-y}
 .groupinvite>div{flex-wrap:wrap;gap:12px}.groupinvite code{min-width:0;overflow-wrap:anywhere}
 .murcastactions{gap:12px}.murcastactions button,.groupswitch button{min-height:44px}
 .mc .rl{font-size:max(10px,calc(var(--ms)*.16));font-weight:700;opacity:.9;background:color-mix(in srgb,var(--card) 92%,transparent);text-transform:none;letter-spacing:0;line-height:1.2}
+
+/* Meer lucht in de Home-kop, zonder de puzzellijsten uit te rekken. */
+body.home #home .hwrap:not(.sco) .hbrand{margin-bottom:4px}
+body.home #home .hwrap:not(.sco) .htop{margin-bottom:6px;row-gap:14px}
+body.home #home .hwrap:not(.sco) .htop h2{line-height:1.2;margin-bottom:8px}
+body.home #home .hwrap:not(.sco)>.uxsave{margin:2px 0 10px;line-height:1.6}
+/* Laat de persoonlijke achtergrond ook lege, hoge vensters vullen. */
+body.nieuw{min-height:100vh;min-height:100dvh;background-repeat:repeat}
+#tbHome{display:inline-flex;align-items:center;justify-content:center;line-height:1}
+#tbHome svg{display:block;width:22px;height:22px;flex:none}
+/* Brede desktop: bediening en bord beginnen samen, binnen dezelfde speelruimte. */
+@media(min-width:1200px) and (min-aspect-ratio:23/20){
+ body.tablet.nieuw:not(.home):not(.newpick) main{max-width:1120px;margin-inline:auto;padding:24px 24px 24px 176px}
+ body.tablet.nieuw:not(.home):not(.newpick) #stage{margin-left:0}
+ body.tablet.nieuw:not(.home):not(.newpick) #pbot{left:max(24px,calc((100vw - 1120px)/2 + 24px));top:86px;bottom:auto;transform:none;max-height:calc(100dvh - 110px)}
+}
+
+/* Ruimte voor de 7px-rand van Hexcells binnen het scrollende hintgebied. */
+body.hintside[data-t=hex] #hexw,body.hintdock[data-t=hex] #hexw{padding:10px}
+.hcontrow{display:flex;align-items:stretch;gap:6px;min-width:0}
+.hcontrow>.hcont{flex:1;min-width:0}
+.hdelete{display:inline-flex;align-items:center;justify-content:center;flex:none;min-width:44px;min-height:44px;padding:10px;border-radius:12px;box-shadow:none;color:#b5483a}
+.hdelete svg{width:20px;height:20px;display:block}
+.hdelete:hover{background:color-mix(in srgb,#b5483a 10%,var(--card))}
