@@ -8,6 +8,7 @@
    const menu=document.getElementById(id);
    if(menu&&menu.classList.contains("open")&&!e.target.closest(inside)){menu.classList.remove("open");dismissing=true}
   }
+  for(const id of ["authaccount","groupaccount"]){const menu=document.getElementById(id);if(menu&&!menu.hidden&&e.target===menu){menu.hidden=true;window.dispatchEvent(new Event("pdrestorestyle"));dismissing=true}}
   if(dismissing&&!e.target.closest("#tbHome,#tbMore,#pm"))stop(e);else dismissing=false;
  },{capture:true,passive:false});
  for(const type of ["pointermove","pointerup","pointercancel","touchstart","touchend","click","dblclick","contextmenu"])
@@ -28,6 +29,37 @@ function fastPenUI(){
  document.addEventListener("click",e=>{if(firing||!last||performance.now()-lastAt>520)return;const b=e.target.closest&&e.target.closest("button,a[href],summary,[role=button]");if(b===last){e.preventDefault();e.stopImmediatePropagation()}},true);
 }
 fastPenUI();
+/* Pencil-scroll in accountvensters: begin elke veeg binnen de echte grenzen,
+   zodat terug omhoog na de onderrand niet in iOS-overscroll blijft hangen. */
+function penScrollDialogs(){
+ let drag=null,last=null,firing=false;
+ const remember=d=>{last={target:d.target,at:performance.now()}};
+ document.addEventListener('pointerdown',e=>{
+  last=null;
+  if(e.pointerType!=='pen'||e.button>0)return;
+  const card=e.target.closest?.('.authcard');
+  if(!card||e.target.closest('input,textarea,select,[contenteditable="true"]'))return;
+  const max=Math.max(0,card.scrollHeight-card.clientHeight),top=Math.max(0,Math.min(max,card.scrollTop));
+  drag={card,target:e.target,action:e.target.closest('button,a[href],summary,[role="button"]'),pid:e.pointerId,y:e.clientY,top,moved:false};
+  card.scrollTop=top;e.preventDefault();card.setPointerCapture?.(e.pointerId);
+ },true);
+ document.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.pid)return;e.preventDefault();
+  const delta=drag.y-e.clientY;if(Math.abs(delta)>6)drag.moved=true;
+  if(drag.moved)drag.card.scrollTop=Math.max(0,Math.min(drag.card.scrollHeight-drag.card.clientHeight,drag.top+delta));
+ },{capture:true,passive:false});
+ const end=(e,cancel)=>{if(!drag||e.pointerId!==drag.pid)return;const d=drag;drag=null;e.preventDefault();remember(d);
+  if(d.card.hasPointerCapture?.(e.pointerId))d.card.releasePointerCapture(e.pointerId);
+  if(!cancel&&!d.moved&&d.action?.isConnected&&!d.action.matches(':disabled')){firing=true;try{d.action.focus?.({preventScroll:true});d.action.click()}finally{firing=false}}
+ };
+ document.addEventListener('pointerup',e=>end(e,false),true);
+ document.addEventListener('pointercancel',e=>end(e,true),true);
+ document.addEventListener('touchstart',e=>{if(drag&&[...(e.changedTouches||[])].some(t=>t.touchType==='stylus'))e.preventDefault()},{capture:true,passive:false});
+ document.addEventListener('click',e=>{if(firing||!last||performance.now()-last.at>520||(e.detail===0&&e.pointerType!=='pen'))return;
+  e.preventDefault();e.stopImmediatePropagation();
+ },true);
+}
+penScrollDialogs();
 /* De namenlijst is bij openen een leesvlak: een Pencil-veeg mag geen
    handschriftinvoer starten. Bewerken wordt bewust met de knop aangezet. */
 function setMurdokuNameEditing(on,focus=false){
@@ -166,8 +198,8 @@ function load(type,practice,fresh,date,skipPersist){clearHomeSkinAccent();docume
   try{updTabs()}catch(e){}render();ub();setTimeout(()=>pingOnline(true),0)},30)}
 
 const LANDQ=matchMedia("(orientation:landscape) and (min-aspect-ratio:23/20)");
-const availBot=()=>{const b=$("#pbot");if(b&&!PHONE&&document.body.classList.contains("tablet")&&LANDQ.matches)return innerHeight+(window.scrollY||0)-14-HINTPAD;return b?b.getBoundingClientRect().top+(window.scrollY||0)-(PHONE?8:18)-HINTPAD:innerHeight-14};
-function sizeCs(cols,rows,extraH){const key=cols+"|"+rows+"|"+(extraH||0);if(S&&S._csFit&&S._csFit.key===key){CS=S._csFit.v;document.documentElement.style.setProperty("--cs",CS+"px");return}const top=$("#grid").getBoundingClientRect().top+(window.scrollY||0);CS=Math.max(24,Math.min(96,Math.floor((availBot()-top-(extraH||0))/rows),Math.floor(($("#stage").clientWidth-6)/cols)));if(S)S._csFit={key,v:CS};document.documentElement.style.setProperty("--cs",CS+"px")}
+const availBot=()=>{const b=$("#pbot");if(b&&!PHONE&&document.body.classList.contains("tablet")&&LANDQ.matches&&!window.LAYOUT_BOTTOM)return innerHeight+(window.scrollY||0)-14-HINTPAD;return b?b.getBoundingClientRect().top+(window.scrollY||0)-(PHONE?8:18)-HINTPAD:innerHeight-14};
+function sizeCs(cols,rows,extraH){const key=cols+"|"+rows+"|"+(extraH||0);if(S&&S._csFit&&S._csFit.key===key){CS=S._csFit.v;document.documentElement.style.setProperty("--cs",CS+"px");return}const top=$("#grid").getBoundingClientRect().top+(window.scrollY||0);CS=Math.max(24,Math.min(window.LAYOUT_ORIGINAL?96:S.type==="plus"?(PHONE?96:innerWidth>2000?(S.p.W>=7?88:72):S.p.W>=7?96:S.p.W===6?88:80):innerWidth>2000?(S.type==="nono"?56:72):96,Math.floor((availBot()-top-(extraH||0))/rows),Math.floor(($("#stage").clientWidth-6)/cols)));if(S)S._csFit={key,v:CS};document.documentElement.style.setProperty("--cs",CS+"px")}
 function popEl(d){d.classList.remove("pop");void d.offsetWidth;d.classList.add("pop")}
 function celebrate(){if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;const cv=document.createElement("canvas");cv.className="cf";cv.width=innerWidth;cv.height=innerHeight;document.body.append(cv);const x=cv.getContext("2d"),cols=["#7a52d6","#f2a000","#12b5a2","#ee5d7a","#2b9be6","#3cb958"],ps=[];
  for(let i=0;i<140;i++){const a=-Math.PI/2+(Math.random()-.5)*1.6,v=9+Math.random()*11;ps.push({x:innerWidth/2,y:innerHeight*.45,vx:Math.cos(a)*v,vy:Math.sin(a)*v,r:4+Math.random()*5,c:cols[i%6],rot:Math.random()*6,vr:(Math.random()-.5)*.4})}
@@ -334,12 +366,17 @@ function starDown(e){const mb=mouseLR(e);if(S.done||S.type!=="star"||e._closed||
  setCell(i,mode==="del"?0:target);
  if(mb===null&&!dbl)lpStart(e,()=>{if(!drag||drag.moved||drag.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag=null;S.gs=null;paintAll();lpNote(i)})}
 function starEnter(j){const d=drag,k=d.path.indexOf(j);if(k>=0){while(d.path.length>k+1){const c=d.path.pop();if(d.prev.has(c)){if(d.note)noteDragWrite(d,c,d.prev.get(c));else S.cur[c]=d.prev.get(c);d.prev.delete(c)}}d.note?paintNotes():paintAll();return}
- d.path.push(j);if(d.note){const o=noteVal(j);if(d.directNote){if(disp(j)!==0)return;const nv=d.mode==="del"?(o===d.target?0:o):d.target;noteDragWrite(d,j,nv)}else applyNoteDrag(j);if(noteVal(j)!==o)d.prev.set(j,o);return}
- if(d.direct){const o=S.cur[j],nv=d.mode==="del"?(o===d.target?0:o):d.target;if(nv!==o){d.prev.set(j,o);S.cur[j]=nv;paintAll()}return}
+ d.path.push(j);if(d.note){const o=noteVal(j);if(d.directNote){if(disp(j)!==0)return;const nv=d.mode==="del"?(o===d.target?0:o):o===0?d.target:o;noteDragWrite(d,j,nv)}else applyNoteDrag(j);if(noteVal(j)!==o)d.prev.set(j,o);return}
+ if(d.direct){const o=S.cur[j],nv=d.mode==="del"?(o===d.target?0:o):o===0?d.target:o;if(nv!==o){d.prev.set(j,o);S.cur[j]=nv;paintAll()}return}
  const o=S.cur[j];applyDrag(j);if(S.cur[j]!==o)d.prev.set(j,o)}
 function starMove(e){if(!drag||S.type!=="star"||e.pointerId!==drag.pid)return;const N=S.p.N,i=gridHit(S.sg,e.clientX,e.clientY,N,N);if(i<0||i===drag.last)return;
  const r0=drag.last/N|0,c0=drag.last%N,r1=i/N|0,c1=i%N,n=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));
- if(!drag.moved){drag.moved=true}
+ if(!drag.moved){drag.moved=true;
+  // Een gewone veeg vult lege vakjes met kruisjes, ook als hij op een
+  // bestaande markering begon. Alleen een losse tik wist die markering.
+  if(drag.direct&&drag.target===1&&!drag.dbl){const old=drag.prev.get(drag.start);if(old>0){S.cur[drag.start]=old;drag.prev.delete(drag.start);paintAll()}drag.mode="add"}
+  if(drag.directNote&&drag.target===1&&!drag.dbl){const old=drag.nchanges.get(drag.start)?.from;if(old>0)noteDragWrite(drag,drag.start,old);drag.mode="add"}
+ }
  for(let k=1;k<=n;k++)starEnter(Math.round(r0+(r1-r0)*k/n)*N+Math.round(c0+(c1-c0)*k/n));
  drag.last=i}
 function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;const d=drag,acted=d.note?[...(d.nchanges||new Map()).values()].some(c=>c.from!==c.to):d.prev&&d.prev.size>0,remember=!d.moved&&!d.dbl&&acted&&e&&e.button!==2;starEnd();if(remember)starLastTap={t:e.timeStamp,i:d.start,h:S.hist.length,note:!!d.note};else if(d.dbl)starLastTap={t:0,i:-1,h:0,note:false}}
@@ -434,16 +471,16 @@ function check(){const{type,p,cur}=S;let ok;
  else if(type==="kak"){const{w,runs}=p;ok=cur.every((v,i)=>!w[i]||v>0)&&runs.every(r=>{const ds=r.cells.map(i=>cur[i]);return new Set(ds).size===ds.length&&ds.reduce((a,b)=>a+b,0)===r.sum})}
  if(ok)finish()}
 
-function finish(){S.secs=Math.max(1,Math.round(playMs()/1000));S.done=true;clearOnline(true);if(S.type==="nono"){const g=$("#grid");if(g)g.classList.add("nfin")}if(S.practice)clearFreeProgressType(S.type,null,S.type==="nono"?S.nv:null);else progDel(progKey(S.type,false,S.date,S.sf));hideHint();if(S.type==="hex")S.p.sol.forEach((v,i)=>S.hx.rev.add(i));
+function finish(){const completedOn=dstr();S.secs=Math.max(1,Math.round(playMs()/1000));S.done=true;clearOnline(true);if(S.type==="nono"){const g=$("#grid");if(g)g.classList.add("nfin")}if(S.practice)clearFreeProgressType(S.type,null,S.type==="nono"?S.nv:null);else progDel(progKey(S.type,false,S.date,S.sf));hideHint();if(S.type==="hex")S.p.sol.forEach((v,i)=>S.hx.rev.add(i));
  setT(fmt(S.secs));
  const bdg=badges({mist:S.mist||0,hints:S.hints||0},S.type);$("#msg").textContent=(S.practice?"Opgelost! 🎉":"Klaar! 🎉"+(TSHOW?" "+fmt(S.secs):""))+(bdg?" "+bdg:"");if(S.practice)$("#next").classList.add("pulse");
  if(S.type!=="m24")render();
  celebrate();
- if(S.practice){const sid=String(S.seed).replace(/\W/g,"").slice(-8),row={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date:S.date,type:"v~"+S.type+S.sf+"~"+sid,secs:S.secs,uid,mist:S.mist||0,hints:S.hints||0,hintSteps:hintTotals()};
+ if(S.practice){const sid=String(S.seed).replace(/\W/g,"").slice(-8),row={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date:completedOn,type:"v~"+S.type+S.sf+"~"+sid,secs:S.secs,uid,mist:S.mist||0,hints:S.hints||0,hintSteps:hintTotals()};
   const fl=freeLoc();fl.push({date:row.date,type:row.type,secs:row.secs,group:row.group,mist:row.mist,hints:row.hints,hintSteps:row.hintSteps});lsSet("pdfree",JSON.stringify(fl.slice(-400)));
   lastRows=lastRows.filter(r=>!(r.uid===uid&&r.type===row.type));lastRows.push(row);renderStats();
   dbSave(row);setTimeout(()=>{if(S.done&&S.practice)showFinFree(S.type+S.sf)},900);return}
- {const sk=S.date+S.type+S.sf;store[sk]=S.secs;SG[sk]=$("#group").value.trim();save();saveSG();XS[sk]={mist:S.mist||0,hints:S.hints||0,hintSteps:hintTotals()}}xsSave();
+ {const sk=S.date+S.type+S.sf;store[sk]=S.secs;SG[sk]=$("#group").value.trim();save();saveSG();XS[sk]={mist:S.mist||0,hints:S.hints||0,hintSteps:hintTotals(),completedOn}}xsSave();
  const row=myRow(S.date,S.type+S.sf);
  lastRows=lastRows.filter(r=>!(r.uid===uid&&r.date===row.date&&r.type===row.type));lastRows.push(row);board(lastRows);
  dbSave(row).catch(()=>{$("#msg").textContent+=" (scorebord niet bereikbaar)"});
@@ -670,7 +707,7 @@ function rHex(){if(!S.p||S.type!=="hex"||!S.hx)return;{const hs=$("#hexstat");if
  const LP={},VC={};P.lineShow.forEach(j=>{const l=P.lines[j],k=l.vq+","+l.vr;VC[k]=(VC[k]||0)+1});const shared=j=>VC[P.lines[j].vq+","+P.lines[j].vr]>1;{const used=[];P.lineShow.forEach(j=>{const l=P.lines[j],[x,y]=px(l.vq,l.vr),ang0=l.d===0?-90:l.d===1?30:-30,ang=TR?90-ang0:ang0,sg=l.d!==1?1:-1,rad=ang*Math.PI/180,ux=Math.cos(rad)*sg,uy=Math.sin(rad)*sg;let k=shared(j)?1.2:.5,tp;for(let t=0;t<6;t++){tp=[x-ux*sz*k,y-uy*sz*k];if(!used.some(q=>Math.hypot(q[0]-tp[0],q[1]-tp[1])<sz*.9))break;k+=.45}used.push(tp);LP[j]=tp})}
  const ext=[...pts.map(p=>[p[0],p[1],sz*1.2]),...Object.values(LP).map(p=>[p[0],p[1],sz*.85])];
  const x0=Math.min(...ext.map(p=>p[0]-p[2])),x1=Math.max(...ext.map(p=>p[0]+p[2])),y0=Math.min(...ext.map(p=>p[1]-p[2])),y1=Math.max(...ext.map(p=>p[1]+p[2]));
- const asp=(x1-x0)/(y1-y0);let h,wd;if(S._hexFit){h=S._hexFit.h;wd=S._hexFit.wd}else{const top=w.getBoundingClientRect().top+(window.scrollY||0),fit=Math.min((availBot()-top-(S.hint?10:0))/(y1-y0),(document.body.classList.contains("hintdock")?parseFloat(getComputedStyle($("#stage")).getPropertyValue("--hint-board-height"))-32:Infinity)/(y1-y0),($("#stage").clientWidth-(S.hint?28:PHONE?2:10))/(x1-x0));h=(y1-y0)*Math.max(.4,Math.min(2.45,fit));wd=h*asp;S._hexFit={h,wd}};
+ const asp=(x1-x0)/(y1-y0);let h,wd;if(S._hexFit){h=S._hexFit.h;wd=S._hexFit.wd}else{const top=w.getBoundingClientRect().top+(window.scrollY||0),fit=Math.min((availBot()-top-(S.hint?10:0))/(y1-y0),(document.body.classList.contains("hintdock")?parseFloat(getComputedStyle($("#stage")).getPropertyValue("--hint-board-height"))-32:Infinity)/(y1-y0),($("#stage").clientWidth-(S.hint?28:PHONE?2:10))/(x1-x0));h=(y1-y0)*Math.max(.4,Math.min(window.LAYOUT_ORIGINAL||innerWidth<=2000?2.45:1.7,fit));wd=h*asp;S._hexFit={h,wd}};
  window._hg={sz,cells:pts.slice(0,P.cells.length),lines:P.lineShow.map((j,k)=>shared(j)?[LP[j][0],LP[j][1],j,LP[j][0],LP[j][1]]:[LP[j][0],LP[j][1],j,pts[P.cells.length+k][0],pts[P.cells.length+k][1]])};
  const hp=(x,y,r)=>[0,1,2,3,4,5].map(k=>{const a=Math.PI/3*k+(TR?Math.PI/6:0);return(x+r*Math.cos(a)).toFixed(1)+","+(y+r*Math.sin(a)).toFixed(1)}).join(" ");
  let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x0} ${y0} ${x1-x0} ${y1-y0}" width="${wd}" height="${h}" style="max-width:none;touch-action:none">`;const H=S.hint;
@@ -1090,7 +1127,7 @@ function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const 
   if(mb!==null){S.mxm=oldMode;paintMur();return}
   if(!potlood&&!S.mxm&&!S.done)lpStart(e,()=>{if(S.done)return;S.cur=snap.cur;S.ms=snap.ms;S.hist.length=snap.h;S.redo=snap.r;ub();lpNote(i)})};
  pal.onpointerdown=e=>{const b=e.target.closest&&e.target.closest("[data-s]");if(!b||S.done)return;e.preventDefault();if(b.dataset.s==="x"){S.mxm=!S.mxm}else{const s=+b.dataset.s;S.mxm=false;S.ms=S.ms===s&&!S.mxm?-1:s}paintMur()};
- ol.onpointerdown=e=>{const li=e.target.closest&&e.target.closest("[data-c]");if(!li)return;e.preventDefault();const c=+li.dataset.c;if(S.str.has(c))S.str.delete(c);else S.str.add(c);paintMur();persist()};
+ ol.onclick=e=>{const li=e.target.closest&&e.target.closest("[data-c]");if(!li)return;const c=+li.dataset.c;if(S.str.has(c))S.str.delete(c);else S.str.add(c);paintMur();persist()};
  const fit=()=>{const t=cl.getBoundingClientRect().top;if(PHONE)cl.style.maxHeight=Math.max(120,innerHeight-t-pbh-HINTPAD-8)+"px";else if(wide)cl.style.maxHeight=Math.max(260,availBot()+14-t-14)+"px"};fit();
  paintMur()}
 function murNext(from){const N=S.p.N,pl=new Set(S.cur.filter(v=>v>=0));for(let k=1;k<=N;k++){const s=(from+k)%N;if(!pl.has(s))return s}return -1}
@@ -1172,11 +1209,11 @@ const badgeLong=(r,t)=>{t=String(t).split(".")[0];const a=[];if(r.mist===0)a.pus
 const quickBadges=(r,t)=>{if(!r)return"";t=String(t).split(".")[0];const a=[];if(r.mist!=null)a.push(r.mist===0?'<span class="rq good" title="Foutloos">🎯</span>':'<span class="rq" title="'+r.mist+(r.mist===1?" fout":" fouten")+'">❌ '+r.mist+'</span>');if(HINTT.includes(t)&&r.hints!=null)a.push(r.hints===0?'<span class="rq good" title="Zonder hint">💡</span>':'<span class="rq" title="'+hintSummary(r)+'">💡 '+r.hints+'</span>');return a.join("")};
 function ownDayResult(date,t){const ty=t+sfx(dagLv(t,date)),g=($("#group").value||"").trim().toLowerCase(),sync=lastRows.find(x=>x.uid===uid&&x.date===date&&x.type===ty&&(x.group||"").toLowerCase()===g);let r=localDoneInGroup(date+ty,g)?myRow(date,ty):sync?Object.assign({},sync):null;if(r&&sync){if(r.mist==null&&sync.mist!=null)r.mist=sync.mist;if(r.hints==null&&sync.hints!=null)r.hints=sync.hints;if(!r.hintSteps&&sync.hintSteps)r.hintSteps=sync.hintSteps;if(!r.secs&&sync.secs)r.secs=sync.secs}if(r){r.type=ty;r.secs=r.secs||store[date+ty]||0}return r}
 function myRow(date,type){const x=XS[date+type]||{},r={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date,type,secs:store[date+type]||1,uid};
- if(x.mist!=null)r.mist=x.mist;if(x.hints!=null)r.hints=x.hints;if(x.hintSteps)r.hintSteps=x.hintSteps;return r}
+ if(x.mist!=null)r.mist=x.mist;if(x.hints!=null)r.hints=x.hints;if(x.hintSteps)r.hintSteps=x.hintSteps;if(x.completedOn)r.completedOn=x.completedOn;return r}
 function dbSave(row){if(!window.PD_DB)return Promise.resolve();
  return window.PD_DB.save(row).catch(e=>{const compatible=Object.assign({},row);delete compatible.hintSteps;
  return window.PD_DB.save(compatible).catch(()=>{const b={};BASEF.forEach(k=>b[k]=row[k]);OLDRULES=true;board(lastRows);return window.PD_DB.save(b)})})}
-function resRow(r,td){if(r.uid===uid&&XS[r.date+r.type]){const x=XS[r.date+r.type];r=Object.assign({},r,{mist:x.mist!=null?x.mist:r.mist,hints:x.hints!=null?x.hints:r.hints})}
+function resRow(r,td){if(r.uid===uid&&XS[(r.puzzleDate||r.date)+r.type]){const x=XS[(r.puzzleDate||r.date)+r.type];r=Object.assign({},r,{mist:x.mist!=null?x.mist:r.mist,hints:x.hints!=null?x.hints:r.hints})}
  const d=document.createElement("div");d.className="row";const a=document.createElement("span"),b=document.createElement("span");a.textContent=playerNameUid(r.uid,r.name)+" ✓ "+badges(r,r.type);b.className="mut";b.textContent=TSHOW?fmt(r.secs):"";d.append(a,b);return d}
 /* Puzzel van de dag: elke dag één vaste soort, voor iedereen dezelfde. De andere dagpuzzels kunnen, maar hoeven niet. */
 const FEATORD=["star","bin","mur","nono","plus","hex"];
@@ -1229,7 +1266,7 @@ document.addEventListener("pointerdown",e=>{const f=$("#fin");if(f&&!f.hidden&&!
 const addDays=(ds,n)=>{const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d+n).toLocaleDateString("sv")};
 const dnl=ds=>{const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("nl-NL",{weekday:"short",day:"numeric",month:"short"}).replace(".","")};
 function allRows(){const g=$("#group").value.trim().toLowerCase(),seen=new Set(),out=[];
- const add=r=>{if(!TYPES[baseT(r)])return;const k=r.uid+"|"+r.date+"|"+r.type;if(seen.has(k))return;seen.add(k);out.push(r)};
+ const add=r=>{if(!TYPES[baseT(r)])return;const k=r.uid+"|"+r.date+"|"+r.type;if(seen.has(k))return;seen.add(k);const x=r.uid===uid&&XS[(r.puzzleDate||r.date)+r.type];out.push(!r.completedOn&&x&&x.completedOn?{...r,completedOn:x.completedOn}:r)};
  lastRows.filter(r=>(r.group||"").toLowerCase()===g).forEach(add);
  freeLoc().filter(r=>String(r.group||legacyGroup()).toLowerCase()===g).forEach(r=>add({...r,name:$("#name").value||"Speler",group:g,uid}));
  for(const k in store){const m=/^(\d{4}-\d\d-\d\d)(.+)$/.exec(k);if(m&&scoreGroup(k).toLowerCase()===g)add({name:$("#name").value||"Speler",group:g,date:m[1],type:m[2],secs:store[k],uid})}
@@ -1239,7 +1276,7 @@ function renderStats(){const raw=allRows(),all=statsRows(raw),rows=all.filter(r=
  const pl=new Map();groupPlayers().forEach(p=>pl.set(uidOf(p),playerName(p)));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});
  const sc=new Map([...pl.keys()].map(u=>[u,{pts:0,n:0,w:0,fw:0,ft:0}])),grp=new Map();
  rows.filter(r=>r.date>=mon&&r.date<=sun).forEach(r=>{const k=r.date+"|"+r.type;if(!grp.has(k))grp.set(k,[]);grp.get(k).push(r)});
- grp.forEach(a=>a.forEach(r=>{const x=sc.get(r.uid);if(!x)return;x.n++;x.pts++;const q=r.uid===uid&&XS[r.date+r.type]?XS[r.date+r.type]:r;if(q.mist===0)x.fl=(x.fl||0)+1;if(HINTT.includes(baseT(r))&&q.hints===0)x.nh=(x.nh||0)+1}));
+ grp.forEach(a=>a.forEach(r=>{const x=sc.get(r.uid);if(!x)return;x.n++;x.pts++;const q=r.uid===uid&&XS[(r.puzzleDate||r.date)+r.type]?XS[(r.puzzleDate||r.date)+r.type]:r;if(q.mist===0)x.fl=(x.fl||0)+1;if(HINTT.includes(baseT(r))&&q.hints===0)x.nh=(x.nh||0)+1}));
  frs.forEach(r=>{const x=sc.get(r.uid);if(!x)return;if(r.date>=mon&&r.date<=sun)x.fw++;if(r.date===today)x.ft++});
  const list=[...sc.entries()];
  const el=$("#week");el.innerHTML="";
@@ -1257,7 +1294,9 @@ let OPER=lsGet("pdper")||"maand",ODAYS=21,SVIEW="today";
 const baseT=r=>isFree(r)?r.type.split("~")[1].split(".")[0]:r.type.split(".")[0];
 const dayForm=r=>{const l=+(String(r.type).split(".")[1]||2);return l>3?"phone":"large"};
 function collapseDaily(rows){const m=new Map();rows.forEach(r=>{const k=r.uid+"|"+r.date+"|"+baseT(r),old=m.get(k);/* Groot scherm is de vaste primaire statistiek als beide varianten zijn gemaakt. */if(!old||dayForm(old)==="phone"&&dayForm(r)==="large")m.set(k,r)});return[...m.values()]}
-const statsRows=all=>[...collapseDaily(all.filter(r=>!isFree(r))),...all.filter(isFree)];
+// Alleen overzichtsregels gebruiken de afrondingsdag als datum. De echte
+// resultaatidentiteit blijft de oorspronkelijke puzzeldag + variant.
+const statsRows=all=>[...collapseDaily(all.filter(r=>!isFree(r))),...all.filter(isFree)].map(r=>({...r,puzzleDate:r.date,date:r.completedOn||r.date}));
 const freeLvl=r=>{if(!isFree(r))return 0;const p=(r.type.split("~")[1]||"").split("."),l=+(p[1]||2);return l};
 const diffGroup=l=>l===1||l===4?1:l===2||l===5?2:l===3||l===6?3:0;
 function renderOver(all,pl){const el=$("#sv-over");if(!el||el.hidden)return;el.innerHTML="";
@@ -1274,7 +1313,7 @@ function renderOver(all,pl){const el=$("#sv-over");if(!el||el.hidden)return;el.i
  /* Hoe ging het? Per puzzel hoe vaak foutloos (🎯) en zonder hint (💡), plus langste reeks en favoriete puzzel. */
  {const h3=document.createElement("h2");h3.textContent="Hoe ging het";el.append(h3);
   const st={};us.forEach(u=>{st[u]={}});
-  all.forEach(r=>{if(!st[r.uid]||!TYPES[baseT(r)]||!inP(r.date))return;const t=baseT(r),q=r.uid===uid&&XS[r.date+r.type]?XS[r.date+r.type]:r,o=st[r.uid][t]=st[r.uid][t]||{n:0,km:0,fl:0,kh:0,nh:0};o.n++;
+  all.forEach(r=>{if(!st[r.uid]||!TYPES[baseT(r)]||!inP(r.date))return;const t=baseT(r),q=r.uid===uid&&XS[(r.puzzleDate||r.date)+r.type]?XS[(r.puzzleDate||r.date)+r.type]:r,o=st[r.uid][t]=st[r.uid][t]||{n:0,km:0,fl:0,kh:0,nh:0};o.n++;
    if(q.mist!=null){o.km++;if(q.mist===0)o.fl++}if(HINTT.includes(t)&&q.hints!=null){o.kh++;if(q.hints===0)o.nh++}});
   const t2=document.createElement("table");t2.className="ot";let hh="<tr><th>Puzzel</th>";us.forEach(u=>hh+="<th>"+pl.get(u)+"</th>");t2.innerHTML=hh+"</tr>";
   const pc=(a,b)=>b?Math.round(100*a/b)+"%":"–";
@@ -1335,12 +1374,14 @@ function mergeRows(oud,nieuw){const m=new Map();const k=r=>(r.group||"")+"|"+r.u
    (bijv. andere browser, beginscherm-app tegenover Safari, gewiste gegevens), ook hier als klaar markeren. */
 function pullMine(rows){let ch=false,g=$("#group").value.trim().toLowerCase();
  rows.forEach(r=>{if(r.uid!==uid||(r.group||"").toLowerCase()!==g||!r.date||!r.type||String(r.type).startsWith("v~")||!(r.secs>0))return;const k=r.date+r.type;
-  if(!store[k]||scoreGroup(k)!==(r.group||legacyGroup())){store[k]=r.secs;SG[k]=r.group||legacyGroup();ch=true;if(!XS[k]&&(r.mist!=null||r.hints!=null)){XS[k]={};if(r.mist!=null)XS[k].mist=r.mist;if(r.hints!=null)XS[k].hints=r.hints;if(r.hintSteps)XS[k].hintSteps=r.hintSteps}}});
+  if(!store[k]||scoreGroup(k)!==(r.group||legacyGroup())){store[k]=r.secs;SG[k]=r.group||legacyGroup();ch=true;if(!XS[k]&&(r.mist!=null||r.hints!=null)){XS[k]={};if(r.mist!=null)XS[k].mist=r.mist;if(r.hints!=null)XS[k].hints=r.hints;if(r.hintSteps)XS[k].hintSteps=r.hintSteps}}
+  if(r.completedOn&&!XS[k]?.completedOn){XS[k]={...XS[k],completedOn:r.completedOn};ch=true}
+ });
  if(!ch)return;save();saveSG();try{xsSave()}catch(e){}
  if(S.p&&!S.practice&&!S.done&&localDoneInGroup(S.date+S.type+S.sf,g)){progDel(progKey(S.type,false,S.date,S.sf));load(S.type,false,false,S.date)}}
 /* Tijden die nog niet op het scorebord staan (bijv. offline gespeeld) alsnog versturen. */
 function resync(rows){if(!window.PD_DB||resync.done)return;resync.done=true;const from=addDays(dstr(),-14);
- Object.keys(store).forEach(k=>{const d=k.slice(0,10),t=k.slice(10);if(d<from||!/^\d{4}-\d\d-\d\d$/.test(d)||!t||scoreGroup(k)!==$("#group").value.trim())return;
+ Object.keys(store).forEach(k=>{const d=k.slice(0,10),t=k.slice(10);if((XS[k]?.completedOn||d)<from||!/^\d{4}-\d\d-\d\d$/.test(d)||!t||scoreGroup(k)!==$("#group").value.trim())return;
   if(!rows.some(r=>r.uid===uid&&r.date===d&&r.type===t&&(r.group||"")===scoreGroup(k)))dbSave(myRow(d,t)).catch(()=>{})})}
 addEventListener("pdready",startBoard);addEventListener("pdready",()=>setTimeout(()=>pullCloudProgress(true),300));
 if("serviceWorker"in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){
@@ -1511,7 +1552,7 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
 function updTop(){if(!S||!S.p)return;document.querySelectorAll("#pbot .pgrp").forEach(mg=>mg.classList.toggle("leeg",![...mg.children].some(x=>getComputedStyle(x).display!=="none")));const t=S.type,ti=$("#tbTitle");document.documentElement.style.setProperty("--tc",TCOL[t]);
  const fnv=t==="nono"&&S.practice?S.nv:"",ttl=FREE_NAME(t,fnv),sub=(S.practice?"Vrij puzzelen":S.arch?"Dagpuzzel van "+dnl(S.date):"Dagpuzzel")+(t==="nono"&&!S.practice?" · "+(S.nv==="color"?"Kleur":"Klassiek"):"")+(LVN[t]?" · "+LVL[S.lvl]:"")+(!S.practice&&featOf(S.date)===t?" · ⭐":"");
  if(ti)ti.innerHTML=tIcon(t,false,fnv)+`<div><b>${ttl}</b><small>${sub}</small></div>`;updatePeerLive()}
-function showHome(){RANDOM=false;if(HOMEREADY)pauseAndPersistActive(true);clearOnline();HVIEW="";HDOPEN="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.remove("newpick");document.body.classList.add("home");if(window.PD_APPLY_SW_UPDATE&&window.PD_APPLY_SW_UPDATE())return;const np=$("#npm");if(np)np.hidden=true;tapMode();renderHome();if(HOMEREADY)pageIn($("#home"));window.scrollTo(0,0)}
+function showHome(){document.body.classList.remove("layout-wide","layout-rail","layout-bottom");window.LAYOUT_BOTTOM=false;RANDOM=false;if(HOMEREADY)pauseAndPersistActive(true);clearOnline();HVIEW="";HDOPEN="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.remove("newpick");document.body.classList.add("home");if(window.PD_APPLY_SW_UPDATE&&window.PD_APPLY_SW_UPDATE())return;const np=$("#npm");if(np)np.hidden=true;tapMode();renderHome();if(HOMEREADY)pageIn($("#home"));window.scrollTo(0,0)}
 const dayLvDevice=(t,ds,phone)=>{if(!dagVast(ds))return null;const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay(),wk=w===0||w===6;return phone?(wk?6:5):(wk?3:2)};
 const dayTypeDevice=(t,ds,phone)=>{const l=dayLvDevice(t,ds,phone);return t+sfx(l||dagLv(t,ds))};
 function myDone(td,t){if(!dagVast(td)){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))||""}const ty=dayTypeDevice(t,td,PHONE),k=td+ty,g=($("#group").value||"").trim().toLowerCase();return localDoneInGroup(k,g)||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty&&(r.group||"").toLowerCase()===g)?k:""}
@@ -1584,7 +1625,9 @@ function updateStylePreview(style,kind){const box=$(kind==="group"?"#groupstylep
 addEventListener("pdpreviewstyle",e=>{const d=e.detail||{};updateStylePreview(d,d.kind);if(document.body.classList.contains("home"))setHomeSkin(cleanStyle(d,d.kind==="group"?"shared":PROFILE_STYLE.theme,d.kind==="group"?"orange":PROFILE_STYLE.accent))});
 addEventListener("pdrestorestyle",applyCurrentHomeStyle);
 function pageIn(el){if(!el||matchMedia("(prefers-reduced-motion: reduce)").matches)return;el.classList.remove("pagein");void el.offsetWidth;el.classList.add("pagein");setTimeout(()=>el.classList.remove("pagein"),260)}
-function fitHomePage(){document.documentElement.classList.remove("pagefit");document.body.classList.remove("pagefit");requestAnimationFrame(()=>{if(!document.body.classList.contains("home")||HVIEW==="score"||innerWidth<761)return;const h=$("#home");if(h&&h.scrollHeight<=innerHeight+2){document.documentElement.classList.add("pagefit");document.body.classList.add("pagefit")}})}
+function fitHomePage(){document.documentElement.classList.remove("pagefit");document.body.classList.remove("pagefit");requestAnimationFrame(()=>{if(!document.body.classList.contains("home")||HVIEW==="score"||innerWidth<761)return;const h=$("#home"),wrap=h?.querySelector('.hwrap:not(.sco)'),last=wrap?.lastElementChild,bottom=last?.getBoundingClientRect().bottom||Infinity,padding=wrap?parseFloat(getComputedStyle(wrap).paddingBottom)||0:0;if(h&&h.scrollHeight<=innerHeight+2&&bottom+Math.max(32,padding)<=innerHeight){document.documentElement.classList.add("pagefit");document.body.classList.add("pagefit")}})}
+/* Home blijft een scrollpagina; een knijpgebaar vergroot de indeling niet. */
+for(const type of ["gesturestart","gesturechange","touchstart","touchmove"])document.addEventListener(type,e=>{if(!document.body.classList.contains("home")||e.target.closest?.('.authcover,.uxcover'))return;if(type.startsWith('gesture')||(e.touches&&e.touches.length>1))e.preventDefault()},{passive:false});
 /* Alleen voor de groep Rekensukkels (Peter en Aart): het verhaal achter de app. */
 const isRekensukkels=()=>($("#group").value||"").trim().toLowerCase()==="peter-aart-jk4hv92t"||String(GROUP_NAME||"").trim().toLowerCase()==="rekensukkels";
 function showScore(who="all"){HVIEW="score";SCOREWHO=who||"all";SWK=0;renderHome();pageIn($("#home"));window.scrollTo(0,0)}
@@ -1594,8 +1637,8 @@ function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r
  setHomeSkin(SCOREWHO==="all"?GROUP_STYLE:styleForPlayer(SCOREWHO));
  const inP=d=>OPER==="dag"?d===today:OPER==="week"?d>=mon0&&d<=addDays(mon0,6):OPER==="maand"?d.slice(0,7)===today.slice(0,7):OPER==="jaar"?d.slice(0,4)===today.slice(0,4):true;
  const PN={dag:"vandaag",week:"deze week",maand:"deze maand",jaar:"dit jaar",alles:"in totaal"}[OPER]||"";
- const q=r=>r.uid===uid&&XS[r.date+r.type]?Object.assign({},r,XS[r.date+r.type]):r,pc=(a,b)=>b?Math.round(100*a/b)+"%":"–";
- const variantNote=r=>{if(isFree(r))return"";const f=new Set(raw.filter(x=>!isFree(x)&&x.uid===r.uid&&x.date===r.date&&baseT(x)===baseT(r)).map(dayForm)),a=[];if(f.has("large"))a.push("🖥️ Groot scherm ✓");if(f.has("phone"))a.push("📱 Telefoon ✓");return a.join(" · ")};
+ const q=r=>r.uid===uid&&XS[(r.puzzleDate||r.date)+r.type]?Object.assign({},r,XS[(r.puzzleDate||r.date)+r.type]):r,pc=(a,b)=>b?Math.round(100*a/b)+"%":"–";
+ const variantNote=r=>{if(isFree(r))return"";const f=new Set(raw.filter(x=>!isFree(x)&&x.uid===r.uid&&x.date===(r.puzzleDate||r.date)&&baseT(x)===baseT(r)).map(dayForm)),a=[];if(f.has("large"))a.push("🖥️ Groot scherm ✓");if(f.has("phone"))a.push("📱 Telefoon ✓");return a.join(" · ")};
  const st=us.map((u,i)=>{const mine=all.filter(r=>r.uid===u&&TYPES[baseT(r)]&&inP(r.date)),d=mine.filter(r=>!isFree(r));let km=0,fl=0,kh=0,nh=0;
   d.forEach(r=>{const x=q(r);if(x.mist!=null){km++;if(x.mist===0)fl++}if(HINTT.includes(baseT(r))&&x.hints!=null){kh++;if(x.hints===0)nh++}});
   const ds=[...new Set(rows.filter(r=>r.uid===u).map(r=>r.date))].sort();let best=0,cur=0,prev=null;ds.forEach(x=>{cur=prev&&addDays(prev,1)===x?cur+1:1;best=Math.max(best,cur);prev=x});

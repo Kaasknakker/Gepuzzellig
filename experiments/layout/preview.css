@@ -1,80 +1,11 @@
-/* Alleen de zelfstandige layoutproef gebruikt deze overrides. */
 #layoutBar{display:flex;align-items:center;gap:8px;min-height:40px;padding:5px 12px;background:var(--card);border-bottom:1px solid var(--line);font-size:13px;position:relative;z-index:45}
 #layoutBar strong{margin-right:auto}#layoutBar button,#layoutBar select{font:inherit;min-height:30px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;color:var(--fg);background:var(--card)}
 #layoutBar a{color:var(--fg)}
 #layoutIntro{padding:10px 0;color:var(--mut);font-size:13px;line-height:1.5}
-body.layout-proef #authbtn,body.layout-proef #hProfile{display:none!important}
-body.layout-proef.phone #mclues{touch-action:pan-y!important;overscroll-behavior:contain;font-size:15px;padding:8px 10px}
-body.layout-proef:not(.phone) #mclues{max-height:none!important;overflow:visible}
-body.layout-proef.phone #home .hwrap{padding:12px 10px 24px!important}
-body.layout-proef.phone #home .hsection{margin-top:12px}
-/* Ook de buitenrand van het bord blijft los van de bovenste knoppen. */
-body.layout-proef.phone:not(.home):not(.newpick) #stage{margin-top:12px}
-body.layout-proef.phone #playbox{transform:translateY(var(--phone-y,0px))!important}
-body.layout-proef.phone .sper{flex-wrap:wrap;gap:3px}
-body.layout-proef.phone .sper button{min-height:40px;padding:6px 11px}
-body.layout-proef.phone .sco .stop{flex-wrap:wrap}
-#layoutShade{position:fixed;inset:0;width:100%;height:100%;z-index:37;pointer-events:none}
-#layoutShade[hidden]{display:none}
-body.layout-proef #hint.layout-hint{position:fixed!important;transform:none!important;left:var(--card-left)!important;top:var(--card-top)!important;right:auto!important;bottom:auto!important;width:var(--card-width)!important;height:var(--card-height)!important;max-height:none!important;margin:0;padding:12px;border:1px solid var(--line);border-radius:14px;z-index:40;display:flex!important;flex-direction:column;box-shadow:0 8px 30px #0003;background:var(--card);overflow:hidden;font-size:15px;animation:none!important}
-body.layout-proef #hint.layout-hint .hx{top:6px;right:6px;width:36px;height:36px;min-width:36px;min-height:36px;z-index:1}
-body.layout-proef #hint.layout-hint .hht{font-size:16px;margin:0 38px 4px 0;line-height:1.3}
-.layout-copy{overflow:auto;min-height:0;flex:1;touch-action:pan-y;overscroll-behavior:contain}
-body.layout-proef #hint.layout-hint .hintbody{font-size:15px;line-height:1.45;margin:6px 0}
-body.layout-proef #hint.layout-hint .hintprogress{font-size:12px}
-body.layout-proef #hint.layout-hint .hintusage{font-size:11px;margin:5px 0;padding:4px 0 0}
-body.layout-proef #hint.layout-hint .hintlegend{font-size:12px;margin:5px 0}
-.layout-actions{display:flex;gap:6px;flex:none;margin-top:8px}
-body.layout-proef #hint.layout-hint .layout-actions button{margin:0!important;min-height:44px;padding:7px 9px;font-size:13px;line-height:1.2}
-body.layout-proef #hint.layout-hint .hintback{width:auto;flex:0 0 64px}
-body.layout-proef #hint.layout-tray{display:grid!important;grid-template-columns:minmax(0,1fr) 112px;grid-template-rows:24px minmax(0,1fr);gap:4px 10px;padding:8px 10px;border-radius:12px 12px 0 0}
-body.layout-proef #hint.layout-tray .hht{grid-column:1;grid-row:1;font-size:14px;margin:0}
-body.layout-proef #hint.layout-tray .layout-copy{grid-column:1;grid-row:2;padding-right:2px}
-body.layout-proef #hint.layout-tray .layout-copy .hintprogress,body.layout-proef #hint.layout-tray .hintusage{display:none}
-body.layout-proef #hint.layout-tray .hintbody{margin:0 0 7px;font-size:15px}
-body.layout-proef #hint.layout-tray .hx{position:static;grid-column:2;grid-row:1;justify-self:end;width:30px;min-width:30px;height:24px;min-height:24px}
-body.layout-proef #hint.layout-tray .layout-actions{grid-column:2;grid-row:2;flex-direction:column;margin:0;overflow:auto;touch-action:pan-y}
-body.layout-proef #hint.layout-tray .layout-actions .hintback{flex:none;width:100%;min-height:30px}
-body.layout-proef.layout-tray-open #pbot{visibility:hidden}
+body #authbtn,body #hProfile{display:none!important}
 @media(max-width:500px){#layoutBar{gap:5px;padding:5px 7px;font-size:12px}#layoutBar strong{font-size:12px}#layoutBar select{max-width:92px}#layoutBar a{font-size:11px}}
-
-body.layout-proef[data-t=mur] #playbox{width:100%}
-
-body.layout-proef #stage{animation:none!important;transform:none!important}
-body.layout-proef #grid .ncl{min-width:min(21px,var(--cs));height:min(21px,var(--cs));padding:0 3px;font-size:clamp(10px,calc(var(--cs)*.5),12px)}
-body.layout-proef #grid .ncv{gap:1px}
-html.tap body.layout-proef,html.tap body.layout-proef main,html.tap body.layout-proef #stage{touch-action:pan-y}
-
-/* Beide vergelijkstanden houden exact dezelfde lage proefbalk. */
 #layoutBar{height:36px;min-height:36px;flex-wrap:nowrap;white-space:nowrap;gap:6px;padding:3px 8px}
 #layoutBar strong{font-size:12px;flex:1;min-width:0}
 #layoutBar button,#layoutBar select{font-size:12px;white-space:nowrap;min-height:28px;padding:3px 6px;flex:none}
 #testCompare{width:78px}
-body.layout-proef #stage{animation:none!important;transform:none!important}
-/* De hint vervangt de bestaande knoppenstrook; deze wordt niet vooraf verhoogd. */
-body.layout-proef #hint.layout-tray{grid-template-rows:18px minmax(0,1fr);padding:5px 7px;gap:2px 8px}
-body.layout-proef #hint.layout-tray .hht{font-size:12px;line-height:18px;margin-right:26px}
-body.layout-proef #hint.layout-tray .hx{grid-column:1;grid-row:1;width:24px;min-width:24px;height:18px;min-height:18px;font-size:12px}
-body.layout-proef #hint.layout-tray .layout-actions{grid-column:2;grid-row:1/3;flex-direction:row;align-items:center;overflow:visible}
-body.layout-proef #hint.layout-tray .layout-actions .hintnext{flex:1;min-width:0;font-size:12px}
-body.layout-proef #hint.layout-tray .layout-actions .hintback{flex:0 0 26px;width:26px;min-height:40px;padding:3px}
 @media(max-width:350px){#layoutBar{gap:3px;padding-inline:4px}#layoutBar strong{font-size:11px}#layoutBar select{max-width:69px}#testCompare{width:72px}}
-body.layout-proef #hint.layout-tray{padding-bottom:calc(5px + env(safe-area-inset-bottom))}
-/* Grotere schermen: het bord zelf staat midden op het scherm. */
-body.layout-proef.tablet.layout-wide:not(.home):not(.newpick) main{padding:0 8px!important;max-width:none!important;height:auto!important;overflow:visible!important}
-body.layout-proef.tablet.layout-wide #stage{position:fixed;left:8px;top:var(--layout-top);width:calc(100% - 16px);height:var(--layout-height);margin:0!important;padding:0!important;overflow:auto;align-items:center;justify-content:flex-start}
-body.layout-proef.tablet.layout-wide #playbox{flex-shrink:0;transform:translateY(var(--test-y,0px))!important}
-body.layout-proef.tablet.layout-rail #pbot{left:var(--rail-x,8px)!important;top:var(--rail-y,var(--layout-top))!important;bottom:auto!important;right:auto!important;transform:none!important;width:128px!important;max-height:var(--layout-height);flex-direction:column;align-items:stretch;gap:0;padding:8px}
-body.layout-proef.tablet.layout-rail #pbot .pgrp{flex-direction:column;align-items:stretch;gap:6px;padding:8px 0;border:0!important}
-body.layout-proef.tablet.layout-rail #pbot .pgrp.g1{flex-direction:row;padding-top:0}
-body.layout-proef.tablet.layout-rail #pbot button{width:100%;min-height:44px;padding:6px;font-size:14px;text-align:left}
-body.layout-proef.tablet.layout-rail #pbot #nmode,body.layout-proef.tablet.layout-rail #pbot #pmode{flex-direction:column;gap:6px;width:100%}
-body.layout-proef.tablet.layout-bottom #pbot{left:50%!important;top:auto!important;bottom:max(8px,env(safe-area-inset-bottom))!important;right:auto!important;transform:translate(-50%,var(--bottom-shift,0px))!important;flex-direction:row!important;align-items:center;width:max-content!important;max-width:calc(100vw - 16px);max-height:none;padding:8px;gap:10px}
-body.layout-proef.tablet.layout-bottom #pbot .pgrp{flex-direction:row!important;align-items:center;gap:6px;padding:0!important;border:0!important}
-body.layout-proef.tablet.layout-bottom #pbot button{width:auto;min-height:44px;padding:7px 9px;text-align:center;justify-content:center}
-body.layout-proef.tablet.layout-bottom #pbot #nmode,body.layout-proef.tablet.layout-bottom #pbot #pmode{flex-direction:row!important;width:auto}
-body.layout-proef.tablet.layout-bottom #pbot #nmode.ncolor{grid-template-columns:repeat(6,minmax(0,1fr));width:auto}
-@media(min-width:740px){body.layout-proef.tablet.layout-wide #mur{display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:0;width:100%}body.layout-proef.tablet.layout-wide:not([data-t=mur]) #mur{display:none!important}body.layout-proef.tablet.layout-wide #mmain{grid-column:2;grid-row:1}body.layout-proef.tablet.layout-wide #mclues{grid-column:3;grid-row:1;margin-left:12px;width:calc(100% - 12px);max-width:300px;min-width:0;font-size:14px;padding:8px 10px}}
-.layout-clue-focus{outline:2px solid var(--hint-look);outline-offset:2px;border-radius:3px}
-/* De stand blijft zichtbaar via de rand; het hele bord schaalt niet meer bij wisselen. */
-body.layout-proef #mgrid.modeflash{animation:none}
