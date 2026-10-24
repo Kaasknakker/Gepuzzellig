@@ -1365,8 +1365,6 @@ body[data-t=plus][data-input-mode] #grid,
 body[data-t=bin][data-input-mode] #grid,
 body[data-t=star][data-input-mode] #grid,
 body[data-t=nono][data-input-mode] #grid{background:var(--card)!important}
-body[data-t=plus][data-input-mode] #grid.pxm,
-body[data-t=plus][data-input-mode] #grid.pom{--card:var(--card)!important}
 body[data-t=hex][data-input-mode=fill] #hexsvg{background:color-mix(in srgb,#3d9bd4 12%,var(--card))!important}
 body[data-t=hex][data-input-mode=cross] #hexsvg{background:color-mix(in srgb,#35363b 10%,var(--card))!important}
 
