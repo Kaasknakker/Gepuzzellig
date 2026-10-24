@@ -87,6 +87,12 @@ jobs:
       - name: Google Cloud CLI instellen
         uses: google-github-actions/setup-gcloud@v3
 
+      - name: Seed Fase 8 testgroepen
+        if: contains(github.event.head_commit.message, '[seed-test-groups]')
+        env:
+          GOOGLE_CLOUD_PROJECT: gepuzzellig-test
+        run: node scripts/seed-test-groups.mjs
+
       - name: Anonymous Authentication alleen in test inschakelen
         run: |
           TOKEN="$(gcloud auth print-access-token)"
