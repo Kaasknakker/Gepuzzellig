@@ -11,3 +11,5 @@ const PUZZLE_REGISTRY={
  mur:{name:"Murdoku",active:true,defaultFavorite:false,dailyLevels:{easy:{wide:1,phone:4},normal:{wide:2,phone:5},hard:{wide:3,phone:6}},color:"#b5483a",levels:{wide:[1,2,3],phone:[4,5,6]},sizes:{1:"6×6",2:"7×7",3:"8×8",4:"5×5",5:"6×6",6:"7×7"}},
  m24:{name:"Maak 24",active:false,color:"#2f9e44"}
 };
+
+window.PUZZLE_REGISTRY=PUZZLE_REGISTRY;
