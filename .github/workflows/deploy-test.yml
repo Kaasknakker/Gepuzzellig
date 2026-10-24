@@ -75,5 +75,18 @@ jobs:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GEPUZZELLIG_TEST }}
           project_id: gepuzzellig-test
 
+      - name: Google Cloud CLI instellen
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Anonymous Authentication alleen in test inschakelen
+        run: |
+          TOKEN="$(gcloud auth print-access-token)"
+          curl --fail-with-body --silent --show-error \
+            -X PATCH \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json" \
+            "https://identitytoolkit.googleapis.com/admin/v2/projects/gepuzzellig-test/config?updateMask=signIn.anonymous.enabled" \
+            -d '{"signIn":{"anonymous":{"enabled":true}}}'
+
       - name: Deploy test rules and Hosting
         run: npx --yes firebase-tools@15.34.1 deploy --only firestore:rules,hosting --config firebase.test.json --project gepuzzellig-test --non-interactive
