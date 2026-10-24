@@ -36,6 +36,9 @@ try{
  // Meerdere admins: admin kan een ander approved lid promoveren en later weer degraderen.
  const promoted={...fx.memberships.member,role:'admin',updatedAt:530};
  {const x=db(admin),b=writeBatch(x);b.set(doc(x,'groups',fx.group.id,'members',member.playerId),promoted);b.set(doc(x,'playerMemberships',member.playerId,'groups',fx.group.id),indexOf(promoted,fx.group.id));await assertSucceeds(b.commit())}
+ // De zojuist gepromoveerde membership-admin kan zelf een andere pending aanvraag goedkeuren.
+ const soloApproved={...request,status:'approved',approvedAt:535,joinedAt:535,approvedByPlayerId:member.playerId,updatedAt:535};
+ {const x=db(member),b=writeBatch(x);b.set(doc(x,'groups',fx.group.id,'members',solo.playerId),soloApproved);b.set(doc(x,'playerMemberships',solo.playerId,'groups',fx.group.id),indexOf(soloApproved,fx.group.id));await assertSucceeds(b.commit())}
  const demoted={...promoted,role:'member',updatedAt:540};
  {const x=db(admin),b=writeBatch(x);b.set(doc(x,'groups',fx.group.id,'members',member.playerId),demoted);b.set(doc(x,'playerMemberships',member.playerId,'groups',fx.group.id),indexOf(demoted,fx.group.id));await assertSucceeds(b.commit())}
  // Laatste-adminbescherming: een admin kan zichzelf nooit degraderen/verwijderen.
