@@ -41,7 +41,7 @@ function binHuman(g,W,H,o){g=g.slice();const L=[];for(let r=0;r<H;r++){const ci=
    if(ch)break}
   if(!ch)break}
  return g}
-const BINSZ={1:[10,8,.5],2:[16,12,.4],3:[18,14,.3],4:[6,8,.5],5:[8,10,.42],6:[10,14,.32]};
+const BINSZ={1:[12,10,.5],2:[18,14,.4],3:[20,16,.3],4:[6,8,.5],5:[8,10,.42],6:[10,14,.32]};
 const BLC={};const binLinesC=n=>BLC[n]||(BLC[n]=binLines(n));
 function genBin0(R,lv,hard,trimAll){const[W,H,fr0]=BINSZ[lv||2],fr=hard?fr0*.8:fr0,LW=binLinesC(W),LH=binLinesC(H),out=[];
  while(!out.length)binSolve(Array(W*H).fill(-1),W,H,LW,LH,R,out,{n:300});const sol=out[0],g=sol.slice();let giv=W*H;
