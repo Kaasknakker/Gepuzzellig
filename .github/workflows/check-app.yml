@@ -35,6 +35,8 @@ jobs:
         run: node .github/scripts/check-phase5-app.mjs
       - name: Fase 6 Functions-veiligheid controleren
         run: node .github/scripts/check-phase6-functions.mjs
+      - name: Fase 7 appcontract controleren
+        run: node .github/scripts/check-phase7-app.mjs
       - name: Functions syntax controleren
         run: node --check functions/index.js
       - name: App controleren
