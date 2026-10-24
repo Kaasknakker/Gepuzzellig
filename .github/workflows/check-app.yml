@@ -29,6 +29,8 @@ jobs:
         run: npm run test:rules
       - name: Fase 4 migratie controleren
         run: node .github/scripts/check-phase4-migration.mjs
+      - name: Fase 5 membershipmigratie controleren
+        run: node .github/scripts/check-phase5-migration.mjs
       - name: App controleren
         run: node .github/scripts/check-app.mjs
       - name: Puzzelregistratie controleren
