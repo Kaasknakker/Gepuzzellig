@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 2,
+  "note": "Alleen rules-testdata; geen productiegegevens.",
+  "players": {
+    "solo": {
+      "authUid": "auth-solo",
+      "playerId": "p_solo",
+      "displayName": "Solo"
+    },
+    "pending": {
+      "authUid": "auth-pending",
+      "playerId": "p_pending",
+      "displayName": "Pending"
+    },
+    "member": {
+      "authUid": "auth-member",
+      "playerId": "p_member",
+      "displayName": "Member"
+    },
+    "admin": {
+      "authUid": "auth-admin",
+      "playerId": "p_admin",
+      "displayName": "Admin"
+    },
+    "outsider": {
+      "authUid": "auth-outsider",
+      "playerId": "p_outsider",
+      "displayName": "Outsider"
+    }
+  },
+  "group": {
+    "id": "g_rules01",
+    "name": "Rules testgroep"
+  },
+  "memberships": {
+    "pending": {
+      "playerId": "p_pending",
+      "role": "member",
+      "status": "pending",
+      "requestedAt": 100,
+      "approvedAt": 0,
+      "joinedAt": 0,
+      "approvedByPlayerId": "",
+      "updatedAt": 100
+    },
+    "member": {
+      "playerId": "p_member",
+      "role": "member",
+      "status": "approved",
+      "requestedAt": 100,
+      "approvedAt": 110,
+      "joinedAt": 110,
+      "approvedByPlayerId": "p_admin",
+      "updatedAt": 110
+    },
+    "admin": {
+      "playerId": "p_admin",
+      "role": "admin",
+      "status": "approved",
+      "requestedAt": 90,
+      "approvedAt": 100,
+      "joinedAt": 100,
+      "approvedByPlayerId": "p_admin",
+      "updatedAt": 100
+    }
+  }
+}

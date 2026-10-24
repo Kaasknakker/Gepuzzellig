@@ -22,6 +22,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Firestore-rules testafhankelijkheden installeren
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Fase 2 Firestore-rules controleren
+        run: npm run test:rules
+
       - name: Run app checks
         run: |
           node .github/scripts/check-app.mjs

@@ -41,6 +41,39 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/groups/$(groupId));
     }
 
+
+    // Fase 2: nieuw persoons-/membershipmodel naast de legacy groepskoppeling.
+    function ownsPlayer(playerId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/players/$(playerId))
+        && get(/databases/$(database)/documents/players/$(playerId)).data.authUid == request.auth.uid;
+    }
+    function membershipPath(groupId, playerId) {
+      return /databases/$(database)/documents/groups/$(groupId)/members/$(playerId);
+    }
+    function approvedMember(groupId, playerId) {
+      return exists(membershipPath(groupId, playerId))
+        && get(membershipPath(groupId, playerId)).data.status == 'approved';
+    }
+    function groupAdmin(groupId, playerId) {
+      return approvedMember(groupId, playerId)
+        && get(membershipPath(groupId, playerId)).data.role == 'admin';
+    }
+    function validMembership(playerId) {
+      return request.resource.data.keys().hasOnly([
+          'playerId','role','status','requestedAt','approvedAt','joinedAt','approvedByPlayerId','updatedAt'
+        ])
+        && request.resource.data.keys().hasAll(['playerId','role','status','requestedAt','updatedAt'])
+        && request.resource.data.playerId == playerId
+        && request.resource.data.role in ['member','admin']
+        && request.resource.data.status in ['pending','approved','rejected','left']
+        && request.resource.data.requestedAt is int && request.resource.data.requestedAt >= 0
+        && request.resource.data.updatedAt is int && request.resource.data.updatedAt >= request.resource.data.requestedAt
+        && request.resource.data.get('approvedAt', 0) is int && request.resource.data.get('approvedAt', 0) >= 0
+        && request.resource.data.get('joinedAt', 0) is int && request.resource.data.get('joinedAt', 0) >= 0
+        && request.resource.data.get('approvedByPlayerId', '') is string;
+    }
+
     function validResult(id) {
       return hasProfile()
         && myGroup().size() > 0
@@ -124,6 +157,62 @@ service cloud.firestore {
         && request.resource.data.get('onlineNono', '') is string
         && request.resource.data.get('onlineNono', '') in ['','classic','color']
         && request.resource.data.get('progress', {}) is map;
+    }
+
+    // Fase 2-skelet: stabiele speleridentiteit. Legacy profiles blijven de huidige app bedienen.
+    match /players/{playerId} {
+      allow get: if ownsPlayer(playerId);
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['playerId','authUid','displayName','createdAt','updatedAt'])
+        && request.resource.data.keys().hasAll(['playerId','authUid','displayName','createdAt','updatedAt'])
+        && request.resource.data.playerId == playerId
+        && request.resource.data.authUid == request.auth.uid
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0 && request.resource.data.displayName.size() <= 30
+        && request.resource.data.createdAt is int && request.resource.data.createdAt > 0
+        && request.resource.data.updatedAt is int && request.resource.data.updatedAt >= request.resource.data.createdAt;
+      allow update: if ownsPlayer(playerId)
+        && request.resource.data.keys().hasOnly(['playerId','authUid','displayName','createdAt','updatedAt'])
+        && request.resource.data.playerId == resource.data.playerId
+        && request.resource.data.authUid == resource.data.authUid
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0 && request.resource.data.displayName.size() <= 30
+        && request.resource.data.updatedAt is int && request.resource.data.updatedAt >= resource.data.updatedAt;
+      allow delete: if false;
+    }
+
+    // Persoonlijke voortgang is in Fase 2 alleen een beveiligd skelet; de app schrijft hier nog niet.
+    match /progress/{playerId}/items/{progressId} {
+      allow read: if ownsPlayer(playerId);
+      allow create, update: if ownsPlayer(playerId)
+        && request.resource.data.keys().hasOnly([
+          'playerId','puzzleType','mode','puzzleKey','difficulty','variant','deviceVariant',
+          'state','progressPercent','startedAt','updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'playerId','puzzleType','mode','puzzleKey','difficulty','state','progressPercent','startedAt','updatedAt'
+        ])
+        && request.resource.data.playerId == playerId
+        && request.resource.data.puzzleType is string
+        && request.resource.data.mode in ['daily','free']
+        && request.resource.data.puzzleKey is string
+        && request.resource.data.difficulty is string
+        && request.resource.data.get('variant','') is string
+        && request.resource.data.get('deviceVariant','') is string
+        && request.resource.data.state is map
+        && request.resource.data.progressPercent is int
+        && request.resource.data.progressPercent >= 0 && request.resource.data.progressPercent <= 100
+        && request.resource.data.startedAt is int && request.resource.data.startedAt >= 0
+        && request.resource.data.updatedAt is int && request.resource.data.updatedAt >= request.resource.data.startedAt;
+      allow delete: if ownsPlayer(playerId);
+    }
+
+    // Minimale inverse index. In Fase 2 read-only voor clients: canonical membership staat onder groups.
+    match /playerMemberships/{playerId}/groups/{groupId} {
+      allow read: if ownsPlayer(playerId);
+      allow create, update, delete: if false;
     }
 
     match /results/{id} {
@@ -263,6 +352,28 @@ service cloud.firestore {
         );
 
       allow delete: if isOwner() && resource.data.playerId != 'u-peter';
+    }
+
+    match /groups/{groupId}/members/{playerId} {
+      allow get: if ownsPlayer(playerId)
+        || (hasProfile() && ownsPlayer(myPlayer()) && approvedMember(groupId, myPlayer()));
+      allow list: if hasProfile() && ownsPlayer(myPlayer()) && approvedMember(groupId, myPlayer());
+      allow create: if ownsPlayer(playerId)
+        && validMembership(playerId)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.role == 'member'
+        && request.resource.data.get('approvedAt', 0) == 0
+        && request.resource.data.get('joinedAt', 0) == 0
+        && request.resource.data.get('approvedByPlayerId', '') == '';
+      // Admins beheren andere memberships. Eigen approved-adminstatus kan client-side niet worden
+      // verlaagd/verwijderd; daarmee kan de laatste admin nooit verdwijnen.
+      allow update: if validMembership(playerId)
+        && hasProfile() && ownsPlayer(myPlayer()) && groupAdmin(groupId, myPlayer())
+        && (playerId != myPlayer()
+          || (resource.data.status == 'approved' && resource.data.role == 'admin'
+            && request.resource.data.status == 'approved' && request.resource.data.role == 'admin'));
+      allow delete: if hasProfile() && ownsPlayer(myPlayer())
+        && groupAdmin(groupId, myPlayer()) && playerId != myPlayer();
     }
 
     match /groups/{groupId} {
