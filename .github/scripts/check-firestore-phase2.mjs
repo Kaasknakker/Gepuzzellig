@@ -15,6 +15,14 @@ try{
   await setDoc(doc(db,'progress','p_solo','items','daily-bin'),{playerId:'p_solo',puzzleType:'bin',mode:'daily',puzzleKey:'bin:fixture',difficulty:'normal',state:{cells:[]},progressPercent:20,startedAt:10,updatedAt:20});
  });
  const db=p=>env.authenticatedContext(p.authUid).firestore(),{solo,pending,member,admin,outsider}=fx.players;
+ const anonUid='auth-new-anon',anonPlayer='p_'+anonUid,anonDb=env.authenticatedContext(anonUid,{firebase:{sign_in_provider:'anonymous'}}).firestore();
+ const anonProfile={authUid:anonUid,playerId:anonPlayer,displayName:'Solo tester',groupId:'',role:'user',accountState:'anonymous',createdAt:300,updatedAt:300,inviteCode:'',invitedByAuthUid:'',groupJoinCode:'',theme:'shared',accent:'blue'};
+ await assertSucceeds(setDoc(doc(anonDb,'profiles',anonUid),anonProfile));
+ await assertSucceeds(setDoc(doc(anonDb,'players',anonPlayer),{playerId:anonPlayer,authUid:anonUid,displayName:'Solo tester',createdAt:300,updatedAt:300}));
+ await assertFails(updateDoc(doc(anonDb,'profiles',anonUid),{playerId:'p_second_identity',updatedAt:301}));
+ const linkedDb=env.authenticatedContext(anonUid,{email:'solo@example.test',email_verified:true,firebase:{sign_in_provider:'google.com'}}).firestore();
+ await assertSucceeds(updateDoc(doc(linkedDb,'profiles',anonUid),{accountState:'linked',updatedAt:302}));
+ await assertFails(updateDoc(doc(linkedDb,'profiles',anonUid),{playerId:'p_second_identity',updatedAt:303}));
  await assertSucceeds(getDoc(doc(db(solo),'players',solo.playerId)));
  await assertFails(getDoc(doc(db(outsider),'players',solo.playerId)));
  await assertSucceeds(getDoc(doc(db(solo),'progress',solo.playerId,'items','daily-bin')));
@@ -34,5 +42,5 @@ try{
  await assertSucceeds(getDoc(doc(db(member),'playerMemberships',member.playerId,'groups',fx.group.id)));
  await assertFails(getDoc(doc(db(outsider),'playerMemberships',member.playerId,'groups',fx.group.id)));
  await assertFails(setDoc(doc(db(member),'playerMemberships',member.playerId,'groups','g_fake'),{groupId:'g_fake',role:'member',status:'approved',joinedAt:1,updatedAt:1}));
- console.log('Fase 2 Firestore-rules: alle scenario’s geslaagd.');
+ console.log('Fase 2/3 Firestore-rules: skeleton, anonymous solo en identiteitsbehoud geslaagd.');
 }finally{await env.cleanup();}
