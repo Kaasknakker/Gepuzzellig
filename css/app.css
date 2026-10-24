@@ -1264,29 +1264,17 @@ body.tablet #topbar #peerLive span{max-width:180px}
 /* Dagpuzzels: grote infoknop links, een afzonderlijke speelknop rechts. */
 .dayitem{position:relative;--day-action-width:110px}
 .daygroup{padding:0;border:0}
-.daygroup summary{display:flex;align-items:center;gap:10px;min-height:62px;box-sizing:border-box;padding:8px calc(var(--day-action-width) + 18px) 8px 4px;cursor:pointer;list-style:none;border-radius:12px;color:var(--fg)}
+.daygroup summary{display:flex;align-items:center;gap:10px;min-height:68px;box-sizing:border-box;padding:8px 62px 8px 4px;cursor:pointer;list-style:none;border-radius:12px;color:var(--fg)}
 .daygroup summary::-webkit-details-marker{display:none}
-.daygroup summary:hover{background:color-mix(in srgb,var(--pc) 6%,transparent)}
-.daygroup summary:focus-visible{outline:2px solid var(--pc);outline-offset:-2px}
-.daygroup summary>i{font-size:18px;font-style:normal;flex:none;color:var(--mut);transition:transform .15s}
-.daygroup[open] summary>i{transform:rotate(180deg)}
-.daygroup summary[data-row-action="play"]{cursor:pointer}.daygroup summary[data-row-action="play"] .dayrowcue{color:var(--dayc);font-weight:900}.daygroup summary[data-row-action="expand"] .dayrowcue{color:var(--mut)}
-.daycaption{display:flex;align-items:center;gap:18px;flex:1;min-width:0}
-.daycaption .dname{flex:1}
-.daystatus{font-size:12px;font-weight:700;white-space:nowrap;color:var(--mut)}
-.daygroup summary>.dot{width:16px;height:16px;box-sizing:border-box;border:2px solid var(--line);border-radius:50%;flex:none}
-.daygroup summary>.dot.done{background:var(--ok);border-color:var(--ok)}
-.daygroup summary>.dot.done:after{content:"✓";display:block;color:white;font-size:10px;line-height:12px;text-align:center;font-weight:900}
-.daygroup summary>.dot.busy{border-color:var(--pc);border-style:dashed}
-.daygroup summary>.ticon{flex:none;box-shadow:none}
-.dayitem .hdrow.dayaction{position:absolute;top:9px;right:3px;display:flex;justify-content:center;gap:6px;width:var(--day-action-width);min-height:44px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:none;text-align:center;font-size:13px;font-weight:800;color:var(--fg)}
-.dayitem .hdrow.dayaction:hover{border-color:var(--pc);background:color-mix(in srgb,var(--pc) 7%,var(--card))}
-.dayaction .pdonut{width:26px;height:26px;flex:none}
-.daygroup .ddpeople{display:flex;flex-wrap:wrap;gap:8px;margin:0 4px;padding:10px 0 12px}
-.daygroup .ddperson{white-space:normal;max-width:100%;flex-wrap:wrap;font-size:12px}
-.daygroup .daydetail{margin:0 4px 10px}
-.daygroup .ddmain{grid-template-columns:minmax(130px,1fr) auto}
-.daygroup .daydetail .ddpeople{margin-top:10px;padding-bottom:0}
+.daygroup summary:hover{background:color-mix(in srgb,var(--dayc) 6%,transparent)}
+.daygroup summary:focus-visible{outline:2px solid var(--dayc);outline-offset:-2px}
+.daycaption{display:flex;align-items:center;gap:18px;flex:1;min-width:0}.daycaption .dname{flex:1}
+.daystatus{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:11px;color:var(--mut)}.ownstatus{font-weight:750;white-space:nowrap}
+.daypeers{display:flex;justify-content:flex-end;gap:5px;flex-wrap:wrap}.daypeer{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:999px;background:color-mix(in srgb,var(--line) 24%,transparent);white-space:nowrap;font-size:10px;font-weight:700}.daypeer.done{color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent)}.daypeer.done i{font-style:normal}.daypeer.busy{color:var(--fg)}.daypeer.busy i{width:6px;height:6px;border-radius:50%;background:var(--dayc)}.daypeer.idle{font-weight:600;opacity:.72}
+.daygo{display:flex;align-items:center;gap:5px;min-width:54px;justify-content:flex-end;color:var(--dayc);font-size:12px;font-weight:850}.daygo i{font-size:18px;font-style:normal}
+.daygroup summary>.dot{width:16px;height:16px;box-sizing:border-box;border:2px solid var(--line);border-radius:50%;flex:none}.daygroup summary>.dot.done{background:var(--ok);border-color:var(--ok)}.daygroup summary>.dot.done:after{content:"✓";display:block;color:white;font-size:10px;line-height:12px;text-align:center;font-weight:900}.daygroup summary>.dot.busy{border-color:var(--dayc);border-style:dashed}.daygroup summary>.ticon{flex:none;box-shadow:none}
+.dayitem .hdrow.dayaction{position:absolute;top:14px;right:7px;display:grid;place-items:center;width:36px;height:36px;min-height:36px;padding:0;border:1px solid color-mix(in srgb,var(--line) 85%,transparent);border-radius:50%;background:var(--card);box-shadow:none;color:var(--mut)}.dayitem .hdrow.dayaction:hover{border-color:var(--dayc);color:var(--dayc);background:color-mix(in srgb,var(--dayc) 7%,var(--card))}.dayinfo{font-family:Georgia,serif;font-size:16px;font-weight:800;font-style:italic;line-height:1}
+.daygroup .ddpeople{display:flex;flex-wrap:wrap;gap:8px;margin:0 4px;padding:10px 0 12px}.daygroup .ddperson{white-space:normal;max-width:100%;flex-wrap:wrap;font-size:12px}.daygroup .daydetail{margin:0 4px 10px}.daygroup .ddmain{grid-template-columns:minmax(130px,1fr) auto}.daygroup .daydetail .ddpeople{margin-top:10px;padding-bottom:0}
 .hlivebadge.liveactivity{white-space:normal;border-radius:14px;text-align:left;max-width:100%;padding:8px 12px}
 .hlivebadge.liveactivity>span{display:flex;align-items:baseline;flex-wrap:wrap;column-gap:10px;row-gap:2px;overflow:visible;line-height:1.4}
 .hlivebadge.liveactivity b{font-size:13px;overflow-wrap:anywhere}
