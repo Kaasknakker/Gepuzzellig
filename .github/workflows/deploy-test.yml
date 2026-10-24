@@ -22,6 +22,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Java 21 instellen voor Firestore-emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
       - name: Firestore-rules testafhankelijkheden installeren
         run: npm install --ignore-scripts --no-audit --no-fund
       - name: Fase 2 Firestore-rules controleren
