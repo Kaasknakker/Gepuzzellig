@@ -1,0 +1,16 @@
+import fs from "node:fs";
+const core=fs.readFileSync("js/core.js","utf8"),fb=fs.readFileSync("js/firebase.js","utf8"),rules=fs.readFileSync("firestore.rules","utf8");
+const need=(hay,needle,msg)=>{if(!hay.includes(needle))throw new Error(msg)};
+need(fb,'"groupActivity"', "Fase 8 groupActivity ontbreekt");
+need(fb,'"groupDailyPlans"', "Fase 8 groupDailyPlans ontbreekt");
+need(fb,'completedAt>=Number(m.joinedAt||0)', "joinedAt-filter ontbreekt bij resultaatprojectie");
+need(fb,'shareDailyPlan', "dagplanprojectie ontbreekt");
+need(core,'completionFor=', "persoonlijk voltooiingspercentage ontbreekt");
+need(core,'Vergelijkbare tijden', "vergelijkbare tijden ontbreken");
+need(core,'r.puzzleKey', "puzzleKey wordt niet gebruikt voor vergelijking");
+need(core,'diffGroup', "moeilijkheid wordt niet gebruikt voor vergelijking");
+for(const p of ['["dag","Dag"]','["week","Week"]','["maand","Maand"]','["jaar","Jaar"]','["alles","Alles"]'])need(core,p,"periodefilter ontbreekt: "+p);
+need(rules,'match /groupActivity/{groupId}/items/{activityId}', "groupActivity rules ontbreken");
+need(rules,"completedAt >= get(membershipPath(groupId, request.resource.data.playerId)).data.joinedAt","joinedAt rule ontbreekt");
+need(rules,'match /groupDailyPlans/{groupId}/items/{planId}', "groupDailyPlans rules ontbreken");
+console.log("Fase 8 appcontract: membership-readmodel, persoonsgericht Vandaag, periodes, dagplannen en eerlijke tijdvergelijking aanwezig.");
