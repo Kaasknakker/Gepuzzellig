@@ -2,7 +2,7 @@
    Nieuwe puzzels beginnen hier, maar worden pas zichtbaar zodra active:true staat.
    Puzzelspecifieke spelcode blijft bewust in de eigen modules. */
 const PUZZLE_REGISTRY={
- bin:{name:"Binair",active:true,color:"#7a52d6",levels:{wide:[1,2,3],phone:[4,5,6]},sizes:{1:"12×10",2:"18×14",3:"20×16",4:"6×8",5:"8×10",6:"10×14"}},
+ bin:{name:"Binair",active:true,color:"#7a52d6",levels:{wide:[1,2,3],phone:[4,5,6]},sizes:{1:"10×14",2:"14×18",3:"16×22",4:"6×8",5:"8×10",6:"10×14"}},
  star:{name:"Star Battle",active:true,color:"#c97a00",levels:{wide:[1,2,3],phone:[4,5,6]},sizes:{1:"8×8 · 1★",2:"9×9 · 2★",3:"10×10 · 2★",4:"7×7 · 1★",5:"8×8 · 2★",6:"9×9 · 2★"}},
  nono:{name:"Nonogram",active:true,color:"#0f9d8c",levels:{wide:[1,2,3],phone:[4,5,6]},sizes:{1:"8×5",2:"15×10",3:"20×14",4:"5×8",5:"8×12",6:"10×15"}},
  kak:{name:"Kakuro",active:false,color:"#e0486b"},
