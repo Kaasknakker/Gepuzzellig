@@ -1,7 +1,7 @@
 "use strict";
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { defineSecret, defineString } = require("firebase-functions/params");
+const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 
@@ -9,15 +9,15 @@ initializeApp();
 
 const POSTMARK_SERVER_TOKEN = defineSecret("POSTMARK_SERVER_TOKEN");
 const POSTMARK_FROM = defineSecret("POSTMARK_FROM");
-const APP_URL = defineString("APP_URL", { default: "https://kaasknakker.github.io/Gepuzzellig/" });
-const MAIL_MODE = defineString("MAIL_MODE", { default: "postmark" });
-const MAIL_ALLOWLIST = defineString("MAIL_ALLOWLIST", { default: "" });
+const APP_URL = () => process.env.APP_URL || "https://kaasknakker.github.io/Gepuzzellig/";
+const MAIL_MODE = () => process.env.MAIL_MODE || "postmark";
+const MAIL_ALLOWLIST = () => process.env.MAIL_ALLOWLIST || "";
 
 const projectId = () => String(process.env.GCLOUD_PROJECT || process.env.GCP_PROJECT || process.env.GOOGLE_CLOUD_PROJECT || "");
 const normalizedUrl = value => String(value || "").replace(/\/+$/, "") + "/";
-const appUrl = () => normalizedUrl(APP_URL.value());
-const mailMode = () => String(MAIL_MODE.value() || "postmark").trim().toLowerCase();
-const allowlist = () => new Set(String(MAIL_ALLOWLIST.value() || "").split(",").map(x => x.trim().toLowerCase()).filter(Boolean));
+const appUrl = () => normalizedUrl(APP_URL());
+const mailMode = () => String(MAIL_MODE() || "postmark").trim().toLowerCase();
+const allowlist = () => new Set(String(MAIL_ALLOWLIST() || "").split(",").map(x => x.trim().toLowerCase()).filter(Boolean));
 const isTestProject = () => projectId() === "gepuzzellig-test";
 const assertEnvironmentSafe = () => {
   const pid = projectId(), mode = mailMode(), url = appUrl();
