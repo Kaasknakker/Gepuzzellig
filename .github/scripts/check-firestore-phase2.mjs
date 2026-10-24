@@ -58,7 +58,7 @@ try{
  await assertSucceeds(getDoc(doc(db(admin),'groupActivity',fx.group.id,'items','member-bin')));
  await assertFails(getDoc(doc(db(outsider),'groupActivity',fx.group.id,'items','member-bin')));
  await assertFails(setDoc(doc(db(member),'groupActivity',fx.group.id,'items','too-old'),{...social,puzzleKey:'old',completedAt:Math.max(1,joined-1)}));
- const sharedPlan={schemaVersion:1,groupId:fx.group.id,playerId:member.playerId,displayName:'Member',date:'2026-10-24',favoritePuzzleTypes:['bin','star'],difficulties:{bin:'normal',star:'hard'},createdAt:joined+20};
+ const sharedPlan={schemaVersion:1,groupId:fx.group.id,playerId:member.playerId,displayName:'Member',date:'2026-10-24',favoritePuzzleTypes:['bin','star'],difficulties:{bin:'normal',star:'hard'},createdAt:Math.max(1,joined-20),sharedAt:joined+20};
  await assertSucceeds(setDoc(doc(db(member),'groupDailyPlans',fx.group.id,'items','2026-10-24_'+member.playerId),sharedPlan));
  await assertSucceeds(getDoc(doc(db(admin),'groupDailyPlans',fx.group.id,'items','2026-10-24_'+member.playerId)));
  await assertFails(getDoc(doc(db(outsider),'groupDailyPlans',fx.group.id,'items','2026-10-24_'+member.playerId)));
