@@ -1340,7 +1340,7 @@ body[data-t=hex][data-input-mode=cross] #hexsvg{background:#dddde1!important}
 /* Moduskleuren volgen de markeringen van iedere puzzel.
    Negatieve actie is wit; plaatsen/invullen gebruikt de eigen puzzelkleur.
    Hexcells behoudt zijn eigen blauw/donker-combinatie. */
-body[data-input-mode=cross]:not([data-t=hex]){--mode-tint:#f0efeb;--mode-button:#f0efeb;--mode-fg:#30343c;--mode-edge:#aaa9a5}
+body[data-input-mode=cross]:not([data-t=hex]){--mode-tint:#dedbd4;--mode-button:#dedbd4;--mode-fg:#30343c;--mode-edge:#9f9b93}
 :root[data-theme=dark] body[data-input-mode=cross]:not([data-t=hex]){--mode-tint:#f2f2f0;--mode-button:#f2f2f0;--mode-edge:#c5c5c2}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]) body[data-input-mode=cross]:not([data-t=hex]){--mode-tint:#f2f2f0;--mode-button:#f2f2f0;--mode-edge:#c5c5c2}}
 body[data-t=bin][data-input-mode=fill]{--mode-tint:#7a52d6;--mode-button:#7a52d6;--mode-fg:#fff;--mode-edge:#7a52d6}
