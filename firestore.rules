@@ -183,17 +183,56 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Persoonlijke voortgang is in Fase 2 alleen een beveiligd skelet; de app schrijft hier nog niet.
+    // Fase 4: persoonlijke resultaten zijn canonical voor nieuwe writes; legacy /results blijft leesbaar.
+    match /playerResults/{playerId}/items/{resultId} {
+      allow read: if ownsPlayer(playerId);
+      allow create, update: if ownsPlayer(playerId)
+        && request.resource.data.keys().hasOnly([
+          'schemaVersion','playerId','name','groupId','puzzleDate','completedOn','puzzleType',
+          'resultType','mode','difficulty','variant','deviceVariant','puzzleKey','secs',
+          'mist','hints','hintSteps','emo','note','legacyResultId','createdAt','updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'schemaVersion','playerId','name','puzzleDate','puzzleType','resultType','mode',
+          'difficulty','puzzleKey','secs','createdAt','updatedAt'
+        ])
+        && request.resource.data.schemaVersion == 3
+        && request.resource.data.playerId == playerId
+        && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 30
+        && request.resource.data.get('groupId','') is string
+        && request.resource.data.puzzleDate is string && request.resource.data.puzzleDate.size() <= 10
+        && request.resource.data.get('completedOn','') is string && request.resource.data.get('completedOn','').size() <= 10
+        && request.resource.data.puzzleType is string && request.resource.data.puzzleType.size() > 0
+        && request.resource.data.resultType is string && request.resource.data.resultType.size() > 0 && request.resource.data.resultType.size() <= 80
+        && request.resource.data.mode in ['daily','free']
+        && request.resource.data.difficulty is string
+        && request.resource.data.get('variant','') is string
+        && request.resource.data.get('deviceVariant','') is string
+        && request.resource.data.puzzleKey is string && request.resource.data.puzzleKey.size() > 0
+        && request.resource.data.secs is int && request.resource.data.secs > 0
+        && request.resource.data.get('mist',0) is int && request.resource.data.get('mist',0) >= 0
+        && request.resource.data.get('hints',0) is int && request.resource.data.get('hints',0) >= 0
+        && request.resource.data.get('emo','') is string && request.resource.data.get('emo','').size() <= 8
+        && request.resource.data.get('note','') is string && request.resource.data.get('note','').size() <= 80
+        && request.resource.data.get('legacyResultId','') is string
+        && request.resource.data.createdAt is int && request.resource.data.createdAt > 0
+        && request.resource.data.updatedAt is int && request.resource.data.updatedAt >= request.resource.data.createdAt;
+      allow delete: if ownsPlayer(playerId);
+    }
+
+    // Fase 4: persoonlijke voortgang; legacy status.progress blijft tijdelijk compatibel leesbaar.
     match /progress/{playerId}/items/{progressId} {
       allow read: if ownsPlayer(playerId);
       allow create, update: if ownsPlayer(playerId)
         && request.resource.data.keys().hasOnly([
           'playerId','puzzleType','mode','puzzleKey','difficulty','variant','deviceVariant',
-          'state','progressPercent','startedAt','updatedAt'
+          'state','progressPercent','startedAt','updatedAt','schemaVersion','legacyKey'
         ])
         && request.resource.data.keys().hasAll([
-          'playerId','puzzleType','mode','puzzleKey','difficulty','state','progressPercent','startedAt','updatedAt'
+          'playerId','puzzleType','mode','puzzleKey','difficulty','state','progressPercent','startedAt','updatedAt','schemaVersion','legacyKey'
         ])
+        && request.resource.data.get('schemaVersion',3) == 3
+        && request.resource.data.get('legacyKey','') is string
         && request.resource.data.playerId == playerId
         && request.resource.data.puzzleType is string
         && request.resource.data.mode in ['daily','free']
