@@ -37,8 +37,15 @@ jobs:
         run: node .github/scripts/check-phase6-functions.mjs
       - name: Fase 7 appcontract controleren
         run: node .github/scripts/check-phase7-app.mjs
+      - name: Fase 7 voorkeurmigratie controleren
+        run: node .github/scripts/check-phase7-migration.mjs
       - name: Functions syntax controleren
         run: node --check functions/index.js
+      - name: Client syntax controleren
+        run: |
+          node --check js/puzzle-registry.js
+          node --check js/core.js
+          node --check js/firebase.js
       - name: App controleren
         run: node .github/scripts/check-app.mjs
       - name: Puzzelregistratie controleren
