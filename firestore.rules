@@ -51,6 +51,16 @@ service cloud.firestore {
     function membershipPath(groupId, playerId) {
       return /databases/$(database)/documents/groups/$(groupId)/members/$(playerId);
     }
+    function membershipIndexPath(groupId, playerId) {
+      return /databases/$(database)/documents/playerMemberships/$(playerId)/groups/$(groupId);
+    }
+    function indexAfterMatches(groupId, playerId) {
+      return existsAfter(membershipIndexPath(groupId, playerId))
+        && getAfter(membershipIndexPath(groupId, playerId)).data.groupId == groupId
+        && getAfter(membershipIndexPath(groupId, playerId)).data.role == request.resource.data.role
+        && getAfter(membershipIndexPath(groupId, playerId)).data.status == request.resource.data.status
+        && getAfter(membershipIndexPath(groupId, playerId)).data.joinedAt == request.resource.data.get('joinedAt',0);
+    }
     function approvedMember(groupId, playerId) {
       return exists(membershipPath(groupId, playerId))
         && get(membershipPath(groupId, playerId)).data.status == 'approved';
@@ -445,6 +455,7 @@ service cloud.firestore {
       // Een speler kan zelf alleen pending aanvragen. Bij het aanmaken van een nieuwe groep mag
       // de maker in dezelfde batch de eerste approved admin worden.
       allow create: if validMembership(playerId)
+        && indexAfterMatches(groupId, playerId)
         && (
           (ownsPlayer(playerId)
             && request.resource.data.status == 'pending'
@@ -463,6 +474,7 @@ service cloud.firestore {
       // Een admin kan zijn eigen approved-adminstatus niet verlagen of verwijderen. Daardoor
       // kan de laatste admin nooit verdwijnen; bij meerdere admins kan een andere admin dit doen.
       allow update: if validMembership(playerId)
+        && indexAfterMatches(groupId, playerId)
         && hasProfile() && ownsPlayer(myPlayer()) && groupAdmin(groupId, myPlayer())
         && request.resource.data.playerId == resource.data.playerId
         && request.resource.data.get('displayName','') == resource.data.get('displayName','')
@@ -471,7 +483,8 @@ service cloud.firestore {
           || (resource.data.status == 'approved' && resource.data.role == 'admin'
             && request.resource.data.status == 'approved' && request.resource.data.role == 'admin'));
       allow delete: if hasProfile() && ownsPlayer(myPlayer())
-        && groupAdmin(groupId, myPlayer()) && playerId != myPlayer();
+        && groupAdmin(groupId, myPlayer()) && playerId != myPlayer()
+        && !existsAfter(membershipIndexPath(groupId, playerId));
     }
 
     match /groups/{groupId} {
