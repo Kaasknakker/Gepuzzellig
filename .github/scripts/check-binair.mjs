@@ -19,16 +19,23 @@ assert.ok(genCached('bin','qold',3,false,'classic',null,'b1').oldBoard);
 assert.ok(!genCached('bin','qold',3,false,'classic',null,'b2').oldBoard);
 assert.ok(genCached('bin','qold',3,false,'classic',null,'b1').oldBoard);
 `,c);
-// Vastgelegd met de ongewijzigde generator uit commit 5a8f206.
-const hashes=[
-'9beed95b1c28ec5d216a124a48f78a6d12c131cf29521700c109f8fc48efe4c8',
-'a85e22c1fd3f2c408fc80204b72b081767c72ba13cb3c034e51c69ef439dc481',
-'cd6507883b4e425e61200806a8fe4663ae5049a8dca7e67b7ba6241dedadfd2c',
-'b4796a1fbc820559053fa97e132062b6bdfcedc45e3be10b5cd98e88895f1597',
-'bfffa7bf3e46f2d7be402b743c12d0c38dee7ef29a88ec62c835d1d1d248fd5a',
-'0eefaa4fce1983655f0b3bed6a38170441ccd8ff03ff06efec6254a4b1272950'];
-for(let lv=1;lv<=6;lv++)for(const enhanced of [false,...([1,2,4,5].includes(lv)?[true]:[])]){
+// De groot-schermformaten zijn bewust gewijzigd op 24 oktober 2026.
+const expectedSizes={1:[12,10],2:[18,14],3:[20,16],4:[6,8],5:[8,10],6:[10,14]};
+for(let lv=1;lv<=6;lv++){
+ const p=vm.runInContext(`genBin(rng(hash('binair-formaat-'+${lv})),${lv},false,false)`,c);
+ assert.deepEqual([p.W,p.H],expectedSizes[lv],`formaat level ${lv}`);
+}
+// De iPhone-formaten zijn niet gewijzigd: bewaak hun bestaande borden exact.
+const phoneHashes={
+ 4:'b4796a1fbc820559053fa97e132062b6bdfcedc45e3be10b5cd98e88895f1597',
+ 5:'bfffa7bf3e46f2d7be402b743c12d0c38dee7ef29a88ec62c835d1d1d248fd5a',
+ 6:'0eefaa4fce1983655f0b3bed6a38170441ccd8ff03ff06efec6254a4b1272950'};
+for(const lv of[4,5,6])for(const enhanced of [false,...([4,5].includes(lv)?[true]:[])]){
  const p=vm.runInContext(`genBin(rng(hash('binair-compat-'+${lv})),${lv},false,${enhanced})`,c);
+ assert.equal(createHash('sha256').update(JSON.stringify(p)).digest('hex'),phoneHashes[lv]);
+}
+console.log('OK: nieuwe groot-schermformaten en ongewijzigde iPhone-borden gecontroleerd');
+vm.runInContext(`genBin(rng(hash('binair-compat-'+${lv})),${lv},false,${enhanced})`,c);
  assert.equal(createHash('sha256').update(JSON.stringify(p)).digest('hex'),hashes[lv-1]);
 }
 console.log('OK: oude borden, Makkelijk/Normaal en gescheiden generatiecache behouden');
