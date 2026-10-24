@@ -137,7 +137,6 @@ service cloud.firestore {
 
     function validStatus(id) {
       return hasProfile()
-        && myGroup().size() > 0
         && request.resource.data.keys().hasOnly([
           'uid','group','name','date','type','at','progress','onlineAt',
           'onlineType','onlinePractice','onlineLvl','onlineNono'
@@ -146,7 +145,7 @@ service cloud.firestore {
         && request.resource.data.uid is string
         && request.resource.data.uid == myPlayer()
         && request.resource.data.group is string
-        && request.resource.data.group == myGroup()
+        && (request.resource.data.group == myGroup() || approvedMember(request.resource.data.group, myPlayer()))
         && id == request.resource.data.group + '_' + request.resource.data.uid
         && request.resource.data.get('name', '') is string
         && request.resource.data.get('name', '').size() <= 30
@@ -287,11 +286,11 @@ service cloud.firestore {
 
     match /results/{id} {
       allow read: if isAdmin()
-        || (hasProfile() && resource.data.group == myGroup());
+        || (hasProfile() && (resource.data.group == myGroup() || approvedMember(resource.data.group, myPlayer())));
       allow create: if validResult(id);
       allow update: if validResult(id)
         && resource.data.uid == myPlayer()
-        && resource.data.group == myGroup()
+        && (resource.data.group == myGroup() || approvedMember(resource.data.group, myPlayer()))
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.group == resource.data.group
         && request.resource.data.date == resource.data.date
@@ -570,7 +569,8 @@ service cloud.firestore {
       allow list: if isAdmin();
 
       allow create: if hasProfile()
-        && myGroup().size() > 0
+        && request.resource.data.suggestedGroupId is string
+        && (request.resource.data.suggestedGroupId == myGroup() || approvedMember(request.resource.data.suggestedGroupId, myPlayer()))
         && code == request.resource.data.code
         && request.resource.data.keys().hasOnly([
           'code','email','createdByAuthUid','createdByPlayerId','createdByName',
@@ -590,7 +590,6 @@ service cloud.firestore {
         && request.resource.data.createdByName is string
         && request.resource.data.createdByName.size() > 0
         && request.resource.data.createdByName.size() <= 30
-        && request.resource.data.suggestedGroupId == myGroup()
         && request.resource.data.suggestedGroupName is string
         && request.resource.data.suggestedGroupName.size() <= 40
         && request.resource.data.createdAt is int
