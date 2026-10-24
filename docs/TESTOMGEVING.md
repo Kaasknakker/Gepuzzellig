@@ -23,7 +23,9 @@ Die workflow:
 
 De productie-workflows blijven apart en gebruiken expliciet `gepuzzelig`.
 
-Firebase Functions worden voorlopig **niet** naar test gedeployed. De huidige uitnodigingsfunctie bevat nog de productie-URL en moet eerst testveilig worden gemaakt. Dit is bewust een open punt.
+Firebase Functions zijn vanaf Fase 6 project-aware en testveilig voorbereid. Ze worden **niet automatisch** bij een push naar `develop` gedeployed. De aparte workflow `Deploy Gepuzzellig Test Functions` is uitsluitend handmatig, gebruikt alleen `gepuzzellig-test`, zet `APP_URL=https://gepuzzellig-test.web.app/` en `MAIL_MODE=sink`, en verstuurt daardoor vanuit test geen echte uitnodigingsmail. Productie gebruikt de bestaande aparte workflow en blijft expliciet `gepuzzelig` gebruiken.
+
+De test-Functionsworkflow vereist dezelfde test-service-accountsecret als de overige testdeploys. Postmarksecrets zijn in sink-modus niet bedoeld voor gebruik vanuit test; echte testmail mag pas later via een expliciete allowlist/sink-strategie worden ingeschakeld.
 
 ## Werkwijze voor volgende chats
 
