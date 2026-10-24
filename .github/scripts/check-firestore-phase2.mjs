@@ -27,22 +27,22 @@ try{
  await assertSucceeds(setDoc(doc(db(solo),'progress',solo.playerId,'items','phase4-free'),{schemaVersion:3,legacyKey:'p:star.3',playerId:solo.playerId,puzzleType:'star',mode:'free',puzzleKey:'p:star.3',difficulty:'3',variant:'',deviceVariant:'ipad',state:{k:'p:star.3',pc:25},progressPercent:25,startedAt:410,updatedAt:411}));await assertFails(getDoc(doc(db(outsider),'progress',solo.playerId,'items','daily-bin')));
  // Solo -> pending: canonical membership en inverse index moeten in dezelfde batch worden geschreven.
  const request={playerId:solo.playerId,displayName:'Solo',role:'member',status:'pending',requestedAt:500,approvedAt:0,joinedAt:0,approvedByPlayerId:'',updatedAt:500};
- {const b=writeBatch(db(solo));b.set(doc(db(solo),'groups',fx.group.id,'members',solo.playerId),request);b.set(doc(db(solo),'playerMemberships',solo.playerId,'groups',fx.group.id),indexOf(request,fx.group.id));await assertSucceeds(b.commit())}
+ {const x=db(solo),b=writeBatch(x);b.set(doc(x,'groups',fx.group.id,'members',solo.playerId),request);b.set(doc(x,'playerMemberships',solo.playerId,'groups',fx.group.id),indexOf(request,fx.group.id));await assertSucceeds(b.commit())}
  await assertFails(setDoc(doc(db(solo),'groups',fx.group.id,'members','p_fake'),{...request,playerId:'p_fake'}));
  // Pending -> approved door groepsadmin, eveneens atomair met inverse index.
  const approved={...fx.memberships.pending,status:'approved',approvedAt:510,joinedAt:510,approvedByPlayerId:admin.playerId,updatedAt:510};
- {const b=writeBatch(db(admin));b.set(doc(db(admin),'groups',fx.group.id,'members',pending.playerId),approved);b.set(doc(db(admin),'playerMemberships',pending.playerId,'groups',fx.group.id),indexOf(approved,fx.group.id));await assertSucceeds(b.commit())}
+ {const x=db(admin),b=writeBatch(x);b.set(doc(x,'groups',fx.group.id,'members',pending.playerId),approved);b.set(doc(x,'playerMemberships',pending.playerId,'groups',fx.group.id),indexOf(approved,fx.group.id));await assertSucceeds(b.commit())}
  await assertFails(updateDoc(doc(db(member),'groups',fx.group.id,'members',pending.playerId),{role:'admin',updatedAt:520}));
  // Meerdere admins: admin kan een ander approved lid promoveren en later weer degraderen.
  const promoted={...fx.memberships.member,role:'admin',updatedAt:530};
- {const b=writeBatch(db(admin));b.set(doc(db(admin),'groups',fx.group.id,'members',member.playerId),promoted);b.set(doc(db(admin),'playerMemberships',member.playerId,'groups',fx.group.id),indexOf(promoted,fx.group.id));await assertSucceeds(b.commit())}
+ {const x=db(admin),b=writeBatch(x);b.set(doc(x,'groups',fx.group.id,'members',member.playerId),promoted);b.set(doc(x,'playerMemberships',member.playerId,'groups',fx.group.id),indexOf(promoted,fx.group.id));await assertSucceeds(b.commit())}
  const demoted={...promoted,role:'member',updatedAt:540};
- {const b=writeBatch(db(admin));b.set(doc(db(admin),'groups',fx.group.id,'members',member.playerId),demoted);b.set(doc(db(admin),'playerMemberships',member.playerId,'groups',fx.group.id),indexOf(demoted,fx.group.id));await assertSucceeds(b.commit())}
+ {const x=db(admin),b=writeBatch(x);b.set(doc(x,'groups',fx.group.id,'members',member.playerId),demoted);b.set(doc(x,'playerMemberships',member.playerId,'groups',fx.group.id),indexOf(demoted,fx.group.id));await assertSucceeds(b.commit())}
  // Laatste-adminbescherming: een admin kan zichzelf nooit degraderen/verwijderen.
  await assertFails(updateDoc(doc(db(admin),'groups',fx.group.id,'members',admin.playerId),{role:'member',updatedAt:550}));await assertFails(deleteDoc(doc(db(admin),'groups',fx.group.id,'members',admin.playerId)));
  // Eén speler kan naast de eerste groep een tweede approved membership hebben.
  const gid2='g_rules02',now=600,admin2={playerId:admin.playerId,displayName:'Admin',role:'admin',status:'approved',requestedAt:now,approvedAt:now,joinedAt:now,approvedByPlayerId:admin.playerId,updatedAt:now};
- {const b=writeBatch(db(admin));b.set(doc(db(admin),'groups',gid2),{name:'Tweede groep',ownerAuthUid:admin.authUid,inviteCode:'rules02',theme:'shared',accent:'blue',murdokuNames:[],createdAt:now,updatedAt:now});b.set(doc(db(admin),'groups',gid2,'members',admin.playerId),admin2);b.set(doc(db(admin),'playerMemberships',admin.playerId,'groups',gid2),indexOf(admin2,gid2));await assertSucceeds(b.commit())}
+ {const x=db(admin),b=writeBatch(x);b.set(doc(x,'groups',gid2),{name:'Tweede groep',ownerAuthUid:admin.authUid,inviteCode:'rules02',theme:'shared',accent:'blue',murdokuNames:[],createdAt:now,updatedAt:now});b.set(doc(x,'groups',gid2,'members',admin.playerId),admin2);b.set(doc(x,'playerMemberships',admin.playerId,'groups',gid2),indexOf(admin2,gid2));await assertSucceeds(b.commit())}
  await assertSucceeds(getDoc(doc(db(admin),'playerMemberships',admin.playerId,'groups',fx.group.id)));await assertSucceeds(getDoc(doc(db(admin),'playerMemberships',admin.playerId,'groups',gid2)));
  await assertFails(getDoc(doc(db(outsider),'playerMemberships',member.playerId,'groups',fx.group.id)));
  console.log('Fase 2-5 Firestore-rules: solo, persoonlijke data, pending/approved, meerdere memberships/admins en laatste-adminbescherming geslaagd.');
