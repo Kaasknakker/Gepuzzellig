@@ -1339,3 +1339,22 @@ body[data-t=hex][data-input-mode=cross] #hexsvg{background:#dddde1!important}
  .daycaption>.daystatus{grid-column:2;grid-row:1;justify-content:flex-end}
  .daycaption>.daypeers{grid-column:1/3;grid-row:2;justify-content:flex-end}
 }
+
+/* Moduskleuren volgen de markeringen van iedere puzzel.
+   Negatieve actie is wit; plaatsen/invullen gebruikt de eigen puzzelkleur.
+   Hexcells behoudt zijn eigen blauw/donker-combinatie. */
+body[data-input-mode=cross]:not([data-t=hex]){--mode-tint:#fff;--mode-button:#fff;--mode-fg:#30343c;--mode-edge:#b8b8b5}
+body[data-t=bin][data-input-mode=fill]{--mode-tint:#7a52d6;--mode-button:#7a52d6;--mode-fg:#fff;--mode-edge:#7a52d6}
+body[data-t=star][data-input-mode=fill]{--mode-tint:#c97a00;--mode-button:#c97a00;--mode-fg:#fff;--mode-edge:#c97a00}
+body[data-t=nono][data-input-mode=fill]{--mode-tint:#0f9d8c;--mode-button:#0f9d8c;--mode-fg:#fff;--mode-edge:#0f9d8c}
+body[data-t=plus][data-input-mode=fill]{--mode-tint:#2b7bd6;--mode-button:#2b7bd6;--mode-fg:#fff;--mode-edge:#2b7bd6}
+body[data-t=mur][data-input-mode=fill]{--mode-tint:#b5483a;--mode-button:#b5483a;--mode-fg:#fff;--mode-edge:#b5483a}
+body[data-t=hex][data-input-mode=fill]{--mode-tint:#3d9bd4;--mode-button:#2f86bc;--mode-fg:#fff;--mode-edge:#2f86bc}
+body[data-t=hex][data-input-mode=cross]{--mode-tint:#35363b;--mode-button:#35363b;--mode-fg:#fff;--mode-edge:#35363b}
+
+body[data-input-mode] :is(#inputmode,#nmode,#pmode) button.on,
+body[data-input-mode] :is(#mb,#mz).on{background:var(--mode-button)!important;border-color:var(--mode-edge)!important;color:var(--mode-fg)!important}
+body[data-input-mode] #grid{box-shadow:0 0 0 5px var(--mode-button),0 0 0 6px var(--mode-edge),0 8px 24px var(--sh)!important}
+body[data-input-mode] #mgrid{outline:5px solid var(--mode-button)!important;box-shadow:0 0 0 1px var(--mode-edge)}
+body[data-t=hex][data-input-mode] #hexsvg{box-shadow:0 0 0 5px var(--mode-button),0 0 0 6px var(--mode-edge),0 8px 24px var(--sh)!important}
+body:not(.home):not(.newpick)[data-input-mode]{background-color:color-mix(in srgb,var(--mode-tint) 7%,var(--bg))}
