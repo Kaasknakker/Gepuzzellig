@@ -70,7 +70,7 @@ async function deliverInvite({ to, subject, textBody, htmlBody }) {
 
 exports.sendInviteEmail = onCall({
   region: "europe-west1",
-  secrets: [POSTMARK_SERVER_TOKEN, POSTMARK_FROM],
+  secrets: isTestProject() ? [] : [POSTMARK_SERVER_TOKEN, POSTMARK_FROM],
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
