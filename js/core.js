@@ -1483,7 +1483,7 @@ function progKey(t,pr,d,sf){const nv=t==="nono"&&S&&S.type==="nono"&&S.nv==="col
 const cloudProgKey=k=>encodeURIComponent(k).replace(/\./g,"%2E");
 const cloudProgOk=()=>!PHONE&&uid&&uid!=="x"&&window.PD_DB&&window.PD_DB.saveProgress;
 let cloudProgLast={},cloudProgCleared={},cloudProgPullAt=0,cloudProgPulling=false;
-function progressRelevant(k){return !k.startsWith("d:")||k.split(":")[1]>=addDays(dstr(),-8)}
+function progressRelevant(k){return true}
 function progressSolved(k,e){const g=String(e&&e.group||legacyGroup()).toLowerCase();if(k.startsWith("d:")){const a=k.split(":"),sk=a[1]+a.slice(2).join(":");return localDoneInGroup(sk,g)}if(k.startsWith("p:")&&e&&e.seed){const sid=String(e.seed).replace(/\W/g,"").slice(-8);return freeLoc().some(r=>String(r.group||legacyGroup()).toLowerCase()===g&&String(r.type).endsWith("~"+sid))}return false}
 function progressPct(){if(!S||!S.p)return 0;const p=S.p,cur=S.cur,ratio=(a,b)=>b?Math.max(a>0?1:0,Math.min(99,Math.round(100*a/b))):0;
  if(S.type==="bin"&&cur){let a=0,b=0;for(let i=0;i<cur.length;i++)if(!p.giv||p.giv[i]<0){b++;if(cur[i]>=0)a++}return ratio(a,b)}
@@ -1505,8 +1505,7 @@ function mergeCloudProgress(mp){if(PHONE||!mp)return false;const a=progAll(),rem
  if(ch&&!lsSet(PKEY,JSON.stringify(a))&&curk)UX.storage(curk,{local:false,remote:"saved"});if(reload&&S&&S.p&&!S.done){const t=S.type,pr=S.practice,d=S.date;S.start=0;load(t,pr,false,d)}else if(document.body.classList.contains("home"))try{renderHome()}catch(e){}return ch}
 function pullCloudProgress(force){if(PHONE||!uid||uid==="x"||!window.PD_DB||!window.PD_DB.getProgress||cloudProgPulling)return Promise.resolve(false);const now=Date.now();if(!force&&now-cloudProgPullAt<15000)return Promise.resolve(false);cloudProgPullAt=now;cloudProgPulling=true;
  return window.PD_DB.getProgress($("#group").value.trim(),uid).then(mergeCloudProgress).catch(()=>{if(S&&S.p)UX.storage(progKey(S.type,S.practice,S.date,S.sf),{remote:"failed"});return false}).finally(()=>{cloudProgPulling=false})}
-function persist(forceCloud){if(S.discarded||!S.p||S.done||!S.start||!S.seed)return;const a=progAll(),today=dstr();let pruned=false;
- for(const k in a)if(k.startsWith("d:")&&k.split(":")[1]<addDays(today,-8)){delete a[k];pruned=true}
+function persist(forceCloud){if(S.discarded||!S.p||S.done||!S.start||!S.seed)return;const a=progAll();let pruned=false;
  const k=progKey(S.type,S.practice,S.date,S.sf),pc=progressPct();
  /* Alleen bordinvoer of eigen aantekeningen maken dit een lopende puzzel; hints bekijken en controleren niet. */
  if(pc<=0&&!(S.nt&&Object.values(S.nt).some(Boolean))&&!(S.cs&&Object.values(S.cs).some(Boolean))&&!(S.str&&S.str.size)){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;UX.saves.delete(k);UX.paintStorage();return}
@@ -1656,7 +1655,7 @@ function showNewFree(t,random,fromCurrent,nvForced){if(!TYPES[t])return;if($("#c
  const levelScreen=()=>{$("#npmt").textContent="Nieuwe "+titleName();sub.textContent=LVN[t]?"Kies de moeilijkheid.":"Klaar voor een nieuwe puzzel?";lvBox.innerHTML="";const old=latestFreeProgress(t,t==="nono"?nv:undefined),levels=LVN[t]||[2];levels.forEach(l=>{const b=document.createElement("button");b.className="nplvb";const desc=t==="nono"&&nv==="color"?(LVS[t][l]||"")+" · "+nonoColorCount(l)+" kleuren":LVS[t]&&LVS[t][l]?LVS[t][l]:"";b.innerHTML="<b>"+(LVN[t]?LVL[l]:"Starten")+"</b><small>"+desc+"</small><span>›</span>";b.onclick=()=>startChosenFree(t,l,nv,random,!!old);lvBox.append(b)});
   const sep=document.createElement("div");sep.className="nparchsep";sep.textContent="Of kies een eerdere dag";lvBox.append(sep);const arch=document.createElement("button");arch.className="nplvb nparchive";arch.innerHTML="<b>Vorige dagelijkse puzzels</b><small>Bekijk de kalender</small><span>›</span>";arch.onclick=archiveScreen;lvBox.append(arch)};
  const existing=old=>{$("#npmt").textContent=titleName();sub.textContent=old.practice?"Je hebt nog een onafgemaakte vrije puzzel.":"Je hebt nog een onafgemaakte "+dnl(old.date)+"-dagpuzzel.";lvBox.innerHTML='<div class="npwarn"><b>Wat wil je doen?</b><p>'+meta(old)+'</p><div class="npactions"><button id="npcontinue">Verder puzzelen</button><button id="npreplace" class="secondary">Nieuwe puzzel</button></div></div>';$("#npcontinue").onclick=()=>resumeProgress(old.k);$("#npreplace").onclick=levelScreen};
- const freeOld=latestFreeProgress(t,t==="nono"?nv:undefined),dayOld=progressList({practice:false,type:t}).find(x=>x.date<dstr())||null,old=!dayOld?freeOld:!freeOld?dayOld:(freeOld.e.at||0)>(dayOld.e.at||0)?freeOld:dayOld;
+ const old=latestFreeProgress(t,t==="nono"?nv:undefined);
  if(fromCurrent&&old){
   $("#npmt").textContent="Nieuwe "+titleName()+" starten?";
   sub.textContent="Je onafgemaakte vrije puzzel wordt vervangen zodra je een nieuwe moeilijkheid kiest.";
