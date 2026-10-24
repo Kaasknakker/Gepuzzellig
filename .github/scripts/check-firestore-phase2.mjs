@@ -26,6 +26,10 @@ try{
  await assertSucceeds(getDoc(doc(db(solo),'players',solo.playerId)));
  await assertFails(getDoc(doc(db(outsider),'players',solo.playerId)));
  await assertSucceeds(getDoc(doc(db(solo),'progress',solo.playerId,'items','daily-bin')));
+ const personalResult={schemaVersion:3,playerId:solo.playerId,name:'Solo',groupId:'',puzzleDate:'2026-10-24',completedOn:'2026-10-24',puzzleType:'bin',resultType:'bin.2',mode:'daily',difficulty:'2',variant:'',deviceVariant:'ipad',puzzleKey:'2026-10-24:bin.2',secs:120,mist:0,hints:0,hintSteps:{},emo:'',note:'',legacyResultId:'',createdAt:400,updatedAt:400};
+ await assertSucceeds(setDoc(doc(db(solo),'playerResults',solo.playerId,'items','daily-bin'),personalResult));
+ await assertFails(setDoc(doc(db(outsider),'playerResults',solo.playerId,'items','bad'),{...personalResult,playerId:solo.playerId,puzzleKey:'bad'}));
+ await assertSucceeds(setDoc(doc(db(solo),'progress',solo.playerId,'items','phase4-free'),{schemaVersion:3,legacyKey:'p:star.3',playerId:solo.playerId,puzzleType:'star',mode:'free',puzzleKey:'p:star.3',difficulty:'3',variant:'',deviceVariant:'ipad',state:{k:'p:star.3',pc:25},progressPercent:25,startedAt:410,updatedAt:411}));
  await assertFails(getDoc(doc(db(outsider),'progress',solo.playerId,'items','daily-bin')));
  await assertSucceeds(setDoc(doc(db(solo),'progress',solo.playerId,'items','free-star'),{playerId:solo.playerId,puzzleType:'star',mode:'free',puzzleKey:'star:fixture',difficulty:'hard',state:{marks:[]},progressPercent:5,startedAt:30,updatedAt:31}));
  await assertFails(setDoc(doc(db(outsider),'progress',solo.playerId,'items','bad'),{playerId:solo.playerId,puzzleType:'bin',mode:'free',puzzleKey:'x',difficulty:'normal',state:{},progressPercent:0,startedAt:1,updatedAt:1}));
@@ -42,5 +46,5 @@ try{
  await assertSucceeds(getDoc(doc(db(member),'playerMemberships',member.playerId,'groups',fx.group.id)));
  await assertFails(getDoc(doc(db(outsider),'playerMemberships',member.playerId,'groups',fx.group.id)));
  await assertFails(setDoc(doc(db(member),'playerMemberships',member.playerId,'groups','g_fake'),{groupId:'g_fake',role:'member',status:'approved',joinedAt:1,updatedAt:1}));
- console.log('Fase 2/3 Firestore-rules: skeleton, anonymous solo en identiteitsbehoud geslaagd.');
+ console.log('Fase 2/3/4 Firestore-rules: skeleton, anonymous identiteit en persoonlijke data geslaagd.');
 }finally{await env.cleanup();}
