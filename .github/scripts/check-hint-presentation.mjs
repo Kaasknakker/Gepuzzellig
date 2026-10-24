@@ -56,3 +56,13 @@ assert.equal(hintStepScope(hexFocus,1).cells.join(),'2,3,4');
 assert.equal(hintStepScope(hexFocus,1).lines.join(),'4');
 `,context);
 console.log('OK: aparte kijkgebieden voor gebieden, rijen en Hexcells-lijnen');
+
+// De denkvraag verschijnt vóór de volledige uitleg; geen voortijdige zet.
+vm.runInContext(`
+const aha={key:'aha',move:{cells:[1],set:1,kind:'tech',text:'Uitgebreide afleiding',btn:'Vul in'},shortDirection:'Kijk naar deze rij.',reasonSteps:['Hier hoort het antwoord.'],explanationSteps:['Hier hoort het antwoord.'],thinkSteps:['Wat gebeurt er als je hier hetzelfde teken zet?'],thinkScope:[0,1],scope:[0,1,2],reasonScope:[0,1,2]};
+S={type:'bin',p:{W:3},cur:[-1,-1,-1],hints:0,hint:aha};
+showHintLevel(aha,2,false);
+assert.equal(box.querySelector('ol').children[0].textContent,aha.thinkSteps[0]);assert.equal(box.querySelector('details'),null);assert.equal(aha.cells.length,0);assert.equal(aha.why.join(),'0,1');
+showHintLevel(aha,3,false);assert.equal(box.querySelector('ol').children[0].textContent,aha.explanationSteps[0]);assert.equal(aha.cells.join(),'1');
+`,context);
+console.log('OK: eerst kijkgebied, dan denkvraag en vakjes, pas daarna volledige uitleg en zet');

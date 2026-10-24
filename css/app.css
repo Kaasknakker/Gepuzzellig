@@ -1202,7 +1202,7 @@ body.phone #grid>.nsize{font-size:10px;padding-right:3px;padding-bottom:3px}
 #inputmode button.on{background:var(--fg);color:var(--card)}
 body[data-input-mode=fill]{--mode-tint:#387dbb}
 body[data-input-mode=cross]{--mode-tint:#b96060}
-body[data-input-mode] #stage{background-color:color-mix(in srgb,var(--mode-tint) 9%,transparent);border-radius:18px;transition:background-color .15s}
+body:not(.home):not(.newpick)[data-input-mode=fill],body:not(.home):not(.newpick)[data-input-mode=cross]{background-color:color-mix(in srgb,var(--mode-tint) 18%,var(--bg))}
 body[data-input-mode=cross] #grid.pxm{--card:color-mix(in srgb,#c76565 15%,var(--bg));box-shadow:0 0 0 4px color-mix(in srgb,#b96060 60%,var(--line)),0 8px 24px var(--sh)}
 body[data-t=bin] #grid,body[data-t=star] #grid{box-shadow:0 0 0 4px color-mix(in srgb,var(--mode-tint) 60%,var(--line)),0 8px 24px var(--sh)}
 #grid .cnt span.full{color:color-mix(in srgb,var(--fg) 32%,var(--bg));font-weight:500}
@@ -1215,7 +1215,7 @@ body.phone #grid>.nsize{font-size:13px;padding:0 4px 5px 0}
 .daygroup{border-top:1px solid var(--line);padding:0 12px}
 .daygroup summary{min-height:40px;display:flex;align-items:center;justify-content:flex-end;gap:8px;cursor:pointer;font-size:13px;color:var(--mut);font-weight:700;list-style:none}
 .daygroup summary::-webkit-details-marker{display:none}
-.daygroup[open] summary span{transform:rotate(180deg)}
+.daygroup[open] summary i{transform:rotate(180deg)}
 .daygroup .ddpeople{display:flex;flex-wrap:wrap;padding-bottom:10px;gap:8px}
 .daygroup .ddperson{white-space:normal;max-width:100%;flex-wrap:wrap}
 @media(max-width:760px),(max-aspect-ratio:1/1){#inputmode{flex-direction:row}}
@@ -1236,3 +1236,47 @@ body.phone:is([data-t=bin],[data-t=star],[data-t=mur]) #pbot #hintb,body.phone:i
 body.phone #pbot #inputmode{min-width:84px;gap:3px}
 body.phone #pbot #inputmode button{font-size:19px;min-height:48px;overflow:hidden}
 @media(max-width:359px){body.phone #pbot #undo,body.phone #pbot #redo{flex-basis:32px}body.phone #pbot #potb{flex-basis:36px}}
+
+/* De volledige groepsstatus blijft één regel. Telefoons tonen de kortste status. */
+.daygroup summary{white-space:nowrap;max-width:none;width:max-content}
+.daygroup summary i{font-style:normal}
+.daystatus-short{display:none}
+@media(max-width:760px){.daygroup summary .daystatus-full{display:none}.daygroup summary .daystatus-short{display:inline}}
+
+/* Dezelfde onlineknop op Home, overzichten en puzzels. */
+.peerlive,.hlivebadge{display:inline-flex;align-items:center;gap:7px;width:max-content;max-width:100%;min-height:34px;padding:5px 10px;border:1px solid color-mix(in srgb,var(--ok) 40%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--ok) 8%,var(--card));color:var(--fg);font-size:13px;font-weight:750;white-space:nowrap;cursor:pointer;box-shadow:none}
+.peerlive[hidden]{display:none!important}
+.peerlive>i{display:block;width:9px;height:9px;flex:none;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 15%,transparent)}
+.hlivebadge{justify-self:start}
+body.phone:not(.home):not(.newpick) #prow #peerLive{width:auto;flex:0 0 auto;min-height:34px;padding:5px 9px;border-radius:999px;gap:6px}
+body.phone:not(.home):not(.newpick) #prow #peerLive span{display:inline;font-size:12px}
+#tbHome{gap:6px;width:auto!important;min-width:44px;padding:8px 12px!important;white-space:nowrap}
+#tbHome span{font-size:14px;font-weight:750}
+body.phone #prow #tbHome{width:auto;flex:0 0 auto;gap:4px;padding:8px!important}
+body.phone #prow #tbHome svg{width:23px;height:23px;flex:none}
+.peerlivepop{max-height:min(420px,70dvh);overflow:auto;overscroll-behavior:contain;font-size:14px;width:min(340px,calc(100vw - 16px))}
+
+/* Modus herkenbaar aan de hele achtergrond, bordrand én geselecteerde knop. */
+body[data-t=hex][data-input-mode=cross]{--mode-tint:#505966}
+body[data-input-mode] #inputmode button.on,body[data-input-mode] #nmode button.on,body[data-input-mode] #pmode button.on,body[data-input-mode] #mb.on,body[data-input-mode] #mz.on{background:color-mix(in srgb,var(--mode-tint) 24%,var(--card))!important;color:var(--fg)!important;box-shadow:inset 0 0 0 2px var(--mode-tint)!important}
+body[data-input-mode] #grid.nf,body[data-input-mode] #grid.nx,body[data-input-mode] #grid.pom,body[data-input-mode] #grid.pxm{box-shadow:0 0 0 4px var(--mode-tint),0 8px 24px var(--sh)}
+body[data-input-mode=cross] #mgrid.mxmode{outline-color:var(--mode-tint)}
+body[data-input-mode=fill] #mgrid.pmode{outline-color:var(--mode-tint)}
+
+.peerlive>span{display:inline;min-width:0;overflow:hidden;text-overflow:ellipsis}
+body.phone #prow #peerLive{max-width:38vw}
+
+@media(max-width:359px){
+ body.phone #pbot:has(#notewipe:not([style*="none"])) #undo,body.phone #pbot:has(#notewipe:not([style*="none"])) #redo,body.phone #pbot:has(#notewipe:not([style*="none"])) #potb,body.phone #pbot:has(#notewipe:not([style*="none"])) #notewipe,body.phone #pbot:has(#notewipe:not([style*="none"])) #hintb,body.phone #pbot:has(#notewipe:not([style*="none"])) #chk{flex-basis:30px}
+ body.phone #pbot:has(#notewipe:not([style*="none"])) #inputmode{min-width:78px}
+}
+@media(max-width:359px){
+ body.phone:not(.home):not(.newpick)[data-t=hex] #prow{flex-wrap:wrap;gap:6px}
+ body.phone:not(.home):not(.newpick)[data-t=hex] #prow #hexstat{order:10;flex:1 0 100%;width:100%;justify-content:center;margin:0}
+}
+@media(max-width:760px){
+ body.phone:not(.home):not(.newpick)[data-t=hex] #prow:has(#peerLive:not([hidden])){flex-wrap:wrap;gap:6px}
+ body.phone:not(.home):not(.newpick)[data-t=hex] #prow:has(#peerLive:not([hidden])) #hexstat{order:10;flex:1 0 100%;width:100%;justify-content:center;margin:0}
+}
+body.tablet #topbar #peerLive{width:max-content;height:34px;min-width:0;flex:0 0 auto;padding:5px 11px;font-size:13px;border-radius:999px}
+body.tablet #topbar #peerLive span{max-width:180px}

@@ -2,6 +2,16 @@
 
 Datum: 23 oktober 2026. Uitgangspunt: nieuwste main `26b5852acfd0e1401fadb5b72cc6a042553aab44`. Wijzigingen op branch `codex/stapsgewijze-hints`.
 
+## Huidige hintbediening — 24 oktober 2026
+
+Deze afspraken vervangen de eerdere presentatiebeschrijvingen hieronder:
+
+1. **Klein duwtje:** markeer een rij, kolom, gekleurd vlak of aanwijzing. Stel een korte kijkvraag.
+2. **Denk eens verder:** markeer relevante vakjes en stel een concrete denkvraag, bijvoorbeeld wat er gebeurt als de speler daar een ster probeert. Dit is nog geen uitleg van de volledige zet. Bij telstappen mag een gerichte telvraag de hypothese vervangen.
+3. **Volledige hint:** toon de hele afleiding in gewone zinnen, markeer de doelvakjes en bied aan de zet uit te voeren.
+
+Doel: de speler krijgt zelf een AHA-moment. Schrijf waar de speler kijkt, wat al bekend is en waarom daaruit iets volgt. Gebruik rij/kolom/vlak in plaats van abstracte aantallen ‘lijnen en gebieden’. Let op enkelvoud en meervoud. Baseer de tekst en markering op dezelfde bewezen afleiding; verzin geen verklaring en lees bij Hexcells geen verborgen kleuren. Vakjes om over na te denken mogen bij stap 2 gemarkeerd zijn, maar de concrete oplossing en uitvoerknop horen bij stap 3.
+
 ## Automatische controles
 
 - `node .github/scripts/check-app.mjs`: geslaagd; scripts, gezamenlijke laadvolgorde, serviceworker-syntax en consistente bestandsversie 89.

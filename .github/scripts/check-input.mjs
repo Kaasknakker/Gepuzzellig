@@ -91,6 +91,12 @@ for(const fn of handlers.click||[])fn({target:button,preventDefault(){suppressed
 const homeButton={closest:()=>homeButton};suppressed=false;
 for(const fn of handlers.click||[])fn({target:homeButton,preventDefault(){suppressed=true},stopImmediatePropagation(){suppressed=true}});
 assert.equal(suppressed,false,'native click on scroll page remains available');
+// Na wissen kan de knop verdwijnen en Hint naar dezelfde plek opschuiven.
+suppressed=false;for(const fn of handlers.click||[])fn({target:homeButton,detail:1,clientX:0,clientY:0,preventDefault(){suppressed=true},stopImmediatePropagation(){suppressed=true}});
+assert.equal(suppressed,true,'compatibility click cannot hit a different button after toolbar reflow');
+suppressed=false;for(const fn of handlers.click||[])fn({target:homeButton,detail:1,clientX:100,clientY:100,preventDefault(){suppressed=true},stopImmediatePropagation(){suppressed=true}});
+assert.equal(suppressed,false,'a separate click elsewhere is not swallowed');
+
 // Scrolls in account dialogs must not toggle the underlying Murdoku mode or
 // suppress the browser's Pencil scroll gesture.
 const modalEvents={},modal=vm.createContext({S:{type:'mur',p:{},mxm:false},document:{addEventListener:(name,fn)=>{(modalEvents[name]??=[]).push(fn)}}});

@@ -94,9 +94,9 @@ function murGuidance(move){
  }
  if(!used.length&&!direct.length)parts.push("Voor "+name+" kan ik op dit moment geen korte afleiding geven. Je kunt de eigen aanwijzingen vergelijken; de concrete plaats is alleen in de volgende stap beschikbaar.");
  else parts.push("Houd voor "+name+" alleen plekken over die aan al deze voorwaarden voldoen. Vakjes met een voorwerp waarop je niet kunt zitten vallen af. Zo beperk je de mogelijkheden zonder te gokken.");
- const briefFacts=(own.length?own:used).slice(0,2).map(c=>nm(c.p)+": “"+c.text+"”"),event=direct.find(e=>["T","P","L","H","V0","V1","V2","V3"].includes(e.kind));
- const briefRule=event?(event.kind==="T"?"Probeer een mogelijke plek: kan "+(+event.f[2]>=0?nm(+event.f[2]):"iedereen")+" dan nog ergens staan?":event.kind==="P"||event.kind==="L"?"Vergelijk de twee rijen of kolommen die deze personen samen nodig hebben.":event.kind==="H"?"Controleer wie nog in "+(event.f[1]==="0"?"rij ":"kolom ")+(+event.f[2]+1)+" past.":"Bij het slachtoffer hoort precies één andere persoon."):occupied.length?"Een rij of kolom waar al iemand staat valt af.":"Voorwerpen zonder zitplek vallen af.";
- const reasonSteps=[...briefFacts,briefRule];if(reasonSteps.length<3)reasonSteps.push("Schrap voor "+name+" de plekken die niet aan deze voorwaarden voldoen.");
+ const briefFacts=(own.length?own:used).slice(0,2).map(c=>"Op het kaartje van "+nm(c.p)+" staat: “"+c.text+"”"),event=direct.find(e=>["T","P","L","H","V0","V1","V2","V3"].includes(e.kind));
+ const briefRule=event?(event.kind==="T"?"Probeer een mogelijke plek: kan "+(+event.f[2]>=0?nm(+event.f[2]):"iedereen")+" dan nog ergens staan?":event.kind==="P"||event.kind==="L"?"Vergelijk de twee rijen of kolommen die deze personen samen nodig hebben.":event.kind==="H"?"Controleer wie nog in "+(event.f[1]==="0"?"rij ":"kolom ")+(+event.f[2]+1)+" past.":"Bij het slachtoffer hoort precies één andere persoon."):occupied.length?"In elke rij en kolom staat maar één persoon. Waar al iemand staat, kan dus niemand meer bij.":"Op een voorwerp dat geen zitmeubel is, kan niemand staan. Die vakjes kun je dus wegstrepen.";
+ const reasonSteps=[...briefFacts,briefRule];if(reasonSteps.length<3)reasonSteps.push("Kijk welke plekken voor "+name+" bij allebei de aanwijzingen passen. Een plek die niet past, kun je wegstrepen.");
  const shortDirection="Bekijk "+(primary.length>1?"de gemarkeerde kaartjes rond ":"het kaartje van ")+(owners[0]||name)+".";
  return {shortDirection,reasonSteps,direction,reason:[...new Set(parts)].join(" "),lookCards:owners.length?[...new Set(primary.map(c=>c.p))]:[person],reasonCards:[...new Set([person,...used.map(c=>c.p)])]};
 }
@@ -113,11 +113,13 @@ function prepareHint(move){
  const key=JSON.stringify([t,move.kind||"tech",move.set==null?null:move.set,move.cells,move.kind==="fix"?move.cells.map(j=>S.cur[j]):null]);
  const guide={scope,direction,reason,unit,lookCards,reasonCards};
  if(t==="mur")Object.assign(guide,briefSource);
- const brief=compactGuidance(move,guide);
+ const brief=compactGuidance(move,guide),thought=thoughtGuidance(move,guide);
+ if(t!=="mur"){direction=brief.shortDirection;reason=brief.reasonSteps.join(" ")}
 
- return {move,key,level:1,scope,direction,reason,...brief,cards,unit,lookCards,reasonCards,reasonScope:reasonScope||scope,lookHexLines,reasonHexLines,cells:[],why:scope};
+ return {move,key,level:1,scope,direction,reason,...brief,...thought,explanationSteps:brief.reasonSteps,cards,unit,lookCards,reasonCards,reasonScope:reasonScope||scope,lookHexLines,reasonHexLines,cells:[],why:scope};
 }
 function hintStepScope(h,index){
+ if(h.reasonScopes?.[index])return {cells:h.reasonScopes[index]};
  const q=h.move.proof||{},text=h.reasonSteps[index]||"",p=S.p,N=p.W||p.N;
  if(S.type==="hex"){
   const clues=q.clues||[],numbered=clues.filter(o=>o.kind!=="rest");
@@ -139,7 +141,8 @@ function projectHint(h){
  h.hexLines=h.level===1?h.lookHexLines:h.reasonHexLines;
  h.ghost=full?m.ghost:null;h.cards=full?m.cards:h.level===1?h.lookCards||h.cards:h.reasonCards||h.cards;
  h.rest=m.rest;h.unit=full?m.unit:h.unit;
- h.focusScope=null;if(h.level===2&&h.focusStep!=null){const focus=hintStepScope(h,h.focusStep);if(focus){h.focusScope=focus.cells;h.why=focus.cells;h.hexLines=focus.lines||[];h.rest=false}}
+ h.focusScope=h.level===2&&h.thinkSteps?h.thinkScope:null;if(h.focusScope)h.why=h.focusScope;
+ if(h.level===2&&h.focusStep!=null){const focus=hintStepScope(h,h.focusStep);if(focus){h.focusScope=focus.cells;h.why=focus.cells;h.hexLines=focus.lines||[];h.rest=false}}
 
 }
 function hintConcrete(h){
@@ -194,25 +197,26 @@ function showHintLevel(h,level,focusNext){
  const b=$("#hint"),action=b.querySelector(".hintnext");clearTimeout(hintHideT);b.classList.remove("closing");b.replaceChildren();
  const add=(tag,cls,text)=>{const e=document.createElement(tag);e.className=cls;e.textContent=text;b.append(e);return e};
  const close=add("button","hx","✕");close.setAttribute("aria-label","Hint sluiten");close.onclick=()=>clearHint();
- const names=["Klein duwtje","Uitleg","Volledige hint"];
+ const names=["Klein duwtje","Denk eens verder","Volledige hint"];
  const title=add("h2","hht","💡 "+names[level-1]);title.id="hinttitle";b.setAttribute("aria-labelledby",title.id);
  add("div","hintprogress","Stap "+level+" van 3");
- if(level===2){const steps=add("ol","hintbody hintsteps","");for(const [index,text] of h.reasonSteps.entries()){const li=document.createElement("li");li.textContent=text;steps.append(li);
- if(hintStepScope(h,index)){const focus=document.createElement("button");focus.className="hintfocus";focus.textContent="Toon op het bord";focus.setAttribute("aria-pressed","false");focus.onclick=()=>{if(h.stale)return;h.focusStep=h.focusStep===index?null:index;for(const b of bSteps())b.setAttribute("aria-pressed",String(b===focus&&h.focusStep===index));projectHint(h);layoutHintCard(h)};li.append(focus)}}
+ if(level===2){const steps=add("ol","hintbody hintsteps","");for(const [index,text] of (h.thinkSteps||h.reasonSteps).entries()){const li=document.createElement("li");li.textContent=text;steps.append(li);
+ if(!h.thinkSteps&&hintStepScope(h,index)){const focus=document.createElement("button");focus.className="hintfocus";focus.textContent="Toon op het bord";focus.setAttribute("aria-pressed","false");focus.onclick=()=>{if(h.stale)return;h.focusStep=h.focusStep===index?null:index;for(const b of bSteps())b.setAttribute("aria-pressed",String(b===focus&&h.focusStep===index));projectHint(h);layoutHintCard(h)};li.append(focus)}}
  function bSteps(){return b.querySelectorAll(".hintfocus")}
 }
- else add("p","hintbody",level===1?h.shortDirection:hintConclusion(h));
- if(level>1){const details=add("details","hintdetails","");details.open=!!(h.detailsOpen&&h.detailsOpen[level]);
+ else{add("p","hintbody",level===1?h.shortDirection:hintConclusion(h));
+ if(level===3&&h.explanationSteps){const explain=add("ol","hintbody hintsteps","");for(const text of h.explanationSteps){const li=document.createElement("li");li.textContent=text;explain.append(li)}}}
+ if(level>1&&!h.thinkSteps&&(level===3||h.reason!==h.reasonSteps.join(" "))){const details=add("details","hintdetails","");details.open=!!(h.detailsOpen&&h.detailsOpen[level]);
   const summary=document.createElement("summary");summary.textContent="Meer uitleg";details.append(summary);
   const body=document.createElement("p");body.className="hintbody";body.textContent=level===2?h.reason:hintConcrete(h);details.append(body);
   details.addEventListener("toggle",()=>{h.detailsOpen=h.detailsOpen||{};h.detailsOpen[level]=details.open;if(S.hint===h&&b.isConnected&&b.contains(details)&&(PHONE||innerWidth<1100))layoutHintCard(h)});
  }
- add("p","hintlegend",h.stale?"Het bord is gewijzigd. Vernieuw de hint voor een actuele aanwijzing.":level<3?"┄ Gestippeld: kijkgebied.":"═ Dubbele rand: hier komt de zet.");
+ add("p","hintlegend",h.stale?"Het bord is gewijzigd. Vernieuw de hint voor een actuele aanwijzing.":level===2&&h.thinkSteps?"┄ Gestippeld: denk over deze vakjes na.":level<3?"┄ Gestippeld: kijkgebied.":"═ Dubbele rand: hier komt de zet.");
  // Behoud de knopidentiteit: de bestaande Pencil-afhandeling moet een
  // nageleverde compatibiliteitsklik op dezelfde knop kunnen tegenhouden.
  const next=action||document.createElement("button");next.className="hintnext";b.append(next);
  if(h.stale){next.textContent="Vernieuw hint voor dit bord";next.onclick=()=>{clearHint();hintGo()}}
- else if(level<3){next.textContent=level===1?"Geef wat meer uitleg":"Toon de volledige hint";next.onclick=()=>showHintLevel(h,level+1,true)}
+ else if(level<3){next.textContent=level===1?"Geef een tweede duwtje":"Toon de volledige hint";next.onclick=()=>showHintLevel(h,level+1,true)}
  else{next.textContent=h.move.btn;next.onclick=doStep}
  if(level>1&&!h.stale){const back=add("button","hintback","← "+names[level-2]);back.onclick=()=>showHintLevel(h,level-1,true)}
  add("div","hintusage",hintSummary({hints:S.hints,hintSteps:hintTotals()}));

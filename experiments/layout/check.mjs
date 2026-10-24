@@ -85,7 +85,7 @@ try{
      hints++;
     }
     // Meer uitleg blijft binnen dezelfde kaart; sluiten geeft bediening terug.
-    await page.locator('#hint summary').click();await page.waitForTimeout(40);
+    if(await page.locator('#hint summary').count())await page.locator('#hint summary').click();await page.waitForTimeout(40);
     assert.deepEqual(await page.locator('#hint').boundingBox(),{x:stable.card.x,y:stable.card.y,width:stable.card.width,height:stable.card.height});
     if(['iphone','ipad-landscape','desktop-4k'].includes(name)&&['bin','hex','mur','plus'].includes(t))await page.screenshot({path:'/tmp/layout-'+name+'-'+t+'.png'});
     await page.locator('#hint .hx').click();await page.waitForTimeout(160);

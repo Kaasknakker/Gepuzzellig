@@ -148,68 +148,151 @@ function puzzleGuidance(move){
 /* Korte leeslaag: één kijkvraag en hooguit drie losse gedachten.
    De volledige afleiding blijft bewaard voor ‘Meer uitleg’. Geen doelvakjes
    of verborgen oplossingswaarden lezen bij het maken van deze teksten. */
+// Vertel de redenering: waar kijken we, wat weten we, wat volgt daaruit?
 function compactGuidance(move,guide){
  const p=S.p,q=move.proof||{},rule=q.rule;
  const result=(direction,...steps)=>({shortDirection:direction,reasonSteps:steps.filter(Boolean)});
- if(move.kind==='fix')return result('Controleer de gemarkeerde eerdere keuzes.','Vergelijk je invoer met de aanwijzingen in dit kijkgebied.','Open de volledige hint om te zien welke keuze je kunt herstellen.');
+ const fallback=()=>result('Kijk nog eens naar de gemarkeerde aanwijzingen.','Voor deze stap kan ik nog geen korte uitleg geven. Je kunt de volledige hint openen om te zien welke zet mogelijk is.');
+ if(move.kind==='fix')return result('Kijk nog eens naar wat je hier hebt ingevuld.','Een van je keuzes past niet bij de aanwijzingen van de puzzel.','Open de volledige hint als je wilt zien welk vakje je kunt herstellen.');
  if(S.type==='mur'){
-  if(move.kind==='kill')return result('Wie stond alleen bij het slachtoffer?','Het slachtoffer was alleen met de moordenaar.','Bekijk wie er in dezelfde ruimte stond.');
-  if(!move.proof)return result('Vergelijk de gemarkeerde kaartjes.','Voor deze stap is geen korte afleiding beschikbaar.','De volledige hint kan je de concrete plek tonen.');
-  return {shortDirection:guide.shortDirection||'Vergelijk de gemarkeerde kaartjes.',reasonSteps:guide.reasonSteps||['Combineer de aanwijzingen op deze kaartjes.','Schrap plekken die daarmee in strijd zijn.']};
+  if(move.kind==='kill')return result('Wie was er bij het slachtoffer?','Het slachtoffer was alleen met de moordenaar in een ruimte.','Kijk wie er in diezelfde ruimte staat. Die persoon is dus de moordenaar.');
+  if(!move.proof)return fallback();
+  return {shortDirection:guide.shortDirection||'Lees de gemarkeerde kaartjes nog eens.',reasonSteps:guide.reasonSteps||['Kijk welke plekken passen bij wat op deze kaartjes staat.','Een plek die niet bij alle aanwijzingen past, kun je wegstrepen.']};
  }
  if(S.type==='bin'){
-  const l=q.line;if(!l)return result('Bekijk de gemarkeerde rij of kolom.','Voor deze stap is geen korte afleiding beschikbaar.');
-  const name=(l.o?'kolom ':'rij ')+(l.x+1),symbol=sy(q.symbol),empty=l.v.filter(v=>v<0).length;
-  if(rule==='pair')return result('Zoek in '+name+' twee gelijke tekens naast elkaar.','In '+name+' staat '+symbol+symbol+'.','Drie gelijke tekens achter elkaar mogen niet.','Bekijk de lege plekken naast dit paar.');
-  if(rule==='gap')return result('Bekijk het gat tussen twee gelijke tekens in '+name+'.','In '+name+' staat '+symbol+' · '+symbol+'.','Vul je in het midden hetzelfde teken in? Dan krijg je er drie op een rij. Dat mag niet.');
-  if(rule==='balance')return result('Tel de '+symbol+' in '+name+'.','Er staan al '+l.len/2+' keer '+symbol+'.','Van elk teken moeten er precies '+l.len/2+' in deze lijn staan.','Er kan dus geen '+symbol+' meer bij.');
-  if(rule==='balanceConflict')return result('Combineer het tellen in '+name+' met de regel over drietallen.','Er kan nog maar één '+symbol+' bij in '+name+'.','Probeer die in gedachten; de overige lege plekken krijgen dan '+sy(1-q.symbol)+'.','Een plek die zo een drietal veroorzaakt valt af.');
-  if(rule==='different'){const other=(q.other.o?'kolom ':'rij ')+(q.other.x+1);return result('Vergelijk '+name+' met '+other+'.','De ingevulde tekens zijn gelijk; '+name+' heeft nog '+empty+' lege vakjes.','Twee volledige lijnen mogen niet hetzelfde zijn.','Als je hiermee '+other+' precies hetzelfde maakt, kan dat dus niet.')}
-  return result('Vergelijk de mogelijke aanvullingen van '+name+'.','Er '+(q.count===1?'is nog één geldige aanvulling.':'zijn nog '+q.count+' geldige aanvullingen.'),'Kijk wat bij al die mogelijkheden op dezelfde plek staat. Dat teken kun je met zekerheid invullen.');
+  const l=q.line;if(!l)return fallback();
+  const name=(l.o?'kolom ':'rij ')+(l.x+1),where=l.o?'kolom':'rij',one=q.symbol?'rondje':'kruisje',many=q.symbol?'rondjes':'kruisjes',other=q.symbol?'kruisje':'rondje',half=l.len/2;
+  if(rule==='pair')return result('Kijk naar '+name+'. Zie je de twee '+many+' naast elkaar?','Er mogen nooit drie dezelfde tekens achter elkaar staan.','Direct naast deze twee '+many+' mag dus geen '+one+' meer komen. Op een lege plek ernaast hoort een '+other+'.');
+  if(rule==='gap')return result('Kijk naar '+name+'. Tussen twee '+many+' zit nog een leeg vakje.','Als je daar ook een '+one+' zet, staan er drie dezelfde tekens achter elkaar. Dat mag niet.','In dat middelste vakje moet daarom een '+other+' komen.');
+  if(rule==='balance')return result('Kijk naar '+name+' en tel de '+many+'.','In deze '+where+' moeten precies '+half+' kruisjes en '+half+' rondjes komen. Er staan al '+half+' '+many+'.','Er kan dus geen '+one+' meer bij. In de overgebleven lege vakjes komt het andere teken.');
+  if(rule==='balanceConflict')return result('Kijk naar '+name+'. Er kan nog maar één '+one+' bij.','Probeer in gedachten waar dat laatste '+one+' zou kunnen staan. Alle andere lege vakjes moeten dan een '+other+' krijgen.','Krijg je zo ergens drie dezelfde tekens achter elkaar? Dan kan dat laatste '+one+' niet op de plek die je probeerde.');
+  if(rule==='different'){const otherName=(q.other.o?'kolom ':'rij ')+(q.other.x+1);return result('Kijk naar '+name+' en vergelijk die met '+otherName+'.','De tekens die al zijn ingevuld, staan op dezelfde plekken. Maar twee volledig ingevulde '+(l.o?'kolommen':'rijen')+' mogen nooit precies hetzelfde zijn.','Vul de lege vakjes dus zo aan dat beide tekens even vaak voorkomen én deze '+where+' verschilt van '+otherName+'.')}
+  return result('Kijk naar de lege vakjes in '+name+'.','Vul ze in gedachten aan: evenveel kruisjes als rondjes, nooit drie dezelfde tekens achter elkaar en geen twee gelijke '+(l.o?'kolommen':'rijen')+'.','Er '+(q.count===1?'is nog maar één manier die aan die regels voldoet.':'zijn nog '+q.count+' manieren die aan die regels voldoen. Kijk welk teken bij al die manieren op dezelfde plek staat. Dat teken kun je alvast invullen.'));
  }
  if(S.type==='nono'){
-  const l=q.line,name=l?l.nm:hintLine(guide.scope,p.W);
-  if(rule==='empty')return result('Bekijk de aanwijzing bij '+name+'.','De aanwijzing is 0.','Er past dus geen gevuld blok in deze lijn.');
-  if(rule==='complete')return result('Vergelijk de blokken in '+name+' met de aanwijzing.','De blokken hebben al de juiste lengtes en volgorde.','Extra vulling zou een blok verlengen of toevoegen.');
-  if(rule==='overlap'){const block=ORD[q.block]||(q.block+1)+'e',span=q.max-q.min+q.length,overlap=q.length-(q.max-q.min);return result('Hoe ver kan het '+block+' blok in '+name+' schuiven?','Dit blok is '+q.length+' vakjes lang'+(q.color?' en '+NCN[q.color]:'')+'.','Het past alleen binnen een strook van '+span+' vakjes.',q.min===q.max?'Het kan daarin niet meer verschuiven.':'Schuif het blok in gedachten helemaal naar beide kanten. Er '+(overlap===1?'blijft dan steeds 1 vakje':'blijven dan steeds '+overlap+' vakjes')+' bedekt. Die kun je dus alvast invullen.')}
-  if(rule==='outside')return result('Bekijk hoe ver de blokken in '+name+' kunnen reiken.','Schuif de blokken zo ver mogelijk naar beide kanten.','Komt een blok daar nooit, hoe je het ook schuift? Dan blijft dat vakje leeg.');
-  return result('Kijk hoe de blokken nog passen in '+name+'.',q.count==null?'Gebruik wat al ingevuld is om plaatsingen uit te sluiten.':'Er '+(q.count===1?'is nog één passende plaatsing.':'zijn nog '+q.count+' passende plaatsingen.'),'Ziet een vakje er bij elke mogelijkheid hetzelfde uit? Dan kun je het alvast invullen. Bij een kleurpuzzel moet ook de kleur steeds hetzelfde zijn. Blijft het altijd leeg? Dan komt er een kruisje.');
+  const l=q.line,name=l?l.nm:hintLine(guide.scope,p.W),where=name.startsWith('kolom')?'kolom':'rij';
+  if(rule==='empty')return result('Kijk naar het getal bij '+name+'. Dat is 0.','In deze '+where+' hoeft dus geen enkel vakje gevuld te worden.','Je kunt alle lege vakjes in deze '+where+' wegkruisen.');
+  if(rule==='complete')return result('Kijk naar de ingevulde blokken in '+name+'.','Ze hebben al precies de lengtes en de volgorde die de getallen aangeven. Alle blokken zijn dus klaar.','De lege vakjes die overblijven, mogen niet meer gevuld worden. Daar kun je kruisjes zetten.');
+  if(rule==='overlap'){
+   const block=ORD[q.block]||(q.block+1)+'e',span=q.max-q.min+q.length,overlap=q.length-(q.max-q.min);
+   return result('Kijk naar het '+block+' blok in '+name+'. Hoe ver kun je dat nog verschuiven?','Het blok is '+hintCount(q.length,'vakje','vakjes')+' lang'+(q.color?' en heeft de kleur '+NCN[q.color]:'')+'. Er is nog ruimte voor dat blok binnen '+hintCount(span,'vakje','vakjes')+'.',q.min===q.max?'Het blok past nog maar op één plek. Je kunt het daar dus invullen.':'Schuif het in gedachten eerst helemaal naar het begin en daarna helemaal naar het einde. Er '+(overlap===1?'is 1 vakje dat':'zijn '+overlap+' vakjes die')+' in beide gevallen bij het blok '+(overlap===1?'hoort':'horen')+'. Die kun je alvast invullen.');
+  }
+  if(rule==='outside')return result('Kijk naar de blokken die nog in '+name+' moeten komen.','Schuif ze in gedachten zo ver mogelijk naar beide kanten, zonder dat ze botsen met wat je al weet.','Een leeg vakje waar geen enkel blok bij kan komen, blijft zeker leeg. Daar kun je een kruisje zetten.');
+  return result('Kijk hoe de blokken nog in '+name+' passen.','De getallen geven de lengte en volgorde van de blokken aan. Wat al is ingevuld, helpt je om sommige plekken uit te sluiten.','Kijk wat bij alle overgebleven mogelijkheden hetzelfde blijft. Is een vakje steeds gevuld'+(p.color?' met dezelfde kleur':'')+'? Dan kun je dat invullen. Blijft het steeds leeg? Dan komt er een kruisje.');
  }
  if(S.type==='plus'){
-  const u=move.unit!=null?S.pu[move.unit]:null;if(!u)return result('Bekijk de gemarkeerde som.','Voor deze stap is geen korte afleiding beschikbaar.');
-  const L=plusLook(u,S.cur,p.num),name=plusName(u),start='De som is '+u.t+'; er staat al '+L.K+' vast, dus er ontbreekt '+L.need+'.';
-  if(rule==='complete')return result('Vergelijk het omcirkelde totaal met de som in '+name+'.','De gevraagde som van '+u.t+' is al bereikt.','Elk extra getal maakt het totaal te groot.');
-  if(rule==='remaining')return result('Tel de open getallen in '+name+' bij elkaar op.',start,'De open getallen zijn samen precies '+L.s0+'.','Weglaten maakt het totaal te klein.');
-  if(rule==='tooLarge')return result('Vergelijk de open getallen in '+name+' met wat nog ontbreekt.',start,'Een getal groter dan '+L.need+' kan niet meedoen.');
-  if(rule==='essential')return result('Laat in '+name+' eens een getal buiten de som.',start,'De open getallen zijn samen '+L.s0+'.','Blijft zonder een getal minder dan '+L.need+' over, dan is dat getal nodig.');
-  return result('Vergelijk de getalcombinaties voor '+name+'.',start,rule==='cannotInclude'?'Probeer een getal mee te tellen: kunnen de andere getallen het restant nog maken?':rule==='cannotExclude'?'Laat een getal weg: kunnen de andere getallen de som dan nog maken?':'Bekijk welke getallen in alle combinaties voorkomen en welke nooit.','Lukt de som dan niet meer? Dan weet je dat die keuze niet kan.');
+  const u=move.unit!=null?S.pu[move.unit]:null;if(!u)return fallback();
+  const L=plusLook(u,S.cur,p.num),name=plusName(u),start='De omcirkelde getallen moeten samen '+u.t+' zijn. Je hebt al '+L.K+' omcirkeld, dus je hebt nog '+L.need+' nodig.';
+  if(rule==='complete')return result('Kijk naar de omcirkelde getallen in '+name+'.','Samen zijn ze al precies '+u.t+'. De som is dus klaar.','Als je nog een getal meetelt, wordt de som te groot. Je kunt de andere open getallen hier wegstrepen.');
+  if(rule==='remaining')return result('Kijk naar de getallen die nog open zijn in '+name+'.',start,'Die open getallen zijn samen '+L.s0+': precies wat je nog nodig hebt. Je moet ze dus allemaal meetellen en kunt ze omcirkelen.');
+  if(rule==='tooLarge')return result('Kijk naar '+name+'. Welk getal is groter dan wat je nog nodig hebt?',start,'Een getal boven '+L.need+' maakt de som meteen te groot. Zo’n getal kun je dus wegstrepen.');
+  if(rule==='essential')return result('Kijk naar '+name+'. Kun je de som nog maken als je een getal overslaat?',start,'Tel de open getallen bij elkaar op en laat er telkens één weg. Kom je zonder dat getal niet meer aan '+L.need+'? Dan heb je het nodig en kun je het omcirkelen.');
+  return result('Kijk welke getallen samen de som in '+name+' kunnen maken.',start,rule==='cannotInclude'?'Tel een open getal in gedachten mee. Kun je met de andere getallen daarna niet meer precies op '+L.need+' uitkomen? Dan kan dat getal niet meedoen en kun je het wegstrepen.':rule==='cannotExclude'?'Laat een open getal in gedachten weg. Kun je met de andere getallen dan niet meer precies '+L.need+' maken? Dan heb je dat getal nodig en kun je het omcirkelen.':'Probeer welke groepjes open getallen samen precies '+L.need+' zijn. Een getal dat je elke keer nodig hebt, kun je omcirkelen. Een getal dat nooit meedoet, kun je wegstrepen.');
  }
  if(S.type==='star'){
   const K=p.K||2,u=q.unit,name=u?unitName(u.kind,u.k):null;
-  if(rule==='trial')return result('Vergelijk de gemarkeerde vrije plekken en hun buren.','Stel dat je hier een ster zet. Dan mogen de vakjes eromheen geen ster meer krijgen.','Daarna heeft '+name+' nog '+hintCount(q.need,'ster','sterren')+' nodig, met '+hintCount(q.available,'vrije plek','vrije plekken')+'.',q.available?'Als die plekken elkaar raken past daar hooguit één ster.':'Er blijft geen plek voor een ster over.');
-  if(u){const start='In '+name+' '+(q.stars===1?'staat ':'staan ')+hintCount(q.stars,'ster','sterren')+'; '+hintCount(q.open,'plek is','plekken zijn')+' nog vrij.';
-   if(rule==='complete')return result('Tel de sterren in '+name+'.',start,'Het vereiste aantal van '+K+' is al bereikt.');
-   if(rule==='remaining')return result('Vergelijk de vrije plekken in '+name+' met de ontbrekende sterren.',start,'Er '+(K-q.stars===1?'ontbreekt':'ontbreken')+' nog '+hintCount(K-q.stars,'ster','sterren')+': evenveel als er plekken vrij zijn.');
-   if(rule==='separate')return result('Welke vrije plekken in '+name+' raken elkaar?',start,'Sterren mogen elkaar ook schuin niet raken.','In een groep onderling aangrenzende plekken past hooguit één ster.');
+  if(rule==='regionsInLines'||rule==='linesInRegions'){
+   const lines=lineNames(q.kind,q.lines),regions=regNames(q.regions),single=q.lines.length===1,area=q.regions.length===1,total=q.lines.length*K;
+   const line=single?'deze '+(q.kind==='r'?'rij':'kolom'):'deze '+(q.kind==='r'?'rijen':'kolommen'),region=area?'dit gekleurde vlak':'deze gekleurde vlakken';
+   const lineCells=q.lines.flatMap(k=>Array.from({length:p.N},(_,j)=>q.kind==='r'?k*p.N+j:j*p.N+k)),regCells=p.reg.map((r,i)=>q.regions.includes(r)?i:-1).filter(i=>i>=0);
+   if(single&&area){
+    const noun=q.kind==='r'?'rij':'kolom',same='In deze '+noun+' '+(K===1?'moet':'moeten')+' '+hintCount(K,'ster','sterren')+' komen. In het hele vlak '+(K===1?'moet':'moeten')+' er ook '+K+' komen. Het gaat dus om dezelfde '+(K===1?'ster':'sterren')+'.';
+    const steps=rule==='linesInRegions'?[
+     'Alle vrije vakjes in '+lines+' liggen in hetzelfde gekleurde vlak: '+regions+'.',
+     same,
+     'Alle lege vakjes van dat vlak buiten deze '+noun+' kun je daarom wegkruisen.'
+    ]:[
+     'Alle vrije vakjes van '+regions+' liggen in '+lines+'.',
+     same,
+     'Alle lege vakjes van deze '+noun+' buiten dat vlak kun je daarom wegkruisen.'
+    ];
+    return {...result('Kijk naar '+lines+' en '+regions+'. Waar kunnen de sterren nog komen?',...steps),reasonScopes:[lineCells,regCells,[...new Set([...lineCells,...regCells])]]};
+   }
+   const steps=rule==='linesInRegions'?[
+    'Alle plekken waar in '+line+' nog een ster kan komen, liggen in '+regions+'.',
+    'In '+line+' '+(total===1?'moet':'moeten')+' '+hintCount(total,'ster','sterren')+' komen. In '+region+' '+(total===1?'moet':'moeten')+' er in totaal ook '+total+' komen. Dat moeten dus dezelfde sterren zijn.',
+    'Daarom is er in '+region+' buiten '+lines+' geen ruimte meer voor een ster. De lege vakjes daar kun je wegkruisen.'
+   ]:[
+    'Alle plekken waar in '+regions+' nog een ster kan komen, liggen in '+lines+'.',
+    'In '+region+' '+(total===1?'moet':'moeten')+' samen '+hintCount(total,'ster','sterren')+' komen. In '+line+' '+(total===1?'moet':'moeten')+' er ook precies '+total+' komen. De sterren uit '+region+' vullen '+line+' dus helemaal.',
+    'Daarom kan er in '+line+' buiten '+regions+' geen ster meer bij. De lege vakjes daar kun je wegkruisen.'
+   ];
+   return {...result('Kijk naar '+lines+'. Vergelijk de plekken voor de sterren met '+regions+'.',...steps),reasonScopes:[lineCells,regCells,[...new Set([...lineCells,...regCells])]]};
   }
-  if(rule==='regionsInLines'||rule==='linesInRegions')return result('Vergelijk de gemarkeerde gebieden en lijnen.','De '+q.regions.length+' gebieden hebben samen '+q.regions.length*K+' sterren nodig.','De '+q.lines.length+' lijnen hebben samen '+q.lines.length*K+' sterren nodig.','Het gaat om dezelfde sterren. Wat je hier plaatst, telt dus ook mee in de rijen of kolommen.');
-  if(rule==='chain')return result('Probeer bij de gemarkeerde plekken in gedachten een ster.','Volg het uitsluiten van de buurvakjes.','Dan ontstaat deze tegenspraak: “'+q.conflict+'”.','Dus: als je zo vastloopt, kan die ster daar niet staan.');
-  return result('Bekijk de vrije plekken in het gemarkeerde gebied.','Voor deze stap is geen korte afleiding beschikbaar.');
+  if(rule==='trial')return result('Kijk naar de gemarkeerde vrije plekken. Wat gebeurt er als je daar een ster probeert?','Stel dat je een ster op een van die plekken zet. In de vakjes eromheen mag dan geen ster meer komen, ook niet schuin ernaast.','Voor '+name+' zijn daarna nog '+hintCount(q.need,'ster','sterren')+' nodig. '+(q.available?'Maar de '+hintCount(q.available,'overgebleven plek','overgebleven plekken')+' '+(q.available===1?'biedt':'bieden')+' samen ruimte voor hooguit één ster.':'Maar er is dan geen vrije plek meer over.'),'Dat kan dus niet. Een plek die dit probleem veroorzaakt, kun je wegkruisen.');
+  if(u){const which=u.kind==='g'?'dit vlak':u.kind==='r'?'deze rij':'deze kolom',need=K-q.stars;
+   if(rule==='complete')return result('Kijk naar '+name+' en tel de sterren.','In '+which+' '+(K===1?'moet':'moeten')+' '+hintCount(K,'ster','sterren')+' staan. '+(K===1?'Die staat er al.':'Die staan er al.'),'Er mag dus geen ster meer bij. Je kunt de andere lege vakjes in '+which+' wegkruisen.');
+   if(rule==='remaining')return result('Kijk naar de lege vakjes in '+name+'.',(q.stars===0?'In '+which+' staat nog geen ster.':'In '+which+' '+(q.stars===1?'staat':'staan')+' al '+hintCount(q.stars,'ster','sterren')+'.')+' Er '+(need===1?'moet':'moeten')+' nog '+hintCount(need,'ster','sterren')+' bij.',q.open===1?'Er is nog maar één vrij vakje. Dat vakje heb je dus nodig voor de ontbrekende ster.':'Er zijn nog maar '+q.open+' vrije vakjes. Je hebt ze dus allemaal nodig voor de ontbrekende sterren.');
+   if(rule==='separate')return result('Kijk naar de vrije vakjes in '+name+'. Welke raken elkaar?','Er moeten nog twee sterren in '+which+' komen. Ze mogen elkaar niet raken, ook niet schuin.','Laat in gedachten een vrij vakje weg. Raken alle andere vrije vakjes elkaar? Dan past daar maar één ster. De tweede ster moet dus in het vakje komen dat je wegliet.');
+  }
+  if(rule==='chain')return result('Probeer in gedachten een ster in het gemarkeerde vlak.','Kruis de buurvakjes in gedachten weg. Kijk daarna waar er nog sterren kunnen komen.','Dan loop je vast: “'+q.conflict+'”. Dat betekent dat de keuze die je probeerde niet kan.');
+  return fallback();
  }
  if(S.type==='hex'){
-  const clues=q.clues||[],rev=S.hx.rev,label=o=>o.kind==='rest'?'de teller':o.kind==='line'?'de lijn met '+clueTxt(o.c):'het '+(o.kind==='zone'?'blauwe':'zwarte')+' getal '+clueTxt(o.c);
+  const clues=q.clues||[],rev=S.hx.rev,label=o=>o.kind==='rest'?'de teller boven het bord':o.kind==='line'?'de lijn met het getal '+clueTxt(o.c):'het '+(o.kind==='zone'?'blauwe':'zwarte')+' vakje met het getal '+clueTxt(o.c);
   const stats=o=>{const unknown=o.c.pos.filter(i=>i>=0&&!rev.has(i)),found=o.c.pos.filter(i=>i>=0&&rev.has(i)).reduce((n,i)=>n+p.sol[i],0);return{unknown,need:o.c.cnt-found}};
-  const typed=o=>o.c.type===1?'Bij '+clueTxt(o.c)+' moeten de blauwe vakjes één groepje vormen.':'Bij '+clueTxt(o.c)+' moeten de blauwe vakjes minstens twee groepjes vormen.';
-  if(!clues.length||rule==='global')return result('Vergelijk de gemarkeerde aanwijzingen met de teller.','Voor deze stap is geen korte lokale afleiding beschikbaar.');
-  const first=clues.find(o=>o.kind!=='rest')||clues[0],A=stats(first),numeric=o=>{const v=stats(o);return 'Kijk naar '+label(o)+'. Daar moeten nog '+hintCount(v.need,'blauw vakje','blauwe vakjes')+' komen. Er '+(v.unknown.length===1?'is nog 1 vakje':'zijn nog '+v.unknown.length+' vakjes')+' dicht.'};
-  if(clues.length>2)return result('Vergelijk de drie gemarkeerde aanwijzingen.',numeric(first),'Gebruik de andere aanwijzingen om verdelingen uit te sluiten.','Alle getallen en voorgeschreven groepjes moeten tegelijk kloppen.');
-  if(clues.length===1){if(first.c.type)return result('Bekijk de groepjes bij '+label(first)+'.',numeric(first),typed(first),'Vergelijk welke plekken in alle toegestane groepjes dezelfde kleur houden.');return result('Tel wat nog nodig is bij '+label(first)+'.',numeric(first),A.need===0?'Het gevraagde aantal is al bereikt.':'Er zijn precies genoeg onbekende vakjes voor het ontbrekende aantal.')}
-  const second=clues.find(o=>o!==first),B=stats(second),direction='Vergelijk '+label(first)+' met '+label(second)+'.';
-  if(second.kind==='rest')return result(direction,'De teller zegt: nog '+B.need+' blauwe vakjes.',label(first)[0].toUpperCase()+label(first).slice(1)+' heeft er zelf nog '+A.need+' nodig.',first.c.type?typed(first):'Buiten die onbekende vakjes blijven dus '+(B.need-A.need)+' blauwe vakjes over.');
+  const fact=o=>{const v=stats(o);return 'Bij '+label(o)+' '+(v.unknown.length===1?'is nog 1 vakje':'zijn nog '+v.unknown.length+' vakjes')+' dicht. Daarvan '+(v.need===1?'moet er nog 1 blauw worden':'moeten er nog '+v.need+' blauw worden')+'.'};
+  const grouped=o=>o.c.type===1?'De haakjes betekenen: de blauwe vakjes moeten één groepje vormen, zonder gat ertussen.':'De streepjes betekenen: er moeten minstens twee losse groepjes blauwe vakjes zijn.';
+  if(!clues.length||rule==='global')return result('Kijk naar de getallen op het bord en de teller erboven.','Alle getallen moeten tegelijk kloppen. Ook het totale aantal blauwe vakjes moet passen.','Voor deze stap kan ik nog geen korte uitleg geven. De volledige hint laat je zien welke vakjes je kunt openen.');
+  const first=clues.find(o=>o.kind!=='rest')||clues[0],A=stats(first);
+  if(clues.length===1)return result('Kijk naar '+label(first)+'.',fact(first),first.c.type?grouped(first)+' Probeer hoe de blauwe vakjes kunnen liggen. Vakjes die bij elke mogelijkheid dezelfde kleur krijgen, kun je openen.':A.need===0?'Je hebt de blauwe vakjes die dit getal aangeeft al gevonden. De vakjes die hier nog dicht zijn, moeten dus zwart zijn.':'Er zijn precies genoeg dichte vakjes over voor het ontbrekende aantal blauwe vakjes. Ze moeten dus allemaal blauw zijn.');
+  const second=clues.find(o=>o!==first),B=stats(second),direction='Kijk naar '+label(first)+' en '+label(second)+'.';
+  if(clues.length>2)return result('Kijk naar de drie gemarkeerde getallen.',...clues.map((o,i)=>fact(o)+(o.c.type?' '+grouped(o):'')+(i===2?' Probeer waar de blauwe vakjes passen. Alle drie de getallen moeten tegelijk kloppen.':'')));
+  if(second.kind==='rest')return result(direction,'De teller zegt dat je op het hele bord nog '+hintCount(B.need,'blauw vakje','blauwe vakjes')+' moet vinden.',fact(first),(first.c.type?grouped(first)+' ':'')+'Buiten de dichte vakjes bij dit getal moeten dus nog '+hintCount(B.need-A.need,'blauw vakje','blauwe vakjes')+' liggen.');
   const types=clues.filter(o=>o.c.type),shared=A.unknown.filter(i=>B.unknown.includes(i)).length;
-  if(types.length)return result(direction,label(first)+': nog '+A.need+' blauw; '+label(second)+': nog '+B.need+' blauw.',typed(types[0]),types.length>1?typed(types[1]):'Vergelijk de mogelijke groepjes in de '+shared+' gedeelde onbekende vakjes.');
+  if(types.length)return result(direction,fact(first)+(first.c.type?' '+grouped(first):''),fact(second)+(second.c.type?' '+grouped(second):''),'Kijk naar de '+hintCount(shared,'dichte plek','dichte plekken')+' die bij beide getallen '+(shared===1?'hoort':'horen')+'. Kun je de groepjes zo maken dat beide getallen kloppen?');
   const low=Math.max(0,A.need-(A.unknown.length-shared),B.need-(B.unknown.length-shared)),high=Math.min(shared,A.need,B.need);
-  return result(direction,numeric(first),numeric(second),low===high?'In de '+shared+' gedeelde vakjes zitten precies '+low+' blauwe vakjes.':'In de '+shared+' gedeelde vakjes zitten minstens '+low+' en hooguit '+high+' blauwe vakjes.');
+  return result(direction,fact(first),fact(second)+' Er '+(shared===1?'is 1 dicht vakje dat':'zijn '+shared+' dichte vakjes die')+' bij beide getallen '+(shared===1?'hoort':'horen')+'. Daar '+(low===high?'moeten precies '+hintCount(low,'blauw vakje','blauwe vakjes')+' komen.':'moeten minstens '+low+' en hooguit '+high+' blauwe vakjes komen.'));
  }
- return result('Bekijk de gemarkeerde aanwijzingen.','Voor deze stap is geen korte afleiding beschikbaar.');
+ return fallback();
+}
+
+// Het tweede duwtje stelt een vraag; de afleiding en de zet blijven voor stap 3.
+function thoughtGuidance(move,guide){
+ const p=S.p,q=move.proof||{},rule=q.rule,N=p.W||p.N,scope=(guide.scope||[]).slice();
+ const result=(cells,...steps)=>({thinkScope:[...new Set(cells)],thinkSteps:steps.filter(Boolean)});
+ if(move.kind==='fix')return result(scope,'Kijk naar je ingevulde vakjes. Welke keuze zou botsen met een aanwijzing als je die laat staan?');
+ if(S.type==='bin'&&q.line){
+  const l=q.line,symbol=q.symbol?'rondje':'kruisje',blank=l.ci.filter(i=>S.cur[i]<0);
+  const near=rule==='pair'||rule==='gap'?l.ci.filter(i=>move.cells.includes(i)||move.cells.some(j=>Math.abs(l.ci.indexOf(i)-l.ci.indexOf(j))<=2)):blank;
+  if(rule==='pair'||rule==='gap')return result(near,'Kijk naar deze lege vakjes. Wat gebeurt er als je hier ook een '+symbol+' invult? Hoeveel dezelfde tekens staan er dan achter elkaar?');
+  if(rule==='balance')return result(blank,'Van elk teken mogen er precies '+l.len/2+' in deze '+(l.o?'kolom':'rij')+' staan. Het aantal '+(q.symbol?'rondjes':'kruisjes')+' is al compleet. Wat gebeurt er als je er nog één bij zet?');
+  if(rule==='balanceConflict')return result(blank,'Er kan nog maar één '+symbol+' bij. Probeer om de beurt een van deze vakjes. Krijg je dan ergens drie dezelfde tekens achter elkaar?');
+  if(rule==='different')return result(blank,'Probeer de tekens uit de andere '+(l.o?'kolom':'rij')+' in deze lege vakjes over te nemen. Wat gebeurt er dan met de regel dat twee '+(l.o?'kolommen':'rijen')+' nooit hetzelfde mogen zijn?');
+  return result(blank,'Probeer hier beide tekens in gedachten. Met welke keuze kun je verder zonder te veel van één teken, drie gelijke tekens of een gelijke '+(l.o?'kolom':'rij')+' te krijgen?');
+ }
+ if(S.type==='star'){
+  const K=p.K||2;
+  if(q.lines&&q.regions){
+   const lineCells=q.lines.flatMap(k=>Array.from({length:p.N},(_,j)=>q.kind==='r'?k*p.N+j:j*p.N+k));
+   const shared=lineCells.filter(i=>q.regions.includes(p.reg[i])&&disp(i)!==1);
+   return result(shared,'Kijk naar de vakjes die de '+(q.lines.length===1?(q.kind==='r'?'rij':'kolom'):(q.kind==='r'?'rijen':'kolommen'))+' en '+(q.regions.length===1?'het gekleurde vlak':'de gekleurde vlakken')+' delen. Ze hebben allebei in totaal '+hintCount(q.lines.length*K,'ster','sterren')+' nodig.','Stel dat er daarbuiten ook nog een ster komt. Kunnen die twee aantallen dan nog allebei kloppen?');
+  }
+  const cells=q.unit?q.unit.cells.filter(i=>disp(i)===0):move.cells;
+  if(rule==='complete')return result(cells,'Er '+(K===1?'staat al één ster':'staan al '+K+' sterren')+' in deze rij, kolom of dit vlak. Wat gebeurt er met het aantal als je in een van deze vakjes nog een ster zet?');
+  if(rule==='remaining')return result(cells,'Er '+(K-q.stars===1?'moet nog één ster':'moeten nog '+(K-q.stars)+' sterren')+' bij. Wat gebeurt er als je een van deze vrije vakjes wegkruist? Houd je dan genoeg plekken over?');
+  if(rule==='separate')return result(cells,'Er moeten nog twee sterren komen die elkaar niet raken. Laat in gedachten één vrij vakje weg. Passen beide sterren dan nog op de andere vrije plekken?');
+  return result(move.cells,'Probeer in deze vakjes in gedachten een ster. Kruis de buurvakjes eromheen weg, ook schuin.','Kijk waar de overige sterren dan nog kunnen komen. Blijft er voor elke rij, kolom en elk vlak genoeg ruimte over?');
+ }
+ if(S.type==='nono'){
+  const l=q.line,cells=l&&rule==='overlap'?l.ci.slice(q.min,q.max+q.length):l?l.ci:scope;
+  if(rule==='overlap')return result(cells,'Schuif dit blok in gedachten helemaal naar de ene kant en daarna naar de andere kant.','Welke vakjes horen in beide gevallen bij het blok?');
+  if(rule==='empty'||rule==='complete')return result(cells,'Kijk naar de getallen en wat al ingevuld is. Past er nog een gevuld vakje bij, zonder een blok langer te maken of een extra blok toe te voegen?');
+  if(rule==='outside')return result(cells,'Schuif de blokken in gedachten zo ver mogelijk op. Kan een van de blokken deze vakjes ooit bereiken?');
+  return result(cells,'Probeer hoe de blokken hier nog kunnen liggen. Welke vakjes blijven bij elke mogelijkheid hetzelfde?'+(p.color?' Let ook op de kleuren.':''));
+ }
+ if(S.type==='plus'&&move.unit!=null){
+  const u=S.pu[move.unit],L=plusLook(u,S.cur,p.num);
+  const base='Je hebt nog '+L.need+' nodig om op '+u.t+' uit te komen. ';
+  if(rule==='complete')return result(L.U,'De omcirkelde getallen zijn samen al '+u.t+'. Wat gebeurt er als je een van deze open getallen ook meetelt?');
+  if(rule==='remaining'||rule==='essential'||rule==='cannotExclude')return result(L.U,base+'Laat in gedachten een van deze getallen weg. Kun je de som met de andere getallen dan nog maken?');
+  return result(L.U,base+'Tel in gedachten een van deze getallen mee. Kun je met de andere open getallen dan nog precies op de som uitkomen?');
+ }
+ if(S.type==='hex'&&q.clues){
+  const cells=q.clues.flatMap(o=>[...(o.c.pos||[]),...(o.kind==='zone'||o.kind==='ring'?[o.id]:[])]).filter(i=>i>=0);
+  const grouped=q.clues.some(o=>o.c.type);
+  return result(cells,grouped?'Probeer hoe de blauwe vakjes hier kunnen liggen. Bij haakjes moeten ze één groepje vormen; bij streepjes moeten het juist losse groepjes zijn.':'Probeer in gedachten een van deze dichte vakjes blauw te maken.','Kunnen alle gemarkeerde getallen dan nog kloppen? En wat gebeurt er als je datzelfde vakje juist zwart maakt?');
+ }
+ if(S.type==='mur')return result(scope,...(guide.reasonSteps||[]).filter(s=>s.includes('“')).slice(0,2),'Welke plekken passen nog bij deze aanwijzingen? Probeer in gedachten een plek en kijk of de andere personen dan ook nog ergens kunnen staan.');
+ return result(scope,'Probeer hier in gedachten een mogelijkheid. Past die bij alle gemarkeerde aanwijzingen, of loop je ergens vast?');
 }

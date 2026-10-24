@@ -30,6 +30,9 @@ for(const type of Object.keys(generators))for(const level of [1,2,3,4,5,6]){
   if(!move)break;
   assert.notEqual(move.kind,'fix','De correcte proefinvoer mag geen correctiehint opleveren: '+type);
   const h=prepareHint(move),q=move.proof;
+  assert.ok(h.thinkSteps.some(s=>s.includes("?")),"Tweede duwtje stelt een denkvraag");
+  assert.ok(!/daarom.*wegkruisen|dus.*omcirkelen/.test(h.thinkSteps.join(" ")),"De volledige zet blijft voor stap 3");
+  assert.ok(!/\\b1 (rijen|kolommen|gebieden|sterren|vakjes)\\b/.test(h.shortDirection+" "+h.reason),"Correct enkelvoud in hints");
   assert.ok(h.shortDirection.length>10);assert.ok(h.shortDirection.split(/\s+/).length<=30,'kort duwtje: '+h.shortDirection);
   assert.ok(h.reasonSteps.length>=1&&h.reasonSteps.length<=3);
   for(const line of h.reasonSteps){assert.ok(line.split(/\s+/).length<=40,'korte stap: '+line);assert.ok(!/undefined|NaN/.test(line))}
@@ -97,7 +100,7 @@ const other={o:0,x:1,ci:[4,5,6,7],len:4,v:[0,1,0,1]},incomplete={o:0,x:0,ci:[0,1
 S.cur=Array(16).fill(-1);incomplete.ci.forEach((i,k)=>S.cur[i]=incomplete.v[k]);other.ci.forEach((i,k)=>S.cur[i]=other.v[k]);
 extra=prepareHint({kind:'tech',cells:[1],why:[...incomplete.ci,...other.ci],set:0,proof:{rule:'different',line:incomplete,other}});
 extra.level=1;projectHint(extra);assert.equal(extra.why.length,4);
-extra.level=2;projectHint(extra);assert.equal(extra.why.length,8);assert.ok(extra.reason.includes('rij 2'));
+extra.level=2;projectHint(extra);assert.equal(extra.why.join(),"1,2");assert.ok(extra.reason.includes('rij 2'));
 // De Hexcells-uitleg mag onbekende oplossingskleuren niet lezen.
 S={type:'hex',p:{n:3,sol:[0,1,0]},hx:{rev:new Set([0])}};
 const hexMove={cells:[1],kind:'deduce',why:[0],proof:{rule:'constraints',clues:[{kind:'ring',id:0,c:{cnt:1,type:1,pos:[1,2]}}]}};
@@ -105,6 +108,19 @@ const before=prepareHint(hexMove);S.p.sol[1]=0;S.p.sol[2]=1;
 const after=prepareHint(hexMove);assert.equal(before.direction,after.direction);assert.equal(before.reason,after.reason);assert.equal(before.shortDirection,after.shortDirection);assert.deepEqual(before.reasonSteps,after.reasonSteps);
 assert.ok(before.reason.includes('haakjes'));assert.ok(before.scope.every(i=>S.hx.rev.has(i)));
 const global=prepareHint({...hexMove,proof:{...hexMove.proof,rule:'global'}});
-assert.ok(global.reason.includes('geen korte lokale afleiding'));assert.equal(global.cells.length,0);
+assert.ok(global.reason.includes('nog geen korte uitleg'));assert.equal(global.cells.length,0);
 console.log('OK: specifieke balans/vergelijking, groeiende context en geen uitlezen van verborgen Hexcells-kleuren');
 `,context,{timeout:180000});
+
+// Eén rij en één gekleurd vlak: dezelfde sterren, met de juiste richting van wegkruisen.
+vm.runInContext(`
+for(const K of [1,2])for(const kind of ['r','c'])for(const rule of ['linesInRegions','regionsInLines']){
+ S={type:'star',p:{N:3,K,reg:[0,0,1,0,2,1,2,2,1]},cur:Array(9).fill(0)};
+ const h=prepareHint({kind:'tech',cells:[2],why:[0,1,2],set:1,proof:{rule,kind,lines:[0],regions:[0]}});
+ assert.equal(h.reasonSteps.length,3);assert.ok(h.reason.includes('dezelfde '+(K===1?'ster':'sterren')));
+ assert.ok(!/1 (rijen|kolommen|gebieden|sterren)/.test(h.reason));
+ assert.ok(h.reasonSteps[2].includes(rule==='linesInRegions'?'van dat vlak buiten deze':'buiten dat vlak'));
+ assert.equal(hintStepScope(h,0).cells.length,3);assert.equal(hintStepScope(h,1).cells.join(),'0,1,3');
+}
+`,context);
+console.log('OK: mensentaal en wegkruisrichting bij één rij/kolom en één vlak');
