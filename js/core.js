@@ -146,7 +146,8 @@ let PLAYER_PREFS={favoritePuzzleTypes:[],dailyDifficulty:{}},DAILY_PLANS={};
 const validDailyDifficulty=v=>["easy","normal","hard"].includes(v)?v:"normal";
 const starterFavorites=()=>ACTIVE.filter(t=>PUZZLE_REGISTRY[t].defaultFavorite);
 const favoriteTypes=()=>{const a=Array.isArray(PLAYER_PREFS.favoritePuzzleTypes)?PLAYER_PREFS.favoritePuzzleTypes.filter(t=>TYPES[t]):[];return a.length?a:starterFavorites()};
-const dailyDifficultyFor=(t,ds)=>{const p=DAILY_PLANS[ds],fromPlan=p&&p.difficulties&&p.difficulties[t];return validDailyDifficulty(fromPlan||PLAYER_PREFS.dailyDifficulty?.[t])};
+const PREF_DAILY_VANAF="2026-10-25";
+const dailyDifficultyFor=(t,ds)=>{if(ds<PREF_DAILY_VANAF){const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay();return w===0||w===6?"hard":"normal"}const p=DAILY_PLANS[ds],fromPlan=p&&p.difficulties&&p.difficulties[t];return validDailyDifficulty(fromPlan||PLAYER_PREFS.dailyDifficulty?.[t])};
 const semanticLevel=(t,diff,phone=PHONE)=>{const m=PUZZLE_REGISTRY[t]?.dailyLevels?.[diff];return m?.[phone?"phone":"wide"]||((phone?{easy:4,normal:5,hard:6}:{easy:1,normal:2,hard:3})[diff]||lvOf(t))};
 const dagLv=(t,ds)=>{if(!dagVast(ds))return lvOf(t);return semanticLevel(t,dailyDifficultyFor(t,ds),PHONE)};
 /* Nonogram-dagvariant: vanaf 23 oktober 2026 datum-gebaseerd willekeurig.
