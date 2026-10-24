@@ -18,9 +18,10 @@ jobs:
         with:
           ref: develop
 
-      - name: Guard branch and test-only configuration
+      - name: Guard develop and test-only configuration
         run: |
           test "$GITHUB_REF_NAME" = "develop"
+          test "${{ github.event.repository.default_branch }}" = "main"
           grep -q 'gepuzzellig-test' .github/scripts/check-phase6-functions.mjs
           node .github/scripts/check-phase6-functions.mjs
           node --check functions/index.js
