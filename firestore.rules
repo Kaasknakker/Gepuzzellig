@@ -275,8 +275,10 @@ service cloud.firestore {
         && request.resource.data.updatedAt is int
         && request.resource.data.updatedAt >= request.resource.data.createdAt
         && request.resource.data.inviteCode is string
-        && request.resource.data.inviteCode.size() >= 8
-        && request.resource.data.inviteCode.size() <= 12
+        && (
+          request.resource.data.inviteCode == ''
+          || (request.resource.data.inviteCode.size() >= 8 && request.resource.data.inviteCode.size() <= 12)
+        )
         && request.resource.data.invitedByAuthUid is string
         && request.resource.data.groupJoinCode == ''
         && request.resource.data.theme in ['shared','peter','aart','stars','nature','retro','animals','sea','travel','music','party','coffee','season','minimal']
