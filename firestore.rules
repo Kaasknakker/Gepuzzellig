@@ -327,8 +327,10 @@ service cloud.firestore {
     }
 
     match /results/{id} {
+      // Legacy resultaten blijven voor de eigenaar leesbaar. Sociale groepslezing loopt in Fase 8
+      // via groupActivity, zodat joinedAt ook werkelijk door rules wordt afgedwongen.
       allow read: if isAdmin()
-        || (hasProfile() && (resource.data.group == myGroup() || approvedMember(resource.data.group, myPlayer())));
+        || (hasProfile() && resource.data.uid == myPlayer());
       allow create: if validResult(id);
       allow update: if validResult(id)
         && resource.data.uid == myPlayer()
