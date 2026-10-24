@@ -1201,7 +1201,6 @@ body.phone #grid>.nsize{font-size:10px;padding-right:3px;padding-bottom:3px}
 #inputmode{padding:3px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--line) 20%,var(--card))}
 #inputmode button{font-weight:700;padding:10px 8px;border-radius:12px;white-space:nowrap;box-shadow:none;border-color:transparent;color:var(--mut);position:relative}
 #inputmode button.on{background:var(--mode-button);border-color:var(--mode-button);color:#fff;box-shadow:0 2px 0 color-mix(in srgb,var(--mode-button) 60%,#000)}
-#inputmode button.on::after{content:"Actief";position:absolute;right:6px;top:3px;font-size:8px;line-height:1;font-weight:900;letter-spacing:.04em;text-transform:uppercase;opacity:.78}
 body[data-input-mode=fill]{--mode-tint:#4b86b4;--mode-button:#3575a5}
 body[data-input-mode=cross]{--mode-tint:#b56f62;--mode-button:#9d5e54}
 body:not(.home):not(.newpick)[data-input-mode]{background-color:color-mix(in srgb,var(--mode-tint) 7%,var(--bg))}
@@ -1318,4 +1317,12 @@ body[data-input-mode] #hexsvg.mb,body[data-input-mode] #hexsvg.mz{box-shadow:0 0
 #inputmode button.modeflash{animation:inputModeConfirm .34s ease-out}
 @keyframes inputModeConfirm{0%{transform:scale(.92)}45%{transform:scale(1.07);filter:brightness(1.14)}100%{transform:scale(1);filter:none}}
 body.phone #pbot #inputmode{padding:2px;border-radius:14px}
-body.phone #pbot #inputmode button.on::after{content:"";width:6px;height:6px;right:4px;top:4px;border-radius:50%;background:#fff;opacity:.9}
+
+/* Definitieve modusweergave: symbool + volle actieve knop + dezelfde bordrand.
+   Geen extra tekst/statusstip; de inactieve keuze blijft bewust rustig. */
+body[data-input-mode] :is(#inputmode,#nmode,#pmode) button:not(.on){background:var(--card)!important;border-color:var(--line)!important;color:var(--mut)!important;box-shadow:none!important}
+body[data-input-mode] :is(#inputmode,#nmode,#pmode) button.on,
+body[data-input-mode] :is(#mb,#mz).on{background:var(--mode-button)!important;border-color:var(--mode-button)!important;color:#fff!important;box-shadow:0 3px 0 color-mix(in srgb,var(--mode-button) 58%,#000)!important}
+body[data-input-mode] #grid{box-shadow:0 0 0 5px var(--mode-button),0 8px 24px var(--sh)!important}
+body[data-input-mode] #mgrid{outline-color:var(--mode-button)!important}
+body[data-t=hex][data-input-mode] #hexsvg{box-shadow:0 0 0 5px var(--mode-button),0 8px 24px var(--sh)!important}
