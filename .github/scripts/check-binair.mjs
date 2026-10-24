@@ -20,7 +20,7 @@ assert.ok(!genCached('bin','qold',3,false,'classic',null,'b2').oldBoard);
 assert.ok(genCached('bin','qold',3,false,'classic',null,'b1').oldBoard);
 `,c);
 // De groot-schermformaten zijn bewust gewijzigd op 24 oktober 2026.
-const expectedSizes={1:[12,10],2:[18,14],3:[20,16],4:[6,8],5:[8,10],6:[10,14]};
+const expectedSizes={1:[10,14],2:[14,18],3:[16,22],4:[6,8],5:[8,10],6:[10,14]};
 for(let lv=1;lv<=6;lv++){
  const p=vm.runInContext(`genBin(rng(hash('binair-formaat-'+${lv})),${lv},false,false)`,c);
  assert.deepEqual([p.W,p.H],expectedSizes[lv],`formaat level ${lv}`);
