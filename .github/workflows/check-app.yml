@@ -20,6 +20,8 @@ jobs:
           node-version: "22"
       - name: App controleren
         run: node .github/scripts/check-app.mjs
+      - name: Puzzelregistratie controleren
+        run: node .github/scripts/check-puzzle-registry.mjs
       - name: Opslag en UX-regressies controleren
         run: node .github/scripts/check-ux.mjs
       - name: Tikken en Pencil-bediening controleren

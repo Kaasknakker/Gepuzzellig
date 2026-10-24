@@ -70,9 +70,9 @@ function setMurdokuNameEditing(on,focus=false){
  if(on&&focus)field.focus();
 }
 {const button=document.getElementById("murdokuedit");if(button)button.onclick=()=>setMurdokuNameEditing(document.getElementById("murdokunames").readOnly,true)}
-const ALLTYPES={bin:"Binair",star:"Star Battle",nono:"Nonogram",kak:"Kakuro",hex:"Hexcells",plus:"Pluszle",mur:"Murdoku",m24:"Maak 24"};
+const ALLTYPES=Object.fromEntries(Object.entries(PUZZLE_REGISTRY).map(([t,p])=>[t,p.name]));
 /* Welke puzzels in de app staan. Kakuro en Maak 24 zitten nog in de code en kunnen later weer worden aangezet. */
-const ACTIVE=["bin","star","nono","hex","plus","mur"];
+const ACTIVE=Object.keys(PUZZLE_REGISTRY).filter(t=>PUZZLE_REGISTRY[t].active);
 const DOUBLE_TAP_MS=600;
 const TYPES=Object.fromEntries(ACTIVE.map(t=>[t,ALLTYPES[t]]));
 const HELP={
@@ -124,9 +124,9 @@ let nonoVariant=lsGet("pdnvar")==="color"?"color":"classic";
 const NIEUW=new URLSearchParams(location.search).get("oud")!=="1";
 const PHONE=(()=>{const q=new URLSearchParams(location.search).get("tel");if(q==="1")return true;if(q==="0")return false;
  return /iPhone|iPod/.test(navigator.userAgent)||(Math.min(screen.width,screen.height)<500&&matchMedia("(pointer:coarse)").matches)})();
-const LVN=PHONE?{bin:[4,5,6],star:[4,5,6],nono:[4,5,6],hex:[4,5,6],plus:[4,5,6],mur:[4,5,6]}:{bin:[1,2,3],star:[1,2,3],nono:[1,2,3],hex:[1,2,3],plus:[1,2,3],mur:[1,2,3]},LVL={1:"Makkelijk",2:"Normaal",3:"Moeilijk",4:"Makkelijk",5:"Normaal",6:"Moeilijk"};
+const LVN=Object.fromEntries(ACTIVE.map(t=>[t,(PUZZLE_REGISTRY[t].levels||{})[PHONE?"phone":"wide"]||[]])),LVL={1:"Makkelijk",2:"Normaal",3:"Moeilijk",4:"Makkelijk",5:"Normaal",6:"Moeilijk"};
 const lvLabel=l=>LVL[l]+(l>3?" · telefoon":"");
-const LVS={bin:{1:"10×8",2:"16×12",3:"18×14",4:"6×8",5:"8×10",6:"10×14"},star:{1:"8×8 · 1★",2:"9×9 · 2★",3:"10×10 · 2★",4:"7×7 · 1★",5:"8×8 · 2★",6:"9×9 · 2★"},nono:{1:"8×5",2:"15×10",3:"20×14",4:"5×8",5:"8×12",6:"10×15"},hex:{1:"klein",2:"middel",3:"pittig",4:"klein",5:"middel",6:"pittig"},plus:{1:"5×5",2:"6×6",3:"7×7 · vlakken",4:"5×5",5:"6×6",6:"6×7 · vlakken"},mur:{1:"6×6",2:"7×7",3:"8×8",4:"5×5",5:"6×6",6:"7×7"}};
+const LVS=Object.fromEntries(ACTIVE.map(t=>[t,PUZZLE_REGISTRY[t].sizes||{}]));
 let LV={};try{LV=JSON.parse(lsGet("pdlvl")||"{}")}catch(e){}
 /* Voorkeursniveau voor vrije puzzels; dagpuzzels kiezen hun niveau op basis van dag en apparaat. */
 
@@ -1289,7 +1289,7 @@ function renderStats(){const raw=allRows(),all=statsRows(raw),rows=all.filter(r=
  [...pl.entries()].forEach(([u,nm])=>{const n=streakOf(rows,u),d=document.createElement("div");d.className="row";const a=document.createElement("span"),b=document.createElement("span");a.textContent=nm;b.textContent=(n?"🔥 ":"")+n+(n===1?" dag":" dagen");d.append(a,b);el.append(d)});
  const note=document.createElement("div");note.className="mut sm";note.style.marginTop="6px";note.textContent="Geen wedstrijd: gewoon kijken hoeveel we samen oplossen. 🎯 = foutloos, 💡 = zonder hint. Reeks: dagen achter elkaar minstens één dagpuzzel.";el.append(note);
 $("#streak b").textContent=streakOf(rows,uid);renderOver(all,pl)}
-const TCOL={bin:"#7a52d6",star:"#c97a00",nono:"#0f9d8c",kak:"#e0486b",hex:"#e8590c",plus:"#2b7bd6",mur:"#b5483a",m24:"#2f9e44"};
+const TCOL=Object.fromEntries(Object.entries(PUZZLE_REGISTRY).map(([t,p])=>[t,p.color]));
 let OPER=lsGet("pdper")||"maand",ODAYS=21,SVIEW="today";
 const baseT=r=>isFree(r)?r.type.split("~")[1].split(".")[0]:r.type.split(".")[0];
 const dayForm=r=>{const l=+(String(r.type).split(".")[1]||2);return l>3?"phone":"large"};
