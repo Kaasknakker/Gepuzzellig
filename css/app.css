@@ -1320,3 +1320,32 @@ body[data-input-mode] #hexsvg.mb,body[data-input-mode] #hexsvg.mz{box-shadow:0 0
 .authlogo.brandmark{grid-template-columns:repeat(2,32px);gap:6px}
 .authlogo.brandmark i{width:32px;height:32px;border-radius:9px}
 .authlogo.brandmark .brand-star{font-size:21px}.authlogo.brandmark .brand-cross{font-size:31px}.authlogo.brandmark .brand-dot::after{width:12px;height:12px}
+
+
+/* Testomgeving: herkenbaar zonder de bestaande Home-indeling te veranderen. */
+body.home #home .htestbanner{
+ background:#f6d86b;
+ color:#27220f;
+ margin:-4px -10px 0;
+ padding:10px 12px 12px;
+ border:1px solid color-mix(in srgb,#b68a00 35%,var(--line));
+ border-radius:16px;
+}
+body.home #home .htestbanner .mut{color:#665a2b}
+body.home #home .htestbanner .hbrand{margin-bottom:8px}
+body.home #home .htestmark{
+ display:inline-flex;
+ align-items:center;
+ gap:4px;
+ margin-left:2px;
+ padding:3px 7px;
+ border-radius:999px;
+ background:rgba(255,255,255,.58);
+ border:1px solid rgba(91,70,0,.18);
+ font-size:10px;
+ font-weight:900;
+ letter-spacing:.08em;
+ line-height:1.2;
+}
+body.phone.home #home .htestbanner{margin:-9px -4px 0;padding:9px 10px 10px;border-radius:14px}
+body.tablet.home #home .htestbanner{padding:12px 14px 14px}
