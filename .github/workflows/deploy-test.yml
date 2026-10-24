@@ -47,6 +47,14 @@ jobs:
           node .github/scripts/check-murdoku.mjs
           node .github/scripts/check-binair.mjs
           node .github/scripts/check-hexcells.mjs
+          node .github/scripts/check-phase4-migration.mjs
+          node .github/scripts/check-phase5-migration.mjs
+          node .github/scripts/check-phase6-functions.mjs
+          node .github/scripts/check-phase7-app.mjs
+          node .github/scripts/check-phase7-migration.mjs
+          node --check js/puzzle-registry.js
+          node --check js/core.js
+          node --check js/firebase.js
 
       - name: Build test-only hosting directory
         run: |
