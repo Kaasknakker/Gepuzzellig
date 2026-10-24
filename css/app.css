@@ -458,8 +458,8 @@ body.phone .hc{padding:16px 16px}
 @media(max-width:360px){body.phone #hexstat .st span{display:none}body.phone header nav{gap:3px}body.phone header nav button{padding:5px 5px;font-size:12.5px}body.phone #pbot{gap:4px;padding-left:5px;padding-right:5px}body.phone #pbot #undo,body.phone #pbot #redo{flex-basis:38px}body.phone #pbot #nmode,body.phone #pbot #pmode{gap:4px}body.phone #pbot #nmode button,body.phone #pbot #pmode button{font-size:13.5px;padding:11px 2px}body[data-t=plus].phone #pbot #hintb,body[data-t=plus].phone #pbot #chk,body[data-t=nono].phone #pbot #hintb,body[data-t=nono].phone #pbot #chk{flex-basis:42px}body.phone #pm{right:4px;width:34px;font-size:17px}body.phone header{padding:4px 43px 4px 3px}body.phone #prow{gap:4px}}
 body.phone .hc ul{font-size:15px}
 
-/* Pluszle behoudt de bestaande tinten; Nonogram houdt één vaste veldkleur. */
-#grid.pxm{--card:#e2e3e8}#grid.pom{--card:#e1effb}
+/* Pluszle en Nonogram houden het speelveld zelf neutraal; de modus staat eromheen. */
+#grid.pxm,#grid.pom{--card:var(--card)}
 #grid .c,#grid .pt{transition:background-color .12s}
 :root[data-theme=dark] #grid.pxm{--card:#101216}:root[data-theme=dark] #grid.pom{--card:#182739}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) #grid.pxm{--card:#101216}:root:not([data-theme=light]) #grid.pom{--card:#182739}}
@@ -548,7 +548,7 @@ body.nieuw.home main,body.nieuw.home #pbot,body.nieuw.home #topbar,body.nieuw.ho
 .hrow{display:flex;align-items:center;gap:9px;padding:6px 2px;border:0;border-top:1px solid color-mix(in srgb,var(--line) 60%,transparent);font:600 16px inherit;font-family:inherit;color:var(--fg);background:transparent;box-shadow:none;width:100%;text-align:left;border-radius:0;cursor:pointer;min-height:0}
 .hrow:hover,.hrow:active{background:color-mix(in srgb,var(--line) 25%,transparent);transform:none}
 .hrow .hb{margin-right:6px;font-size:13px}
-.hbrand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:20px;letter-spacing:-.01em;margin-bottom:-4px}
+.hbrand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:20px;letter-spacing:-.01em;margin-bottom:-4px}.hbrandtext{display:flex;flex-direction:column;line-height:1.05}.hbrandtext small{margin-top:4px;color:var(--mut);font-size:11px;font-weight:650;letter-spacing:0;line-height:1.2}
 .hrow .hx2{margin-left:auto;color:var(--mut);font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
 .hrow .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);flex:none;box-sizing:border-box}
 .hrow.ok .dot{background:var(--ok);border-color:var(--ok)}.hrow.ok .dot::after{content:"✓";display:block;color:#fff;font-size:10px;line-height:12px;text-align:center;font-weight:900}
@@ -1196,15 +1196,16 @@ body.phone.home #home .hwrap:not(.sco)>.uxsave{margin:2px 0 5px;line-height:1.3;
 body.phone #grid>.nsize{font-size:10px;padding-right:3px;padding-bottom:3px}
 
 
-/* Gedeelde invulstanden: rustige blauwe invulstand en warme kruisstand. */
+/* Gedeelde invulstanden: het bord blijft rustig; modus zit in omgeving, rand en knop. */
 #inputmode{display:flex;flex-direction:column;gap:6px}
-#inputmode button{font-weight:700;padding:10px 6px;border-radius:14px;white-space:nowrap}
-#inputmode button.on{background:var(--fg);color:var(--card)}
-body[data-input-mode=fill]{--mode-tint:#387dbb;--mode-button:#28699f}
-body[data-input-mode=cross]{--mode-tint:#b96060;--mode-button:#a74750}
-body:not(.home):not(.newpick)[data-input-mode=fill],body:not(.home):not(.newpick)[data-input-mode=cross]{background-color:color-mix(in srgb,var(--mode-tint) 18%,var(--bg))}
-body[data-input-mode=cross] #grid.pxm{--card:color-mix(in srgb,#c76565 15%,var(--bg));box-shadow:0 0 0 4px color-mix(in srgb,#b96060 60%,var(--line)),0 8px 24px var(--sh)}
-body[data-t=bin] #grid,body[data-t=star] #grid{box-shadow:0 0 0 7px var(--mode-tint),0 8px 24px var(--sh)}
+#inputmode{padding:3px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--line) 20%,var(--card))}
+#inputmode button{font-weight:700;padding:10px 8px;border-radius:12px;white-space:nowrap;box-shadow:none;border-color:transparent;color:var(--mut);position:relative}
+#inputmode button.on{background:var(--mode-button);border-color:var(--mode-button);color:#fff;box-shadow:0 2px 0 color-mix(in srgb,var(--mode-button) 60%,#000)}
+body[data-input-mode=fill]{--mode-tint:#3d9bd4;--mode-button:#2f86bc}
+body[data-input-mode=cross]{--mode-tint:#626b77;--mode-button:#505965}
+body:not(.home):not(.newpick)[data-input-mode]{background-color:color-mix(in srgb,var(--mode-tint) 7%,var(--bg))}
+body[data-input-mode] #grid{background:var(--card);box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-tint) 82%,var(--line)),0 8px 24px var(--sh)}
+body[data-t=bin] #grid,body[data-t=star] #grid{box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-tint) 82%,var(--line)),0 8px 24px var(--sh)}
 #grid .cnt span.full{color:color-mix(in srgb,var(--fg) 32%,var(--bg));font-weight:500}
 #grid .cnt span:not(.full):not(.over){font-weight:850}
 .mc.xx .mx,.mc.xm .mx{color:color-mix(in srgb,var(--fg) 55%,transparent);font-weight:500;font-size:calc(var(--ms)*.45)}
@@ -1236,12 +1237,14 @@ body.phone #prow #tbHome{width:auto;flex:0 0 auto;gap:4px;padding:8px!important}
 body.phone #prow #tbHome svg{width:23px;height:23px;flex:none}
 .peerlivepop{max-height:min(420px,70dvh);overflow:auto;overscroll-behavior:contain;font-size:14px;width:min(340px,calc(100vw - 16px))}
 
-/* Modus herkenbaar aan de hele achtergrond, bordrand én geselecteerde knop. */
-body[data-t=hex][data-input-mode=cross]{--mode-tint:#505966;--mode-button:#454e5a}
-body[data-input-mode] #inputmode button.on,body[data-input-mode] #nmode button.on,body[data-input-mode] #pmode button.on,body[data-input-mode] #mb.on,body[data-input-mode] #mz.on{background:var(--mode-button)!important;color:#fff!important;box-shadow:inset 0 0 0 2px var(--mode-button)!important}
-body[data-input-mode] #grid.nf,body[data-input-mode] #grid.nx,body[data-input-mode] #grid.pom,body[data-input-mode] #grid.pxm{box-shadow:0 0 0 7px var(--mode-tint),0 8px 24px var(--sh)}
-body[data-input-mode=cross] #mgrid.mxmode{outline:6px solid var(--mode-tint)}
-body[data-input-mode=fill] #mgrid.pmode{outline:6px solid var(--mode-tint)}
+/* Eén vriendelijke modustaal: symbool + geselecteerde knop + duidelijke rand, zonder gekleurd speelveld. */
+body[data-t=hex][data-input-mode=fill]{--mode-tint:#3d9bd4;--mode-button:#2f86bc}
+body[data-t=hex][data-input-mode=cross]{--mode-tint:#626b77;--mode-button:#505965}
+body[data-input-mode] #inputmode button.on,body[data-input-mode] #nmode button.on,body[data-input-mode] #pmode button.on,body[data-input-mode] #mb.on,body[data-input-mode] #mz.on{background:color-mix(in srgb,var(--mode-button) 88%,var(--card))!important;border-color:var(--mode-button)!important;color:#fff!important;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--mode-button) 75%,#fff)!important}
+body[data-input-mode] #grid.nf,body[data-input-mode] #grid.nx,body[data-input-mode] #grid.pom,body[data-input-mode] #grid.pxm{box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-tint) 82%,var(--line)),0 8px 24px var(--sh)}
+body[data-input-mode=cross] #mgrid.mxmode{outline:5px solid color-mix(in srgb,var(--mode-tint) 82%,var(--line))}
+body[data-input-mode=fill] #mgrid.pmode{outline:5px solid color-mix(in srgb,var(--mode-tint) 82%,var(--line))}
+body[data-input-mode] #hexsvg{background:var(--card)!important;box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-tint) 82%,var(--line)),0 8px 24px var(--sh)!important}
 
 .peerlive>span{display:inline;min-width:0;overflow:hidden;text-overflow:ellipsis}
 body.phone #prow #peerLive{max-width:38vw}
@@ -1264,43 +1267,32 @@ body.tablet #topbar #peerLive span{max-width:180px}
 /* Dagpuzzels: grote infoknop links, een afzonderlijke speelknop rechts. */
 .dayitem{position:relative;--day-action-width:110px}
 .daygroup{padding:0;border:0}
-.daygroup summary{display:flex;align-items:center;gap:10px;min-height:62px;box-sizing:border-box;padding:8px calc(var(--day-action-width) + 18px) 8px 4px;cursor:pointer;list-style:none;border-radius:12px;color:var(--fg)}
+.daygroup summary{display:flex;align-items:center;gap:10px;min-height:68px;box-sizing:border-box;padding:8px 62px 8px 4px;cursor:pointer;list-style:none;border-radius:12px;color:var(--fg)}
 .daygroup summary::-webkit-details-marker{display:none}
-.daygroup summary:hover{background:color-mix(in srgb,var(--pc) 6%,transparent)}
-.daygroup summary:focus-visible{outline:2px solid var(--pc);outline-offset:-2px}
-.daygroup summary>i{font-size:18px;font-style:normal;flex:none;color:var(--mut);transition:transform .15s}
-.daygroup[open] summary>i{transform:rotate(180deg)}
-.daycaption{display:flex;align-items:center;gap:18px;flex:1;min-width:0}
-.daycaption .dname{flex:1}
-.daystatus{font-size:12px;font-weight:700;white-space:nowrap;color:var(--mut)}
-.daygroup summary>.dot{width:16px;height:16px;box-sizing:border-box;border:2px solid var(--line);border-radius:50%;flex:none}
-.daygroup summary>.dot.done{background:var(--ok);border-color:var(--ok)}
-.daygroup summary>.dot.done:after{content:"✓";display:block;color:white;font-size:10px;line-height:12px;text-align:center;font-weight:900}
-.daygroup summary>.dot.busy{border-color:var(--pc);border-style:dashed}
-.daygroup summary>.ticon{flex:none;box-shadow:none}
-.dayitem .hdrow.dayaction{position:absolute;top:9px;right:3px;display:flex;justify-content:center;gap:6px;width:var(--day-action-width);min-height:44px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:none;text-align:center;font-size:13px;font-weight:800;color:var(--fg)}
-.dayitem .hdrow.dayaction:hover{border-color:var(--pc);background:color-mix(in srgb,var(--pc) 7%,var(--card))}
-.dayaction .pdonut{width:26px;height:26px;flex:none}
-.daygroup .ddpeople{display:flex;flex-wrap:wrap;gap:8px;margin:0 4px;padding:10px 0 12px}
-.daygroup .ddperson{white-space:normal;max-width:100%;flex-wrap:wrap;font-size:12px}
-.daygroup .daydetail{margin:0 4px 10px}
-.daygroup .ddmain{grid-template-columns:minmax(130px,1fr) auto}
-.daygroup .daydetail .ddpeople{margin-top:10px;padding-bottom:0}
+.daygroup summary:hover{background:color-mix(in srgb,var(--dayc) 6%,transparent)}
+.daygroup summary:focus-visible{outline:2px solid var(--dayc);outline-offset:-2px}
+.daycaption{display:grid;grid-template-columns:minmax(220px,1.5fr) minmax(150px,1fr) minmax(135px,.8fr);align-items:center;gap:24px;flex:1;min-width:0}.daycaption .dname{min-width:0}
+.daystatus{display:flex;align-items:center;justify-content:flex-end;gap:9px;font-size:11px;color:var(--mut)}.ownstatus{font-weight:750;white-space:nowrap}.daystatus .pdonut{width:31px;height:31px}.daystatus .pdonut b{font-size:8px}
+.daypeers{display:flex;justify-content:flex-start;gap:6px;flex-wrap:wrap}.daypeer{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;background:color-mix(in srgb,var(--line) 25%,transparent);color:var(--mut);white-space:nowrap;font-size:10px;font-weight:700}.daypeer.done,.daypeer.busy{color:var(--fg)}.daypeer.done i{font-style:normal;color:var(--ok)}.daypeer.busy i{width:6px;height:6px;border-radius:50%;background:var(--mut)}.daypeer.idle{font-weight:600;opacity:.72}
+.daygo{display:flex;align-items:center;gap:5px;min-width:58px;justify-content:flex-end;color:var(--fg);font-size:12px;font-weight:800}.daygo i{font-size:18px;font-style:normal}
+.daygroup summary>.dot{width:16px;height:16px;box-sizing:border-box;border:2px solid var(--line);border-radius:50%;flex:none}.daygroup summary>.dot.done{background:var(--ok);border-color:var(--ok)}.daygroup summary>.dot.done:after{content:"✓";display:block;color:white;font-size:10px;line-height:12px;text-align:center;font-weight:900}.daygroup summary>.dot.busy{border-color:var(--dayc);border-style:dashed}.daygroup summary>.ticon{flex:none;box-shadow:none}
+.dayitem .hdrow.dayaction{position:absolute;top:14px;right:7px;display:flex;align-items:center;justify-content:center;width:36px;height:36px;min-height:36px;padding:0;border:1px solid color-mix(in srgb,var(--line) 85%,transparent);border-radius:50%;background:var(--card);box-shadow:none;color:var(--mut)}.dayitem .hdrow.dayaction:hover{border-color:var(--mut);background:color-mix(in srgb,var(--line) 18%,var(--card))}.dayinfo{display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-family:Georgia,serif;font-size:16px;font-weight:800;font-style:italic;line-height:36px;transform:translateY(-.5px)}
+.daygroup .ddpeople{display:flex;flex-wrap:wrap;gap:8px;margin:0 4px;padding:10px 0 12px}.daygroup .ddperson{white-space:normal;max-width:100%;flex-wrap:wrap;font-size:12px}.daygroup .daydetail{margin:0 4px 10px}.daygroup .ddmain{grid-template-columns:minmax(130px,1fr) auto}.daygroup .daydetail .ddpeople{margin-top:10px;padding-bottom:0}
 .hlivebadge.liveactivity{white-space:normal;border-radius:14px;text-align:left;max-width:100%;padding:8px 12px}
 .hlivebadge.liveactivity>span{display:flex;align-items:baseline;flex-wrap:wrap;column-gap:10px;row-gap:2px;overflow:visible;line-height:1.4}
 .hlivebadge.liveactivity b{font-size:13px;overflow-wrap:anywhere}
 .hlivebadge.liveactivity small{font-size:12px;color:var(--mut);font-weight:650}
 @media(max-width:760px){
- .dayitem{--day-action-width:78px}
- .daygroup summary{gap:7px;min-height:70px;padding-right:calc(var(--day-action-width) + 16px)}
+ .daygroup summary{gap:7px;min-height:76px;padding-right:52px}
  .daygroup summary>.dot{display:none}
  .daygroup summary>.ticon{width:27px;height:27px;border-radius:8px;font-size:13px}
- .daycaption{display:block}
- .daycaption .dname{display:block;font-size:14px}
+ .daycaption{display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:4px 10px}
+ .daycaption .dname{display:block;font-size:14px}.daycaption>.daypeers{grid-column:1/3;grid-row:2}.daycaption>.daystatus{grid-column:2;grid-row:1}
  .daycaption .dname small{font-size:10px}
- .daystatus{display:block;font-size:11px;line-height:1.5;margin-top:2px}
- .dayitem .hdrow.dayaction{top:13px;font-size:12px;gap:3px;padding:5px 3px}
- .dayaction .pdonut{width:23px;height:23px}
+ .daystatus{align-items:center;gap:6px;margin-top:0}.daystatus .pdonut{width:27px;height:27px}
+ .daypeers{justify-content:flex-start;gap:4px}.daypeer{font-size:9px;padding:2px 6px}
+ .daygo{position:absolute;right:51px;top:11px;min-width:0;font-size:10px}.daygo i{font-size:15px}
+ .dayitem .hdrow.dayaction{top:20px;right:6px;width:32px;height:32px;min-height:32px}
  .daygroup .ddmain{grid-template-columns:1fr}
  .hlivebadge.liveactivity>span{display:block}
  .hlivebadge.liveactivity b,.hlivebadge.liveactivity small{display:block}
@@ -1321,6 +1313,66 @@ body[data-input-mode] #hexsvg.mb,body[data-input-mode] #hexsvg.mz{box-shadow:0 0
 .authlogo.brandmark i{width:32px;height:32px;border-radius:9px}
 .authlogo.brandmark .brand-star{font-size:21px}.authlogo.brandmark .brand-cross{font-size:31px}.authlogo.brandmark .brand-dot::after{width:12px;height:12px}
 
+/* Duidelijke feedback bij wisselen van invulstand. */
+#inputmode button.modeflash{animation:inputModeConfirm .34s ease-out}
+@keyframes inputModeConfirm{0%{transform:scale(.92)}45%{transform:scale(1.07);filter:brightness(1.14)}100%{transform:scale(1);filter:none}}
+body.phone #pbot #inputmode{padding:2px;border-radius:14px}
+
+/* Definitieve modusweergave: symbool + volle actieve knop + dezelfde bordrand.
+   Geen extra tekst/statusstip; de inactieve keuze blijft bewust rustig. */
+body[data-input-mode] :is(#inputmode,#nmode,#pmode) button:not(.on){background:var(--card)!important;border-color:var(--line)!important;color:var(--mut)!important;box-shadow:none!important}
+body[data-input-mode] :is(#inputmode,#nmode,#pmode) button.on,
+body[data-input-mode] :is(#mb,#mz).on{background:var(--mode-button)!important;border-color:var(--mode-button)!important;color:#fff!important;box-shadow:0 3px 0 color-mix(in srgb,var(--mode-button) 58%,#000)!important}
+body[data-input-mode] #grid{box-shadow:0 0 0 5px var(--mode-button),0 8px 24px var(--sh)!important}
+body[data-input-mode] #mgrid{outline-color:var(--mode-button)!important}
+body[data-t=hex][data-input-mode] #hexsvg{box-shadow:0 0 0 5px var(--mode-button),0 8px 24px var(--sh)!important}
+
+/* Hexcells is bewust de uitzondering: ook het vlak achter de cellen volgt de modus. */
+body[data-t=hex][data-input-mode=fill] #hexsvg{background:#e3f1fc!important}
+body[data-t=hex][data-input-mode=cross] #hexsvg{background:#dddde1!important}
+
+/* Dagpuzzelvolgorde: puzzel | eigen voortgang | groep, van persoonlijk naar samen. */
+.daycaption{grid-template-columns:minmax(220px,1.5fr) minmax(135px,.8fr) minmax(150px,1fr)}
+.daystatus{justify-content:flex-start}
+.daypeers{justify-content:flex-end}
+@media(max-width:760px){
+ .daycaption>.daystatus{grid-column:2;grid-row:1;justify-content:flex-end}
+ .daycaption>.daypeers{grid-column:1/3;grid-row:2;justify-content:flex-end}
+}
+
+/* Moduskleuren volgen de markeringen van iedere puzzel.
+   Negatieve actie is wit; plaatsen/invullen gebruikt de eigen puzzelkleur.
+   Hexcells behoudt zijn eigen blauw/donker-combinatie. */
+body[data-input-mode=cross]:not([data-t=hex]){--mode-tint:#fff;--mode-button:#fff;--mode-fg:#30343c;--mode-edge:#b8b8b5}
+body[data-t=bin][data-input-mode=fill]{--mode-tint:#7a52d6;--mode-button:#7a52d6;--mode-fg:#fff;--mode-edge:#7a52d6}
+body[data-t=star][data-input-mode=fill]{--mode-tint:#c97a00;--mode-button:#c97a00;--mode-fg:#fff;--mode-edge:#c97a00}
+body[data-t=nono][data-input-mode=fill]{--mode-tint:#0f9d8c;--mode-button:#0f9d8c;--mode-fg:#fff;--mode-edge:#0f9d8c}
+body[data-t=plus][data-input-mode=fill]{--mode-tint:#2b7bd6;--mode-button:#2b7bd6;--mode-fg:#fff;--mode-edge:#2b7bd6}
+body[data-t=mur][data-input-mode=fill]{--mode-tint:#b5483a;--mode-button:#b5483a;--mode-fg:#fff;--mode-edge:#b5483a}
+body[data-t=hex][data-input-mode=fill]{--mode-tint:#3d9bd4;--mode-button:#2f86bc;--mode-fg:#fff;--mode-edge:#2f86bc}
+body[data-t=hex][data-input-mode=cross]{--mode-tint:#35363b;--mode-button:#35363b;--mode-fg:#fff;--mode-edge:#35363b}
+
+body[data-input-mode] :is(#inputmode,#nmode,#pmode) button.on,
+body[data-input-mode] :is(#mb,#mz).on{background:var(--mode-button)!important;border-color:var(--mode-edge)!important;color:var(--mode-fg)!important}
+body[data-input-mode] #grid{box-shadow:0 0 0 5px var(--mode-button),0 0 0 6px var(--mode-edge),0 8px 24px var(--sh)!important}
+body[data-input-mode] #mgrid{outline:5px solid var(--mode-button)!important;box-shadow:0 0 0 1px var(--mode-edge)}
+body[data-t=hex][data-input-mode] #hexsvg{box-shadow:0 0 0 5px var(--mode-button),0 0 0 6px var(--mode-edge),0 8px 24px var(--sh)!important}
+body:not(.home):not(.newpick)[data-input-mode]{background-color:color-mix(in srgb,var(--mode-tint) 7%,var(--bg))}
+
+/* Speelvelden blijven rustig: modus zit in rand + subtiele pagina.
+   Hexcells blijft de bewuste uitzondering en gebruikt zijn zachtere oorspronkelijke modusvlak. */
+body[data-t=plus][data-input-mode] #grid,
+body[data-t=bin][data-input-mode] #grid,
+body[data-t=star][data-input-mode] #grid,
+body[data-t=nono][data-input-mode] #grid{background:var(--card)!important}
+body[data-t=plus][data-input-mode] #grid.pxm,
+body[data-t=plus][data-input-mode] #grid.pom{--card:var(--card)!important}
+body[data-t=hex][data-input-mode=fill] #hexsvg{background:color-mix(in srgb,#3d9bd4 12%,var(--card))!important}
+body[data-t=hex][data-input-mode=cross] #hexsvg{background:color-mix(in srgb,#35363b 10%,var(--card))!important}
+
+/* Bij dynamische kleuren blijft de geselecteerde kleur zelf leidend. */
+body[data-t=nono][data-input-mode=fill] #nmode .ncb.on{background:color-mix(in srgb,var(--mode-button) 24%,var(--card))!important;border-color:var(--mode-button)!important;color:var(--fg)!important;box-shadow:inset 0 0 0 2px var(--mode-button)!important}
+body[data-t=mur][data-input-mode=fill] #inputmode button.on{background:var(--mode-button)!important;border-color:var(--mode-button)!important;color:#fff!important}
 
 /* Testomgeving: herkenbaar zonder de bestaande Home-indeling te veranderen. */
 body.home #home .htestbanner{
