@@ -12,4 +12,4 @@ const PUZZLE_REGISTRY={
  m24:{name:"Maak 24",active:false,color:"#2f9e44"}
 };
 
-window.PUZZLE_REGISTRY=PUZZLE_REGISTRY;
+if(typeof window!=="undefined")window.PUZZLE_REGISTRY=PUZZLE_REGISTRY;
