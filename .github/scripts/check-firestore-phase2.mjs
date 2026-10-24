@@ -15,9 +15,13 @@ try{
  });
  const db=p=>env.authenticatedContext(p.authUid).firestore(),{solo,pending,member,admin,outsider}=fx.players;
  const anonUid='auth-new-anon',anonPlayer='p_'+anonUid,anonDb=env.authenticatedContext(anonUid,{firebase:{sign_in_provider:'anonymous'}}).firestore();
- const anonProfile={authUid:anonUid,playerId:anonPlayer,displayName:'Solo tester',groupId:'',role:'user',accountState:'anonymous',createdAt:300,updatedAt:300,inviteCode:'',invitedByAuthUid:'',groupJoinCode:'',theme:'shared',accent:'blue'};
+ const anonProfile={authUid:anonUid,playerId:anonPlayer,displayName:'Solo tester',groupId:'',role:'user',accountState:'anonymous',createdAt:300,updatedAt:300,inviteCode:'',invitedByAuthUid:'',groupJoinCode:'',theme:'shared',accent:'blue',preferences:{favoritePuzzleTypes:['bin','star','nono'],dailyDifficulty:{bin:'normal',star:'normal',nono:'normal',hex:'normal',plus:'normal',mur:'normal'}}};
  await assertSucceeds(setDoc(doc(anonDb,'profiles',anonUid),anonProfile));await assertSucceeds(setDoc(doc(anonDb,'players',anonPlayer),{playerId:anonPlayer,authUid:anonUid,displayName:'Solo tester',createdAt:300,updatedAt:300}));
  await assertFails(updateDoc(doc(anonDb,'profiles',anonUid),{playerId:'p_second_identity',updatedAt:301}));
+ await assertSucceeds(setDoc(doc(anonDb,'dailyPlans',anonPlayer,'days','2026-10-24'),{schemaVersion:4,playerId:anonPlayer,date:'2026-10-24',favoritePuzzleTypes:['bin','star','nono'],difficulties:{bin:'normal',star:'hard',nono:'easy'},createdAt:305}));
+ await assertSucceeds(getDoc(doc(anonDb,'dailyPlans',anonPlayer,'days','2026-10-24')));
+ await assertFails(updateDoc(doc(anonDb,'dailyPlans',anonPlayer,'days','2026-10-24'),{favoritePuzzleTypes:['bin']}));
+ await assertFails(getDoc(doc(db(outsider),'dailyPlans',anonPlayer,'days','2026-10-24')));
  const linkedDb=env.authenticatedContext(anonUid,{email:'solo@example.test',email_verified:true,firebase:{sign_in_provider:'google.com'}}).firestore();
  await assertSucceeds(updateDoc(doc(linkedDb,'profiles',anonUid),{accountState:'linked',updatedAt:302}));await assertFails(updateDoc(doc(linkedDb,'profiles',anonUid),{playerId:'p_second_identity',updatedAt:303}));
  await assertSucceeds(getDoc(doc(db(solo),'players',solo.playerId)));await assertFails(getDoc(doc(db(outsider),'players',solo.playerId)));
@@ -48,5 +52,5 @@ try{
  {const x=db(admin),b=writeBatch(x);b.set(doc(x,'groups',gid2),{name:'Tweede groep',ownerAuthUid:admin.authUid,inviteCode:'rules02',theme:'shared',accent:'blue',murdokuNames:[],createdAt:now,updatedAt:now});b.set(doc(x,'groups',gid2,'members',admin.playerId),admin2);b.set(doc(x,'playerMemberships',admin.playerId,'groups',gid2),indexOf(admin2,gid2));await assertSucceeds(b.commit())}
  await assertSucceeds(getDoc(doc(db(admin),'playerMemberships',admin.playerId,'groups',fx.group.id)));await assertSucceeds(getDoc(doc(db(admin),'playerMemberships',admin.playerId,'groups',gid2)));
  await assertFails(getDoc(doc(db(outsider),'playerMemberships',member.playerId,'groups',fx.group.id)));
- console.log('Fase 2-5 Firestore-rules: solo, persoonlijke data, pending/approved, meerdere memberships/admins en laatste-adminbescherming geslaagd.');
+ console.log('Fase 2-7 Firestore-rules: solo, persoonlijke data, pending/approved, meerdere memberships/admins en laatste-adminbescherming geslaagd.');
 }finally{await env.cleanup()}
