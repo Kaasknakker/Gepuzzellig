@@ -1203,7 +1203,7 @@ body.phone #grid>.nsize{font-size:10px;padding-right:3px;padding-bottom:3px}
 body[data-input-mode=fill]{--mode-tint:#4b86b4;--mode-button:#3575a5}
 body[data-input-mode=cross]{--mode-tint:#b56f62;--mode-button:#9d5e54}
 body:not(.home):not(.newpick)[data-input-mode]{background-color:color-mix(in srgb,var(--mode-tint) 7%,var(--bg))}
-body[data-input-mode] #grid{--card:var(--card);box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-tint) 82%,var(--line)),0 8px 24px var(--sh)}
+body[data-input-mode] #grid{background:var(--card);box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-tint) 82%,var(--line)),0 8px 24px var(--sh)}
 body[data-t=bin] #grid,body[data-t=star] #grid{box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-tint) 82%,var(--line)),0 8px 24px var(--sh)}
 #grid .cnt span.full{color:color-mix(in srgb,var(--fg) 32%,var(--bg));font-weight:500}
 #grid .cnt span:not(.full):not(.over){font-weight:850}
