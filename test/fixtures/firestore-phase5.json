@@ -1,0 +1,50 @@
+{
+  "profiles": {
+    "auth-owner": {
+      "authUid": "auth-owner",
+      "playerId": "u-special",
+      "displayName": "Eigenaar",
+      "groupId": "legacy-a",
+      "role": "user"
+    },
+    "auth-member": {
+      "authUid": "auth-member",
+      "playerId": "p_member",
+      "displayName": "Lid",
+      "groupId": "legacy-a",
+      "role": "user"
+    },
+    "auth-solo": {
+      "authUid": "auth-solo",
+      "playerId": "p_solo",
+      "displayName": "Solo",
+      "groupId": "",
+      "role": "user"
+    }
+  },
+  "groups": {
+    "legacy-a": {
+      "name": "Oude groep",
+      "ownerAuthUid": "auth-owner",
+      "inviteCode": "ABCDEF12",
+      "createdAt": 10,
+      "updatedAt": 10
+    }
+  },
+  "results": {
+    "legacy-a_2026-10-24_bin.2_u-special": {
+      "uid": "u-special",
+      "group": "legacy-a",
+      "date": "2026-10-24",
+      "type": "bin.2",
+      "secs": 60
+    }
+  },
+  "status": {
+    "legacy-a_u-special": {
+      "uid": "u-special",
+      "group": "legacy-a",
+      "progress": {}
+    }
+  }
+}
