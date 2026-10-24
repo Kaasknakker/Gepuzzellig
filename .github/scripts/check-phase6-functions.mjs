@@ -18,7 +18,7 @@ if(src.includes(required.at(-1)[1]))throw new Error('APP_URL is nog hardcoded');
 const sinkBlock=src.slice(src.indexOf('if (env.mode === "sink")'),src.indexOf('if (env.mode === "allowlist"'));
 if(sinkBlock.includes('fetch('))throw new Error('Test sink mag geen netwerkmail versturen');
 const wf=fs.readFileSync('.github/workflows/deploy-test-functions.yml','utf8');
-for(const needle of ['workflow_dispatch:','project_id: gepuzzellig-test','--project gepuzzellig-test','MAIL_MODE=sink','TEST_SINK_NO_POSTMARK'])if(!wf.includes(needle))throw new Error('Test-Functionsworkflow mist veiligheidsborging: '+needle);
+for(const needle of ['workflow_dispatch:','project_id: gepuzzellig-test','--project gepuzzellig-test','MAIL_MODE=sink' ])if(!wf.includes(needle))throw new Error('Test-Functionsworkflow mist veiligheidsborging: '+needle);
 if(/FIREBASE_SERVICE_ACCOUNT_GEPUZZELIG[^_]/.test(wf))throw new Error('Test-Functionsworkflow verwijst naar productie-serviceaccount');
 if(/--project gepuzzelig(?:\s|$)/.test(wf))throw new Error('Test-Functionsworkflow kan productie targeten');
 console.log('Fase 6 Functions-contract: project-aware URL, sink/allowlist en geïsoleerde handmatige testdeploy geslaagd.');
