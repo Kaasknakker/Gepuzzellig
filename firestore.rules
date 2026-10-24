@@ -266,11 +266,21 @@ service cloud.firestore {
         && request.resource.data.groupId == groupId
         && request.resource.data.schemaVersion == 1
         && request.resource.data.createdAt is int
-        && request.resource.data.createdAt >= get(membershipPath(groupId, request.resource.data.playerId)).data.joinedAt
+        && request.resource.data.sharedAt is int
+        && request.resource.data.sharedAt >= get(membershipPath(groupId, request.resource.data.playerId)).data.joinedAt
         && request.resource.data.favoritePuzzleTypes is list
         && request.resource.data.difficulties is map;
       allow update: if ownsPlayer(resource.data.playerId)
-        && request.resource.data == resource.data;
+        && approvedMember(groupId, resource.data.playerId)
+        && request.resource.data.playerId == resource.data.playerId
+        && request.resource.data.groupId == resource.data.groupId
+        && request.resource.data.date == resource.data.date
+        && request.resource.data.favoritePuzzleTypes == resource.data.favoritePuzzleTypes
+        && request.resource.data.difficulties == resource.data.difficulties
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.sharedAt is int
+        && request.resource.data.sharedAt >= resource.data.get('sharedAt', resource.data.createdAt)
+        && request.resource.data.sharedAt >= get(membershipPath(groupId, resource.data.playerId)).data.joinedAt;
       allow delete: if false;
     }
 
