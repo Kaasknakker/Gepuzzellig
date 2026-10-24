@@ -61,10 +61,12 @@ service cloud.firestore {
     }
     function validMembership(playerId) {
       return request.resource.data.keys().hasOnly([
-          'playerId','role','status','requestedAt','approvedAt','joinedAt','approvedByPlayerId','updatedAt'
+          'playerId','displayName','role','status','requestedAt','approvedAt','joinedAt','approvedByPlayerId','updatedAt'
         ])
         && request.resource.data.keys().hasAll(['playerId','role','status','requestedAt','updatedAt'])
         && request.resource.data.playerId == playerId
+        && request.resource.data.get('displayName','') is string
+        && request.resource.data.get('displayName','').size() <= 30
         && request.resource.data.role in ['member','admin']
         && request.resource.data.status in ['pending','approved','rejected','left']
         && request.resource.data.requestedAt is int && request.resource.data.requestedAt >= 0
@@ -248,10 +250,29 @@ service cloud.firestore {
       allow delete: if ownsPlayer(playerId);
     }
 
-    // Minimale inverse index. In Fase 2 read-only voor clients: canonical membership staat onder groups.
+    // Fase 5: inverse index voor "mijn groepen". Canonical membership blijft groups/{groupId}/members/{playerId}.
+    function validMembershipIndex(groupId) {
+      return request.resource.data.keys().hasOnly(['groupId','role','status','joinedAt','updatedAt'])
+        && request.resource.data.keys().hasAll(['groupId','role','status','joinedAt','updatedAt'])
+        && request.resource.data.groupId == groupId
+        && request.resource.data.role in ['member','admin']
+        && request.resource.data.status in ['pending','approved','rejected','left']
+        && request.resource.data.joinedAt is int && request.resource.data.joinedAt >= 0
+        && request.resource.data.updatedAt is int && request.resource.data.updatedAt >= 0;
+    }
+    function indexMatchesMembership(groupId, playerId) {
+      return existsAfter(membershipPath(groupId, playerId))
+        && getAfter(membershipPath(groupId, playerId)).data.role == request.resource.data.role
+        && getAfter(membershipPath(groupId, playerId)).data.status == request.resource.data.status
+        && getAfter(membershipPath(groupId, playerId)).data.get('joinedAt',0) == request.resource.data.joinedAt;
+    }
     match /playerMemberships/{playerId}/groups/{groupId} {
       allow read: if ownsPlayer(playerId);
-      allow create, update, delete: if false;
+      allow create, update: if validMembershipIndex(groupId)
+        && indexMatchesMembership(groupId, playerId)
+        && (ownsPlayer(playerId) || groupAdmin(groupId, myPlayer()));
+      allow delete: if (ownsPlayer(playerId) || groupAdmin(groupId, myPlayer()))
+        && !existsAfter(membershipPath(groupId, playerId));
     }
 
     match /results/{id} {
@@ -421,17 +442,31 @@ service cloud.firestore {
       allow get: if ownsPlayer(playerId)
         || (hasProfile() && ownsPlayer(myPlayer()) && approvedMember(groupId, myPlayer()));
       allow list: if hasProfile() && ownsPlayer(myPlayer()) && approvedMember(groupId, myPlayer());
-      allow create: if ownsPlayer(playerId)
-        && validMembership(playerId)
-        && request.resource.data.status == 'pending'
-        && request.resource.data.role == 'member'
-        && request.resource.data.get('approvedAt', 0) == 0
-        && request.resource.data.get('joinedAt', 0) == 0
-        && request.resource.data.get('approvedByPlayerId', '') == '';
-      // Admins beheren andere memberships. Eigen approved-adminstatus kan client-side niet worden
-      // verlaagd/verwijderd; daarmee kan de laatste admin nooit verdwijnen.
+      // Een speler kan zelf alleen pending aanvragen. Bij het aanmaken van een nieuwe groep mag
+      // de maker in dezelfde batch de eerste approved admin worden.
+      allow create: if validMembership(playerId)
+        && (
+          (ownsPlayer(playerId)
+            && request.resource.data.status == 'pending'
+            && request.resource.data.role == 'member'
+            && request.resource.data.get('approvedAt', 0) == 0
+            && request.resource.data.get('joinedAt', 0) == 0
+            && request.resource.data.get('approvedByPlayerId', '') == '')
+          ||
+          (ownsPlayer(playerId)
+            && request.resource.data.status == 'approved'
+            && request.resource.data.role == 'admin'
+            && request.resource.data.get('joinedAt',0) > 0
+            && getAfter(/databases/$(database)/documents/groups/$(groupId)).data.ownerAuthUid == request.auth.uid)
+        );
+      // Iedere approved admin mag aanvragen goedkeuren en leden promoveren/demoveren.
+      // Een admin kan zijn eigen approved-adminstatus niet verlagen of verwijderen. Daardoor
+      // kan de laatste admin nooit verdwijnen; bij meerdere admins kan een andere admin dit doen.
       allow update: if validMembership(playerId)
         && hasProfile() && ownsPlayer(myPlayer()) && groupAdmin(groupId, myPlayer())
+        && request.resource.data.playerId == resource.data.playerId
+        && request.resource.data.get('displayName','') == resource.data.get('displayName','')
+        && request.resource.data.requestedAt == resource.data.requestedAt
         && (playerId != myPlayer()
           || (resource.data.status == 'approved' && resource.data.role == 'admin'
             && request.resource.data.status == 'approved' && request.resource.data.role == 'admin'));
@@ -440,9 +475,10 @@ service cloud.firestore {
     }
 
     match /groups/{groupId} {
-      allow get: if isAdmin()
+      allow get: if (hasProfile() && approvedMember(groupId, myPlayer()))
         || (hasProfile() && myGroup() == groupId)
-        || (signedIn() && resource.data.get('ownerAuthUid','') == request.auth.uid);
+        || (signedIn() && resource.data.get('ownerAuthUid','') == request.auth.uid)
+        || isAdmin();
       allow list: if isAdmin();
 
       // Nieuwe groepen krijgen altijd een willekeurig id "g_…" (zoals de app ze maakt). Zo kan niemand
@@ -472,7 +508,7 @@ service cloud.firestore {
         && request.resource.data.updatedAt >= 0;
 
       allow update: if signedIn()
-        && resource.data.get('ownerAuthUid', '') == request.auth.uid
+        && (resource.data.get('ownerAuthUid', '') == request.auth.uid || (hasProfile() && groupAdmin(groupId, myPlayer())))
         && request.resource.data.keys().hasOnly([
           'name','ownerAuthUid','inviteCode','theme','accent','murdokuNames','createdAt','updatedAt'
         ])
@@ -498,13 +534,14 @@ service cloud.firestore {
       allow list: if isAdmin();
 
       allow create: if hasProfile()
+        && (request.resource.data.ownerAuthUid == request.auth.uid || groupAdmin(request.resource.data.groupId, myPlayer()))
         && request.resource.data.keys().hasOnly([
           'groupId','ownerAuthUid','createdAt'
         ])
         && request.resource.data.keys().hasAll([
           'groupId','ownerAuthUid','createdAt'
         ])
-        && request.resource.data.ownerAuthUid == request.auth.uid
+        && request.resource.data.ownerAuthUid is string
         && request.resource.data.createdAt is int
         && request.resource.data.createdAt >= 0
         && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.ownerAuthUid == request.auth.uid
