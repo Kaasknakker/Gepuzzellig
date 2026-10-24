@@ -7,7 +7,8 @@ const testRect=el=>el&&el.getBoundingClientRect();
 function testAvailableRect(){
  const r=testRect($('#stage')),pb=testRect($('#pbot'));
  const side=!PHONE&&!testOriginal?document.body.classList.contains('layout-rail'):pb&&pb.width<innerWidth*.45&&pb.height>pb.width;
- const left=Math.max(4,r.left),right=Math.min(innerWidth-4,r.right),top=Math.max(r.top,(testRect($('#layoutBar'))?.bottom||0));
+ const inset=side&&!testOriginal&&S.type!=='mur'?8:0;
+ const left=Math.max(4,r.left+inset),right=Math.min(innerWidth-4,r.right-inset),top=Math.max(r.top,(testRect($('#layoutBar'))?.bottom||0));
  const bottom=side?innerHeight-8:pb?.top-4||innerHeight-8;
  return {left,right,top,bottom,width:Math.max(0,right-left),height:Math.max(0,bottom-top)};
 }
@@ -17,7 +18,7 @@ function testFrame(){
  document.body.classList.toggle('layout-wide',active);
  if(!active){document.body.classList.remove('layout-rail','layout-bottom');window.LAYOUT_BOTTOM=false;return}
  const key=innerWidth+'x'+innerHeight;
- if(S._testModeKey!==key){S._testModeKey=key;S._testMode=innerWidth/innerHeight>=1.15?'rail':'bottom'}
+ S._testModeKey=key;S._testMode='rail';
  document.body.classList.toggle('layout-rail',S._testMode==='rail');document.body.classList.toggle('layout-bottom',S._testMode==='bottom');window.LAYOUT_BOTTOM=S._testMode==='bottom';
  const top=Math.max((testRect($('#layoutBar'))?.bottom||0),testRect($('#topbar'))?.bottom||0)+8;
  const pb=testRect($('#pbot')),bottom=window.LAYOUT_BOTTOM?pb.top-8:innerHeight-8;
@@ -32,9 +33,6 @@ function testArrange(){
  }
  if(!document.body.classList.contains('layout-wide')||!S.p)return;
  let area=testAvailableRect(),anchor=testRect($(S.type==='mur'?'#mgrid':'#playbox')),pb=testRect($('#pbot'));
- if(S._testMode==='rail'&&anchor.left<pb.width+20){
-  S._testMode='bottom';testFrame();resetPuzzleFit();testBaseRender();testRefit();area=testAvailableRect();anchor=testRect($(S.type==='mur'?'#mgrid':'#playbox'));pb=testRect($('#pbot'));
- }
  const play=testRect($('#playbox')),y=Math.max(0,(area.height-play.height)/2);$('#playbox').style.setProperty('--test-y',y+'px');
  if(S._testMode==='bottom'){const r=testRect($('#playbox'));document.documentElement.style.setProperty('--bottom-shift',Math.min(0,r.bottom+12-pb.top)+'px')}
  if(S._testMode==='rail'){

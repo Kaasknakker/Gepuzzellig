@@ -31,8 +31,8 @@ try{
    if(phone)assert(await page.evaluate(()=>{const p=$('#prow').getBoundingClientRect(),b=$('#playbox').getBoundingClientRect();return b.top-p.bottom>=12}),`${name}/${t}: onvoldoende ruimte boven bord`);
    if(phone)assert(await page.evaluate(()=>{const a=testAvailableRect(),b=$('#playbox').getBoundingClientRect();return b.height>a.height||Math.abs((b.top+b.bottom)/2-(a.top+a.bottom)/2)<1}),`${name}/${t}: niet verticaal gecentreerd`);
    if(t!=='mur')assert(geometry.bottom<=geometry.stage.bottom+2,`${name}/${t}: bord buiten speelruimte: ${JSON.stringify(geometry)}`);
-   if(t==='plus'&&!phone)assert(geometry.cs>56&&geometry.cs<=96,'Pluszle passend en groter');
-   if(!phone)assert(Math.abs((geometry.left+geometry.right)/2-width/2)<2,`${name}/${t}: bord niet gecentreerd`);
+   if(t==='plus'&&!phone)assert(geometry.cs>56&&geometry.cs<=96,'Pluszle passend en groter: '+JSON.stringify(geometry));
+   if(!phone)assert(Math.abs((geometry.left+geometry.right)/2-(geometry.stage.left+geometry.stage.right)/2)<2,`${name}/${t}: bord niet gecentreerd`);
    if(t==='mur'&&!phone)assert.equal(geometry.murOverflow,'visible','Murdoku scrollt op groot scherm');
    if(t==='mur'&&!phone)assert(await page.evaluate(()=>{const a=testAvailableRect(),g=$('#mgrid').getBoundingClientRect(),p=$('#playbox').getBoundingClientRect();return g.top-6>=a.top&&p.bottom+6<=a.bottom}),`${name}: Murdoku-rand/personen/uitleg buiten beeld`);
    if(t==='mur'){

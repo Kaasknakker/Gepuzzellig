@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 const {chromium}=createRequire(import.meta.url)('playwright');
 const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE||undefined,args:['--no-sandbox']});
 try{
- for(const [width,height,phone] of [[320,667,true],[390,844,true],[820,1180,false],[1180,820,false],[1440,1000,false]]){
+ for(const [width,height,phone] of [[320,667,true],[390,844,true],[744,1133,false],[820,1180,false],[1180,820,false],[1440,1000,false]].filter(([width])=>!process.env.CHECK_WIDTH||width===+process.env.CHECK_WIDTH)){
   const context=await browser.newContext({viewport:{width,height},hasTouch:true,userAgent:phone?'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)':'Mozilla/5.0'});
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.route('**/js/firebase.js*',r=>r.fulfill({contentType:'text/javascript',body:''}));
@@ -21,6 +21,8 @@ try{
    await page.locator('#inputmode button').last().click();
    assert(await page.evaluate(()=>S.type==='mur'?S.mxm:S.inputAlt),`${width}/${type}: tweede modus geselecteerd`);
    await page.waitForTimeout(300);await page.screenshot({path:`/tmp/gepuzzellig-${type}-alt-${width}.png`});
+   assert.equal(await page.locator('#inputmode button.on').evaluate(e=>getComputedStyle(e).color),'rgb(255, 255, 255)','actieve modus heeft een wit symbool');
+   assert(await page.locator('#inputmode').evaluate(e=>getComputedStyle(e.querySelector('.on')).backgroundColor!==getComputedStyle(e.querySelector('button:not(.on)')).backgroundColor),'actieve knop heeft een eigen volle kleur');
    await page.evaluate(()=>toggleTwoMode());
    assert.equal(await page.evaluate(()=>S.type==='mur'?!!S.mxm:!!S.inputAlt),false);
    const overlaps=await page.locator('#pbot').evaluate(e=>{const boxes=[...e.querySelectorAll('button')].filter(b=>b.offsetWidth&&b.offsetHeight).map(b=>b.getBoundingClientRect());return boxes.some((a,i)=>boxes.slice(i+1).some(b=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>1&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1))});assert.equal(overlaps,false,`${width}/${type}: bedieningsknoppen overlappen`);
@@ -35,8 +37,28 @@ try{
   for(let n=0;n<2;n++)await page.locator(`#mgrid [data-i="${i}"]`).dispatchEvent('pointerdown',{pointerType:'touch',pointerId:1,button:0});
   assert.deepEqual(await page.evaluate(i=>[S.cur[i],S.hist.length,S.ms,S.mxm],i),[-2,1,1,false]);
   assert.equal(await page.locator('#mpal [data-s="x"]').count(),0);
+  await page.evaluate(i=>{S.cur[i]=-2;S.mxm=true;murLastTap=null;paintMur()},i);
+  await page.locator(`#mgrid [data-i="${i}"]`).dispatchEvent('pointerdown',{pointerType:'touch',pointerId:1,button:0});assert.equal(await page.evaluate(i=>S.cur[i],i),-1,'Murdoku kruismodus wist een kruisje');
+  await page.locator(`#mgrid [data-i="${i}"]`).dispatchEvent('pointerdown',{pointerType:'touch',pointerId:1,button:0});assert.equal(await page.evaluate(i=>S.cur[i],i),-2,'Murdoku kruismodus blijft kruisjes plaatsen');
+  await page.evaluate(()=>{S.mxm=false;paintMur()});
+  await page.locator(`#mgrid [data-i="${i}"]`).dispatchEvent('pointerdown',{pointerType:'mouse',pointerId:1,button:2});assert.deepEqual(await page.evaluate(i=>[S.cur[i],S.mxm],i),[-1,false],'rechts in namenmodus wisselt een kruisje zonder de modus vast te veranderen');
+  await page.evaluate(()=>{S.mxm=true;S.ms=1;paintMur()});
+  await page.locator(`#mgrid [data-i="${i}"]`).dispatchEvent('pointerdown',{pointerType:'mouse',pointerId:1,button:2});assert.deepEqual(await page.evaluate(i=>[S.cur[i],S.mxm],i),[1,true],'rechts in kruismodus plaatst de geselecteerde naam');
   await page.evaluate(()=>{S.cur=S.hist.pop();paintMur()});
   assert.equal(await page.evaluate(i=>S.cur[i],i),-1);
+  // Veld, aanwijzingen en ingevulde kleuren blijven identiek bij moduswissel.
+  for(const nv of ['classic','color']){
+   await page.evaluate(nv=>{nonoVariant=nv;setFreePreferences('nono',1);load('nono',true,true)},nv);await page.waitForFunction(nv=>S.type==='nono'&&!!S.p&&S.nv===nv,nv);
+   for(const theme of ['light','dark']){
+    await page.evaluate(theme=>{setThemeMode(theme);setNonoMode('f');nonoPaint(0,1)},theme);await page.waitForTimeout(400);
+    const before=await page.evaluate(()=>({board:[$('#grid'),S.cells[0],S.cells[1],$('#grid .k')].map(e=>getComputedStyle(e).backgroundColor),body:getComputedStyle(document.body).backgroundColor,frame:getComputedStyle($('#grid')).boxShadow}));
+    await page.evaluate(()=>toggleTwoMode());await page.waitForTimeout(400);
+    const after=await page.evaluate(()=>({board:[$('#grid'),S.cells[0],S.cells[1],$('#grid .k')].map(e=>getComputedStyle(e).backgroundColor),body:getComputedStyle(document.body).backgroundColor,frame:getComputedStyle($('#grid')).boxShadow,button:getComputedStyle($('#nx')).color}));
+    assert.deepEqual(after.board,before.board,`${width}/${nv}/${theme}: vaste veldkleuren`);assert.notEqual(after.body,before.body);assert.notEqual(after.frame,before.frame);assert(after.frame.includes('7px'));assert.equal(after.button,'rgb(255, 255, 255)');
+    if(width===820)await page.screenshot({path:`/tmp/gepuzzellig-nono-${nv}-${theme}.png`});
+   }
+  }
+  await page.evaluate(()=>{setThemeMode('light');nonoVariant='classic'});
   // Namen worden volledig uitgeschreven, inclusief bij meerdere groepsleden.
   await page.evaluate(()=>{GROUP_MEMBERS=[{playerId:uid,displayName:'Testspeler'},{playerId:'aart',displayName:'Aart'},{playerId:'long',displayName:'Een lange groepsnaam'}];PROFILE_NAMES.aart='Aart';PROFILE_NAMES.long='Een lange groepsnaam';showHome()});
   await page.evaluate(()=>{STAT=[{uid:'aart',group:$('#group').value,date:dstr(),type:dayTypeDevice('star',dstr(),PHONE),at:Date.now()}];renderHome()});
@@ -95,6 +117,7 @@ try{
   for(const t of ['bin','star','nono','hex','plus','mur']){
    await page.evaluate(t=>{setFreePreferences(t,1);load(t,true,true)},t);await page.waitForFunction(t=>S.type===t&&!!S.p,t);await page.waitForTimeout(150);
    const top=await page.locator(phone?'#prow':'#topbar').evaluate(e=>[...e.querySelectorAll('button,.peerlive,#hexstat')].filter(b=>b.getClientRects().length&&getComputedStyle(b).display!=='none').map(b=>{const r=b.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}}));
+   if(!phone)assert(await page.evaluate(()=>{const p=$('#pbot').getBoundingClientRect(),b=$(S.type==='hex'?'#hexsvg':S.type==='mur'?'#mgrid':'#grid').getBoundingClientRect();return document.body.classList.contains('layout-rail')&&!document.body.classList.contains('layout-bottom')&&p.right<=b.left-6&&p.left>=0&&p.bottom<=innerHeight}),`${width}/${t}: bediening altijd links en binnen beeld`);
    assert(top.every(r=>r.left>=-1&&r.right<=width+1),`${width}/${t}: bovenbalk past met onlineknop`);
    assert(await page.locator('#peerLive span').evaluate(e=>e.scrollWidth<=e.clientWidth+1),`${width}/${t}: online-aantal past`);
    if(width===1180&&t==='star'){
@@ -103,6 +126,14 @@ try{
     await page.evaluate(()=>showHintLevel(S.hint,3,false));await page.screenshot({path:'/tmp/gepuzzellig-aha-full.png'});await page.evaluate(()=>clearHint());
    }
    if(phone&&t==='hex')await page.screenshot({path:`/tmp/gepuzzellig-hex-online-${width}.png`});
+   if(!phone&&t==='hex')for(const color of [1,0]){
+    const cell=await page.evaluate(color=>{setHexMode(color?'z':'b');const i=S.p.sol.findIndex((v,i)=>v===color&&!S.hx.rev.has(i)),svg=$('#hexsvg').firstElementChild,pt=svg.createSVGPoint();if(i<0)return null;[pt.x,pt.y]=window._hg.cells[i];const c=pt.matrixTransform(svg.getScreenCTM());return {i,x:c.x,y:c.y,mode:hexMode}},color);assert(cell,'verborgen Hexcells-vakje voor rechtermuisknop');
+    await page.mouse.click(cell.x,cell.y,{button:'right'});assert(await page.evaluate(i=>S.hx.rev.has(i),cell.i),'rechts onthult de andere kleur');assert.equal(await page.evaluate(()=>hexMode),cell.mode,'Hexcells-modus blijft geselecteerd');
+   }
+  }
+  if(!phone){
+   await page.setViewportSize(width>height?{width:820,height:1180}:{width:1180,height:820});await page.waitForTimeout(350);
+   assert(await page.evaluate(()=>{const p=$('#pbot').getBoundingClientRect(),b=$('#mgrid').getBoundingClientRect();return document.body.classList.contains('layout-rail')&&!document.body.classList.contains('layout-bottom')&&p.right<=b.left-6&&p.left>=0&&p.bottom<=innerHeight}),'na draaien blijft het paneel links');
   }
   assert.deepEqual(errors,[],'geen browserfouten');
   await context.close();console.log(`OK: ${width}×${height}, modi, Murdoku, groepsdetails en controlefeedback`);

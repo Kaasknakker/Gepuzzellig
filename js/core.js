@@ -198,7 +198,7 @@ function load(type,practice,fresh,date,skipPersist){if($("#checkfeedback"))$("#c
   try{updTabs()}catch(e){}render();ub();setTimeout(()=>pingOnline(true),0)},30)}
 
 const LANDQ=matchMedia("(orientation:landscape) and (min-aspect-ratio:23/20)");
-const availBot=()=>{const b=$("#pbot");if(b&&!PHONE&&document.body.classList.contains("tablet")&&LANDQ.matches&&!window.LAYOUT_BOTTOM)return innerHeight+(window.scrollY||0)-14-HINTPAD;return b?b.getBoundingClientRect().top+(window.scrollY||0)-(PHONE?8:18)-HINTPAD:innerHeight-14};
+const availBot=()=>{const b=$("#pbot");if(b&&!PHONE&&document.body.classList.contains("tablet")&&(document.body.classList.contains("layout-rail")||LANDQ.matches)&&!window.LAYOUT_BOTTOM)return innerHeight+(window.scrollY||0)-14-HINTPAD;return b?b.getBoundingClientRect().top+(window.scrollY||0)-(PHONE?8:18)-HINTPAD:innerHeight-14};
 function sizeCs(cols,rows,extraH){const key=cols+"|"+rows+"|"+(extraH||0);if(S&&S._csFit&&S._csFit.key===key){CS=S._csFit.v;document.documentElement.style.setProperty("--cs",CS+"px");return}const top=$("#grid").getBoundingClientRect().top+(window.scrollY||0);CS=Math.max(24,Math.min(window.LAYOUT_ORIGINAL?96:S.type==="plus"?(PHONE?96:innerWidth>2000?(S.p.W>=7?88:72):S.p.W>=7?96:S.p.W===6?88:80):innerWidth>2000?(S.type==="nono"?56:72):96,Math.floor((availBot()-top-(extraH||0))/rows),Math.floor(($("#stage").clientWidth-6)/cols)));if(S)S._csFit={key,v:CS};document.documentElement.style.setProperty("--cs",CS+"px")}
 function popEl(d){d.classList.remove("pop");void d.offsetWidth;d.classList.add("pop")}
 function celebrate(){if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;const cv=document.createElement("canvas");cv.className="cf";cv.width=innerWidth;cv.height=innerHeight;document.body.append(cv);const x=cv.getContext("2d"),cols=["#7a52d6","#f2a000","#12b5a2","#ee5d7a","#2b9be6","#3cb958"],ps=[];
@@ -298,7 +298,7 @@ function binDown(e){const mb=mouseLR(e);if(S.done||S.type!=="bin"||e._closed||mb
   S.pick={t:drag2.line,at:ri>=0?ri:ci};binCompare();paintBin();return}
  const i=binCell(e.clientX,e.clientY);if(i<0)return;
  e.preventDefault();if(!S.start&&S.p.giv[i]<0)S.start=Date.now();invalidateHint();
- const N=S.p.W,r=i/N|0,c=i%N,dbl=mb!=="r"&&binLastTap.i===i&&binLastTap.note===!!potlood&&e.timeStamp-binLastTap.t<DOUBLE_TAP_MS;
+ const N=S.p.W,r=i/N|0,c=i%N,dbl=mb!=="r"&&binLastTap.i===i&&binLastTap.note===!!potlood&&binLastTap.id===S.id&&binLastTap.h===S.hist.length&&binLastTap.change===S.hist[S.hist.length-1]&&e.timeStamp-binLastTap.t<DOUBLE_TAP_MS;
  let dblBase=null;
  if(dbl&&binLastTap.h===S.hist.length&&S.hist.length){const h=S.hist[S.hist.length-1];
   if(potlood&&h&&h.note&&h.i===i){S.hist.pop();noteRaw(i,h.from);S.redo=[]}
@@ -322,7 +322,7 @@ function binMove(e){if(!drag2||S.type!=="bin"||e.pointerId!==drag2.pid)return;
  if(d.note){noteDragRestore(d,d.start);paintNotes()}else if(d.applied){S.cur[d.start]=d.old;d.applied=false}
  S.pick=(d.maxr-d.minr)>=(d.maxc-d.minc)?{t:"r",a:d.minr,b:d.maxr,at:r}:{t:"c",a:d.minc,b:d.maxc,at:c};
  binCompare();paintBin()}
-function binUp(e){if(!drag2||(e&&e.pointerId!==drag2.pid))return;const d=drag2,acted=d.note?[...(d.nchanges||new Map()).values()].some(c=>c.from!==c.to):!!d.applied,remember=!d.line&&!d.moved&&!d.dbl&&acted&&e&&e.button!==2;binEnd();if(remember)binLastTap={t:e.timeStamp,i:d.start,h:S.hist.length,note:!!d.note};else if(d.dbl)binLastTap={t:0,i:-1,h:0,note:false}}
+function binUp(e){if(!drag2||(e&&e.pointerId!==drag2.pid))return;const d=drag2,acted=d.note?[...(d.nchanges||new Map()).values()].some(c=>c.from!==c.to):!!d.applied,remember=!d.line&&!d.moved&&!d.dbl&&acted&&e&&e.button!==2;binEnd();if(remember)binLastTap={t:e.timeStamp,i:d.start,h:S.hist.length,note:!!d.note,id:S.id,change:S.hist[S.hist.length-1]};else if(d.dbl)binLastTap={t:0,i:-1,h:0,note:false}}
 function binEnd(){const d=drag2;drag2=null;if(S.type!=="bin")return;
  if(d.note){if(d.moved){S.pick=null;paintBin();noteFinish(d,false);return}noteFinish(d,false);return}
  if(d.moved){S.gs=null;S.pick=null;paintBin();return}
@@ -351,7 +351,7 @@ const noteDisp=i=>noteVal(i)===2?2:(noteVal(i)===1||(autoCrossOn()&&noteAdjStar(
 function applyNoteDrag(i){if(disp(i)!==0)return;if(drag.mode==="add"){if(noteDisp(i)===0)noteDragWrite(drag,i,1)}else if(drag.mode==="del"){if(noteVal(i)===1)noteDragWrite(drag,i,0)}}
 function starDown(e){const mb=mouseLR(e);if(S.done||S.type!=="star"||e._closed||mb==="")return;if(drag&&drag.pid!==e.pointerId)starEnd();
  const N=S.p.N;S.sg=gridGeo(N);const i=gridHit(S.sg,e.clientX,e.clientY,N,N);if(i<0)return;
- const dbl=mb!=="r"&&starLastTap.i===i&&starLastTap.note===!!potlood&&e.timeStamp-starLastTap.t<DOUBLE_TAP_MS;let dblBase=null;
+ const dbl=mb!=="r"&&starLastTap.i===i&&starLastTap.note===!!potlood&&starLastTap.id===S.id&&starLastTap.h===S.hist.length&&starLastTap.change===S.hist[S.hist.length-1]&&e.timeStamp-starLastTap.t<DOUBLE_TAP_MS;let dblBase=null;
  if(dbl&&starLastTap.h===S.hist.length&&S.hist.length){const h=S.hist[S.hist.length-1];
   if(potlood&&h&&h.note&&h.i===i){S.hist.pop();noteRaw(i,h.from);S.redo=[]}
   else if(!potlood&&Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.redo=[];S.cur=dblBase.slice();paintAll()}}
@@ -379,7 +379,7 @@ function starMove(e){if(!drag||S.type!=="star"||e.pointerId!==drag.pid)return;co
  }
  for(let k=1;k<=n;k++)starEnter(Math.round(r0+(r1-r0)*k/n)*N+Math.round(c0+(c1-c0)*k/n));
  drag.last=i}
-function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;const d=drag,acted=d.note?[...(d.nchanges||new Map()).values()].some(c=>c.from!==c.to):d.prev&&d.prev.size>0,remember=!d.moved&&!d.dbl&&acted&&e&&e.button!==2;starEnd();if(remember)starLastTap={t:e.timeStamp,i:d.start,h:S.hist.length,note:!!d.note};else if(d.dbl)starLastTap={t:0,i:-1,h:0,note:false}}
+function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;const d=drag,acted=d.note?[...(d.nchanges||new Map()).values()].some(c=>c.from!==c.to):d.prev&&d.prev.size>0,remember=!d.moved&&!d.dbl&&acted&&e&&e.button!==2;starEnd();if(remember)starLastTap={t:e.timeStamp,i:d.start,h:S.hist.length,note:!!d.note,id:S.id,change:S.hist[S.hist.length-1]};else if(d.dbl)starLastTap={t:0,i:-1,h:0,note:false}}
 function starEnd(){const d=drag;drag=null;if(S.type!=="star")return;if(d.note){noteFinish(d,d.moved);return}commit();check()}
 addEventListener("pointerup",starUp);addEventListener("pointercancel",starUp);
 
@@ -417,8 +417,8 @@ function nonoAuto(changed){if(!autoCrossOn())return;const W=S.p.W,H=S.p.H,rows=n
  rows.forEach(r=>{const idx=[];for(let c=0;c<W;c++)idx.push(r*W+c);fix(idx,S.p.rc[r])});
  cols.forEach(c=>{const idx=[];for(let r=0;r<H;r++)idx.push(r*W+c);fix(idx,S.p.cc[c])})}
 let nonoMode="f",nonoColorMode=1;
-function setNonoMode(m){const ch=nonoMode!==m;nonoMode=m;ub();if(ch)setTimeout(flashMode,0)}
-function setNonoColorMode(v){nonoColorMode=v;nonoMode="f";ub();setTimeout(flashMode,0)}
+function setNonoMode(m){const ch=nonoMode!==m;lastTap={t:0,i:-1};nonoMode=m;ub();if(ch)setTimeout(flashMode,0)}
+function setNonoColorMode(v){lastTap={t:0,i:-1};nonoColorMode=v;nonoMode="f";ub();setTimeout(flashMode,0)}
 function nonoLine(id){const N=S.p.W,k=+id.slice(1),idx=[];for(let j=0;j<(id[0]==="r"?N:S.p.H);j++)idx.push(id[0]==="r"?k*N+j:j*N+k);
  const emp=idx.filter(i=>S.cur[i]===0);if(!emp.length)return;begin();if(!S.start)S.start=Date.now();emp.forEach(i=>nonoPaint(i,S.p.color?-1:2));commit()}
 /* Nonogram: tik = de gekozen stand (vullen of kruisje), nog eens tikken = leeg. Slepen kleurt in dezelfde stand.
@@ -426,17 +426,17 @@ function nonoLine(id){const N=S.p.W,k=+id.slice(1),idx=[];for(let j=0;j<(id[0]==
 function nonoDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="nono"||S.done||e._closed)return;e.preventDefault();if(nd&&nd.pid!==e.pointerId)nonoEnd();
  const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){if(mb==="r")return;nonoLine(ck.dataset.ln);return}
  S.ng=gridGeo(S.p.W);const i=nonoAt(e.clientX,e.clientY);if(i<0)return;e._nono=true;
- const dbl=mb!=="r"&&lastTap.i===i&&e.timeStamp-lastTap.t<DOUBLE_TAP_MS;if(dbl)lastTap={t:0,i:-1};else if(mb==="r")lastTap={t:0,i:-1};
+ const dbl=mb!=="r"&&lastTap.i===i&&lastTap.id===S.id&&lastTap.h===S.hist.length&&lastTap.change===S.hist[S.hist.length-1]&&e.timeStamp-lastTap.t<DOUBLE_TAP_MS;if(dbl)lastTap={t:0,i:-1};else if(mb==="r")lastTap={t:0,i:-1};
  if(dbl&&S.hist&&S.hist.length){const pre=S.hist[S.hist.length-1];if(Array.isArray(pre)&&pre.length===S.cur.length){const was=S.cur.slice();S.cur=S.hist.pop().slice();S.redo=[];was.forEach((v,j)=>{if(v!==S.cur[j])nonoPaint(j,S.cur[j])});ub()}}
  if(!S.start)S.start=Date.now();invalidateHint();begin();const old=S.cur[i],cross=S.p.color?-1:2,fill=S.p.color?nonoColorMode:1,active=S.p.color?(nonoMode==="x"?cross:fill):(nonoMode==="x"?cross:fill),val=(dbl||mb==="r")?(active===cross?fill:cross):active;
- const remove=(mb!=="r"&&old!==0)||old===val;
+ const remove=(mb!=="r"&&!dbl&&old!==0)||old===val;
  nd={i0:i,last:i,moved:false,pid:e.pointerId,path:[i],prev:new Map(),old,val:remove?old:val,mode:remove?"del":"add",dbl};
  const nv=remove?0:val;nonoPaint(i,nv);if(nv!==old)nd.prev.set(i,old)}
 function nonoMove(e){if(!nd||S.type!=="nono"||e.pointerId!==nd.pid)return;const i=nonoAt(e.clientX,e.clientY);if(i<0||i===nd.last)return;const N=S.p.W;nd.moved=true;
  const r0=nd.last/N|0,c0=nd.last%N,r1=i/N|0,c1=i%N,n=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));
  for(let k=1;k<=n;k++)nonoEnter(Math.round(r0+(r1-r0)*k/n)*N+Math.round(c0+(c1-c0)*k/n));
  nd.last=i}
-function nonoUp(e){if(!nd||e.pointerId!==nd.pid)return;const d=nd;if(!d.moved&&!d.dbl&&e&&e.button!==2)lastTap={t:e.timeStamp,i:d.i0};else if(d.dbl)lastTap={t:0,i:-1};nonoEnd()}
+function nonoUp(e){if(!nd||e.pointerId!==nd.pid)return;const d=nd;nonoEnd();if(!d.moved&&!d.dbl&&e&&e.button!==2)lastTap={t:e.timeStamp,i:d.i0,id:S.id,h:S.hist.length,change:S.hist[S.hist.length-1]};else if(d.dbl)lastTap={t:0,i:-1}}
 function nonoEnd(){const d=nd;nd=null;if(S.type!=="nono")return;const ch=[];if(S.gs)S.cur.forEach((v,i)=>{if(v!==S.gs[i])ch.push(i)});const filled=ch.filter(i=>S.p.color?S.cur[i]>0:S.cur[i]===1);if(filled.length)nonoAuto(filled);commit();check()}
 addEventListener("pointerup",nonoUp);addEventListener("pointercancel",nonoUp);
 function tap(i){if(S.done)return;const{type,p}=S;begin();
@@ -880,7 +880,7 @@ $("#mb").onpointerdown=e=>{e.preventDefault();setHexMode("b")};$("#mz").onpointe
 /* S.cur per vakje: 0 = open, 1 = omcirkeld (blijft zeker staan), 2 = weggestreept.
    Tik = de gekozen stand (standaard ○ omcirkelen), dubbeltik = de andere stand. Nog eens tikken = weer open. Slepen werkt in de gekozen vaste stand. */
 let plusMode="o",pd=null,plusLastTap={t:0,i:-1,h:0};
-function setPlusMode(m){const ch=plusMode!==m;plusMode=m;ub();if(ch)setTimeout(flashMode,0)}
+function setPlusMode(m){const ch=plusMode!==m;plusLastTap={t:0,i:-1};plusMode=m;ub();if(ch)setTimeout(flashMode,0)}
 /* Kleur per vlak: buren krijgen een andere kleur. */
 const PHUE=[54,220,350,150,28,280,190],PNAME=["gele","blauwe","roze","groene","oranje","paarse","turquoise"];
 function plusPal(p){const pal=[],W=p.W,used=PHUE.map(()=>0);p.rg.forEach((g,k)=>{const nb=new Set();g.cells.forEach(i=>{const r=i/W|0,c=i%W;[[r-1,c],[r+1,c],[r,c-1],[r,c+1],[r-1,c-1],[r-1,c+1],[r+1,c-1],[r+1,c+1]].forEach(([y,x])=>{if(y<0||x<0||y>=p.H||x>=W)return;const o=p.reg[y*W+x];if(o>=0&&o!==k&&pal[o]!==undefined)nb.add(pal[o])})});
@@ -916,13 +916,14 @@ function plusDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="plus"||S.done||e.
  if(e.target.closest&&e.target.closest("#psum")){if(mb==="r")return;plusPeek(true);return}
  const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){if(mb==="r")return;plusLine(ck.dataset.ln);return}
  S.ng=gridGeo(S.p.W);const i=gridHit(S.ng,e.clientX,e.clientY,S.p.W,S.p.H);if(i<0)return;e._nono=true;
- if(!S.start)S.start=Date.now();invalidateHint();const dbl=mb!=="r"&&plusLastTap.i===i&&e.timeStamp-plusLastTap.t<DOUBLE_TAP_MS;let dblBase=null;if(dbl&&plusLastTap.h===S.hist.length&&S.hist.length){const h=S.hist[S.hist.length-1];if(Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.cur=dblBase.slice();S.redo=[];S.cells.forEach((d,j)=>plusCls(d,j));S.pu.forEach((u,k)=>plusLab(k))}}if(dbl)plusLastTap={t:0,i:-1,h:0};else if(mb==="r")plusLastTap={t:0,i:-1,h:0};begin();if(dblBase)S.gs=dblBase;const old=S.cur[i],active=plusMode==="o"?1:2,val=(mb==="r"||dbl)?(active===1?2:1):active;
- pd={last:i,pid:e.pointerId,path:[i],prev:new Map(),val,mode:old===val?"del":"add",dbl,start:i};
- const nv=old===val?0:val;plusPaint(i,nv);if(nv!==old)pd.prev.set(i,old)}
+ if(!S.start)S.start=Date.now();invalidateHint();const dbl=mb!=="r"&&plusLastTap.i===i&&plusLastTap.id===S.id&&plusLastTap.h===S.hist.length&&plusLastTap.change===S.hist[S.hist.length-1]&&e.timeStamp-plusLastTap.t<DOUBLE_TAP_MS;let dblBase=null;if(dbl&&plusLastTap.h===S.hist.length&&S.hist.length){const h=S.hist[S.hist.length-1];if(Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.cur=dblBase.slice();S.redo=[];S.cells.forEach((d,j)=>plusCls(d,j));S.pu.forEach((u,k)=>plusLab(k))}}if(dbl)plusLastTap={t:0,i:-1,h:0};else if(mb==="r")plusLastTap={t:0,i:-1,h:0};begin();if(dblBase)S.gs=dblBase;const old=S.cur[i],active=plusMode==="o"?1:2,val=(mb==="r"||dbl)?(active===1?2:1):active;
+ const remove=(mb!=="r"&&!dbl&&old!==0)||old===val;
+ pd={last:i,pid:e.pointerId,path:[i],prev:new Map(),val:remove?old:val,mode:remove?"del":"add",dbl,start:i};
+ const nv=remove?0:val;plusPaint(i,nv);if(nv!==old)pd.prev.set(i,old)}
 function plusMove(e){if(!pd||S.type!=="plus"||e.pointerId!==pd.pid)return;const W=S.p.W,i=gridHit(S.ng,e.clientX,e.clientY,W,S.p.H);if(i<0||i===pd.last)return;
  const r0=pd.last/W|0,c0=pd.last%W,r1=i/W|0,c1=i%W,n=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));
  for(let k=1;k<=n;k++)plusEnter(Math.round(r0+(r1-r0)*k/n)*W+Math.round(c0+(c1-c0)*k/n));pd.last=i}
-function plusUp(e){if(!pd||e.pointerId!==pd.pid)return;const d=pd,remember=!d.dbl&&e.button!==2;plusEnd();if(remember)plusLastTap={t:e.timeStamp,i:d.start,h:S.hist.length};else if(d.dbl)plusLastTap={t:0,i:-1,h:0}}
+function plusUp(e){if(!pd||e.pointerId!==pd.pid)return;const d=pd,remember=!d.dbl&&e.button!==2;plusEnd();if(remember)plusLastTap={t:e.timeStamp,i:d.start,h:S.hist.length,id:S.id,change:S.hist[S.hist.length-1]};else if(d.dbl)plusLastTap={t:0,i:-1,h:0}}
 function plusEnd(){pd=null;if(S.type!=="plus")return;const ch=[];if(S.gs)S.cur.forEach((v,i)=>{if(v!==S.gs[i])ch.push(i)});plusAuto(ch);commit();check()}
 addEventListener("pointerup",plusUp);addEventListener("pointercancel",plusUp);
 /* Na een zet, alleen in de rijen, kolommen en vlakken van de vakjes die je net veranderde: klopt wat er nog staat precies
@@ -1124,9 +1125,9 @@ function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const 
  g.onpointerdown=e=>{const d=e.target.closest&&e.target.closest("[data-i]");if(!d)return;const mb=mouseLR(e);if(mb==="")return;e.preventDefault();const i=+d.dataset.i,oldMode=S.mxm;
   if(mb==="r")S.mxm=!oldMode;
   const snap={cur:S.cur.slice(),ms:S.ms,h:S.hist.length,r:S.redo.slice(),nt:{...S.nt}};
-  const last=murLastTap,dbl=mb!=="r"&&!oldMode&&last&&last.id===S.id&&last.i===i&&last.note===!!potlood&&e.timeStamp-last.t<DOUBLE_TAP_MS&&S.hist.length===last.after;
+  const last=murLastTap,dbl=mb!=="r"&&!oldMode&&last&&last.id===S.id&&last.i===i&&last.note===!!potlood&&e.timeStamp-last.t<DOUBLE_TAP_MS&&S.hist.length===last.after&&last.change===S.hist[S.hist.length-1];
   if(dbl){S.cur=last.snap.cur.slice();S.ms=last.snap.ms;S.nt={...last.snap.nt};S.hist.length=last.snap.h;S.redo=[];S.mxm=true;murTap(i);S.mxm=false;murLastTap=null;paintMur();ub();return}
-  murTap(i);murLastTap=mb!=="r"&&!oldMode?{id:S.id,i,t:e.timeStamp,note:!!potlood,snap,after:S.hist.length}:null;
+  murTap(i);murLastTap=mb!=="r"&&!oldMode?{id:S.id,i,t:e.timeStamp,note:!!potlood,snap,after:S.hist.length,change:S.hist[S.hist.length-1]}:null;
   if(mb!==null){S.mxm=oldMode;paintMur();return}
   if(!potlood&&!S.mxm&&!S.done)lpStart(e,()=>{if(S.done)return;murLastTap=null;S.cur=snap.cur;S.ms=snap.ms;S.hist.length=snap.h;S.redo=snap.r;ub();lpNote(i)})};
  pal.onpointerdown=e=>{const b=e.target.closest&&e.target.closest("[data-s]");if(!b||S.done)return;e.preventDefault();if(b.dataset.s==="x"){S.mxm=!S.mxm}else{const s=+b.dataset.s,wasCross=S.mxm;S.mxm=false;S.ms=S.ms===s&&!wasCross?-1:s}murLastTap=null;paintMur();ub()};

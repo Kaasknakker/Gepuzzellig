@@ -72,6 +72,50 @@ for(const mode of ['f','x'])for(const color of [false,true])for(const pointerTyp
  tap(4000);assert.equal(S.cur[0],mode==='x'?(color?-1:2):1);tap(5000);assert.equal(S.cur[0],0,'single tap clears filled cell');
 }
 `,c);
+// An Undo or a new puzzle invalidates a previous tap at the same position.
+vm.runInContext(`
+for(const type of ['bin','star','nono'])for(const pointerType of ['touch','pen','mouse'])for(const change of ['undo','new-puzzle']){
+ potlood=false;const empty=type==='bin'?-1:0,primary=type==='bin'?0:1;nonoMode='f';
+ S={id:11,type,inputAlt:false,p:{W:1,H:1,N:1,giv:[-1]},cur:[empty],nt:{},hist:[],redo:[],rowc:[],colc:[],start:0};binLastTap=starLastTap=lastTap={t:0,i:-1};
+ const down=type==='bin'?binDown:type==='star'?starDown:nonoDown,up=type==='bin'?binUp:type==='star'?starUp:nonoUp;
+ const tap=t=>{const e={pointerType,button:0,pointerId:1,clientX:5,clientY:5,timeStamp:t,target:{closest:()=>null},preventDefault(){}};down(e);up({...e,timeStamp:t+20})};
+ tap(1000);if(change==='undo')S.cur=S.hist.pop();else{S.id=12;S.cur=[empty]}
+ tap(1250);assert.equal(S.cur[0],primary,type+' '+change+' does not reuse previous tap');
+}
+// Every existing Nonogram mark clears on one tap; double tap uses the other mode.
+for(const color of [false,true])for(const mode of ['f','x'])for(const old of (color?[1,2,3,4,-1]:[1,2]))for(const double of [false,true]){
+ nonoMode=mode;nonoColorMode=color?3:1;const secondary=mode==='x'?nonoColorMode:color?-1:2;
+ S={id:21,type:'nono',p:{W:1,H:1,color},cur:[old],hist:[],redo:[],start:0};lastTap={t:0,i:-1};
+ const tap=t=>{const e={pointerType:'touch',button:0,pointerId:1,clientX:5,clientY:5,timeStamp:t,target:{closest:()=>null},preventDefault(){}};nonoDown(e);nonoUp({...e,timeStamp:t+20})};
+ tap(1000);if(double)tap(1250);assert.equal(S.cur[0],double?(old===secondary?0:secondary):0,'Nonogram existing mark and mode');
+}
+`,c);
+// Exercise Pluszle's handlers, including existing marks and single-step Undo.
+vm.runInContext(`let plusMode='o',pd=null,plusLastTap={t:0,i:-1};const plusAuto=()=>{},plusCls=()=>{},plusLab=()=>{};function plusPaint(i,v){S.cur[i]=v}`,c);
+vm.runInContext(section('function plusDown(','addEventListener("pointerup",plusUp)'),c);
+vm.runInContext(`
+for(const mode of ['o','x'])for(const pointerType of ['touch','pen','mouse'])for(const old of [0,1,2])for(const double of [false,true]){
+ plusMode=mode;const primary=mode==='o'?1:2,secondary=3-primary;
+ S={id:31,type:'plus',p:{W:1,H:1},cur:[old],hist:[],redo:[],start:0,cells:[],pu:[]};plusLastTap={t:0,i:-1};
+ const tap=t=>{const e={pointerType,button:0,pointerId:1,clientX:5,clientY:5,timeStamp:t,target:{closest:()=>null},preventDefault(){}};plusDown(e);plusUp({...e,timeStamp:t+20})};
+ tap(1000);if(double)tap(1250);assert.equal(S.cur[0],double?(old===secondary?0:secondary):old?0:primary,'Pluszle '+mode+' '+old+' double='+double);
+ assert.equal(S.hist.length,S.cur[0]===old?0:1,'Pluszle gesture is one undo step');
+}
+`,c);
+// Right-click always uses the other mode, without changing the selected mode.
+vm.runInContext(`
+for(const type of ['bin','star','nono','plus'])for(const alt of [false,true]){
+ const empty=type==='bin'?-1:0,secondary=type==='bin'?(alt?0:1):type==='star'?(alt?1:2):type==='nono'?(alt?1:2):(alt?1:2);
+ for(const old of [empty,type==='bin'?0:1,type==='bin'?1:2]){
+  potlood=false;nonoMode=alt?'x':'f';plusMode=alt?'x':'o';
+  S={id:41,type,inputAlt:alt,p:{W:1,H:1,N:1,giv:[-1]},cur:[old],nt:{},hist:[],redo:[],rowc:[],colc:[],start:0,cells:[],pu:[]};binLastTap=starLastTap=lastTap=plusLastTap={t:0,i:-1};
+  const e={pointerType:'mouse',button:2,pointerId:1,clientX:5,clientY:5,timeStamp:1000,target:{closest:()=>null},preventDefault(){}};
+  (type==='bin'?binDown:type==='star'?starDown:type==='nono'?nonoDown:plusDown)(e);
+  (type==='bin'?binUp:type==='star'?starUp:type==='nono'?nonoUp:plusUp)({...e,timeStamp:1020});
+  assert.equal(S.cur[0],old===secondary?empty:secondary,type+' right click');assert.equal(S.inputAlt,alt);assert.equal(nonoMode,alt?'x':'f');assert.equal(plusMode,alt?'x':'o');
+ }
+}
+`,c);
 // A Pencil contact must not activate a menu on both down and up/touchstart.
 let scrollSurface=false;
 const handlers={},button={matches:()=>false,closest:s=>s.startsWith('button')||scrollSurface&&s.startsWith('#home,')?button:null,click:()=>calls++};
