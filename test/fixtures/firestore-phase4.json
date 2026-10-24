@@ -1,0 +1,65 @@
+{
+  "profiles": {
+    "auth-a": {
+      "playerId": "u-special",
+      "displayName": "A",
+      "groupId": "g1"
+    },
+    "auth-b": {
+      "playerId": "p_auth-b",
+      "displayName": "B",
+      "groupId": "g2"
+    }
+  },
+  "results": {
+    "g1_2026-10-24_bin.2_u-special": {
+      "uid": "u-special",
+      "name": "A",
+      "group": "g1",
+      "date": "2026-10-24",
+      "completedOn": "2026-10-24",
+      "type": "bin.2",
+      "secs": 123,
+      "mist": 1,
+      "hints": 2,
+      "hintSteps": {
+        "rule": 1
+      },
+      "createdAt": 10
+    },
+    "g2_2026-10-24_v~nono~abc_p_auth-b": {
+      "uid": "p_auth-b",
+      "name": "B",
+      "group": "g2",
+      "date": "2026-10-24",
+      "type": "v~nono~abc",
+      "lvl": 3,
+      "nv": "color",
+      "deviceVariant": "phone",
+      "secs": 456,
+      "createdAt": 20
+    }
+  },
+  "status": {
+    "g1_u-special": {
+      "uid": "u-special",
+      "progress": {
+        "d%3A2026-10-24%3Abin.2": {
+          "k": "d:2026-10-24:bin.2",
+          "pc": 50,
+          "at": 30
+        }
+      }
+    },
+    "g2_p_auth-b": {
+      "uid": "p_auth-b",
+      "progress": {
+        "p%3Anono.3": {
+          "k": "p:nono.3",
+          "pc": 25,
+          "at": 40
+        }
+      }
+    }
+  }
+}
