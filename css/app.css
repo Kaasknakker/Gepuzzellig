@@ -1311,3 +1311,12 @@ body[data-t=bin] #grid .c.g{background:color-mix(in srgb,var(--line) 22%,var(--c
 body[data-t=bin] #grid .c.g.dup{background:color-mix(in srgb,var(--dup) 65%,color-mix(in srgb,var(--line) 22%,var(--card)))}
 body[data-input-mode] #nmode .ncb.on i{box-shadow:0 0 0 2px #fff}
 body[data-input-mode] #hexsvg.mb,body[data-input-mode] #hexsvg.mz{box-shadow:0 0 0 7px var(--mode-tint),0 8px 24px var(--sh)}
+
+/* Gepuzzellig-beeldmerk: strak 2x2 puzzelraster. */
+.brandmark{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;transform:none}
+.brandmark i{display:flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:4px;font-style:normal;font-weight:900;line-height:1;color:#fff}
+.brandmark i:nth-child(1){background:#7a52d6}.brandmark i:nth-child(2){background:#f2a000}.brandmark i:nth-child(3){background:#12a6ae}.brandmark i:nth-child(4){background:#ee3e6d}
+.brandmark .brand-star{font-size:10px}.brandmark .brand-cross{font-size:15px;font-weight:700}.brandmark .brand-dot::after{content:"";width:5px;height:5px;border-radius:50%;background:#fff}
+.authlogo.brandmark{grid-template-columns:repeat(2,32px);gap:6px}
+.authlogo.brandmark i{width:32px;height:32px;border-radius:9px}
+.authlogo.brandmark .brand-star{font-size:21px}.authlogo.brandmark .brand-cross{font-size:31px}.authlogo.brandmark .brand-dot::after{width:12px;height:12px}
