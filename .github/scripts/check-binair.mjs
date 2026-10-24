@@ -56,7 +56,7 @@ function hintProfile(p){S={p,cur:p.giv.slice()};let advanced=0,total=0;const rul
   for(const i of h.cells){assert.equal(S.cur[i],-1);assert.equal(h.set,p.sol[i]);S.cur[i]=h.set}const rule=h.proof.rule;rules[rule]=(rules[rule]||0)+1;if(!['pair','gap','balance'].includes(rule))advanced++;total++}
  assert.deepEqual(S.cur,p.sol);return{advanced,total,rules}}
 const report={};
-for(const lv of[3,6]){let oldSum=0,newSum=0,oldTotal=0,newTotal=0,maxMs=0,minAdvanced=Infinity;
+for(const lv of[3,6]){let oldSum=0,newSum=0,oldTotal=0,newTotal=0,maxMs=0,minAdvanced=Infinity;console.log('TEST_BIN_LEVEL',lv);
  for(let n=0;n<16;n++){const seed=n<8?'bin2026-10-'+String(24+n).padStart(2,'0')+'.'+lv:'qtest-binair-'+lv+'-'+n;
   const old=genBin(rng(hash(seed)),lv,false,false),start=Date.now(),p=genBin(rng(hash(seed)),lv,false);maxMs=Math.max(maxMs,Date.now()-start);
   const d=binDifficulty(p);assert.ok(d.solved&&!d.basicSolved);assert.ok(d.advanced>=(lv===3?6:4));
