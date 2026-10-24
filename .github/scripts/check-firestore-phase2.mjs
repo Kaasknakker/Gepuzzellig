@@ -52,5 +52,15 @@ try{
  {const x=db(admin),b=writeBatch(x);b.set(doc(x,'groups',gid2),{name:'Tweede groep',ownerAuthUid:admin.authUid,inviteCode:'rules02',theme:'shared',accent:'blue',murdokuNames:[],createdAt:now,updatedAt:now});b.set(doc(x,'groups',gid2,'members',admin.playerId),admin2);b.set(doc(x,'playerMemberships',admin.playerId,'groups',gid2),indexOf(admin2,gid2));await assertSucceeds(b.commit())}
  await assertSucceeds(getDoc(doc(db(admin),'playerMemberships',admin.playerId,'groups',fx.group.id)));await assertSucceeds(getDoc(doc(db(admin),'playerMemberships',admin.playerId,'groups',gid2)));
  await assertFails(getDoc(doc(db(outsider),'playerMemberships',member.playerId,'groups',fx.group.id)));
- console.log('Fase 2-7 Firestore-rules: solo, persoonlijke data, pending/approved, meerdere memberships/admins en laatste-adminbescherming geslaagd.');
+ // Fase 8: sociale projecties zijn alleen zichtbaar binnen approved memberships en pas vanaf joinedAt.
+ const joined=Number(fx.memberships.member.joinedAt)||1,social={schemaVersion:1,groupId:fx.group.id,playerId:member.playerId,name:'Member',puzzleDate:'2026-10-24',completedOn:'2026-10-24',puzzleType:'bin',resultType:'bin.2',mode:'daily',difficulty:'2',variant:'',deviceVariant:'ipad',puzzleKey:'2026-10-24:bin.2',secs:111,mist:0,hints:0,hintSteps:{},completedAt:joined+10};
+ await assertSucceeds(setDoc(doc(db(member),'groupActivity',fx.group.id,'items','member-bin'),social));
+ await assertSucceeds(getDoc(doc(db(admin),'groupActivity',fx.group.id,'items','member-bin')));
+ await assertFails(getDoc(doc(db(outsider),'groupActivity',fx.group.id,'items','member-bin')));
+ await assertFails(setDoc(doc(db(member),'groupActivity',fx.group.id,'items','too-old'),{...social,puzzleKey:'old',completedAt:Math.max(1,joined-1)}));
+ const sharedPlan={schemaVersion:1,groupId:fx.group.id,playerId:member.playerId,displayName:'Member',date:'2026-10-24',favoritePuzzleTypes:['bin','star'],difficulties:{bin:'normal',star:'hard'},createdAt:joined+20};
+ await assertSucceeds(setDoc(doc(db(member),'groupDailyPlans',fx.group.id,'items','2026-10-24_'+member.playerId),sharedPlan));
+ await assertSucceeds(getDoc(doc(db(admin),'groupDailyPlans',fx.group.id,'items','2026-10-24_'+member.playerId)));
+ await assertFails(getDoc(doc(db(outsider),'groupDailyPlans',fx.group.id,'items','2026-10-24_'+member.playerId)));
+ console.log('Fase 2-8 Firestore-rules: solo, persoonlijke data, memberships, joinedAt-sociale projecties en laatste-adminbescherming geslaagd.');
 }finally{await env.cleanup()}
