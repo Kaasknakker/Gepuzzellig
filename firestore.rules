@@ -465,6 +465,7 @@ service cloud.firestore {
           && request.resource.data.get('groupJoinCode','') == resource.data.get('groupJoinCode','')
           && request.resource.data.get('theme','shared') == resource.data.get('theme','shared')
           && request.resource.data.get('accent','blue') == resource.data.get('accent','blue')
+          && request.resource.data.get('preferences',{}) == resource.data.get('preferences',{})
           && request.resource.data.role in ['user','admin']
           && request.resource.data.updatedAt is int
           && request.resource.data.updatedAt >= 0
