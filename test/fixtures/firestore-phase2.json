@@ -41,7 +41,8 @@
       "approvedAt": 0,
       "joinedAt": 0,
       "approvedByPlayerId": "",
-      "updatedAt": 100
+      "updatedAt": 100,
+      "displayName": "Pending"
     },
     "member": {
       "playerId": "p_member",
@@ -51,7 +52,8 @@
       "approvedAt": 110,
       "joinedAt": 110,
       "approvedByPlayerId": "p_admin",
-      "updatedAt": 110
+      "updatedAt": 110,
+      "displayName": "Member"
     },
     "admin": {
       "playerId": "p_admin",
@@ -61,7 +63,8 @@
       "approvedAt": 100,
       "joinedAt": 100,
       "approvedByPlayerId": "p_admin",
-      "updatedAt": 100
+      "updatedAt": 100,
+      "displayName": "Admin"
     }
   }
 }
