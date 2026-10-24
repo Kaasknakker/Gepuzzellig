@@ -198,7 +198,7 @@ function showHintLevel(h,level,focusNext){
  const title=add("h2","hht","💡 "+names[level-1]);title.id="hinttitle";b.setAttribute("aria-labelledby",title.id);
  add("div","hintprogress","Stap "+level+" van 3");
  if(level===2){const steps=add("ol","hintbody hintsteps","");for(const [index,text] of h.reasonSteps.entries()){const li=document.createElement("li");li.textContent=text;steps.append(li);
- if(hintStepScope(h,index)){const focus=document.createElement("button");focus.className="hintfocus";focus.textContent="Toon op het bord";focus.setAttribute("aria-pressed","false");focus.onclick=()=>{h.focusStep=h.focusStep===index?null:index;for(const b of bSteps())b.setAttribute("aria-pressed",String(b===focus&&h.focusStep===index));projectHint(h);layoutHintCard(h)};li.append(focus)}}
+ if(hintStepScope(h,index)){const focus=document.createElement("button");focus.className="hintfocus";focus.textContent="Toon op het bord";focus.setAttribute("aria-pressed","false");focus.onclick=()=>{if(h.stale)return;h.focusStep=h.focusStep===index?null:index;for(const b of bSteps())b.setAttribute("aria-pressed",String(b===focus&&h.focusStep===index));projectHint(h);layoutHintCard(h)};li.append(focus)}}
  function bSteps(){return b.querySelectorAll(".hintfocus")}
 }
  else add("p","hintbody",level===1?h.shortDirection:hintConclusion(h));
