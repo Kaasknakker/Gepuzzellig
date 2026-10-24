@@ -35,10 +35,6 @@ for(const lv of[4,5,6])for(const enhanced of [false,...([4,5].includes(lv)?[true
  assert.equal(createHash('sha256').update(JSON.stringify(p)).digest('hex'),phoneHashes[lv]);
 }
 console.log('OK: nieuwe groot-schermformaten en ongewijzigde iPhone-borden gecontroleerd');
-vm.runInContext(`genBin(rng(hash('binair-compat-'+${lv})),${lv},false,${enhanced})`,c);
- assert.equal(createHash('sha256').update(JSON.stringify(p)).digest('hex'),hashes[lv-1]);
-}
-console.log('OK: oude borden, Makkelijk/Normaal en gescheiden generatiecache behouden');
 vm.runInContext(`
 // Eigen lijnpatronen en volledige oplossingteller, los van binHuman/binSolve.
 const patterns={};function validPatterns(n){if(patterns[n])return patterns[n];const out=[];
