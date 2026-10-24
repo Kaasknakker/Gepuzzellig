@@ -13,7 +13,7 @@ Dagplannen blijven persoonlijk en immutable onder `dailyPlans`. Voor eerlijke gr
 Firestore Rules staan het maken van beide sociale projecties alleen toe wanneer:
 - de schrijver eigenaar is van de betreffende `playerId`;
 - die speler approved lid is van de groep;
-- `completedAt` respectievelijk `createdAt` niet vóór de canonical membership-`joinedAt` ligt.
+- `completedAt` respectievelijk de sociale delingstijd `sharedAt` niet vóór de canonical membership-`joinedAt` ligt. Het persoonlijke dagplan mag al eerder die dag zijn aangemaakt; bij een nieuw membership wordt alleen de huidige dagset vanaf het lidmaatschap gedeeld.
 
 Legacy `results` zijn voor gewone gebruikers vanaf Fase 8 alleen nog voor de eigen speler leesbaar. Sociale lezingen lopen via het nieuwe readmodel. Daardoor kan een nieuw groepslid niet via een oude legacy-query historische resultaten van anderen ophalen.
 
