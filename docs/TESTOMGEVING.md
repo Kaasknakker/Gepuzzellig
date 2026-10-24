@@ -25,7 +25,7 @@ De productie-workflows blijven apart en gebruiken expliciet `gepuzzelig`.
 
 Firebase Functions zijn vanaf Fase 6 project-aware en testveilig voorbereid. Ze worden **niet automatisch** bij een push naar `develop` gedeployed. De aparte workflow `Deploy Gepuzzellig Test Functions` is uitsluitend handmatig, gebruikt alleen `gepuzzellig-test`, zet `APP_URL=https://gepuzzellig-test.web.app/` en `MAIL_MODE=sink`, en verstuurt daardoor vanuit test geen echte uitnodigingsmail. Productie gebruikt de bestaande aparte workflow en blijft expliciet `gepuzzelig` gebruiken.
 
-De test-Functionsworkflow vereist dezelfde test-service-accountsecret als de overige testdeploys. Postmarksecrets zijn in sink-modus niet bedoeld voor gebruik vanuit test; echte testmail mag pas later via een expliciete allowlist/sink-strategie worden ingeschakeld.
+De test-Functionsworkflow vereist dezelfde test-service-accountsecret als de overige testdeploys. Omdat de Function declaratief twee secrets bindt, moeten `POSTMARK_SERVER_TOKEN` en `POSTMARK_FROM` óók als **aparte testproject-secrets** bestaan voordat de eerste test-Functionsdeploy kan slagen. Gebruik daarvoor uitsluitend onschuldige test-placeholderwaarden; kopieer nooit de productiesecrets. In `MAIL_MODE=sink` worden deze waarden niet gebruikt en verlaat geen uitnodigingsmail de testomgeving. Echte testmail mag pas later via een expliciete allowlist worden ingeschakeld.
 
 ## Werkwijze voor volgende chats
 
