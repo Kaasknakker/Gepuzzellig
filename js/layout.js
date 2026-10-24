@@ -85,11 +85,13 @@ function testRefit(){
 // Gebruik dezelfde aanwijzingen als de hint; alleen het kijkgebied wordt ruimer.
 function testHexClues(h,all=false){
  const clues=h.move.proof?.clues||[];
+ if(!all&&h.focusScope)return clues.filter(o=>o.kind==='line'?(h.hexLines||[]).includes(o.id):o.kind==='rest'?false:h.focusScope.includes(o.id));
  if(all||h.level>1||clues.length>2)return clues;
  const anchors=new Set(h.why||[]),lines=new Set(h.hexLines||[]);
  return clues.filter(o=>o.kind==='line'?lines.has(o.id):o.kind==='rest'?h.rest:anchors.has(o.id));
 }
 function testHexCells(h,all=false){
+ if(!all&&h.focusScope)return h.focusScope;
  const m=h.move,ids=new Set(all?[...(h.scope||[]),...(h.reasonScope||[]),...(m.cells||[]),...(m.why||[]),...(m.ghost||[])]:[...(h.why||[]),...(h.cells||[]),...(h.ghost||[])]);
  for(const o of testHexClues(h,all)){
   const positions=o.kind==='line'?S.p.lines[o.id]?.idx:o.c?.pos;
@@ -99,6 +101,7 @@ function testHexCells(h,all=false){
  return [...ids];
 }
 function testContextCells(h,all=false){
+ if(!all&&h.focusScope)return h.focusScope;
  if(S.type==='hex')return testHexCells(h,all);
  const m=h.move,base=all?[...(h.scope||[]),...(h.reasonScope||[]),...(m.cells||[]),...(m.why||[]),...(m.ghost||[])]:[...(h.level>1?h.reasonScope||[]:h.scope||[]),...(h.why||[]),...(h.cells||[]),...(h.ghost||[])],ids=new Set(base);
  const p=S.p,N=p.N||p.W,H=p.H||N,addRoom=k=>p.reg?.forEach((v,i)=>{if(v===k)ids.add(i)}),row=k=>{for(let c=0;c<N;c++)ids.add(k*N+c)},col=k=>{for(let r=0;r<H;r++)ids.add(r*N+k)},placed=s=>S.cur.indexOf(s);
@@ -210,4 +213,3 @@ const testBaseInvalidate=invalidateHint;
 invalidateHint=function(){testBaseInvalidate();if(!testOriginal){testClueEmphasis(S.hint);testPaintShade(S.hint)}};
 document.addEventListener('scroll',()=>{if(S.hint&&!testOriginal)testPaintShade(S.hint)},{passive:true,capture:true});
 addEventListener('resize',()=>{requestAnimationFrame(()=>{testFrame();if(S.p){resetPuzzleFit();render()}if(S.hint&&!testOriginal){delete S.hint.testCard;testHintPosition(S.hint)}})});
-

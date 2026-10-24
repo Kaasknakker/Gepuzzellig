@@ -114,8 +114,24 @@ function prepareHint(move){
  const guide={scope,direction,reason,unit,lookCards,reasonCards};
  if(t==="mur")Object.assign(guide,briefSource);
  const brief=compactGuidance(move,guide);
- if(t==="hex"&&move.proof&&move.proof.clues&&move.proof.clues.length===2){scope=reasonScope;lookHexLines=reasonHexLines}
+
  return {move,key,level:1,scope,direction,reason,...brief,cards,unit,lookCards,reasonCards,reasonScope:reasonScope||scope,lookHexLines,reasonHexLines,cells:[],why:scope};
+}
+function hintStepScope(h,index){
+ const q=h.move.proof||{},text=h.reasonSteps[index]||"",p=S.p,N=p.W||p.N;
+ if(S.type==="hex"){
+  const clues=q.clues||[],numbered=clues.filter(o=>o.kind!=="rest");
+  if(/gedeelde|alle getallen|andere aanwijzingen/.test(text))return null;
+  const target=/lijn/.test(text)?numbered.find(o=>o.kind==="line"):/getal/.test(text)?numbered.find(o=>o.kind!=="line"):null;
+  const o=target||clues[Math.min(index,clues.length-1)];
+  if(o)return {cells:[...new Set([...(o.c?.pos||[]),...(o.kind==="zone"||o.kind==="ring"?[o.id]:[])])].filter(i=>i>=0),lines:o.kind==="line"?[o.id]:[]};
+ }
+ const rows=[...text.matchAll(/rij (\d+)/g)].map(m=>+m[1]-1),cols=[...text.matchAll(/kolom (\d+)/g)].map(m=>+m[1]-1);
+ if(rows.length||cols.length){const cells=[];for(const r of rows)for(let c=0;c<N;c++)cells.push(r*N+c);for(const c of cols)for(let r=0;r<(p.H||N);r++)cells.push(r*N+c);return {cells:[...new Set(cells)]}}
+ if(S.type==="star"&&q.rule==="trial"){if(index===0)return {cells:p.reg.map((r,i)=>r===p.reg[h.move.cells[0]]?i:-1).filter(i=>i>=0)};if(index===1)return {cells:q.unit.cells}}
+ if(S.type==="star"&&q.regions&&/gebieden/.test(text))return {cells:p.reg.map((r,i)=>q.regions.includes(r)?i:-1).filter(i=>i>=0)};
+ if(S.type==="star"&&q.lines&&/lijnen|rijen|kolommen/.test(text))return {cells:q.lines.flatMap(k=>Array.from({length:N},(_,j)=>q.kind==="c"?j*N+k:k*N+j))};
+ return null;
 }
 function projectHint(h){
  const full=h.level===3,m=h.move;
@@ -123,6 +139,8 @@ function projectHint(h){
  h.hexLines=h.level===1?h.lookHexLines:h.reasonHexLines;
  h.ghost=full?m.ghost:null;h.cards=full?m.cards:h.level===1?h.lookCards||h.cards:h.reasonCards||h.cards;
  h.rest=m.rest;h.unit=full?m.unit:h.unit;
+ h.focusScope=null;if(h.level===2&&h.focusStep!=null){const focus=hintStepScope(h,h.focusStep);if(focus){h.focusScope=focus.cells;h.why=focus.cells;h.hexLines=focus.lines||[];h.rest=false}}
+
 }
 function hintConcrete(h){
  const m=h.move,text=m.steps?[m.intro,...m.steps,m.outro].join(" "):m.text;
@@ -171,7 +189,7 @@ function layoutHintCard(h){const b=$("#hint");
  }
 }
 function showHintLevel(h,level,focusNext){
- h.level=level;if(!h.stale){projectHint(h);registerHint(h,level)}
+ h.level=level;h.focusStep=null;if(!h.stale){projectHint(h);registerHint(h,level)}
  if(!S.start)S.start=Date.now();
  const b=$("#hint"),action=b.querySelector(".hintnext");clearTimeout(hintHideT);b.classList.remove("closing");b.replaceChildren();
  const add=(tag,cls,text)=>{const e=document.createElement(tag);e.className=cls;e.textContent=text;b.append(e);return e};
@@ -179,7 +197,10 @@ function showHintLevel(h,level,focusNext){
  const names=["Klein duwtje","Uitleg","Volledige hint"];
  const title=add("h2","hht","💡 "+names[level-1]);title.id="hinttitle";b.setAttribute("aria-labelledby",title.id);
  add("div","hintprogress","Stap "+level+" van 3");
- if(level===2){const steps=add("ol","hintbody hintsteps","");for(const text of h.reasonSteps){const li=document.createElement("li");li.textContent=text;steps.append(li)}}
+ if(level===2){const steps=add("ol","hintbody hintsteps","");for(const [index,text] of h.reasonSteps.entries()){const li=document.createElement("li");li.textContent=text;steps.append(li);
+ if(hintStepScope(h,index)){const focus=document.createElement("button");focus.className="hintfocus";focus.textContent="Toon op het bord";focus.setAttribute("aria-pressed","false");focus.onclick=()=>{h.focusStep=h.focusStep===index?null:index;for(const b of bSteps())b.setAttribute("aria-pressed",String(b===focus&&h.focusStep===index));projectHint(h);layoutHintCard(h)};li.append(focus)}}
+ function bSteps(){return b.querySelectorAll(".hintfocus")}
+}
  else add("p","hintbody",level===1?h.shortDirection:hintConclusion(h));
  if(level>1){const details=add("details","hintdetails","");details.open=!!(h.detailsOpen&&h.detailsOpen[level]);
   const summary=document.createElement("summary");summary.textContent="Meer uitleg";details.append(summary);

@@ -41,3 +41,18 @@ const oldDetails=box.querySelector('details');S.hint=null;const prior=layouts;ol
 S.hint=h;h.stale=true;showHintLevel(h,2,false);assert.equal(box.querySelector('.hintback'),null);assert.equal(box.querySelector('.hintnext').textContent,'Vernieuw hint voor dit bord');assert.equal(actions,1);assert.equal(S.hints,1);
 `,context);
 console.log('Hintpresentatie: drie niveaus, inklappen, hinttelling, verborgen zet, knopidentiteit en verouderde hint gecontroleerd.');
+
+
+// De twee uitlegpunten mogen verschillende gebieden op het bord aanwijzen.
+vm.runInContext(`
+S={type:'star',p:{N:3,K:1,reg:[0,0,1,0,2,1,2,2,1]}};
+const focused={move:{proof:{rule:'regionsInLines',kind:'r',regions:[0],lines:[1]}},reasonSteps:['De gebieden hebben samen één ster nodig.','De lijnen hebben samen één ster nodig.']};
+assert.equal(hintStepScope(focused,0).cells.join(), '0,1,3');
+assert.equal(hintStepScope(focused,1).cells.join(), '3,4,5');
+S={type:'hex',p:{n:6}};
+const hexFocus={move:{proof:{clues:[{kind:'zone',id:0,c:{pos:[1,2]}},{kind:'line',id:4,c:{pos:[2,3,4]}}]}},reasonSteps:['Kijk naar het blauwe getal.','Kijk naar de lijn.']};
+assert.equal(hintStepScope(hexFocus,0).cells.join(),'1,2,0');
+assert.equal(hintStepScope(hexFocus,1).cells.join(),'2,3,4');
+assert.equal(hintStepScope(hexFocus,1).lines.join(),'4');
+`,context);
+console.log('OK: aparte kijkgebieden voor gebieden, rijen en Hexcells-lijnen');

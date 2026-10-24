@@ -69,3 +69,9 @@ body.layout-modern.tablet.layout-bottom #pbot #nmode.ncolor{grid-template-column
 /* De stand blijft zichtbaar via de rand; het hele bord schaalt niet meer bij wisselen. */
 body.layout-modern #mgrid.modeflash{animation:none}
 
+
+body.layout-modern.tablet.layout-rail #pbot #inputmode{flex-direction:column;width:100%}
+body.layout-modern.tablet.layout-bottom #pbot #inputmode{flex-direction:row;width:auto}
+body.layout-modern #hint .hintsteps li{margin-bottom:9px;line-height:1.55}
+body.layout-modern #hint .hintfocus{display:inline-flex;min-height:32px;margin:4px 0 0;padding:4px 9px;font-size:12px;border-radius:8px}
+body.layout-modern #hint .hintfocus[aria-pressed=true]{background:var(--fg);color:var(--card)}

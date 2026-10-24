@@ -23,21 +23,21 @@ vm.runInContext(section('function starDown(','function starEnter('),c);
 vm.runInContext(section('function starEnter(','function starUp('),c);
 vm.runInContext(section('function starUp(','addEventListener("pointerup",starUp)'),c);
 vm.runInContext(`
-for(const type of ['bin','star'])for(const pointerType of ['touch','pen','mouse'])for(const notes of [false,true]){
- const empty=type==='bin'?-1:0,secondary=type==='bin'?1:2;
- potlood=notes;S={type,p:{W:1,H:1,N:1,giv:[-1]},cur:[empty],nt:{},hist:[],redo:[],rowc:[],colc:[],start:0};
+for(const alt of [false,true])for(const type of ['bin','star'])for(const pointerType of ['touch','pen','mouse'])for(const notes of [false,true]){
+ const empty=type==='bin'?-1:0,secondary=type==='bin'?(alt?0:1):(alt?1:2),noteSecondary=alt?1:2;
+ potlood=notes;S={type,inputAlt:alt,p:{W:1,H:1,N:1,giv:[-1]},cur:[empty],nt:{},hist:[],redo:[],rowc:[],colc:[],start:0};
  binLastTap=starLastTap={t:0,i:-1};
  const value=()=>notes?noteVal(0):S.cur[0],down=type==='bin'?binDown:starDown,up=type==='bin'?binUp:starUp;
  function tap(t,button=0){const e={pointerType,button,pointerId:1,clientX:5,clientY:5,timeStamp:t,target:{closest:()=>null},preventDefault(){}};down(e);up({...e,timeStamp:t+40})}
- tap(1000);tap(1540);assert.equal(value(),notes?2:secondary,type+' slow double tap');assert.equal(S.hist.length,1,'one undo step');
+ tap(1000);tap(1540);assert.equal(value(),notes?noteSecondary:secondary,type+' slow double tap');assert.equal(S.hist.length,1,'one undo step');
  let h=S.hist.pop();if(notes)noteRaw(0,h.from);else S.cur=h;assert.equal(value(),notes?0:empty,'undo removes secondary');
- for(const mark of [notes?1:type==='bin'?0:1,notes?2:secondary]){
+ for(const mark of [notes?1:type==='bin'?0:1,notes?noteSecondary:secondary]){
   S.hist=[];S.cur=[notes?empty:mark];S.nt=notes?{0:mark}:{};binLastTap=starLastTap={t:0,i:-1};
   tap(2500);assert.equal(value(),notes?0:empty,type+' one tap clears either existing mark');
  }
- S.hist=[];S.cur=[notes?empty:secondary];S.nt=notes?{0:2}:{};binLastTap=starLastTap={t:0,i:-1};
+ S.hist=[];S.cur=[notes?empty:secondary];S.nt=notes?{0:noteSecondary}:{};binLastTap=starLastTap={t:0,i:-1};
  tap(3000);tap(3540);assert.equal(value(),notes?0:empty,type+' '+pointerType+' notes='+notes+' double tap clears existing secondary');
- h=S.hist.pop();if(notes)noteRaw(0,h.from);else S.cur=h;assert.equal(value(),notes?2:secondary,'undo restores secondary');
+ h=S.hist.pop();if(notes)noteRaw(0,h.from);else S.cur=h;assert.equal(value(),notes?noteSecondary:secondary,'undo restores secondary');
  S.hist=[];S.cur=[empty];S.nt={};binLastTap=starLastTap={t:0,i:-1};tap(5000);tap(5800);assert.equal(value(),notes?0:empty,'separate taps toggle primary');
 }
 `,c);
@@ -64,12 +64,12 @@ vm.runInContext(`let nd=null,lastTap={t:0,i:-1},nonoMode='f',nonoColorMode=1;con
 vm.runInContext(section('function nonoDown(','function nonoMove('),c);
 vm.runInContext(section('function nonoUp(','addEventListener("pointerup",nonoUp)'),c);
 vm.runInContext(`
-for(const color of [false,true])for(const pointerType of ['touch','pen','mouse']){
- S={type:'nono',p:{W:1,H:1,color},cur:[0],hist:[],redo:[],start:0};lastTap={t:0,i:-1};
+for(const mode of ['f','x'])for(const color of [false,true])for(const pointerType of ['touch','pen','mouse']){
+ nonoMode=mode;S={type:'nono',p:{W:1,H:1,color},cur:[0],hist:[],redo:[],start:0};lastTap={t:0,i:-1};
  function tap(t){const e={pointerType,button:0,pointerId:1,clientX:5,clientY:5,timeStamp:t,target:{closest:()=>null},preventDefault(){}};nonoDown(e);nonoUp({...e,timeStamp:t+40})}
- tap(1000);tap(1540);assert.equal(S.cur[0],color?-1:2,'double tap places cross');assert.equal(S.hist.length,1);
+ tap(1000);tap(1540);assert.equal(S.cur[0],mode==='x'?1:color?-1:2,'double tap uses opposite mode');assert.equal(S.hist.length,1);
  tap(3000);assert.equal(S.cur[0],0,'single tap clears cross');
- tap(4000);assert.equal(S.cur[0],1);tap(5000);assert.equal(S.cur[0],0,'single tap clears filled cell');
+ tap(4000);assert.equal(S.cur[0],mode==='x'?(color?-1:2):1);tap(5000);assert.equal(S.cur[0],0,'single tap clears filled cell');
 }
 `,c);
 // A Pencil contact must not activate a menu on both down and up/touchstart.
