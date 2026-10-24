@@ -50,10 +50,5 @@ jobs:
           grep -q '^MAIL_MODE=sink$' functions/.env.gepuzzellig-test
           ! grep -q 'kaasknakker.github.io' functions/.env.gepuzzellig-test
 
-      - name: Ensure isolated test-only Function secrets exist
-        run: |
-          printf '%s' 'TEST_SINK_NO_POSTMARK' | gcloud secrets versions add POSTMARK_SERVER_TOKEN --project gepuzzellig-test --data-file=- 2>/dev/null || printf '%s' 'TEST_SINK_NO_POSTMARK' | gcloud secrets create POSTMARK_SERVER_TOKEN --project gepuzzellig-test --replication-policy=automatic --data-file=-
-          printf '%s' 'test-sink@invalid.example' | gcloud secrets versions add POSTMARK_FROM --project gepuzzellig-test --data-file=- 2>/dev/null || printf '%s' 'test-sink@invalid.example' | gcloud secrets create POSTMARK_FROM --project gepuzzellig-test --replication-policy=automatic --data-file=-
-
       - name: Deploy only Functions to test
         run: npx --yes firebase-tools@15.34.1 deploy --only functions --project gepuzzellig-test --non-interactive
