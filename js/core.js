@@ -1741,10 +1741,10 @@ const checkFeedback=document.createElement("div");checkFeedback.id="checkfeedbac
 // Dezelfde standknoppen voor Binair, Star Battle en Murdoku.
 const inputModes=document.createElement("div");inputModes.id="inputmode";inputModes.style.display="none";inputModes.setAttribute("aria-label","Invulstand");
 for(let n=0;n<2;n++){const b=document.createElement("button");b.type="button";b.onclick=()=>{if(S.type==="mur"){S.mxm=!!n;murLastTap=null;paintMur()}else{S.inputAlt=!!n;binLastTap={t:0,i:-1};starLastTap={t:0,i:-1}}ub();flashMode()};inputModes.append(b)}
-$("#pbot .modes")?$("#pbot .modes").prepend(inputModes):$("#pbot").prepend(inputModes);
+$("#pbot .modes")?$("#pbot .modes").prepend(inputModes):$("#pbot").insertBefore(inputModes,$("#potb"));
 function syncInputModes(){const type=S.type,on=["bin","star","mur"].includes(type),alt=type==="mur"?!!S.mxm:!!S.inputAlt;
  inputModes.style.display=on?"":"none";const labels=type==="bin"?["✕ Kruisje","○ Rondje"]:type==="star"?["× Kruisje","★ Ster"]:["● Namen","× Kruisje"];
- [...inputModes.children].forEach((b,n)=>{b.textContent=labels[n];b.classList.toggle("on",alt===!!n);b.setAttribute("aria-pressed",String(alt===!!n));b.disabled=!!S.done});
+ [...inputModes.children].forEach((b,n)=>{b.textContent=PHONE?(type==="bin"?["✕","○"]:type==="star"?["×","★"]:["●","×"])[n]:labels[n];b.setAttribute("aria-label",labels[n]);b.title=labels[n];b.classList.toggle("on",alt===!!n);b.setAttribute("aria-pressed",String(alt===!!n));b.disabled=!!S.done});
  document.body.dataset.inputMode=twoMode()?(type==="mur"?S.mxm:type==="bin"||type==="star"? !S.inputAlt:type==="plus"?plusMode==="x":type==="nono"?nonoMode==="x":hexMode==="z")?"cross":"fill":"";
 }
 

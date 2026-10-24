@@ -20,9 +20,10 @@ try{
    assert.equal(await page.locator('#inputmode button').count(),2);
    await page.locator('#inputmode button').last().click();
    assert(await page.evaluate(()=>S.type==='mur'?S.mxm:S.inputAlt),`${width}/${type}: tweede modus geselecteerd`);
-   await page.screenshot({path:`/tmp/gepuzzellig-${type}-alt-${width}.png`});
+   await page.waitForTimeout(300);await page.screenshot({path:`/tmp/gepuzzellig-${type}-alt-${width}.png`});
    await page.evaluate(()=>toggleTwoMode());
    assert.equal(await page.evaluate(()=>S.type==='mur'?!!S.mxm:!!S.inputAlt),false);
+   const overlaps=await page.locator('#pbot').evaluate(e=>{const boxes=[...e.querySelectorAll('button')].filter(b=>b.offsetWidth&&b.offsetHeight).map(b=>b.getBoundingClientRect());return boxes.some((a,i)=>boxes.slice(i+1).some(b=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>1&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1))});assert.equal(overlaps,false,`${width}/${type}: bedieningsknoppen overlappen`);
    const rect=await page.locator('#inputmode').boundingBox();assert(rect&&rect.x>=0&&rect.y>=0&&rect.x+rect.width<=width+1&&rect.y+rect.height<=height+1,'standknoppen binnen scherm');
   }
   // Klikken op een naam in kruismodus moet die naam onmiddellijk kiezen.

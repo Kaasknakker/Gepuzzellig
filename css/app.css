@@ -1230,3 +1230,9 @@ body.phone #pbot #inputmode button{flex:1 1 0;min-width:0;padding:10px 4px;font-
 @media(min-width:761px) and (max-width:900px){.daygroup summary{right:194px;max-width:82px;font-size:11px}}
 @media(max-width:760px){.daygroup summary{right:65px;top:5px;font-size:10px;max-width:88px;min-height:32px}.dayitem .hdrow .dstate{margin-left:88px}.daygroup .ddpeople{padding:8px 0}.daygroup .ddperson{font-size:12px}}
 @media(max-width:359px){.daygroup summary{position:static;max-width:none;min-height:28px;background:transparent}.dayitem .hdrow .dstate{margin-left:0}}
+
+body.phone:is([data-t=bin],[data-t=star],[data-t=mur]) #pbot #hintb span,body.phone:is([data-t=bin],[data-t=star],[data-t=mur]) #pbot #chk span{display:none}
+body.phone:is([data-t=bin],[data-t=star],[data-t=mur]) #pbot #hintb,body.phone:is([data-t=bin],[data-t=star],[data-t=mur]) #pbot #chk{flex:0 0 38px}
+body.phone #pbot #inputmode{min-width:84px;gap:3px}
+body.phone #pbot #inputmode button{font-size:19px;min-height:48px;overflow:hidden}
+@media(max-width:359px){body.phone #pbot #undo,body.phone #pbot #redo{flex-basis:32px}body.phone #pbot #potb{flex-basis:36px}}
