@@ -1,0 +1,13 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "hosting": {
+    "public": ".test-dist",
+    "ignore": [
+      "firebase.test.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
