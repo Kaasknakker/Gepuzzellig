@@ -66,8 +66,11 @@ service cloud.firestore {
         && get(membershipPath(groupId, playerId)).data.status == 'approved';
     }
     function groupAdmin(groupId, playerId) {
-      return approvedMember(groupId, playerId)
-        && get(membershipPath(groupId, playerId)).data.role == 'admin';
+      return (approvedMember(groupId, playerId)
+          && get(membershipPath(groupId, playerId)).data.role == 'admin')
+        || (signedIn()
+          && exists(/databases/$(database)/documents/groups/$(groupId))
+          && get(/databases/$(database)/documents/groups/$(groupId)).data.get('ownerAuthUid','') == request.auth.uid);
     }
     function validMembership(playerId) {
       return request.resource.data.keys().hasOnly([
@@ -450,7 +453,8 @@ service cloud.firestore {
     match /groups/{groupId}/members/{playerId} {
       allow get: if ownsPlayer(playerId)
         || (hasProfile() && ownsPlayer(myPlayer()) && approvedMember(groupId, myPlayer()));
-      allow list: if hasProfile() && ownsPlayer(myPlayer()) && approvedMember(groupId, myPlayer());
+      allow list: if hasProfile() && ownsPlayer(myPlayer())
+        && (approvedMember(groupId, myPlayer()) || groupAdmin(groupId, myPlayer()));
       // Een speler kan zelf alleen pending aanvragen. Bij het aanmaken van een nieuwe groep mag
       // de maker in dezelfde batch de eerste approved admin worden.
       allow create: if validMembership(playerId)
