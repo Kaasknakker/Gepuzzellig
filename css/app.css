@@ -1280,16 +1280,16 @@ body.tablet #topbar #peerLive span{max-width:180px}
 .hlivebadge.liveactivity b{font-size:13px;overflow-wrap:anywhere}
 .hlivebadge.liveactivity small{font-size:12px;color:var(--mut);font-weight:650}
 @media(max-width:760px){
- .dayitem{--day-action-width:78px}
- .daygroup summary{gap:7px;min-height:70px;padding-right:calc(var(--day-action-width) + 16px)}
+ .daygroup summary{gap:7px;min-height:76px;padding-right:52px}
  .daygroup summary>.dot{display:none}
  .daygroup summary>.ticon{width:27px;height:27px;border-radius:8px;font-size:13px}
  .daycaption{display:block}
  .daycaption .dname{display:block;font-size:14px}
  .daycaption .dname small{font-size:10px}
- .daystatus{display:block;font-size:11px;line-height:1.5;margin-top:2px}
- .dayitem .hdrow.dayaction{top:13px;font-size:12px;gap:3px;padding:5px 3px}
- .dayaction .pdonut{width:23px;height:23px}
+ .daystatus{align-items:flex-start;gap:3px;margin-top:3px}
+ .daypeers{justify-content:flex-start;gap:4px}.daypeer{font-size:9px;padding:1px 5px}
+ .daygo{position:absolute;right:51px;top:11px;min-width:0;font-size:10px}.daygo i{font-size:15px}
+ .dayitem .hdrow.dayaction{top:20px;right:6px;width:32px;height:32px;min-height:32px}
  .daygroup .ddmain{grid-template-columns:1fr}
  .hlivebadge.liveactivity>span{display:block}
  .hlivebadge.liveactivity b,.hlivebadge.liveactivity small{display:block}
