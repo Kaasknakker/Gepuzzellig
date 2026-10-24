@@ -204,7 +204,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly([
           'schemaVersion','playerId','name','groupId','puzzleDate','completedOn','puzzleType',
           'resultType','mode','difficulty','variant','deviceVariant','puzzleKey','secs',
-          'mist','hints','hintSteps','emo','note','legacyResultId','createdAt','updatedAt'
+          'mist','hints','hintSteps','emo','note','legacyResultId','completedAt','createdAt','updatedAt'
         ])
         && request.resource.data.keys().hasAll([
           'schemaVersion','playerId','name','puzzleDate','puzzleType','resultType','mode',
@@ -229,12 +229,51 @@ service cloud.firestore {
         && request.resource.data.get('emo','') is string && request.resource.data.get('emo','').size() <= 8
         && request.resource.data.get('note','') is string && request.resource.data.get('note','').size() <= 80
         && request.resource.data.get('legacyResultId','') is string
+        && request.resource.data.get('completedAt', request.resource.data.createdAt) is int
+        && request.resource.data.get('completedAt', request.resource.data.createdAt) > 0
         && request.resource.data.createdAt is int && request.resource.data.createdAt > 0
         && request.resource.data.updatedAt is int && request.resource.data.updatedAt >= request.resource.data.createdAt;
       allow delete: if ownsPlayer(playerId);
     }
 
     // Fase 4: persoonlijke voortgang; legacy status.progress blijft tijdelijk compatibel leesbaar.
+    // Fase 8: afgeleide sociale read-index. Persoonlijke playerResults blijven canonical.
+    // Een projectie mag alleen door de speler zelf worden geschreven, voor een approved membership,
+    // en nooit voor activiteit van vóór joinedAt. Daardoor kan een nieuw groepslid geen oude historie delen.
+    match /groupActivity/{groupId}/items/{activityId} {
+      allow get, list: if hasProfile() && ownsPlayer(myPlayer()) && approvedMember(groupId, myPlayer());
+      allow create, update: if hasProfile()
+        && ownsPlayer(request.resource.data.playerId)
+        && approvedMember(groupId, request.resource.data.playerId)
+        && request.resource.data.groupId == groupId
+        && request.resource.data.schemaVersion == 1
+        && request.resource.data.completedAt is int
+        && request.resource.data.completedAt >= get(membershipPath(groupId, request.resource.data.playerId)).data.joinedAt
+        && request.resource.data.keys().hasOnly([
+          'schemaVersion','groupId','playerId','name','puzzleDate','completedOn','puzzleType',
+          'resultType','mode','difficulty','variant','deviceVariant','puzzleKey','secs',
+          'mist','hints','hintSteps','completedAt'
+        ])
+        && request.resource.data.secs is int && request.resource.data.secs > 0;
+      allow delete: if ownsPlayer(resource.data.playerId);
+    }
+
+    match /groupDailyPlans/{groupId}/items/{planId} {
+      allow get, list: if hasProfile() && ownsPlayer(myPlayer()) && approvedMember(groupId, myPlayer());
+      allow create: if hasProfile()
+        && ownsPlayer(request.resource.data.playerId)
+        && approvedMember(groupId, request.resource.data.playerId)
+        && request.resource.data.groupId == groupId
+        && request.resource.data.schemaVersion == 1
+        && request.resource.data.createdAt is int
+        && request.resource.data.createdAt >= get(membershipPath(groupId, request.resource.data.playerId)).data.joinedAt
+        && request.resource.data.favoritePuzzleTypes is list
+        && request.resource.data.difficulties is map;
+      allow update: if ownsPlayer(resource.data.playerId)
+        && request.resource.data == resource.data;
+      allow delete: if false;
+    }
+
     match /progress/{playerId}/items/{progressId} {
       allow read: if ownsPlayer(playerId);
       allow create, update: if ownsPlayer(playerId)
