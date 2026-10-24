@@ -1762,7 +1762,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  h.querySelectorAll(".hdrow[data-day-t]").forEach(b=>b.onclick=e=>{e.stopPropagation();const d=b.closest(".dayitem").querySelector(".daygroup"),willOpen=!d.open;d.open=willOpen;if(willOpen){h.querySelectorAll(".daygroup").forEach(other=>{if(other!==d)other.open=false});DAYGROUP_OPEN.clear();DAYGROUP_OPEN.add(d.dataset.dayGroup)}else DAYGROUP_OPEN.delete(d.dataset.dayGroup);fitHomePage()});
  h.querySelectorAll("[data-delete-pk]").forEach(b=>b.onclick=()=>withFreshProgress(()=>discardProgress(b.dataset.deletePk)));
  h.querySelectorAll(".hcont[data-pk]").forEach(b=>b.onclick=()=>withFreshProgress(()=>resumeProgress(b.dataset.pk)));
- h.querySelectorAll(".tile.free[data-free-t]").forEach(b=>b.onclick=()=>showNewFree(b.dataset.freeT,false,false,b.dataset.freeNv||null));
+ h.querySelectorAll(".tile.free[data-free-t]").forEach(b=>b.onclick=()=>withFreshProgress(()=>showNewFree(b.dataset.freeT,false,false,b.dataset.freeNv||null)));
  h.querySelectorAll(".hhomeviews [data-home-who]").forEach(b=>b.onclick=()=>showScore(b.dataset.homeWho));
  {const hp=$("#hProfile");if(hp)hp.onclick=()=>window.dispatchEvent(new Event("pdopenprofile"))}
  h.querySelectorAll(".htheme [data-theme-mode]").forEach(b=>b.onclick=()=>setThemeMode(b.dataset.themeMode));updTheme(false);
