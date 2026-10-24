@@ -255,14 +255,13 @@ service cloud.firestore {
       // Een nieuw profiel kan alleen ontstaan uit een geldige, e-mailgebonden uitnodiging.
       allow create: if signedIn()
         && request.auth.uid == authUid
-        && request.auth.token.email_verified == true
         && request.resource.data.keys().hasOnly([
           'authUid','playerId','displayName','groupId','role',
-          'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent'
+          'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent','accountState'
         ])
         && request.resource.data.keys().hasAll([
           'authUid','playerId','displayName','groupId','role',
-          'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent'
+          'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent','accountState'
         ])
         && request.resource.data.authUid == request.auth.uid
         && request.resource.data.playerId == 'p_' + request.auth.uid
@@ -282,12 +281,26 @@ service cloud.firestore {
         && request.resource.data.groupJoinCode == ''
         && request.resource.data.theme in ['shared','peter','aart','stars','nature','retro','animals','sea','travel','music','party','coffee','season','minimal']
         && request.resource.data.accent in ['blue','purple','teal','green','orange','pink','red']
-        && exists(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode))
-        && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.email == request.auth.token.email
-        && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.createdByAuthUid == request.resource.data.invitedByAuthUid
-        && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.usedByAuthUid == ''
-        && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.revoked == false
-        && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.expiresAt > request.time;
+        && request.resource.data.accountState in ['anonymous','linked']
+        && (
+          (
+            request.auth.token.firebase.sign_in_provider == 'anonymous'
+            && request.resource.data.accountState == 'anonymous'
+            && request.resource.data.inviteCode == ''
+            && request.resource.data.invitedByAuthUid == ''
+          )
+          || (
+            request.auth.token.email_verified == true
+            && request.resource.data.accountState == 'linked'
+            && exists(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode))
+            && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.email == request.auth.token.email
+            && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.createdByAuthUid == request.resource.data.invitedByAuthUid
+            && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.usedByAuthUid == ''
+            && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.revoked == false
+            && get(/databases/$(database)/documents/accessInvites/$(request.resource.data.inviteCode)).data.expiresAt > request.time
+          )
+        )
+;
 
       // Gebruikers kunnen alleen hun eigen naam/groep wijzigen; rol en identiteit blijven vast.
       allow update: if (
@@ -295,7 +308,7 @@ service cloud.firestore {
           && request.auth.uid == authUid
           && request.resource.data.keys().hasOnly([
             'authUid','playerId','displayName','groupId','role',
-            'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent'
+            'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent','accountState'
           ])
           && request.resource.data.authUid == resource.data.authUid
           && request.resource.data.playerId == resource.data.playerId
@@ -303,6 +316,15 @@ service cloud.firestore {
           && request.resource.data.get('createdAt',0) == resource.data.get('createdAt',0)
           && request.resource.data.get('inviteCode','') == resource.data.get('inviteCode','')
           && request.resource.data.get('invitedByAuthUid','') == resource.data.get('invitedByAuthUid','')
+          && request.resource.data.get('accountState','linked') in ['anonymous','linked']
+          && (
+            request.resource.data.get('accountState','linked') == resource.data.get('accountState','linked')
+            || (
+              resource.data.get('accountState','linked') == 'anonymous'
+              && request.resource.data.accountState == 'linked'
+              && request.auth.token.firebase.sign_in_provider != 'anonymous'
+            )
+          )
           && request.resource.data.displayName is string
           && request.resource.data.displayName.size() > 0
           && request.resource.data.displayName.size() <= 30
