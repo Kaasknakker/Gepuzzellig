@@ -1629,6 +1629,17 @@ function discardProgress(k){
 }
 function resumeProgress(k){const e=progAll()[k],m=progressMeta(k,e);if(!m)return;if(!m.practice){load(m.type,false,false,m.date);return}clearFreeProgressType(m.type,k,m.type==="nono"?nonoMetaVariant(m):null);RANDOM=false;setFreePreferences(m.type,m.lvl,nonoMetaVariant(m));load(m.type,true,false)}
 function startChosenFree(t,l,nv,random,replace){pauseAndPersistActive(true);if(replace)clearFreeProgressType(t,null,t==="nono"?nv:null);setFreePreferences(t,l,nv);RANDOM=!!random;$("#npm").hidden=true;document.body.classList.remove("newpick");load(t,true,true,undefined,true)}
+function startFreeFromHome(t,nv){
+ const open=progressList({practice:true})[0]||null;
+ if(!open)return showNewFree(t,false,false,nv||null);
+ const same=open.type===t&&(t!=="nono"||nonoMetaVariant(open)===(nv||"classic"));
+ if(same)return showNewFree(t,false,false,nv||null);
+ UX.dialog("Je hebt nog een vrije puzzel open",(card,close)=>{
+  UX.text(card,FREE_NAME(open.type,nonoMetaVariant(open))+" is nog "+(open.e.pc||0)+"% ingevuld. Wil je daarmee verder of een nieuwe "+FREE_NAME(t,nv||"classic")+" starten?");
+  const cont=document.createElement("button");cont.textContent="Verder puzzelen";cont.onclick=()=>{close();resumeProgress(open.k)};card.append(cont);
+  const fresh=document.createElement("button");fresh.textContent="Nieuwe puzzel";fresh.className="secondary";fresh.onclick=()=>{close();showNewFree(t,false,false,nv||null)};card.append(fresh)
+ })
+}
 /* Nieuwe vrije puzzel: één flow voor alle puzzeltypes.
    De Nonogramvariant komt van de gekozen Home-tegel of de huidige puzzel; nooit wisselen tijdens het spelen.
    Een lopende huidige puzzel krijgt één bevestiging; opgeslagen voortgang krijgt expliciet Verdergaan of Nieuwe puzzel. */
@@ -1762,7 +1773,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  h.querySelectorAll(".hdrow[data-day-t]").forEach(b=>b.onclick=e=>{e.stopPropagation();const d=b.closest(".dayitem").querySelector(".daygroup"),willOpen=!d.open;d.open=willOpen;if(willOpen){h.querySelectorAll(".daygroup").forEach(other=>{if(other!==d)other.open=false});DAYGROUP_OPEN.clear();DAYGROUP_OPEN.add(d.dataset.dayGroup)}else DAYGROUP_OPEN.delete(d.dataset.dayGroup);fitHomePage()});
  h.querySelectorAll("[data-delete-pk]").forEach(b=>b.onclick=()=>withFreshProgress(()=>discardProgress(b.dataset.deletePk)));
  h.querySelectorAll(".hcont[data-pk]").forEach(b=>b.onclick=()=>withFreshProgress(()=>resumeProgress(b.dataset.pk)));
- h.querySelectorAll(".tile.free[data-free-t]").forEach(b=>b.onclick=()=>withFreshProgress(()=>showNewFree(b.dataset.freeT,false,false,b.dataset.freeNv||null)));
+ h.querySelectorAll(".tile.free[data-free-t]").forEach(b=>b.onclick=()=>withFreshProgress(()=>startFreeFromHome(b.dataset.freeT,b.dataset.freeNv||null)));
  h.querySelectorAll(".hhomeviews [data-home-who]").forEach(b=>b.onclick=()=>showScore(b.dataset.homeWho));
  {const hp=$("#hProfile");if(hp)hp.onclick=()=>window.dispatchEvent(new Event("pdopenprofile"))}
  h.querySelectorAll(".htheme [data-theme-mode]").forEach(b=>b.onclick=()=>setThemeMode(b.dataset.themeMode));updTheme(false);
