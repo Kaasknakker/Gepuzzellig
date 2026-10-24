@@ -994,7 +994,13 @@ body.phone:not(.home):not(.newpick) #prow{
  min-height:58px;
  padding:14px 6px 7px;
 }
-body.phone:not(.home):not(.newpick) #prow>:not(#tbHome):not(#pm):not(#hexstat){display:none!important}
+body.phone:not(.home):not(.newpick) #prow>:not(#tbHome):not(#pm):not(#hexstat):not(#peerLive){display:none!important}
+body.phone:not(.home):not(.newpick) #prow #peerLive{display:flex!important;order:8;width:34px;height:34px;flex:0 0 34px;padding:0;justify-content:center;border-radius:50%;margin-left:auto}
+body.phone:not(.home):not(.newpick) #prow #peerLive span{display:none}
+body.phone:not(.home):not(.newpick) #prow #peerLive i{width:10px;height:10px}
+body.phone:not(.home):not(.newpick) #prow #peerLive[hidden]{display:none!important}
+.peerlivepop{position:fixed;z-index:80;top:calc(env(safe-area-inset-top) + 60px);right:58px;width:min(280px,calc(100vw - 78px));padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 8px 28px #0002;font-size:12px}
+.peerlivepop[hidden]{display:none!important}.peerlivepop>b{display:block;margin-bottom:6px}.peerlivepop>div{display:flex;align-items:center;gap:8px;padding:5px 0;line-height:1.3}.peerlivepop i{display:block;width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#28a745}.peerlivepop span{min-width:0}
 /* Hexcells: de teller "nog te vinden" is een echte aanwijzing, dus die blijft ook op de iPhone in beeld. */
 body.phone:not(.home):not(.newpick)[data-t=hex] #prow #hexstat{display:flex!important;order:5;margin:0 8px 0 auto}
 body.phone:not(.home):not(.newpick)[data-t=hex] #prow #pm{order:9;margin-left:0}
@@ -1013,7 +1019,7 @@ body.phone #prow #pm{
  line-height:1;
  box-shadow:0 2px 0 var(--line);
 }
-body.phone #prow #pm{margin-left:auto}
+body.phone #prow #pm{margin-left:0}
 body.phone #pmp.open{top:calc(env(safe-area-inset-top) + 72px)}
 
 body.tablet.home #home .hwrap:not(.sco) .hbrand{font-size:22px}
