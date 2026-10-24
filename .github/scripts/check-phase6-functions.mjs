@@ -3,7 +3,7 @@ import fs from 'node:fs';
 const src=fs.readFileSync('functions/index.js','utf8');
 const required=[
  ['project-aware APP_URL','process.env.APP_URL'],
- ['mail mode','defineString("MAIL_MODE"'],
+ ['mail mode','process.env.MAIL_MODE'],
  ['testproject','gepuzzellig-test'],
  ['test URL','https://gepuzzellig-test.web.app/'],
  ['sink','env.mode === "sink"'],
