@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {execFileSync} from 'node:child_process';
+const dir=fs.mkdtempSync(path.join(os.tmpdir(),'gepuzzellig-phase7-')),copy=path.join(dir,'fixture.json');
+fs.writeFileSync(copy,JSON.stringify({profiles:{legacy:{playerId:'u-special',displayName:'Legacy'},modern:{playerId:'p_modern',preferences:{favoritePuzzleTypes:['bin','hex'],dailyDifficulty:{bin:'hard',hex:'easy'}}}}}));
+const run=(apply=false)=>execFileSync(process.execPath,['scripts/migrate-phase7.mjs',copy,...(apply?['--apply']:[])],{encoding:'utf8'}),dry=run(),outPath=copy.replace(/\.json$/,'-phase7.json');
+if(!dry.includes('Dry-run: niets geschreven')||fs.existsSync(outPath))throw new Error('Fase 7 dry-run schreef data');run(true);const first=fs.readFileSync(outPath,'utf8'),out=JSON.parse(first);
+if(out.profiles.legacy.playerId!=='u-special'||out.stats.playerIdsChanged!==0)throw new Error('playerId gewijzigd');if(out.profiles.legacy.preferences.favoritePuzzleTypes.length!==6)throw new Error('legacy favorieten niet compatibel');if(out.profiles.modern.preferences.dailyDifficulty.bin!=='hard'||out.profiles.modern.preferences.favoritePuzzleTypes.length!==2)throw new Error('bestaande voorkeuren niet behouden');run(true);if(fs.readFileSync(outPath,'utf8')!==first)throw new Error('Fase 7 migratie niet idempotent');console.log('Fase 7 migratie: dry-run, legacy compatibiliteit, voorkeurbehoud, playerId-behoud en idempotentie geslaagd.');
