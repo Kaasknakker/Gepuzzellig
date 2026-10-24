@@ -26,7 +26,7 @@ try{
  await assertSucceeds(getDoc(doc(db(solo),'players',solo.playerId)));
  await assertFails(getDoc(doc(db(outsider),'players',solo.playerId)));
  await assertSucceeds(getDoc(doc(db(solo),'progress',solo.playerId,'items','daily-bin')));
- const personalResult={schemaVersion:3,playerId:solo.playerId,name:'Solo',groupId:'',puzzleDate:'2026-10-24',completedOn:'2026-10-24',puzzleType:'bin',resultType:'bin.2',mode:'daily',difficulty:'2',variant:'',deviceVariant:'ipad',puzzleKey:'2026-10-24:bin.2',secs:120,mist:0,hints:0,emo:'',note:'',legacyResultId:'',createdAt:400,updatedAt:400};
+ const personalResult={schemaVersion:3,playerId:solo.playerId,name:'Solo',groupId:'',puzzleDate:'2026-10-24',completedOn:'2026-10-24',puzzleType:'bin',resultType:'bin.2',mode:'daily',difficulty:'2',variant:'',deviceVariant:'ipad',puzzleKey:'2026-10-24:bin.2',secs:120,mist:0,hints:0,hintSteps:{},emo:'',note:'',legacyResultId:'',createdAt:400,updatedAt:400};
  await assertSucceeds(setDoc(doc(db(solo),'playerResults',solo.playerId,'items','daily-bin'),personalResult));
  await assertFails(setDoc(doc(db(outsider),'playerResults',solo.playerId,'items','bad'),{...personalResult,playerId:solo.playerId,puzzleKey:'bad'}));
  await assertSucceeds(setDoc(doc(db(solo),'progress',solo.playerId,'items','phase4-free'),{schemaVersion:3,legacyKey:'p:star.3',playerId:solo.playerId,puzzleType:'star',mode:'free',puzzleKey:'p:star.3',difficulty:'3',variant:'',deviceVariant:'ipad',state:{k:'p:star.3',pc:25},progressPercent:25,startedAt:410,updatedAt:411}));
