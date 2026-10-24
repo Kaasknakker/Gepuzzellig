@@ -1,4 +1,7 @@
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import {execFileSync} from "node:child_process";
 const core=fs.readFileSync("js/core.js","utf8"),fb=fs.readFileSync("js/firebase.js","utf8"),rules=fs.readFileSync("firestore.rules","utf8");
 const need=(hay,needle,msg)=>{if(!hay.includes(needle))throw new Error(msg)};
 need(fb,'"groupActivity"', "Fase 8 groupActivity ontbreekt");
@@ -13,4 +16,12 @@ for(const p of ['["dag","Dag"]','["week","Week"]','["maand","Maand"]','["jaar","
 need(rules,'match /groupActivity/{groupId}/items/{activityId}', "groupActivity rules ontbreken");
 need(rules,"completedAt >= get(membershipPath(groupId, request.resource.data.playerId)).data.joinedAt","joinedAt rule ontbreekt");
 need(rules,'match /groupDailyPlans/{groupId}/items/{planId}', "groupDailyPlans rules ontbreken");
-console.log("Fase 8 appcontract: membership-readmodel, persoonsgericht Vandaag, periodes, dagplannen en eerlijke tijdvergelijking aanwezig.");
+const dir=fs.mkdtempSync(path.join(os.tmpdir(),"gp8-")),input=path.join(dir,"fixture.json");
+const fixture={memberships:{g1:{p1:{status:"approved",joinedAt:100,displayName:"P1"},p2:{status:"approved",joinedAt:200,displayName:"P2"}}},playerResults:{p1:{a:{playerId:"p1",name:"P1",puzzleDate:"2026-10-24",puzzleType:"bin",resultType:"bin.2",mode:"daily",difficulty:"2",puzzleKey:"2026-10-24:bin.2",secs:90,createdAt:150}},p2:{old:{playerId:"p2",name:"P2",puzzleDate:"2026-10-23",puzzleType:"bin",resultType:"bin.2",mode:"daily",difficulty:"2",puzzleKey:"2026-10-23:bin.2",secs:100,createdAt:150},new:{playerId:"p2",name:"P2",puzzleDate:"2026-10-24",puzzleType:"star",resultType:"star.3",mode:"daily",difficulty:"3",puzzleKey:"2026-10-24:star.3",secs:120,createdAt:250}}},dailyPlans:{p1:{"2026-10-24":{favoritePuzzleTypes:["bin"],difficulties:{bin:"normal"},createdAt:120}},p2:{"2026-10-23":{favoritePuzzleTypes:["bin"],difficulties:{bin:"normal"},createdAt:150},"2026-10-24":{favoritePuzzleTypes:["star"],difficulties:{star:"hard"},createdAt:220}}}};
+fs.writeFileSync(input,JSON.stringify(fixture));
+execFileSync(process.execPath,["scripts/migrate-phase8.mjs",input,"--apply"],{stdio:"pipe"});
+const out=JSON.parse(fs.readFileSync(input.replace(/\.json$/,"-phase8.json"),"utf8"));
+if(Object.keys(out.groupActivity.g1||{}).length!==2)throw new Error("joinedAt result-backfill lekt of mist data");
+if(Object.keys(out.groupDailyPlans.g1||{}).length!==2)throw new Error("joinedAt plan-backfill lekt of mist data");
+const once=JSON.stringify(out);execFileSync(process.execPath,["scripts/migrate-phase8.mjs",input,"--apply"],{stdio:"pipe"});if(JSON.stringify(JSON.parse(fs.readFileSync(input.replace(/\.json$/,"-phase8.json"),"utf8")))!==once)throw new Error("Fase 8 migratie is niet idempotent");
+console.log("Fase 8 appcontract: memberships, joinedAt-privacy, periodes, dagplannen, legacy-backfill en eerlijke tijdvergelijking aanwezig.");
