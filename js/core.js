@@ -1757,8 +1757,9 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  const datum=now.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}),g=($("#group").value||"").trim().toLowerCase(),others=groupPlayers().filter(p=>uidOf(p)!==uid),types=Object.keys(TYPES),raadselsOK=g==="peter-aart-jk4hv92t"||String(GROUP_NAME||"").trim().toLowerCase()==="rekensukkels";
  const pa=progAll(),busyMeta=t=>progressList({practice:false,type:t,date:td},pa)[0]||null;
  const progRing=(p,t)=>p==null?"":`<span class="pdonut" aria-label="${p}% ingevuld" title="${p}% ingevuld; dit zegt niet of de vakjes correct zijn" style="--p:${p};--ring:${TCOL[t]||"var(--pc)"}"><b>${p}%</b></span>`;
- const active=progressList({},pa),dayActive=active.filter(m=>!m.practice),freeActive=active.filter(m=>m.practice),olderDay=dayActive.filter(m=>m.date!==td),homeRaw=allRows();
+ const active=progressList({},pa),dayActive=active.filter(m=>!m.practice),freeActive=active.filter(m=>m.practice),olderDay=dayActive.filter(m=>m.date!==td),activeGroups=types.map(t=>({t,items:active.filter(m=>m.type===t)})).filter(x=>x.items.length),homeRaw=allRows();
  const resumeCard=m=>{const nv=m.type==="nono"?(m.color?"color":"classic"):"",name=m.practice?FREE_NAME(m.type,nv):(TYPES[m.type]||m.type),badge=!m.practice&&nv?`<span class="nvbadge ${nv}">${nv==="color"?"Kleur":"Klassiek"}</span>`:"",sub=[m.practice?"Vrij puzzelen":m.date===td?"Vandaag":dnl(m.date),LVN[m.type]?LVL[m.lvl]:""].filter(Boolean).join(" · ");return`<div class="hcontrow"><button class="hcont${nv?" nono-"+nv:""}" data-pk="${m.k}" title="Ga verder met ${name}">${tIcon(m.type,false,m.practice?nv:"")}<span class="ctxt"><b>${name}${badge}</b><small>${sub}</small></span>${progRing(m.e.pc==null?0:m.e.pc,m.type)}<span class="hgo2">›</span></button><button class="hdelete" data-delete-pk="${m.k}" title="Wis voortgang van ${name}" aria-label="Wis voortgang van ${name}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></button></div>`};
+ const resumeGroupCard=x=>{const recent=x.items[0],n=x.items.length,free=x.items.filter(m=>m.practice).length,days=n-free,parts=[free?free+" vrij":"",days?days+" dag"+(days===1?"puzzel":"puzzels"):""].filter(Boolean).join(" · "),pc=recent.e.pc==null?0:recent.e.pc;return '<button class="hcont hcontgroup" data-progress-type="'+x.t+'" title="Bekijk openstaande '+(TYPES[x.t]||x.t)+'-puzzels">'+tIcon(x.t,false)+'<span class="ctxt"><b>'+(TYPES[x.t]||x.t)+'</b><small>'+n+' '+(n===1?"puzzel":"puzzels")+' bezig · '+parts+'</small><small>Meest recent · '+pc+'%</small></span>'+progRing(pc,x.t)+'<span class="hgo2">›</span></button>'};
  const otherLabel=PHONE?"Groot scherm":"Telefoon",otherIcon=PHONE?"🖥️":"📱";
  const dayExact=(name,t,phone)=>{const u=uidOf(name),ty=dayTypeDevice(t,td,phone),sync=homeRaw.find(x=>!isFree(x)&&x.uid===u&&x.date===td&&x.type===ty);if(u!==uid)return sync||null;const loc=store[td+ty]?myRow(td,ty):null;return loc?Object.assign({},sync||{},loc):sync||null};
  const dayResultFor=(name,t)=>dayExact(name,t,PHONE),dayOtherResultFor=(name,t)=>dagVast(td)?dayExact(name,t,!PHONE):null;
@@ -1777,12 +1778,12 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
 
  <section class="hsection hdaily"><div class="hsecthead"><div><h3>📅 Dagelijkse puzzels</h3><span class="mut">Vandaag · ${types.filter(doneToday).length} van ${types.length} klaar · ${PHONE?"telefoonvariant":"groot-schermvariant"}</span></div><span class="hstreak">🔥 ${strk} ${strk===1?"dag":"dagen"}</span></div>
   <div class="hcard hdlist">${[ft,...types.filter(t=>t!==ft)].map(dayRow).join("")}</div>
-  ${olderDay.length?`<div class="hsub"><div class="hsubhead"><b>Eerdere dagpuzzels</b><span class="mut">${olderDay.length} bezig</span></div><div class="hcontlist">${olderDay.map(resumeCard).join("")}</div></div>`:""}
   ${raadselsOK?'<a class="hcard hraad" href="raadsels.html"><span class="ticon big" style="background:#c2255c">÷</span><div><b>Rekenraadsel van vandaag</b> <span class="hpill">proefversie</span><div class="mut">Eén 3F-rekenraadsel per dag, met kladpapier en rekenmachine.</div></div><span class="hgo">›</span></a>':""}
  </section>
 
+ ${activeGroups.length?`<section class="hsection hresume"><div class="hsecthead"><div><h3>🧩 Verder puzzelen</h3><span class="mut">${active.length} ${active.length===1?"puzzel":"puzzels"} bezig · ${activeGroups.length} ${activeGroups.length===1?"soort":"soorten"}</span></div></div><div class="hcontlist hcontgroups">${activeGroups.map(resumeGroupCard).join("")}</div></section>`:""}
+
  <section class="hsection hfree"><div class="hsecthead"><div><h3>🎲 Vrij puzzelen</h3><span class="mut">Kies zelf wat je wilt maken</span></div><button id="hFree" class="hshuffle">🎲 Willekeurig</button></div>
-  ${freeActive.length?`<div class="hsub hactive"><div class="hsubhead"><b>Verder puzzelen</b><span class="mut">${freeActive.length} ${freeActive.length===1?"puzzel":"puzzels"} bezig</span></div><div class="hcontlist">${freeActive.map(resumeCard).join("")}</div></div>`:""}
   <div class="tiles freegrid">${freeTiles.map(freeTile).join("")}</div>
  </section>
 
@@ -1791,6 +1792,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  h.querySelectorAll(".hdrow[data-day-t]").forEach(b=>b.onclick=e=>{e.stopPropagation();const d=b.closest(".dayitem").querySelector(".daygroup"),willOpen=!d.open;d.open=willOpen;if(willOpen){h.querySelectorAll(".daygroup").forEach(other=>{if(other!==d)other.open=false});DAYGROUP_OPEN.clear();DAYGROUP_OPEN.add(d.dataset.dayGroup)}else DAYGROUP_OPEN.delete(d.dataset.dayGroup);fitHomePage()});
  h.querySelectorAll("[data-delete-pk]").forEach(b=>b.onclick=()=>withFreshProgress(()=>discardProgress(b.dataset.deletePk)));
  h.querySelectorAll(".hcont[data-pk]").forEach(b=>b.onclick=()=>withFreshProgress(()=>resumeProgress(b.dataset.pk)));
+ h.querySelectorAll("[data-progress-type]").forEach(b=>b.onclick=()=>withFreshProgress(()=>showProgressGroup(b.dataset.progressType)));
  h.querySelectorAll(".tile.free[data-free-t]").forEach(b=>b.onclick=()=>withFreshProgress(()=>showNewFree(b.dataset.freeT,false,false,b.dataset.freeNv||null)));
  h.querySelectorAll(".hhomeviews [data-home-who]").forEach(b=>b.onclick=()=>showScore(b.dataset.homeWho));
  {const hp=$("#hProfile");if(hp)hp.onclick=()=>window.dispatchEvent(new Event("pdopenprofile"))}
