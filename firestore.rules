@@ -313,6 +313,24 @@ service cloud.firestore {
       allow delete: if isOwner();
     }
 
+    // Fase 7: een daily plan is een persoonlijke, onveranderlijke snapshot van de keuzes voor die datum.
+    match /dailyPlans/{playerId}/days/{date} {
+      allow get: if ownsPlayer(playerId);
+      allow list: if ownsPlayer(playerId);
+      allow create: if ownsPlayer(playerId)
+        && request.resource.data.keys().hasOnly(['schemaVersion','playerId','date','favoritePuzzleTypes','difficulties','createdAt'])
+        && request.resource.data.playerId == playerId
+        && request.resource.data.date == date
+        && request.resource.data.schemaVersion == 4
+        && request.resource.data.favoritePuzzleTypes is list
+        && request.resource.data.favoritePuzzleTypes.size() > 0
+        && request.resource.data.favoritePuzzleTypes.size() <= 6
+        && request.resource.data.difficulties is map
+        && request.resource.data.createdAt is int
+        && request.resource.data.createdAt > 0;
+      allow update, delete: if false;
+    }
+
     match /profiles/{authUid} {
       allow get: if signedIn()
         && (
@@ -329,11 +347,11 @@ service cloud.firestore {
         && request.auth.uid == authUid
         && request.resource.data.keys().hasOnly([
           'authUid','playerId','displayName','groupId','role',
-          'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent','accountState'
+          'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent','accountState','preferences'
         ])
         && request.resource.data.keys().hasAll([
           'authUid','playerId','displayName','groupId','role',
-          'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent','accountState'
+          'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent','accountState','preferences'
         ])
         && request.resource.data.authUid == request.auth.uid
         && request.resource.data.playerId == 'p_' + request.auth.uid
@@ -382,7 +400,7 @@ service cloud.firestore {
           && request.auth.uid == authUid
           && request.resource.data.keys().hasOnly([
             'authUid','playerId','displayName','groupId','role',
-            'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent','accountState'
+            'createdAt','updatedAt','inviteCode','invitedByAuthUid','groupJoinCode','theme','accent','accountState','preferences'
           ])
           && request.resource.data.authUid == resource.data.authUid
           && request.resource.data.playerId == resource.data.playerId
@@ -404,6 +422,11 @@ service cloud.firestore {
           && request.resource.data.displayName.size() <= 30
           && request.resource.data.get('theme','shared') in ['shared','peter','aart','stars','nature','retro','animals','sea','travel','music','party','coffee','season','minimal']
           && request.resource.data.get('accent','blue') in ['blue','purple','teal','green','orange','pink','red']
+          && request.resource.data.get('preferences', {'favoritePuzzleTypes': [], 'dailyDifficulty': {}}) is map
+          && request.resource.data.get('preferences', {'favoritePuzzleTypes': [], 'dailyDifficulty': {}}).keys().hasOnly(['favoritePuzzleTypes','dailyDifficulty'])
+          && request.resource.data.get('preferences', {'favoritePuzzleTypes': [], 'dailyDifficulty': {}}).get('favoritePuzzleTypes',[]) is list
+          && request.resource.data.get('preferences', {'favoritePuzzleTypes': [], 'dailyDifficulty': {}}).get('favoritePuzzleTypes',[]).size() <= 6
+          && request.resource.data.get('preferences', {'favoritePuzzleTypes': [], 'dailyDifficulty': {}}).get('dailyDifficulty',{}) is map
           && request.resource.data.groupId is string
           && (
             request.resource.data.groupId == resource.data.groupId
