@@ -1330,3 +1330,12 @@ body[data-t=hex][data-input-mode] #hexsvg{box-shadow:0 0 0 5px var(--mode-button
 /* Hexcells is bewust de uitzondering: ook het vlak achter de cellen volgt de modus. */
 body[data-t=hex][data-input-mode=fill] #hexsvg{background:#e3f1fc!important}
 body[data-t=hex][data-input-mode=cross] #hexsvg{background:#dddde1!important}
+
+/* Dagpuzzelvolgorde: puzzel | eigen voortgang | groep, van persoonlijk naar samen. */
+.daycaption{grid-template-columns:minmax(220px,1.5fr) minmax(135px,.8fr) minmax(150px,1fr)}
+.daystatus{justify-content:flex-start}
+.daypeers{justify-content:flex-end}
+@media(max-width:760px){
+ .daycaption>.daystatus{grid-column:2;grid-row:1;justify-content:flex-end}
+ .daycaption>.daypeers{grid-column:1/3;grid-row:2;justify-content:flex-end}
+}
