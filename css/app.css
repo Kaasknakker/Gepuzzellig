@@ -1270,6 +1270,7 @@ body.tablet #topbar #peerLive span{max-width:180px}
 .daygroup summary:focus-visible{outline:2px solid var(--pc);outline-offset:-2px}
 .daygroup summary>i{font-size:18px;font-style:normal;flex:none;color:var(--mut);transition:transform .15s}
 .daygroup[open] summary>i{transform:rotate(180deg)}
+.daygroup summary[data-row-action="play"]{cursor:pointer}.daygroup summary[data-row-action="play"] .dayrowcue{color:var(--dayc);font-weight:900}.daygroup summary[data-row-action="expand"] .dayrowcue{color:var(--mut)}
 .daycaption{display:flex;align-items:center;gap:18px;flex:1;min-width:0}
 .daycaption .dname{flex:1}
 .daystatus{font-size:12px;font-weight:700;white-space:nowrap;color:var(--mut)}
