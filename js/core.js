@@ -227,7 +227,7 @@ function rGrid(){const{type,p}=S,N=type==="bin"||type==="nono"?p.W:p.N,M=type===
  else if(type==="bin"){exW=PHONE?1.05:1.3;exH=exW}
  sizeCs(N+exW,M+exH);
  g.style.gridTemplateColumns=(nono||type==="bin"?"auto ":"")+`repeat(${N},${CS}px)`;
- if(nono){g.append(document.createElement("div"));p.cc.forEach((cl,ci)=>{const d=document.createElement("div");d.className="k";d.dataset.ln="c"+ci;if(p.color)d.innerHTML='<div class="ncv col">'+(cl.length?cl.map(q=>'<span class="ncl c'+q.c+'">'+q.n+"</span>").join(""):'<span class="mut">0</span>')+"</div>";else d.innerHTML="<div>"+(cl.length?cl:[0]).map(v=>"<span>"+v+"</span>").join("\n")+"</div>";g.append(d)})}
+ if(nono){const corner=document.createElement("div");corner.className="nsize";corner.textContent=p.W+"×"+p.H;corner.setAttribute("aria-label","Bordformaat "+p.W+" bij "+p.H);g.append(corner);p.cc.forEach((cl,ci)=>{const d=document.createElement("div");d.className="k";d.dataset.ln="c"+ci;if(p.color)d.innerHTML='<div class="ncv col">'+(cl.length?cl.map(q=>'<span class="ncl c'+q.c+'">'+q.n+"</span>").join(""):'<span class="mut">0</span>')+"</div>";else d.innerHTML="<div>"+(cl.length?cl:[0]).map(v=>"<span>"+v+"</span>").join("\n")+"</div>";g.append(d)})}
  const dark=isDark();
  for(let i=0;i<N*M;i++){
   if(type==="bin"&&i%N===0){const k=mkCnt();S.rowc[i/N|0]=k;g.append(k)}
@@ -1553,7 +1553,7 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
  document.body.append($("#side"));{const x=document.createElement("button");x.id="sideX";x.textContent="✕";x.title="Sluiten";x.setAttribute("aria-label","Sluiten");x.onclick=()=>toggleSide(false);$("#side").prepend(x)}
  const home=document.createElement("section");home.id="home";$("main").before(home)}
 function updTop(){if(!S||!S.p)return;document.querySelectorAll("#pbot .pgrp").forEach(mg=>mg.classList.toggle("leeg",![...mg.children].some(x=>getComputedStyle(x).display!=="none")));const t=S.type,ti=$("#tbTitle");document.documentElement.style.setProperty("--tc",TCOL[t]);
- const fnv=t==="nono"&&S.practice?S.nv:"",ttl=FREE_NAME(t,fnv),nsize=t==="nono"?" · "+S.p.W+"×"+S.p.H:"",sub=(S.practice?"Vrij puzzelen":S.arch?"Dagpuzzel van "+dnl(S.date):"Dagpuzzel")+(t==="nono"&&!S.practice?" · "+(S.nv==="color"?"Kleur":"Klassiek"):"")+nsize+(LVN[t]?" · "+LVL[S.lvl]:"")+(!S.practice&&featOf(S.date)===t?" · ⭐":"");
+ const fnv=t==="nono"&&S.practice?S.nv:"",ttl=FREE_NAME(t,fnv),sub=(S.practice?"Vrij puzzelen":S.arch?"Dagpuzzel van "+dnl(S.date):"Dagpuzzel")+(t==="nono"&&!S.practice?" · "+(S.nv==="color"?"Kleur":"Klassiek"):"")+(LVN[t]?" · "+LVL[S.lvl]:"")+(!S.practice&&featOf(S.date)===t?" · ⭐":"");
  if(ti)ti.innerHTML=tIcon(t,false,fnv)+`<div><b>${ttl}</b><small>${sub}</small></div>`;updatePeerLive()}
 function showHome(){document.body.classList.remove("layout-wide","layout-rail","layout-bottom");window.LAYOUT_BOTTOM=false;RANDOM=false;if(HOMEREADY)pauseAndPersistActive(true);clearOnline();HVIEW="";HDOPEN="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.remove("newpick");document.body.classList.add("home");if(window.PD_APPLY_SW_UPDATE&&window.PD_APPLY_SW_UPDATE())return;const np=$("#npm");if(np)np.hidden=true;tapMode();renderHome();if(HOMEREADY)pageIn($("#home"));window.scrollTo(0,0)}
 const dayLvDevice=(t,ds,phone)=>{if(!dagVast(ds))return null;const[y,m,d]=ds.split("-").map(Number),w=new Date(y,m-1,d).getDay(),wk=w===0||w===6;return phone?(wk?6:5):(wk?3:2)};
