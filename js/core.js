@@ -1,3 +1,12 @@
+/* iPad/iPhone: een veeg vanaf de home-indicator is een systeemgebaar, geen app-tik.
+   Puzzelinvoer reageert bewust al op pointerdown; vang daarom alleen de onderste
+   systeemzone af vóór die handlers een zet of knopactie kunnen uitvoeren. */
+(()=>{
+ const appleTouch=()=>navigator.maxTouchPoints>1&&/(iPad|iPhone|Mac)/i.test(navigator.platform||"");
+ const inHomeGesture=e=>e.pointerType==="touch"&&appleTouch()&&e.clientY>=((window.visualViewport?.height||innerHeight)+(window.visualViewport?.offsetTop||0)-28);
+ window.addEventListener("pointerdown",e=>{if(!inHomeGesture(e))return;e.preventDefault();e.stopImmediatePropagation()},{capture:true,passive:false});
+})();
+
 /* Een tik buiten een open menu sluit alleen het menu, ook met pen of touch. */
 (()=>{
  let dismissing=false;
