@@ -878,8 +878,8 @@ $("#mb").onpointerdown=e=>{e.preventDefault();setHexMode("b")};$("#mz").onpointe
 
 /* ---- Pluszle ---- */
 /* S.cur per vakje: 0 = open, 1 = omcirkeld (blijft zeker staan), 2 = weggestreept.
-   Tik = de gekozen stand (✕ wegstrepen of ○ omcirkelen), nog eens tikken = weer open. Slepen werkt in dezelfde stand. */
-let plusMode="x",pd=null;
+   Tik = de gekozen stand (standaard ○ omcirkelen), dubbeltik = de andere stand. Nog eens tikken = weer open. Slepen werkt in de gekozen vaste stand. */
+let plusMode="o",pd=null,plusLastTap={t:0,i:-1,h:0};
 function setPlusMode(m){const ch=plusMode!==m;plusMode=m;ub();if(ch)setTimeout(flashMode,0)}
 /* Kleur per vlak: buren krijgen een andere kleur. */
 const PHUE=[54,220,350,150,28,280,190],PNAME=["gele","blauwe","roze","groene","oranje","paarse","turquoise"];
@@ -916,13 +916,13 @@ function plusDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="plus"||S.done||e.
  if(e.target.closest&&e.target.closest("#psum")){if(mb==="r")return;plusPeek(true);return}
  const ck=e.target.closest&&e.target.closest("[data-ln]");if(ck){if(mb==="r")return;plusLine(ck.dataset.ln);return}
  S.ng=gridGeo(S.p.W);const i=gridHit(S.ng,e.clientX,e.clientY,S.p.W,S.p.H);if(i<0)return;e._nono=true;
- if(!S.start)S.start=Date.now();invalidateHint();begin();const old=S.cur[i],active=plusMode==="o"?1:2,val=mb==="r"?(active===1?2:1):active;
- pd={last:i,pid:e.pointerId,path:[i],prev:new Map(),val,mode:old===val?"del":"add"};
+ if(!S.start)S.start=Date.now();invalidateHint();const dbl=mb!=="r"&&plusLastTap.i===i&&e.timeStamp-plusLastTap.t<DOUBLE_TAP_MS;let dblBase=null;if(dbl&&plusLastTap.h===S.hist.length&&S.hist.length){const h=S.hist[S.hist.length-1];if(Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.cur=dblBase.slice();S.redo=[];S.cells.forEach((d,j)=>plusCls(d,j));S.pu.forEach((u,k)=>plusLab(k))}}if(dbl)plusLastTap={t:0,i:-1,h:0};else if(mb==="r")plusLastTap={t:0,i:-1,h:0};begin();if(dblBase)S.gs=dblBase;const old=S.cur[i],active=plusMode==="o"?1:2,val=(mb==="r"||dbl)?(active===1?2:1):active;
+ pd={last:i,pid:e.pointerId,path:[i],prev:new Map(),val,mode:old===val?"del":"add",dbl,start:i};
  const nv=old===val?0:val;plusPaint(i,nv);if(nv!==old)pd.prev.set(i,old)}
 function plusMove(e){if(!pd||S.type!=="plus"||e.pointerId!==pd.pid)return;const W=S.p.W,i=gridHit(S.ng,e.clientX,e.clientY,W,S.p.H);if(i<0||i===pd.last)return;
  const r0=pd.last/W|0,c0=pd.last%W,r1=i/W|0,c1=i%W,n=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));
  for(let k=1;k<=n;k++)plusEnter(Math.round(r0+(r1-r0)*k/n)*W+Math.round(c0+(c1-c0)*k/n));pd.last=i}
-function plusUp(e){if(!pd||e.pointerId!==pd.pid)return;plusEnd()}
+function plusUp(e){if(!pd||e.pointerId!==pd.pid)return;const d=pd,remember=!d.dbl&&e.button!==2;plusEnd();if(remember)plusLastTap={t:e.timeStamp,i:d.start,h:S.hist.length};else if(d.dbl)plusLastTap={t:0,i:-1,h:0}}
 function plusEnd(){pd=null;if(S.type!=="plus")return;const ch=[];if(S.gs)S.cur.forEach((v,i)=>{if(v!==S.gs[i])ch.push(i)});plusAuto(ch);commit();check()}
 addEventListener("pointerup",plusUp);addEventListener("pointercancel",plusUp);
 /* Na een zet, alleen in de rijen, kolommen en vlakken van de vakjes die je net veranderde: klopt wat er nog staat precies

@@ -26,6 +26,8 @@ jobs:
         run: node .github/scripts/check-ux.mjs
       - name: Tikken en Pencil-bediening controleren
         run: node .github/scripts/check-input.mjs
+      - name: Pluszle dubbeltik controleren
+        run: node .github/scripts/check-pluszle-doubletap.mjs
       - name: Afrondingsdag en resultaatidentiteit controleren
         run: node .github/scripts/check-completion.mjs
       - name: Automatische kruisjes controleren
