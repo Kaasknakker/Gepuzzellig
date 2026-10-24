@@ -31,6 +31,8 @@ jobs:
         run: node .github/scripts/check-phase4-migration.mjs
       - name: Fase 5 membershipmigratie controleren
         run: node .github/scripts/check-phase5-migration.mjs
+      - name: Fase 5 appcontract controleren
+        run: node .github/scripts/check-phase5-app.mjs
       - name: App controleren
         run: node .github/scripts/check-app.mjs
       - name: Puzzelregistratie controleren
