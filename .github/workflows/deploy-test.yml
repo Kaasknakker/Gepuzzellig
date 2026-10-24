@@ -52,6 +52,7 @@ jobs:
           node .github/scripts/check-phase6-functions.mjs
           node .github/scripts/check-phase7-app.mjs
           node .github/scripts/check-phase7-migration.mjs
+          node .github/scripts/check-phase8-app.mjs
           node --check js/puzzle-registry.js
           node --check js/core.js
           node --check js/firebase.js
