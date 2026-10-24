@@ -459,10 +459,7 @@ body.phone .hc{padding:16px 16px}
 body.phone .hc ul{font-size:15px}
 
 /* Pluszle en Nonogram houden het speelveld zelf neutraal; de modus staat eromheen. */
-#grid.pxm,#grid.pom{--card:var(--card)}
 #grid .c,#grid .pt{transition:background-color .12s}
-:root[data-theme=dark] #grid.pxm{--card:#101216}:root[data-theme=dark] #grid.pom{--card:#182739}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]) #grid.pxm{--card:#101216}:root:not([data-theme=light]) #grid.pom{--card:#182739}}
 
 /* ===== Verfijningslaag: rust, touch en toegankelijkheid ===== */
 #msg:not(:empty){display:inline-block;max-width:min(680px,92vw);padding:5px 11px;border-radius:999px;background:color-mix(in srgb,var(--pc) 9%,var(--card));border:1px solid color-mix(in srgb,var(--pc) 20%,var(--line));box-shadow:0 2px 8px var(--sh)}
@@ -1343,7 +1340,9 @@ body[data-t=hex][data-input-mode=cross] #hexsvg{background:#dddde1!important}
 /* Moduskleuren volgen de markeringen van iedere puzzel.
    Negatieve actie is wit; plaatsen/invullen gebruikt de eigen puzzelkleur.
    Hexcells behoudt zijn eigen blauw/donker-combinatie. */
-body[data-input-mode=cross]:not([data-t=hex]){--mode-tint:#fff;--mode-button:#fff;--mode-fg:#30343c;--mode-edge:#b8b8b5}
+body[data-input-mode=cross]:not([data-t=hex]){--mode-tint:#f0efeb;--mode-button:#f0efeb;--mode-fg:#30343c;--mode-edge:#aaa9a5}
+:root[data-theme=dark] body[data-input-mode=cross]:not([data-t=hex]){--mode-tint:#f2f2f0;--mode-button:#f2f2f0;--mode-edge:#c5c5c2}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) body[data-input-mode=cross]:not([data-t=hex]){--mode-tint:#f2f2f0;--mode-button:#f2f2f0;--mode-edge:#c5c5c2}}
 body[data-t=bin][data-input-mode=fill]{--mode-tint:#7a52d6;--mode-button:#7a52d6;--mode-fg:#fff;--mode-edge:#7a52d6}
 body[data-t=star][data-input-mode=fill]{--mode-tint:#c97a00;--mode-button:#c97a00;--mode-fg:#fff;--mode-edge:#c97a00}
 body[data-t=nono][data-input-mode=fill]{--mode-tint:#0f9d8c;--mode-button:#0f9d8c;--mode-fg:#fff;--mode-edge:#0f9d8c}
