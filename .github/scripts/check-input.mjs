@@ -218,7 +218,7 @@ const home=vm.createContext({console,Date,Promise,Array,Object,Set,
  UX:{saves:new Map(),storage:(k,v)=>{status={...status,...v}},paintStorage(){}},
  $:id=>elements[id]??={value:'test',hidden:false,classList:{remove(){}}},
  document:{body:{classList:{add:x=>flags.add(x),remove:x=>flags.delete(x),contains:x=>flags.has(x)}}},
- clearOnline(){},clearHint(){},toggleSide(){},tapMode(){},renderHome(){rendered=true},pageIn(){},cloudClearProgress(){},
+ clearOnline(){},pingOnline(){},clearHint(){},toggleSide(){},tapMode(){},renderHome(){rendered=true},pageIn(){},cloudClearProgress(){},
  window:{scrollTo(){},PD_DB:{saveProgress:o=>{noNestedArrays(o.entry);captured=o.entry;if(failSave)throw new Error('save failed');return Promise.resolve()}}}
 });
 for(const [a,b]of [
