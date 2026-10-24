@@ -1173,3 +1173,9 @@ body.hintside[data-t=hex] #hexw,body.hintdock[data-t=hex] #hexw{padding:10px}
 #hint .hintdetails summary{min-height:44px;display:list-item;align-content:center;cursor:pointer;font-size:14px;font-weight:700;padding:10px 0}
 #hint .hintdetails summary:focus-visible{outline:3px solid var(--acc);outline-offset:2px;border-radius:4px}
 #hint .hintdetails .hintbody{font-size:14px;line-height:1.55;margin:4px 0 12px}
+
+/* iPhone Home: compacte kop; acties vullen niet langer de hoogte naast de begroeting. */
+body.phone.home #home .hwrap:not(.sco) .htop{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-bottom:1px;row-gap:8px}
+body.phone.home #home .hwrap:not(.sco) .htop h2{margin-bottom:3px;line-height:1.12}
+body.phone.home #home .hwrap:not(.sco) .hactions{justify-self:end;margin-top:0}
+body.phone.home #home .hwrap:not(.sco)>.uxsave{margin:0 0 4px;line-height:1.35}
