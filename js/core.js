@@ -1761,7 +1761,7 @@ if(NIEUW)nieuwLayout();
 document.addEventListener("pointerdown",e=>{const pop=$("#peerLivePop");if(pop&&!pop.hidden&&!e.target.closest("#peerLive,#peerLivePop,[data-live-badge]")){pop.hidden=true;document.querySelectorAll("#peerLive,[data-live-badge]").forEach(b=>b.setAttribute("aria-expanded","false"))}},true);
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){const pop=$("#peerLivePop");if(pop)pop.hidden=true;document.querySelectorAll("#peerLive,[data-live-badge]").forEach(b=>b.setAttribute("aria-expanded","false"))}});
 {const td=dstr(),ft=featOf(td),first=lsGet("pdfeat")!==td;lsSet("pdfeat",td);
- const t=first&&!myDone(td,ft)?ft:TYPES[lsGet("pdtab")]?lsGet("pdtab"):ft;first&&!myDone(td,ft)?load(t,false):openType(t)}
+ if(!NIEUW){const t=first&&!myDone(td,ft)?ft:TYPES[lsGet("pdtab")]?lsGet("pdtab"):ft;first&&!myDone(td,ft)?load(t,false):openType(t)}}
 if(NIEUW){showHome();HOMEREADY=true}
 /* Laat de uiteindelijke layout eerst volledig berekenen en schilder hem daarna in één keer. */
 requestAnimationFrame(()=>document.documentElement.removeAttribute("data-ui-pending"));
