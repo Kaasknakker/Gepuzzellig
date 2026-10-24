@@ -1626,6 +1626,21 @@ function discardProgress(k){
   card.append(remove);
  });
 }
+function showProgressGroup(t){
+ const items=progressList({type:t});
+ if(!items.length)return;
+ UX.dialog((TYPES[t]||t)+" · Verder puzzelen",(card,close)=>{
+  const free=items.filter(m=>m.practice).length,days=items.length-free;
+  UX.text(card,[free?free+" vrije "+(free===1?"puzzel":"puzzels"):"",days?days+" "+(days===1?"dagpuzzel":"dagpuzzels"):""].filter(Boolean).join(" · "));
+  const list=document.createElement("div");list.className="progresspick";
+  items.forEach(m=>{const row=document.createElement("div");row.className="progresspickrow";const go=document.createElement("button");go.className="progresspickgo";
+   const nv=m.type==="nono"?nonoMetaVariant(m):"",name=m.practice?"Vrij puzzelen":m.date===dstr()?"Dagpuzzel · Vandaag":"Dagpuzzel · "+dnl(m.date),detail=[LVN[m.type]?LVL[m.lvl]:"",m.e.pc!=null?m.e.pc+"% ingevuld":""].filter(Boolean).join(" · ");
+   go.innerHTML=tIcon(m.type,false,m.practice?nv:"")+'<span><b>'+name+'</b><small>'+detail+'</small></span><span class="hgo2">›</span>';go.onclick=()=>{close();resumeProgress(m.k)};
+   const del=document.createElement("button");del.className="hdelete";del.title="Wis deze voortgang";del.setAttribute("aria-label","Wis "+name);del.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg>';del.onclick=()=>{close();discardProgress(m.k)};
+   row.append(go,del);list.append(row)
+  });card.append(list)
+ })
+}
 function resumeProgress(k){const e=progAll()[k],m=progressMeta(k,e);if(!m)return;if(!m.practice){load(m.type,false,false,m.date);return}clearFreeProgressType(m.type,k,m.type==="nono"?nonoMetaVariant(m):null);RANDOM=false;setFreePreferences(m.type,m.lvl,nonoMetaVariant(m));load(m.type,true,false)}
 function startChosenFree(t,l,nv,random,replace){pauseAndPersistActive(true);if(replace)clearFreeProgressType(t,null,t==="nono"?nv:null);setFreePreferences(t,l,nv);RANDOM=!!random;$("#npm").hidden=true;document.body.classList.remove("newpick");load(t,true,true,undefined,true)}
 /* Nieuwe vrije puzzel: één flow voor alle puzzeltypes.
