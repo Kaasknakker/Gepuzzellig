@@ -54,13 +54,17 @@ for(const pointerType of ['touch','pen','mouse'])for(const old of [0,1,2])for(co
  assert.deepEqual(values(),[old||1,1,2,1,1],'drag preserves stars and existing crosses');
  starMove({...e,clientX:35});
  assert.deepEqual(values(),[old||1,1,2,1,0],'backtracking restores only new crosses');
+ starMove({...e,clientX:5});
+ assert.deepEqual(values(),[old,0,2,1,0],'backtracking to start also restores the first cell');
+ starMove({...e,clientX:35});
+ assert.deepEqual(values(),[old||1,1,2,1,0],'dragging out again includes the starting cell');
  starUp({...e,timeStamp:10500});
  if(!notes){assert.equal(S.hist.length,1);S.cur=S.hist.pop();assert.deepEqual(S.cur,original,'one undo restores stroke')}
 }
 potlood=false;
 `,c);
 // Nonogram: a cross (including color Nonogram) also clears with one tap.
-vm.runInContext(`let nd=null,lastTap={t:0,i:-1},nonoMode='f',nonoColorMode=1;const nonoAt=()=>0,nonoLine=()=>{},nonoAuto=()=>{};function nonoPaint(i,v){S.cur[i]=v}`,c);
+vm.runInContext(`let nd=null,lastTap={t:0,i:-1},nonoMode='f',nonoColorMode=1;const nonoAt=(x=5,y=5)=>Math.floor(y/30)*(S.p.W||1)+Math.floor(x/30),nonoLine=()=>{},nonoAuto=()=>{};function nonoPaint(i,v){S.cur[i]=v}`,c);
 vm.runInContext(section('function nonoDown(','function nonoMove('),c);
 vm.runInContext(section('function nonoUp(','addEventListener("pointerup",nonoUp)'),c);
 vm.runInContext(`
@@ -113,6 +117,29 @@ for(const type of ['bin','star','nono','plus'])for(const alt of [false,true]){
   (type==='bin'?binDown:type==='star'?starDown:type==='nono'?nonoDown:plusDown)(e);
   (type==='bin'?binUp:type==='star'?starUp:type==='nono'?nonoUp:plusUp)({...e,timeStamp:1020});
   assert.equal(S.cur[0],old===secondary?empty:secondary,type+' right click');assert.equal(S.inputAlt,alt);assert.equal(nonoMode,alt?'x':'f');assert.equal(plusMode,alt?'x':'o');
+ }
+}
+`,c);
+// Fully reversing a stroke restores its origin and does not leave an Undo entry.
+// The same gesture can then be extended again, including its first cell.
+vm.runInContext(section('function nonoEnter(','/* Is een rij of kolom'),c);
+vm.runInContext(section('function nonoMove(','function nonoUp('),c);
+vm.runInContext(section('function plusEnter(','function plusDown('),c);
+vm.runInContext(`
+for(const type of ['star','nono','color','plus'])for(const alt of [false,true])for(const pointerType of ['touch','pen','mouse'])for(const extend of [false,true]){
+ const isStar=type==='star',isPlus=type==='plus',color=type==='color',active=isStar?(alt?2:1):isPlus?(alt?2:1):alt?(color?-1:2):(color?3:1);
+ for(const old of [0,active]){
+  potlood=false;nonoMode=alt?'x':'f';nonoColorMode=color?3:1;plusMode=alt?'x':'o';
+  S={id:51,type:isStar?'star':isPlus?'plus':'nono',inputAlt:alt,p:{N:5,W:5,H:1,color},cur:[old,old,0,old,0],nt:{},hist:[],redo:[],start:0,cells:[],pu:[]};
+  binLastTap=starLastTap=lastTap=plusLastTap={t:0,i:4};const original=S.cur.slice();
+  const down=isStar?starDown:isPlus?plusDown:nonoDown,move=isStar?starMove:isPlus?plusMove:nonoMove,up=isStar?starUp:isPlus?plusUp:nonoUp;
+  const e={pointerType,button:0,pointerId:17,clientX:5,clientY:5,timeStamp:10000,target:{closest:()=>null},preventDefault(){}};
+  down(e);move({...e,clientX:135});move({...e,clientX:5});assert.deepEqual(S.cur,original,type+' restores entire stroke including origin');
+  if(extend){move({...e,clientX:35});assert.equal(S.cur[0],isStar&&!alt&&old?old:old?0:active,type+' redraws origin');assert.equal(S.cur[1],isStar&&!alt&&old?old:old?0:active)}
+  up({...e,timeStamp:10500});
+  assert.equal((isStar?starLastTap:isPlus?plusLastTap:lastTap).i,-1,'a drag never carries over an earlier tap');
+  const changed=S.cur.join()!==original.join();assert.equal(S.hist.length,changed?1:0,type+' only a real change creates one Undo step');
+  if(changed){S.cur=S.hist.pop();assert.deepEqual(S.cur,original,type+' Undo restores the entire stroke')}
  }
 }
 `,c);

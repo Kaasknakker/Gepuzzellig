@@ -358,14 +358,20 @@ function starDown(e){const mb=mouseLR(e);if(S.done||S.type!=="star"||e._closed||
  if(dbl)starLastTap={t:0,i:-1,h:0,note:false};else if(mb==="r")starLastTap={t:0,i:-1,h:0,note:false};
  e.preventDefault();if(!S.start)S.start=Date.now();invalidateHint();
  if(potlood){if(disp(i)!==0)return;const raw=noteVal(i),target=(mb==="r"||dbl)?(S.inputAlt?1:2):(S.inputAlt?2:1),mode=(mb!=="r"&&!dbl&&raw>0)||raw===target?"del":"add";
-  drag={note:true,directNote:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),nchanges:new Map(),dbl};
+  drag={note:true,directNote:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map([[i,raw]]),nchanges:new Map(),dbl};
   noteDragWrite(drag,i,mode==="del"?0:target);return}
  begin();if(dblBase)S.gs=dblBase;
  const target=(mb==="r"||dbl)?(S.inputAlt?1:2):(S.inputAlt?2:1),old=S.cur[i],mode=(mb!=="r"&&!dbl&&old!==0)||old===target?"del":"add";
  drag={direct:true,target,pid:e.pointerId,mode,start:i,last:i,moved:false,path:[i],prev:new Map(),dbl};drag.prev.set(i,old);
  setCell(i,mode==="del"?0:target);
  if(mb===null&&!dbl)lpStart(e,()=>{if(!drag||drag.moved||drag.start!==i)return;if(S.gs)S.cur=S.gs.slice();drag=null;S.gs=null;paintAll();lpNote(i)})}
-function starEnter(j){const d=drag,k=d.path.indexOf(j);if(k>=0){while(d.path.length>k+1){const c=d.path.pop();if(d.prev.has(c)){if(d.note)noteDragWrite(d,c,d.prev.get(c));else S.cur[c]=d.prev.get(c);d.prev.delete(c)}}d.note?paintNotes():paintAll();return}
+/* Terug naar het begin maakt de hele veeg ongedaan, inclusief het beginvakje.
+   Bij opnieuw uitlopen hoort dat vakje weer bij de nieuwe veeg. */
+function rewindStroke(d,j,restore){const k=d.path.indexOf(j);if(k<0)return false;
+ while(d.path.length>k+1){const i=d.path.pop();if(d.prev.has(i)){restore(i,d.prev.get(i));d.prev.delete(i)}}
+ if(k===0){if(d.prev.has(j)){restore(j,d.prev.get(j));d.prev.delete(j)}d.rewound=true}return true}
+function starEnter(j){const d=drag;if(rewindStroke(d,j,(i,v)=>{if(d.note)noteDragWrite(d,i,v);else S.cur[i]=v})){d.note?paintNotes():paintAll();return}
+ if(d.rewound){d.rewound=false;const origin=d.path[0];d.path=[];starEnter(origin)}
  d.path.push(j);if(d.note){const o=noteVal(j);if(d.directNote){if(disp(j)!==0)return;const nv=d.mode==="del"?(o===d.target?0:o):o===0?d.target:o;noteDragWrite(d,j,nv)}else applyNoteDrag(j);if(noteVal(j)!==o)d.prev.set(j,o);return}
  if(d.direct){const o=S.cur[j],nv=d.mode==="del"?(o===d.target?0:o):o===0?d.target:o;if(nv!==o){d.prev.set(j,o);S.cur[j]=nv;paintAll()}return}
  const o=S.cur[j];applyDrag(j);if(S.cur[j]!==o)d.prev.set(j,o)}
@@ -379,7 +385,7 @@ function starMove(e){if(!drag||S.type!=="star"||e.pointerId!==drag.pid)return;co
  }
  for(let k=1;k<=n;k++)starEnter(Math.round(r0+(r1-r0)*k/n)*N+Math.round(c0+(c1-c0)*k/n));
  drag.last=i}
-function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;const d=drag,acted=d.note?[...(d.nchanges||new Map()).values()].some(c=>c.from!==c.to):d.prev&&d.prev.size>0,remember=!d.moved&&!d.dbl&&acted&&e&&e.button!==2;starEnd();if(remember)starLastTap={t:e.timeStamp,i:d.start,h:S.hist.length,note:!!d.note,id:S.id,change:S.hist[S.hist.length-1]};else if(d.dbl)starLastTap={t:0,i:-1,h:0,note:false}}
+function starUp(e){if(!drag||(e&&e.pointerId!==drag.pid))return;const d=drag,acted=d.note?[...(d.nchanges||new Map()).values()].some(c=>c.from!==c.to):d.prev&&d.prev.size>0,remember=!d.moved&&!d.dbl&&acted&&e&&e.button!==2;starEnd();if(remember)starLastTap={t:e.timeStamp,i:d.start,h:S.hist.length,note:!!d.note,id:S.id,change:S.hist[S.hist.length-1]};else if(d.dbl||d.moved)starLastTap={t:0,i:-1,h:0,note:false}}
 function starEnd(){const d=drag;drag=null;if(S.type!=="star")return;if(d.note){noteFinish(d,d.moved);return}commit();check()}
 addEventListener("pointerup",starUp);addEventListener("pointercancel",starUp);
 
@@ -397,7 +403,8 @@ function nonoClue(i){if(S.type!=="nono"||!S.p)return;const W=S.p.W,H=S.p.H,r=i/W
    Bij bijvoorbeeld 1 1 1 1 met één gevuld vakje is niet duidelijk welke 1 het is: dan blijft alles zwart. */
 function nonoDone(cl,v){if(!cl.length)return[];const A=nonoArr(cl,v);if(!A.cnt||A.cnt>200000)return cl.map(()=>false);return cl.map((len,k)=>A.mn[k]===A.mx[k]&&v.slice(A.mn[k],A.mn[k]+len).every(x=>x===1))}
 function nonoColorDone(cl,v){if(!cl.length)return[];const A=cnLine(cl,v);if(!A.cnt||A.overflow)return cl.map(()=>false);return cl.map((q,k)=>A.mn[k]===A.mx[k]&&v.slice(A.mn[k],A.mn[k]+q.n).every(x=>x===q.c))}
-function nonoEnter(j){const k=nd.path.indexOf(j);if(k>=0){while(nd.path.length>k+1){const c=nd.path.pop();if(nd.prev.has(c)){nonoPaint(c,nd.prev.get(c));nd.prev.delete(c)}}return}
+function nonoEnter(j){if(rewindStroke(nd,j,nonoPaint))return;
+ if(nd.rewound){nd.rewound=false;const origin=nd.path[0];nd.path=[];nonoEnter(origin)}
  nd.path.push(j);const o=S.cur[j];nonoApply(j);if(S.cur[j]!==o)nd.prev.set(j,o)}
 function nonoApply(j){if(nd.mode==="add"){if(S.cur[j]===0)nonoPaint(j,nd.val)}else if(S.cur[j]===nd.val)nonoPaint(j,0)}
 /* Is een rij of kolom precies volgens de getallen gevuld? Dan worden de lege vakjes daarin vanzelf kruisjes. */
@@ -436,7 +443,7 @@ function nonoMove(e){if(!nd||S.type!=="nono"||e.pointerId!==nd.pid)return;const 
  const r0=nd.last/N|0,c0=nd.last%N,r1=i/N|0,c1=i%N,n=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));
  for(let k=1;k<=n;k++)nonoEnter(Math.round(r0+(r1-r0)*k/n)*N+Math.round(c0+(c1-c0)*k/n));
  nd.last=i}
-function nonoUp(e){if(!nd||e.pointerId!==nd.pid)return;const d=nd;nonoEnd();if(!d.moved&&!d.dbl&&e&&e.button!==2)lastTap={t:e.timeStamp,i:d.i0,id:S.id,h:S.hist.length,change:S.hist[S.hist.length-1]};else if(d.dbl)lastTap={t:0,i:-1}}
+function nonoUp(e){if(!nd||e.pointerId!==nd.pid)return;const d=nd;nonoEnd();if(!d.moved&&!d.dbl&&e&&e.button!==2)lastTap={t:e.timeStamp,i:d.i0,id:S.id,h:S.hist.length,change:S.hist[S.hist.length-1]};else if(d.dbl||d.moved)lastTap={t:0,i:-1}}
 function nonoEnd(){const d=nd;nd=null;if(S.type!=="nono")return;const ch=[];if(S.gs)S.cur.forEach((v,i)=>{if(v!==S.gs[i])ch.push(i)});const filled=ch.filter(i=>S.p.color?S.cur[i]>0:S.cur[i]===1);if(filled.length)nonoAuto(filled);commit();check()}
 addEventListener("pointerup",nonoUp);addEventListener("pointercancel",nonoUp);
 function tap(i){if(S.done)return;const{type,p}=S;begin();
@@ -910,7 +917,8 @@ function plusCls(d,i){const v=S.cur[i];d.classList.toggle("po",v===1);d.classLis
 function plusLab(k){const e=S.plab[k];if(!e||!S.pu||!S.pu[k])return;const u=S.pu[k],p=S.p;let open=0,o=0;u.cells.forEach(i=>{const v=S.cur[i];if(v===0)open++;else if(v===1)o+=p.num[i]});
  e.classList.toggle("mk",!open);e.classList.toggle("over",o>u.t)}
 function plusPaint(i,v){S.cur[i]=v;const d=S.cells[i];if(d){plusCls(d,i);popEl(d)}S.pof[i].forEach(plusLab)}
-function plusEnter(j){const k=pd.path.indexOf(j);if(k>=0){while(pd.path.length>k+1){const c=pd.path.pop();if(pd.prev.has(c)){plusPaint(c,pd.prev.get(c));pd.prev.delete(c)}}return}
+function plusEnter(j){if(rewindStroke(pd,j,plusPaint))return;
+ if(pd.rewound){pd.rewound=false;const origin=pd.path[0];pd.path=[];plusEnter(origin)}
  pd.path.push(j);const o=S.cur[j];if(pd.mode==="add"){if(o===0)plusPaint(j,pd.val)}else if(o===pd.val)plusPaint(j,0);if(S.cur[j]!==o)pd.prev.set(j,o)}
 function plusDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="plus"||S.done||e._closed)return;e.preventDefault();if(pd&&pd.pid!==e.pointerId)plusEnd();
  if(e.target.closest&&e.target.closest("#psum")){if(mb==="r")return;plusPeek(true);return}
@@ -918,12 +926,12 @@ function plusDown(e){const mb=mouseLR(e);if(mb===""||S.type!=="plus"||S.done||e.
  S.ng=gridGeo(S.p.W);const i=gridHit(S.ng,e.clientX,e.clientY,S.p.W,S.p.H);if(i<0)return;e._nono=true;
  if(!S.start)S.start=Date.now();invalidateHint();const dbl=mb!=="r"&&plusLastTap.i===i&&plusLastTap.id===S.id&&plusLastTap.h===S.hist.length&&plusLastTap.change===S.hist[S.hist.length-1]&&e.timeStamp-plusLastTap.t<DOUBLE_TAP_MS;let dblBase=null;if(dbl&&plusLastTap.h===S.hist.length&&S.hist.length){const h=S.hist[S.hist.length-1];if(Array.isArray(h)&&h.length===S.cur.length){dblBase=S.hist.pop();S.cur=dblBase.slice();S.redo=[];S.cells.forEach((d,j)=>plusCls(d,j));S.pu.forEach((u,k)=>plusLab(k))}}if(dbl)plusLastTap={t:0,i:-1,h:0};else if(mb==="r")plusLastTap={t:0,i:-1,h:0};begin();if(dblBase)S.gs=dblBase;const old=S.cur[i],active=plusMode==="o"?1:2,val=(mb==="r"||dbl)?(active===1?2:1):active;
  const remove=(mb!=="r"&&!dbl&&old!==0)||old===val;
- pd={last:i,pid:e.pointerId,path:[i],prev:new Map(),val:remove?old:val,mode:remove?"del":"add",dbl,start:i};
+ pd={last:i,pid:e.pointerId,path:[i],prev:new Map(),val:remove?old:val,mode:remove?"del":"add",dbl,start:i,moved:false};
  const nv=remove?0:val;plusPaint(i,nv);if(nv!==old)pd.prev.set(i,old)}
-function plusMove(e){if(!pd||S.type!=="plus"||e.pointerId!==pd.pid)return;const W=S.p.W,i=gridHit(S.ng,e.clientX,e.clientY,W,S.p.H);if(i<0||i===pd.last)return;
+function plusMove(e){if(!pd||S.type!=="plus"||e.pointerId!==pd.pid)return;const W=S.p.W,i=gridHit(S.ng,e.clientX,e.clientY,W,S.p.H);if(i<0||i===pd.last)return;pd.moved=true;
  const r0=pd.last/W|0,c0=pd.last%W,r1=i/W|0,c1=i%W,n=Math.max(Math.abs(r1-r0),Math.abs(c1-c0));
  for(let k=1;k<=n;k++)plusEnter(Math.round(r0+(r1-r0)*k/n)*W+Math.round(c0+(c1-c0)*k/n));pd.last=i}
-function plusUp(e){if(!pd||e.pointerId!==pd.pid)return;const d=pd,remember=!d.dbl&&e.button!==2;plusEnd();if(remember)plusLastTap={t:e.timeStamp,i:d.start,h:S.hist.length,id:S.id,change:S.hist[S.hist.length-1]};else if(d.dbl)plusLastTap={t:0,i:-1,h:0}}
+function plusUp(e){if(!pd||e.pointerId!==pd.pid)return;const d=pd,remember=!d.moved&&!d.dbl&&e.button!==2;plusEnd();if(remember)plusLastTap={t:e.timeStamp,i:d.start,h:S.hist.length,id:S.id,change:S.hist[S.hist.length-1]};else if(d.dbl||d.moved)plusLastTap={t:0,i:-1,h:0}}
 function plusEnd(){pd=null;if(S.type!=="plus")return;const ch=[];if(S.gs)S.cur.forEach((v,i)=>{if(v!==S.gs[i])ch.push(i)});plusAuto(ch);commit();check()}
 addEventListener("pointerup",plusUp);addEventListener("pointercancel",plusUp);
 /* Na een zet, alleen in de rijen, kolommen en vlakken van de vakjes die je net veranderde: klopt wat er nog staat precies
