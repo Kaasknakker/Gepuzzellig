@@ -1,50 +1,49 @@
 import fs from 'node:fs';
 import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
-const projectId='gepuzzellig-rules-test', rules=fs.readFileSync('firestore.rules','utf8');
-const fx=JSON.parse(fs.readFileSync('test/fixtures/firestore-phase2.json','utf8'));
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+const projectId='gepuzzellig-rules-test',rules=fs.readFileSync('firestore.rules','utf8'),fx=JSON.parse(fs.readFileSync('test/fixtures/firestore-phase2.json','utf8'));
 const env=await initializeTestEnvironment({projectId,firestore:{rules,host:'127.0.0.1',port:8080}});
 const playerDoc=p=>({playerId:p.playerId,authUid:p.authUid,displayName:p.displayName,createdAt:1,updatedAt:1});
 const profileDoc=p=>({authUid:p.authUid,playerId:p.playerId,displayName:p.displayName,groupId:'',role:'user',createdAt:1,updatedAt:1,inviteCode:'fixture000',invitedByAuthUid:'fixture',groupJoinCode:'',theme:'shared',accent:'blue'});
+const indexOf=(m,gid)=>({groupId:gid,role:m.role,status:m.status,joinedAt:m.joinedAt||0,updatedAt:m.updatedAt});
 try{
  await env.withSecurityRulesDisabled(async c=>{const db=c.firestore();
   for(const p of Object.values(fx.players)){await setDoc(doc(db,'players',p.playerId),playerDoc(p));await setDoc(doc(db,'profiles',p.authUid),profileDoc(p));}
   await setDoc(doc(db,'groups',fx.group.id),{name:fx.group.name,ownerAuthUid:'auth-admin',inviteCode:'rules01',theme:'shared',accent:'blue',murdokuNames:[],createdAt:1,updatedAt:1});
-  for(const m of Object.values(fx.memberships))await setDoc(doc(db,'groups',fx.group.id,'members',m.playerId),m);
-  await setDoc(doc(db,'playerMemberships','p_member','groups',fx.group.id),{groupId:fx.group.id,role:'member',status:'approved',joinedAt:110,updatedAt:110});
+  for(const m of Object.values(fx.memberships)){await setDoc(doc(db,'groups',fx.group.id,'members',m.playerId),m);await setDoc(doc(db,'playerMemberships',m.playerId,'groups',fx.group.id),indexOf(m,fx.group.id));}
   await setDoc(doc(db,'progress','p_solo','items','daily-bin'),{playerId:'p_solo',puzzleType:'bin',mode:'daily',puzzleKey:'bin:fixture',difficulty:'normal',state:{cells:[]},progressPercent:20,startedAt:10,updatedAt:20});
  });
  const db=p=>env.authenticatedContext(p.authUid).firestore(),{solo,pending,member,admin,outsider}=fx.players;
  const anonUid='auth-new-anon',anonPlayer='p_'+anonUid,anonDb=env.authenticatedContext(anonUid,{firebase:{sign_in_provider:'anonymous'}}).firestore();
  const anonProfile={authUid:anonUid,playerId:anonPlayer,displayName:'Solo tester',groupId:'',role:'user',accountState:'anonymous',createdAt:300,updatedAt:300,inviteCode:'',invitedByAuthUid:'',groupJoinCode:'',theme:'shared',accent:'blue'};
- await assertSucceeds(setDoc(doc(anonDb,'profiles',anonUid),anonProfile));
- await assertSucceeds(setDoc(doc(anonDb,'players',anonPlayer),{playerId:anonPlayer,authUid:anonUid,displayName:'Solo tester',createdAt:300,updatedAt:300}));
+ await assertSucceeds(setDoc(doc(anonDb,'profiles',anonUid),anonProfile));await assertSucceeds(setDoc(doc(anonDb,'players',anonPlayer),{playerId:anonPlayer,authUid:anonUid,displayName:'Solo tester',createdAt:300,updatedAt:300}));
  await assertFails(updateDoc(doc(anonDb,'profiles',anonUid),{playerId:'p_second_identity',updatedAt:301}));
  const linkedDb=env.authenticatedContext(anonUid,{email:'solo@example.test',email_verified:true,firebase:{sign_in_provider:'google.com'}}).firestore();
- await assertSucceeds(updateDoc(doc(linkedDb,'profiles',anonUid),{accountState:'linked',updatedAt:302}));
- await assertFails(updateDoc(doc(linkedDb,'profiles',anonUid),{playerId:'p_second_identity',updatedAt:303}));
- await assertSucceeds(getDoc(doc(db(solo),'players',solo.playerId)));
- await assertFails(getDoc(doc(db(outsider),'players',solo.playerId)));
+ await assertSucceeds(updateDoc(doc(linkedDb,'profiles',anonUid),{accountState:'linked',updatedAt:302}));await assertFails(updateDoc(doc(linkedDb,'profiles',anonUid),{playerId:'p_second_identity',updatedAt:303}));
+ await assertSucceeds(getDoc(doc(db(solo),'players',solo.playerId)));await assertFails(getDoc(doc(db(outsider),'players',solo.playerId)));
  await assertSucceeds(getDoc(doc(db(solo),'progress',solo.playerId,'items','daily-bin')));
  const personalResult={schemaVersion:3,playerId:solo.playerId,name:'Solo',groupId:'',puzzleDate:'2026-10-24',completedOn:'2026-10-24',puzzleType:'bin',resultType:'bin.2',mode:'daily',difficulty:'2',variant:'',deviceVariant:'ipad',puzzleKey:'2026-10-24:bin.2',secs:120,mist:0,hints:0,emo:'',note:'',legacyResultId:'',createdAt:400,updatedAt:400};
- await assertSucceeds(setDoc(doc(db(solo),'playerResults',solo.playerId,'items','daily-bin'),personalResult));
- await assertFails(setDoc(doc(db(outsider),'playerResults',solo.playerId,'items','bad'),{...personalResult,playerId:solo.playerId,puzzleKey:'bad'}));
- await assertSucceeds(setDoc(doc(db(solo),'progress',solo.playerId,'items','phase4-free'),{schemaVersion:3,legacyKey:'p:star.3',playerId:solo.playerId,puzzleType:'star',mode:'free',puzzleKey:'p:star.3',difficulty:'3',variant:'',deviceVariant:'ipad',state:{k:'p:star.3',pc:25},progressPercent:25,startedAt:410,updatedAt:411}));
- await assertFails(getDoc(doc(db(outsider),'progress',solo.playerId,'items','daily-bin')));
- await assertSucceeds(setDoc(doc(db(solo),'progress',solo.playerId,'items','free-star'),{playerId:solo.playerId,puzzleType:'star',mode:'free',puzzleKey:'star:fixture',difficulty:'hard',state:{marks:[]},progressPercent:5,startedAt:30,updatedAt:31}));
- await assertFails(setDoc(doc(db(outsider),'progress',solo.playerId,'items','bad'),{playerId:solo.playerId,puzzleType:'bin',mode:'free',puzzleKey:'x',difficulty:'normal',state:{},progressPercent:0,startedAt:1,updatedAt:1}));
- await assertSucceeds(getDoc(doc(db(pending),'groups',fx.group.id,'members',pending.playerId)));
- await assertFails(getDoc(doc(db(pending),'groups',fx.group.id,'members',member.playerId)));
- await assertSucceeds(getDoc(doc(db(member),'groups',fx.group.id,'members',admin.playerId)));
- await assertFails(getDoc(doc(db(outsider),'groups',fx.group.id,'members',member.playerId)));
- await assertSucceeds(setDoc(doc(db(solo),'groups',fx.group.id,'members',solo.playerId),{playerId:solo.playerId,role:'member',status:'pending',requestedAt:200,approvedAt:0,joinedAt:0,approvedByPlayerId:'',updatedAt:200}));
- await assertFails(setDoc(doc(db(solo),'groups',fx.group.id,'members','p_fake'),{playerId:'p_fake',role:'member',status:'pending',requestedAt:200,updatedAt:200}));
- await assertSucceeds(updateDoc(doc(db(admin),'groups',fx.group.id,'members',pending.playerId),{status:'approved',approvedAt:210,joinedAt:210,approvedByPlayerId:admin.playerId,updatedAt:210}));
- await assertFails(updateDoc(doc(db(member),'groups',fx.group.id,'members',pending.playerId),{role:'admin',updatedAt:220}));
- await assertFails(updateDoc(doc(db(admin),'groups',fx.group.id,'members',admin.playerId),{role:'member',updatedAt:230}));
- await assertFails(deleteDoc(doc(db(admin),'groups',fx.group.id,'members',admin.playerId)));
- await assertSucceeds(getDoc(doc(db(member),'playerMemberships',member.playerId,'groups',fx.group.id)));
+ await assertSucceeds(setDoc(doc(db(solo),'playerResults',solo.playerId,'items','daily-bin'),personalResult));await assertFails(setDoc(doc(db(outsider),'playerResults',solo.playerId,'items','bad'),{...personalResult,playerId:solo.playerId,puzzleKey:'bad'}));
+ await assertSucceeds(setDoc(doc(db(solo),'progress',solo.playerId,'items','phase4-free'),{schemaVersion:3,legacyKey:'p:star.3',playerId:solo.playerId,puzzleType:'star',mode:'free',puzzleKey:'p:star.3',difficulty:'3',variant:'',deviceVariant:'ipad',state:{k:'p:star.3',pc:25},progressPercent:25,startedAt:410,updatedAt:411}));await assertFails(getDoc(doc(db(outsider),'progress',solo.playerId,'items','daily-bin')));
+ // Solo -> pending: canonical membership en inverse index moeten in dezelfde batch worden geschreven.
+ const request={playerId:solo.playerId,displayName:'Solo',role:'member',status:'pending',requestedAt:500,approvedAt:0,joinedAt:0,approvedByPlayerId:'',updatedAt:500};
+ {const b=writeBatch(db(solo));b.set(doc(db(solo),'groups',fx.group.id,'members',solo.playerId),request);b.set(doc(db(solo),'playerMemberships',solo.playerId,'groups',fx.group.id),indexOf(request,fx.group.id));await assertSucceeds(b.commit())}
+ await assertFails(setDoc(doc(db(solo),'groups',fx.group.id,'members','p_fake'),{...request,playerId:'p_fake'}));
+ // Pending -> approved door groepsadmin, eveneens atomair met inverse index.
+ const approved={...fx.memberships.pending,status:'approved',approvedAt:510,joinedAt:510,approvedByPlayerId:admin.playerId,updatedAt:510};
+ {const b=writeBatch(db(admin));b.set(doc(db(admin),'groups',fx.group.id,'members',pending.playerId),approved);b.set(doc(db(admin),'playerMemberships',pending.playerId,'groups',fx.group.id),indexOf(approved,fx.group.id));await assertSucceeds(b.commit())}
+ await assertFails(updateDoc(doc(db(member),'groups',fx.group.id,'members',pending.playerId),{role:'admin',updatedAt:520}));
+ // Meerdere admins: admin kan een ander approved lid promoveren en later weer degraderen.
+ const promoted={...fx.memberships.member,role:'admin',updatedAt:530};
+ {const b=writeBatch(db(admin));b.set(doc(db(admin),'groups',fx.group.id,'members',member.playerId),promoted);b.set(doc(db(admin),'playerMemberships',member.playerId,'groups',fx.group.id),indexOf(promoted,fx.group.id));await assertSucceeds(b.commit())}
+ const demoted={...promoted,role:'member',updatedAt:540};
+ {const b=writeBatch(db(admin));b.set(doc(db(admin),'groups',fx.group.id,'members',member.playerId),demoted);b.set(doc(db(admin),'playerMemberships',member.playerId,'groups',fx.group.id),indexOf(demoted,fx.group.id));await assertSucceeds(b.commit())}
+ // Laatste-adminbescherming: een admin kan zichzelf nooit degraderen/verwijderen.
+ await assertFails(updateDoc(doc(db(admin),'groups',fx.group.id,'members',admin.playerId),{role:'member',updatedAt:550}));await assertFails(deleteDoc(doc(db(admin),'groups',fx.group.id,'members',admin.playerId)));
+ // Eén speler kan naast de eerste groep een tweede approved membership hebben.
+ const gid2='g_rules02',now=600,admin2={playerId:admin.playerId,displayName:'Admin',role:'admin',status:'approved',requestedAt:now,approvedAt:now,joinedAt:now,approvedByPlayerId:admin.playerId,updatedAt:now};
+ {const b=writeBatch(db(admin));b.set(doc(db(admin),'groups',gid2),{name:'Tweede groep',ownerAuthUid:admin.authUid,inviteCode:'rules02',theme:'shared',accent:'blue',murdokuNames:[],createdAt:now,updatedAt:now});b.set(doc(db(admin),'groups',gid2,'members',admin.playerId),admin2);b.set(doc(db(admin),'playerMemberships',admin.playerId,'groups',gid2),indexOf(admin2,gid2));await assertSucceeds(b.commit())}
+ await assertSucceeds(getDoc(doc(db(admin),'playerMemberships',admin.playerId,'groups',fx.group.id)));await assertSucceeds(getDoc(doc(db(admin),'playerMemberships',admin.playerId,'groups',gid2)));
  await assertFails(getDoc(doc(db(outsider),'playerMemberships',member.playerId,'groups',fx.group.id)));
- await assertFails(setDoc(doc(db(member),'playerMemberships',member.playerId,'groups','g_fake'),{groupId:'g_fake',role:'member',status:'approved',joinedAt:1,updatedAt:1}));
- console.log('Fase 2/3/4 Firestore-rules: skeleton, anonymous identiteit en persoonlijke data geslaagd.');
-}finally{await env.cleanup();}
+ console.log('Fase 2-5 Firestore-rules: solo, persoonlijke data, pending/approved, meerdere memberships/admins en laatste-adminbescherming geslaagd.');
+}finally{await env.cleanup()}
