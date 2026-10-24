@@ -1201,8 +1201,8 @@ body.phone #grid>.nsize{font-size:10px;padding-right:3px;padding-bottom:3px}
 #inputmode{padding:3px;border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--line) 20%,var(--card))}
 #inputmode button{font-weight:700;padding:10px 8px;border-radius:12px;white-space:nowrap;box-shadow:none;border-color:transparent;color:var(--mut);position:relative}
 #inputmode button.on{background:var(--mode-button);border-color:var(--mode-button);color:#fff;box-shadow:0 2px 0 color-mix(in srgb,var(--mode-button) 60%,#000)}
-body[data-input-mode=fill]{--mode-tint:#4b86b4;--mode-button:#3575a5}
-body[data-input-mode=cross]{--mode-tint:#b56f62;--mode-button:#9d5e54}
+body[data-input-mode=fill]{--mode-tint:#3d9bd4;--mode-button:#2f86bc}
+body[data-input-mode=cross]{--mode-tint:#626b77;--mode-button:#505965}
 body:not(.home):not(.newpick)[data-input-mode]{background-color:color-mix(in srgb,var(--mode-tint) 7%,var(--bg))}
 body[data-input-mode] #grid{background:var(--card);box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-tint) 82%,var(--line)),0 8px 24px var(--sh)}
 body[data-t=bin] #grid,body[data-t=star] #grid{box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-tint) 82%,var(--line)),0 8px 24px var(--sh)}
@@ -1326,3 +1326,7 @@ body[data-input-mode] :is(#mb,#mz).on{background:var(--mode-button)!important;bo
 body[data-input-mode] #grid{box-shadow:0 0 0 5px var(--mode-button),0 8px 24px var(--sh)!important}
 body[data-input-mode] #mgrid{outline-color:var(--mode-button)!important}
 body[data-t=hex][data-input-mode] #hexsvg{box-shadow:0 0 0 5px var(--mode-button),0 8px 24px var(--sh)!important}
+
+/* Hexcells is bewust de uitzondering: ook het vlak achter de cellen volgt de modus. */
+body[data-t=hex][data-input-mode=fill] #hexsvg{background:#e3f1fc!important}
+body[data-t=hex][data-input-mode=cross] #hexsvg{background:#dddde1!important}
