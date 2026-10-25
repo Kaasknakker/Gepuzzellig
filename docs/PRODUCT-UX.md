@@ -85,7 +85,18 @@ Bij compacte puzzelweergaven geldt:
 
 Controleer relevante wijzigingen waar passend op smalle en normale iPhone, grotere tekst, iPad portrait/landscape en desktop, inclusief touch, muis/toetsenbord en waar relevant Apple Pencil.
 
-## 6. Groepen en sociale laag
+## 6. Browser, PWA en puzzelvariant
+
+De fysieke apparaatklasse en de bedoelde puzzelvariant moeten voorspelbaar zijn. Dezelfde gebruiker op hetzelfde apparaat krijgt in Safari/browser en als geïnstalleerde PWA normaal dezelfde bord-/puzzelvariant.
+
+- Houd responsive UI-layout en de keuze van puzzelvariant conceptueel gescheiden.
+- Baseer een apparaatvariant niet onnodig op browser- of standalone-status.
+- Een ontwikkeloverride mag alleen bewust en tijdelijk werken en mag normaal gebruik niet persistent veranderen.
+- Portrait/landscape mag niet onverwacht een andere dagelijkse puzzel opleveren wanneer het conceptueel hetzelfde apparaat blijft.
+- Bestaande voortgang en resultaten van oudere telefoon- of groot-schermvarianten moeten bereikbaar blijven.
+- Behandel dit als een generiek productprincipe, niet als een Binair-specifieke uitzondering.
+
+## 7. Groepen en sociale laag
 
 De onderliggende architectuur mag uitgebreid zijn; de gebruikersinterface gebruikt menselijke taal.
 
@@ -95,13 +106,13 @@ De sociale laag is ondersteunend en gezellig. Vermijd ontwerpkeuzes die Gepuzzel
 
 Groepsweergaven moeten schaalbaar blijven wanneer het aantal puzzelsoorten groeit. Gebruik begrijpelijke tekst boven cryptische notatie wanneer ruimte en context daarom vragen.
 
-## 7. Profiel
+## 8. Profiel
 
 Profiel is voor persoonlijke en accountinstellingen en mag geen verzamelbak worden voor functies die logischer bij Puzzelen of Groepen horen.
 
 Een instelling moet waar mogelijk ook te beheren zijn op de plek waar de gebruiker het effect ervan begrijpt. Favorieten uitsluitend diep in Profiel beheren is bijvoorbeeld minder direct dan ze ook vanuit het puzzelaanbod kunnen aanpassen.
 
-## 8. Puzzelmetadata en interne identiteit
+## 9. Puzzelmetadata en interne identiteit
 
 De bestaande puzzle registry is de natuurlijke centrale bron voor gedeelde metadata van puzzelsoorten. Vermijd dezelfde puzzelmetadata op meerdere plekken hardcoden.
 
@@ -119,7 +130,7 @@ Houd rekening met concepten zoals:
 
 De **interne puzzle-id staat los van de zichtbare naam**. Een puzzel moet later kunnen worden hernoemd of per taal anders heten zonder gebruikersdata te hoeven migreren.
 
-## 9. Nederlands-first, international-ready
+## 10. Nederlands-first, international-ready
 
 Gepuzzellig blijft voorlopig Nederlands. Bouw niet preventief een volledige internationale versie of zwaar lokalisatieframework zonder concrete behoefte.
 
@@ -133,13 +144,13 @@ Voorkom wel nieuwe technische schuld die internationalisering onnodig moeilijk m
 
 Engels is een logische eerste extra taal wanneer internationalisering daadwerkelijk aan de orde is.
 
-## 10. Naamgeving en eigen identiteit
+## 11. Naamgeving en eigen identiteit
 
 Bekende, juridisch veilige puzzelnamen hoeven niet geforceerd een woordgrap te krijgen. Eigen Gepuzzellig-concepten mogen een herkenbare, speelse naamstijl krijgen.
 
 Brainstormnamen zoals **Sterk**, **Zeskundig**, **Hexact**, **Optellig**, **Hoofdsom**, **Sompig** en **LogiCase** zijn **geen definitieve productbesluiten**. Voer zulke namen niet automatisch door en doe vóór publieke/commerciële toepassing waar nodig een actuele merk-/juridische controle.
 
-## 11. Visuele taal en toegankelijkheid
+## 12. Visuele taal en toegankelijkheid
 
 - Gebruik consistente functionele SVG/line-iconen waar functies een icoon nodig hebben.
 - Gebruik emoji bewust als speels of statusgericht element, niet willekeurig als functioneel icoon.
@@ -149,7 +160,7 @@ Brainstormnamen zoals **Sterk**, **Zeskundig**, **Hexact**, **Optellig**, **Hoof
 - Grotere tekst en iOS-safe-areas zijn onderdeel van normaal responsive ontwerp.
 - Bestaande goede toegankelijkheidsvoorzieningen niet herschrijven zonder concrete reden.
 
-## 12. Frontend-onderhoud
+## 13. Frontend-onderhoud
 
 Voorkom pleisters op pleisters en steeds meer specifieke responsive uitzonderingen.
 
@@ -159,7 +170,7 @@ Een groot bestand hoeft niet om architecturale schoonheid ineens te worden hersc
 
 Wanneer een afgebakend onderdeel toch substantieel wordt gewijzigd, mag het veilig worden losgemaakt uit een te breed bestand als dat onderhoudbaarheid aantoonbaar verbetert zonder onnodig migratierisico.
 
-## 13. Toekomstige productrichting
+## 14. Toekomstige productrichting
 
 Meer puzzelsoorten zijn welkom wanneer ze kwalitatief goed zijn en cognitief voldoende variëren. Bekende puzzels kunnen instap en herkenning bieden; eigen puzzels geven Gepuzzellig identiteit.
 
@@ -167,7 +178,7 @@ Moeilijkheid hoort op langere termijn waar mogelijk meer te betekenen dan alleen
 
 Dit is richting, geen verplichte scope voor huidige migratie- of polishfasen.
 
-## 14. Besluit versus richting
+## 15. Besluit versus richting
 
 Bij gebruik van dit document altijd onderscheid maken tussen:
 
@@ -178,6 +189,7 @@ Bij gebruik van dit document altijd onderscheid maken tussen:
 - De volledige catalogus hoort bij Puzzelen.
 - Groepen zijn een lichte sociale laag, geen harde competitie.
 - Interne puzzle-id en zichtbare naam zijn gescheiden.
+- Browser en PWA gebruiken op hetzelfde fysieke apparaat voorspelbaar dezelfde bedoelde puzzelvariant.
 - Eenvoud en kwaliteit gaan boven het tonen van alle mogelijkheden.
 
 **Richtinggevend / nog te valideren**
