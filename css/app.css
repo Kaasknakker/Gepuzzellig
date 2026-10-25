@@ -1959,7 +1959,7 @@ body:not(.home):not(.newpick) #stage{overscroll-behavior:none}
 @media(prefers-reduced-motion:reduce){.pagein,#authaccount.authpage.ui-reveal,#groupaccount.authpage.ui-reveal{animation:none!important}}
 
 /* v204: full-page instellingen volgen het echte thema en blijven volledig onder de iOS-statuszone. */
-#authaccount.authpage,#groupaccount.authpage{background-color:var(--page-tone,var(--bg))!important;background-image:var(--page-pattern,none)!important;background-size:220px!important;background-position:center top!important;padding-top:max(env(safe-area-inset-top),12px)!important}
+#authaccount.authpage,#groupaccount.authpage{background-color:var(--page-tone,var(--bg))!important;background-image:var(--page-pattern,none)!important;padding-top:max(env(safe-area-inset-top),12px)!important}
 :root[data-theme=dark] #authaccount.authpage,:root[data-theme=dark] #groupaccount.authpage{background-image:var(--pp-d,var(--page-pattern,none))!important}
 #authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{top:0!important;margin-top:0!important}
 #authaccount.authpage .authcard,#groupaccount.authpage .authcard{padding-top:0!important}
@@ -1974,7 +1974,7 @@ body:not(.home):not(.newpick) #stage{overscroll-behavior:none}
 @media(max-width:760px){.dayitem{--day-info-w:46px}.dayitem .hdrow.dayaction{right:2px!important;width:42px!important;height:46px!important;min-width:42px!important;min-height:46px!important}.daygroup summary{padding-right:calc(var(--day-info-w) + 6px)!important}}
 
 
-/* v207: laatste pre-live uitlijning en stabiele themapagina's. */
+/* Canonieke pre-live uitlijning voor thema-, catalogus- en dagregelpolish. */
 #authaccount.authpage,#groupaccount.authpage{
   background-size:380px 380px!important;
   background-position:center top!important;
