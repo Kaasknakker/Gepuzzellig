@@ -1933,3 +1933,27 @@ body.using-keyboard .dayitem .dayaction:focus-visible{outline:2px solid var(--pc
 body.home #home,#authaccount.authpage,#groupaccount.authpage,#side,#more{overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 body.home #home{min-height:calc(100dvh + 2px)}
 body:not(.home) #stage{overscroll-behavior:none}
+
+/* v203: touchzones onzichtbaar, chevrons lucht, echte scrolloppervlakken en stabiele reveals. */
+.dayitem .hdrow.dayaction,.dayitem .hdrow.dayaction:focus,.dayitem .hdrow.dayaction:active{border:0!important;background:transparent!important;box-shadow:none!important}
+.dayitem .hdrow.dayaction:hover{background:color-mix(in srgb,var(--card) 18%,transparent)!important}
+.dayitem .dayinfo{color:var(--fg)!important;opacity:.72;border:1px solid color-mix(in srgb,var(--fg) 24%,transparent);background:color-mix(in srgb,var(--card) 82%,transparent)}
+.dayitem .dayinfo svg{color:currentColor!important}
+.sgroupperson{padding-right:42px!important;grid-template-columns:38px minmax(120px,1fr) minmax(68px,auto) minmax(92px,auto) 44px!important}
+.sgopen{justify-self:start!important;margin-right:0!important;margin-left:8px!important}
+
+/* Alle app-/menu-/overzichtspagina's zijn echte verticale scrollers; het puzzelbord blijft vast. */
+body.home{overflow:hidden}
+body.home #home{height:100dvh;min-height:100dvh;overflow-y:scroll!important;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:max(2px,env(safe-area-inset-bottom))}
+#authaccount.authpage,#groupaccount.authpage{height:100dvh;overflow-y:scroll!important;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch}
+#authaccount.authpage .authcard,#groupaccount.authpage .authcard{min-height:calc(100dvh + 2px)}
+#side,#more{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:auto}
+body:not(.home):not(.newpick){overflow:hidden}
+body:not(.home):not(.newpick) #stage{overscroll-behavior:none}
+
+/* Geen animatie meer over half-gerenderde kaarten: alleen een korte, uniforme fade van de reeds opgebouwde pagina. */
+.pagein{animation:pageReadyIn 180ms ease-out both!important}
+@keyframes pageReadyIn{from{opacity:.72}to{opacity:1}}
+#authaccount.authpage:not([hidden]),#groupaccount.authpage:not([hidden]){animation:none!important}
+#authaccount.authpage.ui-reveal,#groupaccount.authpage.ui-reveal{animation:pageReadyIn 180ms ease-out both!important}
+@media(prefers-reduced-motion:reduce){.pagein,#authaccount.authpage.ui-reveal,#groupaccount.authpage.ui-reveal{animation:none!important}}
