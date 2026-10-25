@@ -6,3 +6,6 @@ for(const [needle,label] of [['PLAYER_PREFS','persoonlijke voorkeuren'],['DAILY_
 for(const [needle,label] of [['ensureDailyPlan','daily plan snapshot'],['savePuzzlePrefs','voorkeuren opslaan'],['defaultPrefs(false)','starterset nieuwe speler'],['cleanPrefs(null,true)','legacy backfill']])need(fb,needle,label);
 need(html,'id="profpuzzles"','profiel-UI');need(rules,'match /dailyPlans/{playerId}/days/{date}','daily plan rules');need(rules,'allow update, delete: if false','immutable daily plan');
 console.log('Fase 7 appcontract: favorieten, moeilijkheid, daily plan, vrije catalogus en navigatie geslaagd.');
+
+// Home/Puzzelen moet niet alleen logisch maar ook visueel kunnen wisselen.
+if(!css.includes('#home [data-home-section][hidden],#home [data-puzzles-section][hidden]{display:none!important}')) fail('Home/Puzzelen hidden-contract ontbreekt');
