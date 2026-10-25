@@ -178,15 +178,15 @@ for(const name of ['pointerdown','touchstart','touchend'])for(const fn of modalE
 assert.equal(modalPrevented,false,'Pencil scrolling in profile/group dialog is left to browser');
 assert.equal(modal.S.mxm,false,'dialog scroll never changes puzzle input mode');
 // The first pen stroke back up after the bottom edge must move immediately.
-const scrollHandlers={},card={scrollHeight:1000,clientHeight:400,scrollTop:600,setPointerCapture(){},hasPointerCapture:()=>false};
+const scrollHandlers={},scroller={scrollHeight:1000,clientHeight:400,scrollTop:600,setPointerCapture(){},hasPointerCapture:()=>false},card={closest:s=>s==='#authaccount,#groupaccount'?scroller:null};
 let scrollClicks=0;
 const scrollButton={isConnected:true,matches:()=>false,focus(){},click(){scrollClicks++}},scrollTarget={closest:s=>s==='.authcard'?card:s.startsWith('button')?scrollButton:null};
 const scrollContext=vm.createContext({document:{addEventListener:(name,fn)=>{(scrollHandlers[name]??=[]).push(fn)}},performance:{now:()=>1000}});
 vm.runInContext(section('function penScrollDialogs(){','penScrollDialogs();')+'penScrollDialogs();',scrollContext);
 const scrollEvent=(y=300,extra={})=>({pointerType:'pen',pointerId:3,button:0,clientY:y,target:scrollTarget,preventDefault(){},stopImmediatePropagation(){},...extra});
 const sendScroll=(type,event)=>{for(const fn of scrollHandlers[type]||[])fn(event)};
-sendScroll('pointerdown',scrollEvent());sendScroll('pointermove',scrollEvent(200));sendScroll('pointerup',scrollEvent(200));assert.equal(card.scrollTop,600,'bottom is clamped');
-sendScroll('pointerdown',scrollEvent());sendScroll('pointermove',scrollEvent(380));sendScroll('pointerup',scrollEvent(380));assert.equal(card.scrollTop,520,'first stroke from bottom moves up');assert.equal(scrollClicks,0,'scroll over button never clicks');
+sendScroll('pointerdown',scrollEvent());sendScroll('pointermove',scrollEvent(200));sendScroll('pointerup',scrollEvent(200));assert.equal(scroller.scrollTop,600,'bottom is clamped');
+sendScroll('pointerdown',scrollEvent());sendScroll('pointermove',scrollEvent(380));sendScroll('pointerup',scrollEvent(380));assert.equal(scroller.scrollTop,520,'first stroke from bottom moves up');assert.equal(scrollClicks,0,'scroll over button never clicks');
 sendScroll('pointerdown',scrollEvent());sendScroll('pointerup',scrollEvent());assert.equal(scrollClicks,1,'short Pencil tap clicks once');
 let compatBlocked=false;sendScroll('click',scrollEvent(300,{detail:1,preventDefault(){compatBlocked=true}}));assert(compatBlocked,'compatibility click is suppressed');
 const dismissHandlers={};let open=true;
