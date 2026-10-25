@@ -1524,3 +1524,24 @@ details.hcontgroup>summary,.hcontsingle .hcont{box-shadow:none}
  .daystatus{grid-column:2;grid-row:2;padding-right:72px}
  .daypeers{grid-column:2!important}
 }
+
+
+/* Designverfijning: functionele lijniconen en schaalbare groepsweergave. */
+.uiicon{width:18px;height:18px;flex:0 0 18px}
+.hshuffle{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.dayaction .dayinfo{display:grid;place-items:center;width:30px;height:30px}
+.dayaction .dayinfo svg{width:22px;height:22px;display:block}
+.daypeer.summary{gap:6px}.daypeer.summary i{width:7px;height:7px;border-radius:50%;background:var(--mut);opacity:.7}
+.sphead strong{display:inline-flex;align-items:center;gap:7px}
+.spchev{display:grid;place-items:center;width:24px;height:24px;border:1px solid color-mix(in srgb,var(--line) 82%,transparent);border-radius:50%;background:color-mix(in srgb,var(--card) 92%,var(--bg));transition:transform .2s ease,border-color .2s ease}
+.spchev svg{width:15px;height:15px}.spmain.open .spchev{transform:rotate(180deg);border-color:color-mix(in srgb,var(--pc) 35%,var(--line))}
+.sgrouplist{padding:0;overflow:hidden}.sgrouphead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:15px 17px 10px;border-bottom:1px solid color-mix(in srgb,var(--line) 72%,transparent)}
+.sgroupperson{display:grid;width:100%;grid-template-columns:38px minmax(120px,1fr) minmax(68px,auto) minmax(92px,auto) 24px;align-items:center;gap:10px;padding:11px 15px;border:0;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent);border-radius:0;background:transparent;color:var(--ink);text-align:left;box-shadow:none}
+.sgroupperson:last-child{border-bottom:0}.sgroupperson:hover,.sgroupperson:focus-visible{background:color-mix(in srgb,var(--pc) 5%,var(--card))}
+.sgavatar{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:color-mix(in srgb,var(--pc) 11%,var(--card));border:1px solid color-mix(in srgb,var(--pc) 20%,var(--line));font-size:.82rem;font-weight:900}
+.sgidentity{min-width:0}.sgidentity b,.sgidentity small,.sgdaily b,.sgdaily small,.sgprogress b,.sgprogress small{display:block}.sgidentity b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sgidentity i{font-style:normal;color:var(--mut);font-weight:650}.sgidentity small,.sgdaily small,.sgprogress small{color:var(--mut);font-size:.72rem;font-weight:600}.sgdaily,.sgprogress{text-align:right}.sgdaily b,.sgprogress b{font-size:.9rem;font-variant-numeric:tabular-nums}.sgopen{display:grid;place-items:center;color:var(--mut)}.sgopen svg{width:18px;height:18px}
+.sovermain{gap:14px}
+@media(max-width:600px){
+ .sgrouphead{padding:13px 14px 9px}.sgroupperson{grid-template-columns:34px minmax(0,1fr) auto 20px;gap:8px;padding:10px 12px}.sgavatar{width:31px;height:31px}.sgprogress{display:none}.sgdaily b{font-size:.86rem}.sgdaily small{font-size:.68rem}
+ .dayaction .dayinfo{width:32px;height:32px}.dayaction .dayinfo svg{width:23px;height:23px}
+}
