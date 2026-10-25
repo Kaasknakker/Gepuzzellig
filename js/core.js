@@ -17,7 +17,6 @@
    const menu=document.getElementById(id);
    if(menu&&menu.classList.contains("open")&&!e.target.closest(inside)){menu.classList.remove("open");dismissing=true}
   }
-  for(const id of ["authaccount","groupaccount"]){const menu=document.getElementById(id);if(menu&&!menu.hidden&&e.target===menu){menu.hidden=true;window.dispatchEvent(new Event("pdrestorestyle"));dismissing=true}}
   if(dismissing&&!e.target.closest("#tbHome,#tbMore,#pm"))stop(e);else dismissing=false;
  },{capture:true,passive:false});
  for(const type of ["pointermove","pointerup","pointercancel","touchstart","touchend","click","dblclick","contextmenu"])
@@ -1582,9 +1581,10 @@ function doCheck(){if(S.done||!S.p||!["bin","star","nono","kak","mur","plus"].in
 $("#chk").onclick=doCheck;$("#chk").title="Dezelfde verkeerde invoer opnieuw controleren telt niet opnieuw als foutmoment.";
 /* ---- Weergave: systeem, licht of donker ---- */
 let THEME_MODE=(()=>{const t=lsGet("pdtheme");return t==="light"||t==="dark"||t==="system"?t:"system"})();const themeMode=()=>THEME_MODE;
+const themeIcon=m=>m==="light"?'<svg class="uiicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"/></svg>':m==="dark"?'<svg class="uiicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 15.5A8 8 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5z"/></svg>':'<svg class="uiicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor" opacity=".18"/></svg>';
 function updTheme(redraw){const mode=themeMode(),root=document.documentElement;if(mode==="system")root.removeAttribute("data-theme");else root.dataset.theme=mode;
  const dark=isDark(),meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=dark?"#15171c":"#f6f4ef";
- const th=$("#theme"),themeIcon=m=>m==="light"?'<svg class="uiicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"/></svg>':m==="dark"?'<svg class="uiicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 15.5A8 8 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5z"/></svg>':'<svg class="uiicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor" opacity=".18"/></svg>',ico=themeIcon(mode),lbl=mode==="system"?"Systeem":mode==="dark"?"Donker":"Licht";
+ const th=$("#theme"),ico=themeIcon(mode),lbl=mode==="system"?"Systeem":mode==="dark"?"Donker":"Licht";
  if(th){if(th.closest&&th.closest("#more"))th.innerHTML='<span class="ic">'+ico+'</span><span>Weergave: '+lbl+'</span>';else th.innerHTML=ico+(PHONE?" <span>"+lbl+"</span>":"");th.title="Weergave: "+lbl+" · tik om te wisselen"}
  document.querySelectorAll(".htheme [data-theme-mode],.themeMenu [data-theme-mode]").forEach(b=>{const on=b.dataset.themeMode===mode;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on?"true":"false")});
  if(redraw&&typeof S!=="undefined"&&S&&S.p&&!document.body.classList.contains("home")){if(S.type==="hex")setTimeout(rHex,0);else render()}}
