@@ -1872,3 +1872,15 @@ body.using-keyboard .dayitem .dayaction:focus-visible{outline:2px solid var(--pc
 /* Iets duidelijkere, maar rustige pagina-overgang. */
 .pagein{animation-duration:360ms!important}
 @keyframes pagein{from{opacity:.18;transform:translateY(12px) scale(.994)}to{opacity:1;transform:none}}
+
+/* v199: paginanavigatie links en menu-identiteit op één vaste lijn. */
+.authdialoghead{grid-template-columns:44px minmax(0,1fr) 44px!important}
+.authdialoghead .authx{grid-column:1!important;grid-row:1;justify-self:start}
+.authdialoghead h2{grid-column:2!important;grid-row:1;padding-left:0!important;text-align:center}
+#more #authbtn{display:flex;align-items:center;justify-content:flex-start;gap:12px;text-align:left}
+#more #authbtn .authdot{width:9px;height:9px;flex:0 0 9px;margin:0}
+#more #authbtn>span:not(.authdot){min-width:0}
+#more .mlist #reset{color:var(--fg)}
+#more .mlist #reset .ic{color:var(--mut)}
+#more .mlist #reset.arm{color:#c22}
+#more .mlist #reset.arm .ic{color:currentColor}
