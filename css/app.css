@@ -1432,3 +1432,95 @@ details.hcontgroup{display:block;border:0;background:transparent;align-self:star
 .hgroupstack{display:grid;gap:12px}.hgroupcard{padding:16px 18px}.hghead{display:flex;align-items:center;justify-content:space-between;gap:14px}.hghead h4{margin:0 0 3px;font-size:1.02rem}.hghead button{flex:0 0 auto;border:1px solid var(--line);border-radius:11px;background:transparent;color:var(--ink);padding:7px 10px;font-weight:750}.hgsummary{margin:12px 0 7px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--line) 72%,transparent);color:var(--mut);font-size:.78rem}.hgmembers{display:grid;gap:2px}.hgmember{display:grid;grid-template-columns:112px auto 38px;align-items:center;justify-content:start;gap:8px;min-height:34px;padding:3px 0}.hgmember>b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hgchips{display:flex;justify-content:flex-start;gap:4px}.hgchip{display:grid;place-items:center;width:22px;height:22px;border:1px solid var(--line);border-radius:7px;color:var(--mut);font-size:.72rem;font-style:normal;font-weight:850}.hgchip.done{color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,var(--card));border-color:color-mix(in srgb,var(--ok) 38%,var(--line))}.hgcount{text-align:right;color:var(--mut);font-size:.78rem;font-weight:800;font-variant-numeric:tabular-nums}@media(max-width:600px){.hgroupcard{padding:14px}.hghead{align-items:flex-start}.hgmember{grid-template-columns:90px auto 34px;gap:6px}.hgchip{width:20px;height:20px}}
 
 .hgsegments{display:flex;width:132px;height:20px;align-items:stretch;gap:2px;padding:3px;border:1px solid var(--line);border-radius:7px;background:color-mix(in srgb,var(--line) 7%,transparent)}.hgsegments i{flex:1;min-width:2px;border-radius:2px;background:color-mix(in srgb,var(--line) 72%,transparent)}.hgsegments i.done{background:var(--ok)}@media(max-width:600px){.hgsegments{width:108px}}
+
+
+/* ===== Designronde 2026-10-25: rustige hiërarchie, minder dashboard/AI-look ===== */
+/* De bestaande Gepuzzellig-stijl blijft leidend. Deze laag maakt informatiehiërarchie
+   explicieter en voorkomt dat kaarten, pills en decoratieve iconen met elkaar concurreren. */
+.hsection{margin-top:28px}
+.hsecthead{align-items:flex-end;gap:16px;margin-bottom:10px}
+.hsecthead h3{margin:0;font-size:1.02rem;letter-spacing:-.01em}
+.hsecthead .mut{font-size:.78rem}
+.hcard{box-shadow:0 5px 16px color-mix(in srgb,var(--sh) 72%,transparent)}
+.hmainnav{gap:6px;margin-bottom:22px;padding:4px;border:1px solid color-mix(in srgb,var(--line) 72%,transparent);border-radius:15px;background:color-mix(in srgb,var(--card) 74%,transparent)}
+.hmainnav button{border:0;box-shadow:none;background:transparent;min-height:40px}
+.hmainnav button.on{background:var(--card);box-shadow:0 2px 8px var(--sh)!important;color:var(--fg)}
+.hstreak{font-size:.76rem;font-weight:750;color:var(--mut);white-space:nowrap}
+
+/* Dagpuzzel: identiteit en eigen voortgang zijn primair; actie hoort bij de speler.
+   Groepsactiviteit krijgt bewust een tweede, rustigere regel. */
+.dayitem{--day-info:38px}
+.daygroup summary{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:11px;row-gap:3px;min-height:72px;padding:10px calc(var(--day-info) + 16px) 10px 7px}
+.daygroup summary>.dot{display:none}
+.daygroup summary>.ticon{grid-column:1;grid-row:1/3;align-self:center}
+.daycaption{display:contents}
+.daycaption .dname{grid-column:2;grid-row:1;align-self:end;font-size:14px;font-weight:800;line-height:1.2}
+.daycaption .dname small{display:block;margin-top:2px;font-size:10px;font-weight:650;color:var(--mut)}
+.daystatus{grid-column:2;grid-row:2;justify-content:flex-start;align-self:start;min-width:0;gap:7px}
+.daystatus .ownstatus{font-size:11px;color:var(--mut);font-weight:700}
+.daystatus .pdonut{width:27px;height:27px}
+.daystatus .pdonut b{font-size:7px}
+.daygo{grid-column:3;grid-row:1/3;align-self:center;position:static!important;min-width:68px;padding:7px 11px;font-size:10px}
+.daypeers{grid-column:2/4;grid-row:3;justify-content:flex-start;margin-top:5px;gap:5px}
+.daypeer{background:transparent;border:0;padding:1px 4px 1px 0;font-size:10px;font-weight:650}
+.daypeer+.daypeer:before{content:"·";margin-right:5px;color:var(--line)}
+.daypeer.busy i{width:6px;height:6px}
+.dayitem .hdrow.dayaction{top:17px;right:7px;width:34px;height:34px;min-height:34px;border-color:transparent;background:transparent}
+.dayitem .hdrow.dayaction:hover{background:color-mix(in srgb,var(--line) 16%,transparent)}
+.dayinfo{font-family:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;font-size:14px;font-style:normal;font-weight:800}
+.daygroup .ddpeople{border-top:1px solid color-mix(in srgb,var(--line) 60%,transparent);margin-top:4px}
+.daygroup .ddperson{background:transparent}
+
+/* Verder puzzelen: gesloten kaarten blijven keuzes, geen mini-dashboards. */
+.hcontgroups{gap:9px}
+details.hcontgroup>summary,.hcontsingle .hcont{box-shadow:none}
+.hcont .ctxt b{font-size:.9rem}
+.hcont .ctxt small{font-size:.72rem}
+.hresumeaction{background:transparent;border:0;padding:4px 0 4px 8px;color:var(--tc,var(--pc));font-size:10px}
+.hcontgroupitems{box-shadow:none;background:color-mix(in srgb,var(--card) 86%,transparent)}
+
+/* Groepen voelen als mensen, niet als KPI-kaarten. */
+.hgroupstack{gap:10px}
+.hgroupcard{padding:15px 17px;box-shadow:none}
+.hghead{align-items:center}
+.hghead h4{font-size:.98rem}
+.hghead button{box-shadow:none;background:transparent;border-color:transparent;color:var(--mut)}
+.hghead button:hover{color:var(--fg);background:color-mix(in srgb,var(--line) 14%,transparent)}
+.hgsummary{font-size:.75rem}
+.hgsummary b{color:var(--fg)}
+.hgmember{min-height:32px}
+.hgchip{border-radius:50%;width:19px;height:19px;background:transparent;font-size:.66rem}
+.hgchip.done{background:transparent}
+.hgcount{font-weight:700}
+
+/* Instellingen: visuele secties, zonder voor ieder onderdeel een nieuwe kaartstijl. */
+.authform>.stylebox,.authform>.profileprefs,.authform>.profgroupcard,.authform>.accessinvite,
+.groupform>.groupmembers,.groupform>.groupcurrent,.groupform #groupownerbox>.stylebox,
+.groupform .murcastbox,.groupform>.groupinvite{box-shadow:none}
+.authform>label,.profileprefs,.profgroupcard,.accessinvite,.groupmembers,.groupcurrent,.murcastbox,.groupinvite{scroll-margin-top:18px}
+.authform small,.groupform small{letter-spacing:.01em}
+.stylehint,.profileprefs .mut.sm,.groupinvite .mut.sm{line-height:1.45}
+
+/* Kleine schermen krijgen dezelfde hiërarchie, maar geen samengeperste desktopkolommen. */
+@media(max-width:760px){
+ .hsection{margin-top:24px}
+ .hmainnav{grid-template-columns:repeat(4,minmax(0,1fr));overflow-x:auto}
+ .hmainnav button{padding:8px 6px;font-size:.78rem}
+ .daygroup summary{grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto auto;min-height:78px;padding:9px 45px 9px 4px;column-gap:9px}
+ .daycaption .dname{grid-column:2;grid-row:1}
+ .daystatus{grid-column:2;grid-row:2;justify-content:flex-start!important}
+ .daygo{grid-column:3;grid-row:1/3;right:auto;top:auto}
+ .daypeers{grid-column:2/4!important;grid-row:3!important;justify-content:flex-start!important;margin-top:4px}
+ .dayitem .hdrow.dayaction{top:7px;right:5px;width:32px;height:32px;min-height:32px}
+ .daygroup summary>.ticon{width:29px;height:29px}
+ .daystatus .pdonut{width:25px;height:25px}
+ .hgroupcard{padding:13px 14px}
+ .hghead button span{display:none}
+}
+@media(max-width:430px){
+ .hmainnav{grid-template-columns:repeat(4,minmax(72px,1fr))}
+ .daygroup summary{grid-template-columns:auto minmax(0,1fr);padding-right:42px}
+ .daygo{grid-column:2;grid-row:2;justify-self:end;align-self:center}
+ .daystatus{grid-column:2;grid-row:2;padding-right:72px}
+ .daypeers{grid-column:2!important}
+}
