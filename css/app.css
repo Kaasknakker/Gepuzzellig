@@ -1703,8 +1703,8 @@ body.nieuw:not(.home)::before{opacity:.58}
 }
 
 /* Home/Puzzelen: dezelfde bewezen catalogus, twee rustige bestemmingen. */
-.hpuzzlecta{margin-top:20px}.hpuzzlectabtn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;text-align:left;cursor:pointer}.hpuzzlectabtn>span:first-child{display:grid;gap:3px}.hpuzzlectabtn small{color:var(--mut);font-size:11px}.hpuzzlectabtn .hgo{white-space:nowrap;font-weight:850}.show-puzzles .hfree{margin-top:22px}.show-puzzles .hfree .hsecthead h3{font-size:20px}.show-puzzles .hfree .hsecthead h3::after{content:"";}.show-puzzles .hfree .mut{font-size:12px}
+.hpuzzlecta{margin-top:20px}.hpuzzlectabtn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;text-align:left;cursor:pointer}.hpuzzlectabtn>span:first-child{display:grid;gap:3px}.hpuzzlectabtn small{color:var(--mut);font-size:11px}.hpuzzlectabtn .hgo{white-space:nowrap;font-weight:850}
 @media(max-width:760px){.hpuzzlectabtn{padding:13px 14px}}
 
-/* Bestemmingssecties: author-CSS mag het native hidden-contract niet overschrijven. */
-#home [data-home-section][hidden],#home [data-puzzles-section][hidden]{display:none!important}
+/* Puzzelen is een zelfstandige appweergave, niet een verborgen Home-sectie. */
+.hpuzzlesview .hfree{margin-top:24px}.hpuzzlesview .freegrid{margin-top:10px}
