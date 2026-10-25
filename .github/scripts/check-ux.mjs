@@ -5,6 +5,24 @@ import assert from 'node:assert/strict';
 const read=p=>fs.readFileSync(p,'utf8'),core=read('js/core.js'),raad=read('raadsels.html');
 const section=(s,a,b)=>s.slice(s.indexOf(a),s.indexOf(b,s.indexOf(a)));
 let count=0,saved={},pushes=[],clears=[];
+
+// Apparaatvariant is fysiek/responsive, niet afhankelijk van Safari versus standalone-PWA.
+const phoneExpr=core.slice(core.indexOf("const PHONE="),core.indexOf("const LVN=",core.indexOf("const PHONE=")));
+assert(phoneExpr.includes("iPhone|iPod"));
+assert(phoneExpr.includes("screen.width"));
+assert(!/standalone|display-mode|navigator\.standalone/.test(phoneExpr));
+assert(!/localStorage|lsGet|lsSet/.test(phoneExpr));
+assert(core.includes('const q=new URLSearchParams(location.search).get("tel")'));
+assert(!core.includes('lsSet("tel"'));
+count+=6;
+
+// Themasegment gebruikt dezelfde gedeelde icon helper; voorkom een runtime-scopefout.
+const themeHelper=core.indexOf("const themeIcon=");
+const themeUpdater=core.indexOf("function updTheme");
+const themeSegment=core.indexOf("function makeThemeSeg");
+assert(themeHelper>=0&&themeHelper<themeUpdater&&themeUpdater<themeSegment);
+count++;
+
 const context={S:null,GV:1,MGV:1,PGV:1,BGV:1,HGV:1,PKEY:'test',dstr:()=> '2026-10-23',addDays:()=> '2026-10-15',nonoDayVariant:()=> 'color',
  progAll:()=>JSON.parse(JSON.stringify(saved)),lsSet:(k,v)=>{saved=JSON.parse(v);return true},playMs:()=>1000,
  cloudPushProgress:(...args)=>pushes.push(args),cloudClearProgress:k=>clears.push(k),$:()=>({value:'groep'}),
