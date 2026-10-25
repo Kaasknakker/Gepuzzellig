@@ -1826,3 +1826,30 @@ body.newpick #npm{animation:gpPanelIn var(--motion-ui) var(--motion-ease) both}
 #reset b .uiicon{width:18px;height:18px}
 #reset{color:var(--fg)!important}
 #reset.arm{color:var(--bad)!important;border-color:color-mix(in srgb,var(--bad) 45%,var(--line))!important}
+
+
+/* Licht thema: warmer papier, duidelijkere lagen en iets meer Gepuzzellig-karakter. */
+:root[data-theme=light]{--bg:#f4efe3;--card:#fffdf8;--line:#d3c9b7;--sh:rgba(92,72,34,.11)}
+:root[data-theme=light] body.home.nieuw{--page-tone:color-mix(in srgb,#f0c84b 10%,var(--bg))}
+:root[data-theme=light] body.home.nieuw::before{opacity:1;filter:saturate(1.08) contrast(1.04)}
+:root[data-theme=light] body.home .hcard,
+:root[data-theme=light] body.home .daylist,
+:root[data-theme=light] body.home .continuecard,
+:root[data-theme=light] body.home .grouphomecard{background:color-mix(in srgb,var(--card) 96%,#f7df8a);border-color:color-mix(in srgb,var(--line) 88%,#d4a82f)}
+:root[data-theme=light] body.home .hmainnav{background:color-mix(in srgb,var(--card) 92%,#f5dc82);border-color:color-mix(in srgb,var(--line) 82%,#d4a82f)}
+:root[data-theme=light] body.home .hmainnav button.on{background:color-mix(in srgb,#f3cf55 18%,var(--card))}
+:root[data-theme=light] body.home .hsection{border-color:color-mix(in srgb,var(--line) 78%,#d4a82f)}
+:root[data-theme=light] body.home .hmorepuzzles{background:color-mix(in srgb,var(--card) 88%,#f4d96f)!important;border-color:color-mix(in srgb,var(--line) 75%,#d4a82f)!important}
+@media(prefers-color-scheme:light){
+ :root:not([data-theme=dark]){--bg:#f4efe3;--card:#fffdf8;--line:#d3c9b7;--sh:rgba(92,72,34,.11)}
+ :root:not([data-theme=dark]) body.home.nieuw{--page-tone:color-mix(in srgb,#f0c84b 10%,var(--bg))}
+ :root:not([data-theme=dark]) body.home.nieuw::before{opacity:1;filter:saturate(1.08) contrast(1.04)}
+ :root:not([data-theme=dark]) body.home .hcard,
+ :root:not([data-theme=dark]) body.home .daylist,
+ :root:not([data-theme=dark]) body.home .continuecard,
+ :root:not([data-theme=dark]) body.home .grouphomecard{background:color-mix(in srgb,var(--card) 96%,#f7df8a);border-color:color-mix(in srgb,var(--line) 88%,#d4a82f)}
+ :root:not([data-theme=dark]) body.home .hmainnav{background:color-mix(in srgb,var(--card) 92%,#f5dc82);border-color:color-mix(in srgb,var(--line) 82%,#d4a82f)}
+ :root:not([data-theme=dark]) body.home .hmainnav button.on{background:color-mix(in srgb,#f3cf55 18%,var(--card))}
+ :root:not([data-theme=dark]) body.home .hsection{border-color:color-mix(in srgb,var(--line) 78%,#d4a82f)}
+ :root:not([data-theme=dark]) body.home .hmorepuzzles{background:color-mix(in srgb,var(--card) 88%,#f4d96f)!important;border-color:color-mix(in srgb,var(--line) 75%,#d4a82f)!important}
+}
