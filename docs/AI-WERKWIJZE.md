@@ -54,3 +54,18 @@ Deze afspraken gelden voor alle Gepuzzellig-chats die deze werkwijze volgen.
 | `idee:` | Denk eerst mee over UX, gevolgen en haalbaarheid. Voer nog niets door totdat een concrete uitvoering is gevraagd. |
 
 De gebruiker beschrijft het probleem of doel; de passende werkwijze volgt uit het label. Vraag alleen om ontbrekende informatie die nodig is om verantwoord verder te kunnen.
+
+## Product- en UX-kaders
+
+Bij werk dat de productstructuur, navigatie, Home, puzzelaanbod, favorieten, groepen, profiel, onboarding, responsive gedrag of andere brede UX raakt, lees vóór implementatie ook `docs/PRODUCT-UX.md` op de branch waarop wordt gewerkt. Die productvisie beschrijft blijvende gebruikersprincipes; de actuele repository en werkende implementatie blijven de technische bron van waarheid.
+
+Hanteer daarbij aanvullend deze vaste regels:
+
+- **Houd Home persoonlijk en compact.** De puzzelcatalogus mag groeien zonder dat Home automatisch meegroeit; favorieten bepalen welke puzzelsoorten daar prominent verschijnen.
+- **Verberg technische complexiteit.** Architectuurtermen en interne dataconcepten horen niet zonder gebruikersreden in de interface.
+- **Ontwerp structureel responsive.** Een smalle iPhone en grotere tekst zijn volwaardige uitgangspunten, geen uitzonderingen achteraf. Dezelfde informatiehiërarchie mag op verschillende schermformaten een andere fysieke indeling krijgen.
+- **Maak primaire acties zelfstandig begrijpelijk.** Voeg geen informatie of bediening toe alleen omdat de onderliggende architectuur die beschikbaar maakt.
+- **Bewaar schaalbaarheid van puzzelmetadata.** Beoordeel bij nieuwe puzzelsoorten en puzzel-UX de samenhang met registry, favorieten, categorieën, dagpuzzels, vrij puzzelen en toekomstige lokalisatie.
+- **Gebruik consistente functionele iconen.** Emoji zijn prima als bewust speels of statusgericht element, niet als willekeurige vervanging voor functionele iconografie.
+
+Kort uitgangspunt: **de app mag krachtiger worden zonder ingewikkelder te voelen.**
