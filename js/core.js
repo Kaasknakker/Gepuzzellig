@@ -1414,7 +1414,15 @@ function liveOf(u){const g=($("#group").value||"").trim().toLowerCase(),st=STAT.
  if(st.onlineView!=="home"&&!st.onlinePractice&&st.onlineType&&lastRows.some(r=>{if(r.uid!==u||r.date!==dstr()||(r.group||"").toLowerCase()!==g||!(r.secs>0)||String(r.type).startsWith("v~"))return false;return st.onlineLvl?r.type===st.onlineType+sfx(st.onlineLvl):String(r.type).split(".")[0]===st.onlineType}))return null;
  return st}
 function liveTitle(st){if(!st)return"";if(st.onlineView==="home")return(st.name||"Iemand")+" is online · Home";const t=st.onlineType&&TYPES[st.onlineType]?TYPES[st.onlineType]:"puzzel",bits=[(st.name||"Iemand")+" is online",t];if(st.onlinePractice)bits.push("Vrij puzzelen");else bits.push("Dagpuzzel");if(st.onlineLvl&&LVL[st.onlineLvl])bits.push(LVL[st.onlineLvl]);if(st.onlineType==="nono"&&st.onlineNono)bits.push(st.onlineNono==="color"?"Kleur":"Klassiek");return bits.join(" · ")}
-function livePeersNow(){return SET&&SET.players?groupPlayers().map(p=>({p,u:uidOf(p)})).filter(x=>x.u!==uid).map(x=>({p:x.p,st:liveOf(x.u)})).filter(x=>x.st):[]}
+function testPresencePeers(){
+ if(!(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.projectId==="gepuzzellig-test"))return[];
+ const now=Date.now(),g=($("#group").value||"").trim();
+ return[
+  {p:"Lisa",st:{uid:"test-presence-lisa",group:g,name:"Lisa",onlineAt:now,onlineView:"home",onlineType:"",onlinePractice:false,onlineLvl:0,onlineNono:""}},
+  {p:"Mark",st:{uid:"test-presence-mark",group:g,name:"Mark",onlineAt:now,onlineView:"puzzle",onlineType:"bin",onlinePractice:false,onlineLvl:2,onlineNono:""}},
+  {p:"Sophie",st:{uid:"test-presence-sophie",group:g,name:"Sophie",onlineAt:now,onlineView:"puzzle",onlineType:"nono",onlinePractice:true,onlineLvl:1,onlineNono:"color"}}
+ ]}
+function livePeersNow(){const real=SET&&SET.players?groupPlayers().map(p=>({p,u:uidOf(p)})).filter(x=>x.u!==uid).map(x=>({p:x.p,st:liveOf(x.u)})).filter(x=>x.st):[];return real.concat(testPresencePeers())}
 function updatePeerLive(){
  const peers=livePeersNow();
  if(document.body.classList.contains("home")){
