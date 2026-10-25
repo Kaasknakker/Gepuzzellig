@@ -1736,3 +1736,19 @@ body.nieuw:not(.home)::before{opacity:.58}
 
 /* Puzzelen: favorieten en volledige catalogus */
 .hpuzzletabs{display:flex;gap:5px;width:max-content;max-width:100%;margin:2px 0 12px;padding:4px;border:1px solid var(--line);border-radius:13px;background:color-mix(in srgb,var(--line) 12%,var(--card))}.hpuzzletabs button{min-height:40px;padding:8px 15px;border:0;border-radius:9px;background:transparent;color:var(--mut);box-shadow:none;font-weight:850;touch-action:manipulation}.hpuzzletabs button.on{background:var(--card);color:var(--fg);box-shadow:0 1px 4px #00000012}.pcarddaily{margin:10px 0 2px;border-top:1px solid color-mix(in srgb,var(--line) 75%,transparent);border-bottom:1px solid color-mix(in srgb,var(--line) 75%,transparent)}.pcarddailyopen{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:44px;padding:9px 2px;border:0;background:transparent;color:var(--fg);box-shadow:none;text-align:left;font-weight:750;touch-action:manipulation}.pcarddailyopen>span:last-child{font-size:20px;color:var(--mut);transition:transform .18s ease}.pcarddailyopen[aria-expanded="true"]>span:last-child{transform:rotate(90deg)}.pcarddailychoices{padding:0 0 11px}.pcarddailychoices>span{display:block;margin:1px 0 7px;color:var(--mut);font-size:.72rem;font-weight:750}.pcarddailychoices>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.pcarddailychoices button{min-height:40px;padding:7px 5px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--fg);box-shadow:none;font-size:.76rem;font-weight:800;touch-action:manipulation}.pcarddailychoices button.on{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 12%,var(--card));color:var(--tc)}.pcarddailychoices small{display:block;margin-top:7px;color:var(--mut);font-size:.68rem;line-height:1.35}@media(max-width:560px){.hpuzzletabs{width:100%}.hpuzzletabs button{flex:1}.pcarddailychoices button{min-height:44px}}
+
+
+/* Rustige, niet-blokkerende motion-laag. State en puzzeltimers wachten nooit op animaties. */
+:root{--motion-fast:160ms;--motion-ui:210ms;--motion-ease:cubic-bezier(.2,.7,.3,1)}
+#hm:not([hidden]),#cm:not([hidden]),.authcover:not([hidden]){animation:gpCoverIn var(--motion-ui) var(--motion-ease) both}
+#hm:not([hidden])>.hc,#cm:not([hidden])>.hc,.authcover:not([hidden])>.authcard{animation:gpDialogIn var(--motion-ui) var(--motion-ease) both}
+#fin:not([hidden]){animation:gpFinIn var(--motion-ui) var(--motion-ease) both}
+.peerlivepop:not([hidden]),#archp.open,#pmp.open{animation:gpPopup var(--motion-fast) var(--motion-ease) both}
+body.newpick #npm{animation:gpPanelIn var(--motion-ui) var(--motion-ease) both}
+@keyframes gpCoverIn{from{opacity:0}to{opacity:1}}
+@keyframes gpDialogIn{from{opacity:.2;transform:translateY(7px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes gpPanelIn{from{opacity:.2;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes gpFinIn{from{opacity:.2;transform:translate(-50%,7px) scale(.985)}to{opacity:1;transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){
+ .pagein,#more.open,.daydetail,#hm:not([hidden]),#cm:not([hidden]),.authcover:not([hidden]),#hm:not([hidden])>.hc,#cm:not([hidden])>.hc,.authcover:not([hidden])>.authcard,#fin:not([hidden]),.peerlivepop:not([hidden]),#archp.open,#pmp.open,body.newpick #npm{animation:none!important}
+}
