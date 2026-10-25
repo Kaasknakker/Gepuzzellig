@@ -1637,3 +1637,23 @@ body.nieuw:not(.home)::before{opacity:.58}
  #home .sco:not(.personview)>.hgrid2.sh2{grid-template-columns:1fr!important}
  #home .sco:not(.personview)>.hgrid2.sh2>.hcard:last-child{grid-column:auto}
 }
+
+
+/* Persoonlijke statistieken: functionele kleur, één lijniconentaal. */
+.personview .stat-icon{width:18px;height:18px;display:inline-block;vertical-align:-3px;flex:0 0 auto}
+.personview .smic .stat-icon{width:24px;height:24px;vertical-align:0}
+.personview .smetric.green .smic{color:#26966f;background:color-mix(in srgb,#58c79e 18%,var(--card))}
+.personview .smetric.pink .smic{color:#c9576d;background:color-mix(in srgb,#e88194 17%,var(--card))}
+.personview .smetric.yellow .smic{color:#b98818;background:color-mix(in srgb,#e9bd4c 18%,var(--card))}
+.personview .smetric.blue .smic{color:#477fae;background:color-mix(in srgb,#76a9d4 18%,var(--card))}
+.personview .smetric.peach .smic{color:#d56b3f;background:color-mix(in srgb,#ed966e 18%,var(--card))}
+.personview .smetric.purple .smic{color:#8063c7;background:color-mix(in srgb,#a68be4 18%,var(--card))}
+.personview .spmeta .stat-icon,.personview .spdrow .stat-icon{width:14px;height:14px;vertical-align:-2px;opacity:.82}
+.personview .spmeta span{display:inline-flex;align-items:center;gap:4px}
+.personview .srecent>span:last-child{display:flex;align-items:center;gap:6px}
+.personview .stat-inline{display:inline-grid;place-items:center;color:var(--mut)}
+.personview .stat-inline .stat-icon{width:15px;height:15px}
+.personview .rq{display:inline-flex;align-items:center;gap:2px}
+.personview .rq .stat-icon{width:16px;height:16px}
+.personview .rq-target{color:#c9576d}.personview .rq-hint{color:#b98818}.personview .rq-bad{color:#c45145}
+.personview .rq b{font-size:.76rem}
