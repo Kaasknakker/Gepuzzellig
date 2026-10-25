@@ -45,7 +45,7 @@ jobs:
         run: node .github/scripts/check-phase9-tutorial.mjs
       - name: Fase 9 tutorialmigratie controleren
         run: node .github/scripts/check-phase9-migration.mjs
-      - name: Functions syntax controleren
+      - name: Fase 10 productiemigratierepetitie controleren\n        run: node .github/scripts/check-phase10-rehearsal.mjs\n      - name: Functions syntax controleren
         run: node --check functions/index.js
       - name: Client syntax controleren
         run: |

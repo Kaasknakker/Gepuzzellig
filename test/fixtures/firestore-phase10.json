@@ -1,0 +1,7 @@
+{
+  "profiles":{"auth-owner":{"playerId":"p_owner","displayName":"Eigenaar","groupId":"g1","createdAt":10},"auth-member":{"playerId":"p_member","displayName":"Lid","groupId":"g1","createdAt":11},"auth-solo":{"playerId":"p_solo","displayName":"Solo","groupId":"","createdAt":12}},
+  "groups":{"g1":{"name":"Familie","ownerAuthUid":"auth-owner","inviteCode":"ABCDEF12","createdAt":5}},
+  "results":{"r1":{"uid":"p_owner","name":"Eigenaar","group":"g1","date":"2026-10-24","completedOn":"2026-10-24","type":"bin.2","secs":60,"createdAt":20},"r2":{"uid":"p_member","name":"Lid","group":"g1","date":"2026-10-24","completedOn":"2026-10-24","type":"star.2","secs":90,"createdAt":21}},
+  "status":{"s1":{"uid":"p_owner","progress":{"d%3A2026-10-25%3Abin.2":{"k":"d:2026-10-25:bin.2","pc":50,"at":30}}}},
+  "dailyPlans":{}
+}
