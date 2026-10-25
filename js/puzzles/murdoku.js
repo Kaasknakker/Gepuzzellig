@@ -17,17 +17,17 @@ function murNamePool(){
 const murCastSig=()=>murNamePool().map(x=>x[0]).join("|");
 function murTag(p,s){const nm=String(p.ppl[s]||"?");for(let n=1;n<=Math.min(3,nm.length);n++){const q=nm.slice(0,n).toLocaleLowerCase("nl");if(p.ppl.filter(x=>String(x).slice(0,n).toLocaleLowerCase("nl")===q).length===1)return nm.slice(0,n)}return nm.slice(0,1)+(s+1)}
 const MROOM=[["in de keuken","Keuken"],["in de eetkamer","Eetkamer"],["in de woonkamer","Woonkamer"],["in de badkamer","Badkamer"],["in de logeerkamer","Logeerkamer"],["in de slaapkamer","Slaapkamer"],["in de hal","Hal"],["op de zolder","Zolder"],["in de werkkamer","Werkkamer"],["in de bibliotheek","Bibliotheek"],["in de serre","Serre"],["in de garage","Garage"]];
-const murObjIcon=(body,cls="")=>'<svg class="mobjicon '+cls+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+body+'</svg>';
+const murObjIcon=(body,cls="")=>'<svg class="mobjicon '+cls+'" viewBox="0 0 24 24" aria-hidden="true">'+body+'</svg>';
 const MOBJ={
- stoel:{e:murObjIcon('<path d="M7 11V5.5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2V11"/><path d="M5 11h14v4H5z"/><path d="M7 15v5M17 15v5"/>'),n:"stoel",seat:1},
- bed:{e:murObjIcon('<path d="M4 19V8M20 19v-6a3 3 0 0 0-3-3H9a3 3 0 0 0-3 3"/><path d="M4 15h16"/><path d="M7 10V7h5v3"/>'),n:"bed",seat:1},
- bank:{e:murObjIcon('<path d="M6 12V8.5A2.5 2.5 0 0 1 8.5 6h7A2.5 2.5 0 0 1 18 8.5V12"/><path d="M5 11a2 2 0 0 0-2 2v4h18v-4a2 2 0 0 0-2-2"/><path d="M6 17v2M18 17v2"/>'),n:"bank",seat:1},
- tafel:{e:murObjIcon('<path d="M4 8h16v4H4z"/><path d="M7 12v8M17 12v8"/><path d="M8 6h8"/>'),n:"tafel"},
- plant:{e:murObjIcon('<path d="M12 14V6"/><path d="M12 9c-4 0-5-2-5-5 3 0 5 1 5 5z"/><path d="M12 11c4 0 5-2 5-5-3 0-5 1-5 5z"/><path d="M7 14h10l-1.5 6h-7z"/>'),n:"plant"},
- tv:{e:murObjIcon('<rect x="3.5" y="5" width="17" height="12" rx="2"/><path d="m9 21 3-4 3 4M8 21h8"/>'),n:"tv"},
- kast:{e:murObjIcon('<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/>'),n:"kast"},
- cadeau:{e:murObjIcon('<path d="M4 10h16v11H4zM3 7h18v3H3zM12 7v14"/><path d="M12 7c-3.5 0-5-1-5-2.5S8.2 2 9.5 2C11.2 2 12 4 12 7zM12 7c3.5 0 5-1 5-2.5S15.8 2 14.5 2C12.8 2 12 4 12 7z"/>'),n:"cadeau"},
- piano:{e:murObjIcon('<path d="M4 5h16v10H4z"/><path d="M6 15v5M18 15v5"/><path d="M7 9h10v6H7z"/><path d="M9 9v3M12 9v3M15 9v3"/>'),n:"piano"}
+ stoel:{e:murObjIcon('<path class="mi-main" d="M7 4.5h10v8H7z"/><path class="mi-dark" d="M5 11h14v5H5z"/><path class="mi-line" d="M7 16v4M17 16v4"/>'),n:"stoel",seat:1},
+ bed:{e:murObjIcon('<path class="mi-main" d="M4 9h16v8H4z"/><path class="mi-light" d="M6 7h6v5H6z"/><path class="mi-dark" d="M4 14h16v3H4z"/><path class="mi-line" d="M5 17v3M19 17v3"/>'),n:"bed",seat:1},
+ bank:{e:murObjIcon('<path class="mi-main" d="M6 6h12v8H6z"/><path class="mi-dark" d="M3.5 11h17v6h-17z"/><path class="mi-light" d="M8 8h3v5H8zM13 8h3v5h-3z"/><path class="mi-line" d="M6 17v2.5M18 17v2.5"/>'),n:"bank",seat:1},
+ tafel:{e:murObjIcon('<ellipse class="mi-main" cx="12" cy="8" rx="8" ry="3.5"/><path class="mi-dark" d="M10 10h4v8h-4z"/><path class="mi-line" d="M7 20h10"/>'),n:"tafel"},
+ plant:{e:murObjIcon('<path class="mi-main" d="M12 12C5 11 5 5 6 3c4 0 6 2 6 6 1-4 3-5 6-5 1 4-1 7-6 8z"/><path class="mi-line" d="M12 8v7"/><path class="mi-dark" d="M7 14h10l-2 7H9z"/>'),n:"plant"},
+ tv:{e:murObjIcon('<rect class="mi-dark" x="3" y="5" width="18" height="12" rx="2"/><rect class="mi-main" x="5" y="7" width="14" height="8" rx="1"/><path class="mi-line" d="m9 21 3-4 3 4"/>'),n:"tv"},
+ kast:{e:murObjIcon('<rect class="mi-main" x="5" y="3" width="14" height="18" rx="2"/><path class="mi-dark" d="M11 3h2v18h-2z"/><circle class="mi-light" cx="9" cy="12" r="1"/><circle class="mi-light" cx="15" cy="12" r="1"/>'),n:"kast"},
+ cadeau:{e:murObjIcon('<rect class="mi-main" x="4" y="8" width="16" height="13" rx="1"/><path class="mi-dark" d="M10.5 8h3v13h-3zM3 7h18v4H3z"/><path class="mi-light" d="M12 7C8 7 6 6 6 4.5S7 2 8.5 2C10.5 2 12 4 12 7zm0 0c4 0 6-1 6-2.5S17 2 15.5 2C13.5 2 12 4 12 7z"/>'),n:"cadeau"},
+ piano:{e:murObjIcon('<path class="mi-dark" d="M4 4h16v13H4z"/><path class="mi-main" d="M6 7h12v7H6z"/><path class="mi-light" d="M7 10h10v4H7z"/><path class="mi-line" d="M9 10v4M12 10v4M15 10v4M6 17v4M18 17v4"/>'),n:"piano"}
 };
 const MLV={1:6,2:7,3:8,4:5,5:6,6:7};
 function murRooms(N,K,R){for(let att=0;att<300;att++){const reg=Array(N*N).fill(-1);shuf([...Array(N*N).keys()],R).slice(0,K).forEach((c,k)=>{reg[c]=k});
