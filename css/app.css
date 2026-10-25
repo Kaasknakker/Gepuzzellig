@@ -1708,3 +1708,6 @@ body.nieuw:not(.home)::before{opacity:.58}
 
 /* Puzzelen is een zelfstandige appweergave, niet een verborgen Home-sectie. */
 .hpuzzlesview .hfree{margin-top:24px}.hpuzzlesview .freegrid{margin-top:10px}
+
+/* Murdoku-objecten: vaste Gepuzzellig-lijniconen i.p.v. platformemoji. */
+.mobjicon{display:inline-block;width:1.35em;height:1.35em;vertical-align:-.24em;color:currentColor}.ob .mobjicon{width:100%;height:100%;vertical-align:0}.mlegicon{display:inline-flex;width:1.45em;height:1.45em;align-items:center;justify-content:center;vertical-align:-.3em}.mlegicon .mobjicon{width:100%;height:100%}
