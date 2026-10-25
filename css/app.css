@@ -1614,7 +1614,7 @@ body.nieuw:not(.home)::before{opacity:.58}
 
 
 /* Groepsweergave v2: vaste navigatie-iconen, compacte teamblik en inhoudsgestuurde kaarten. */
-.sviews button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.sviews button{display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .sviews button .uiicon{width:16px;height:16px;flex:0 0 16px}
 .daypeer.glance{display:inline-flex;align-items:center;justify-content:flex-end;gap:5px;min-width:0;width:auto;background:transparent!important;border:0!important;padding:0!important;white-space:nowrap}
 .daypeer.glance b{overflow:hidden;text-overflow:ellipsis;font-size:11px}
