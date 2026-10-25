@@ -1604,3 +1604,9 @@ body.nieuw:not(.home)::before{opacity:.58}
  #home .sco:not(.personview)>.hgrid2.sh2{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
  #home .sco:not(.personview)>.hgrid2.sh2>.hcard:last-child{grid-column:1/-1}
 }
+
+.sgavatar svg{width:19px;height:19px;display:block}
+.daypeer.idle{opacity:.72;background:color-mix(in srgb,var(--line) 18%,transparent);font-weight:650}
+@media(max-width:760px){
+ .daypeer.summary{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+}
