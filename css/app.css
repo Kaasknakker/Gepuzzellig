@@ -1972,3 +1972,38 @@ body:not(.home):not(.newpick) #stage{overscroll-behavior:none}
 .dayitem .hdrow.dayaction:hover .dayinfo{background:color-mix(in srgb,var(--fg) 6%,transparent)!important;opacity:.85}
 .daygroup summary{padding-right:calc(var(--day-info-w) + 8px)!important}
 @media(max-width:760px){.dayitem{--day-info-w:46px}.dayitem .hdrow.dayaction{right:2px!important;width:42px!important;height:46px!important;min-width:42px!important;min-height:46px!important}.daygroup summary{padding-right:calc(var(--day-info-w) + 6px)!important}}
+
+
+/* v207: laatste pre-live uitlijning en stabiele themapagina's. */
+#authaccount.authpage,#groupaccount.authpage{
+  background-size:380px 380px!important;
+  background-position:center top!important;
+  background-attachment:fixed!important;
+}
+#authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{
+  border-bottom-color:color-mix(in srgb,var(--home-accent,var(--pc)) 52%,var(--line))!important;
+  box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--home-accent,var(--pc)) 24%,transparent);
+}
+#authaccount.authpage .authdialoghead h2,#groupaccount.authpage .authdialoghead h2{color:var(--home-accent,var(--pc))}
+#authaccount .stylebox,#groupaccount .stylebox{border-top:3px solid color-mix(in srgb,var(--home-accent,var(--pc)) 72%,var(--line))}
+#authaccount .stylecolors button.on::before,#groupaccount .stylecolors button.on::before{box-shadow:0 0 0 3px var(--home-accent,var(--pc)),0 0 0 5px var(--card)!important}
+
+/* De infoactie blijft gekoppeld aan de kopregel, ook wanneer details uitklappen. */
+.dayitem .hdrow.dayaction,.dayitem .hdrow.dayaction:focus,.dayitem .hdrow.dayaction:active{top:32px!important;transform:translateY(-50%)!important}
+@media(max-width:760px){.dayitem .hdrow.dayaction{top:37px!important}}
+
+/* Puzzelen blijft ook met een korte favorietenlijst een echt native scrolloppervlak. */
+body.home #home .hwrap:has(.hpuzzletabs){min-height:calc(100dvh + 3px);box-sizing:border-box}
+
+/* Favorieten houden een vaste tweekolomsmaat en intern dezelfde verticale ritmiek. */
+@media(min-width:561px){
+ body.home #home .hwrap:has(.hpuzzletabs) .puzzlecatalog{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+body.home #home .hwrap:has(.hpuzzletabs) .puzzlecard{height:100%;min-height:246px;box-sizing:border-box}
+body.home #home .hwrap:has(.hpuzzletabs) .puzzlecardbody{display:flex;flex-direction:column;height:100%}
+body.home #home .hwrap:has(.hpuzzletabs) .puzzlecard p{min-height:2.84em}
+body.home #home .hwrap:has(.hpuzzletabs) .pcarddaily{margin-top:auto}
+body.home #home .hwrap:has(.hpuzzletabs) .puzzlecardfoot{margin-top:10px}
+
+/* Binair-potlood iets terug voor meer onderscheid met definitieve invoer. */
+body[data-t=bin] .c .nt{left:7%;top:6%;width:58%;height:58%;opacity:.54}
