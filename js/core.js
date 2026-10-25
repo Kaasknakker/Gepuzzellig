@@ -38,6 +38,28 @@ function fastPenUI(){
  document.addEventListener("click",e=>{if(firing||!last||performance.now()-lastAt>520)return;const b=e.target.closest&&e.target.closest("button,a[href],summary,[role=button]");if(b===last||(e.detail!==0&&Math.hypot(e.clientX-lastX,e.clientY-lastY)<24)){e.preventDefault();e.stopImmediatePropagation()}},true);
 }
 fastPenUI();
+/* Details hebben op iPad geen betrouwbare vloeiende auto-hoogte-animatie.
+   Animeer daarom het hele details-element; dit werkt gelijk voor touch, Pencil en muis. */
+function smoothDetails(){
+ const selector='details.hcontgroup,.daygroup,.groupswitch,#uit',running=new WeakMap();
+ document.addEventListener('click',e=>{
+  const summary=e.target.closest?.('summary'),details=summary?.parentElement;
+  if(!details?.matches?.(selector)||details.firstElementChild!==summary)return;
+  if(matchMedia?.('(prefers-reduced-motion: reduce)').matches||!details.animate)return;
+  e.preventDefault();
+  running.get(details)?.forEach(a=>a.cancel());
+  const opening=!details.open,start=details.getBoundingClientRect().height;
+  if(opening)details.open=true;
+  const end=opening?details.scrollHeight:summary.getBoundingClientRect().height,bodies=[...details.children].filter(x=>x!==summary);
+  details.style.overflow='hidden';
+  const main=details.animate([{height:start+'px'},{height:end+'px'}],{duration:380,easing:'cubic-bezier(.22,.8,.3,1)'});
+  const extras=bodies.map(el=>el.animate(opening?[{opacity:0,transform:'translateY(-7px)'},{opacity:1,transform:'translateY(0)'}]:[{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(-7px)'}],{duration:opening?300:240,easing:'ease-out'}));
+  running.set(details,[main,...extras]);
+  main.onfinish=()=>{if(!opening)details.open=false;details.style.height='';details.style.overflow='';running.delete(details)};
+  main.oncancel=()=>{details.style.height='';details.style.overflow=''};
+ });
+}
+smoothDetails();
 /* Pencil-scroll in accountvensters: begin elke veeg binnen de echte grenzen,
    zodat terug omhoog na de onderrand niet in iOS-overscroll blijft hangen. */
 function penScrollDialogs(){
@@ -1765,7 +1787,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  const progRing=(p,t)=>p==null?"":`<span class="pdonut" aria-label="${p}% ingevuld" title="${p}% ingevuld; dit zegt niet of de vakjes correct zijn" style="--p:${p};--ring:${TCOL[t]||"var(--pc)"}"><b>${p}%</b></span>`;
  const active=progressList({},pa),dayActive=active.filter(m=>!m.practice),freeActive=active.filter(m=>m.practice),olderDay=dayActive.filter(m=>m.date!==td),activeGroups=types.map(t=>({t,items:active.filter(m=>m.type===t)})).filter(x=>x.items.length),homeRaw=allRows();
  const resumeCard=m=>{const nv=m.type==="nono"?(m.color?"color":"classic"):"",name=m.practice?FREE_NAME(m.type,nv):(TYPES[m.type]||m.type),badge=!m.practice&&nv?`<span class="nvbadge ${nv}">${nv==="color"?"Kleur":"Klassiek"}</span>`:"",sub=[m.practice?"Vrij puzzelen":m.date===td?"Vandaag":dnl(m.date),LVN[m.type]?LVL[m.lvl]:""].filter(Boolean).join(" · ");return`<div class="hcontrow"><button class="hcont${nv?" nono-"+nv:""}" data-pk="${m.k}" title="Ga verder met ${name}">${tIcon(m.type,false,m.practice?nv:"")}<span class="ctxt"><b>${name}${badge}</b><small>${sub}</small></span>${progRing(m.e.pc==null?0:m.e.pc,m.type)}<span class="hgo2">›</span></button><button class="hdelete" data-delete-pk="${m.k}" title="Wis voortgang van ${name}" aria-label="Wis voortgang van ${name}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></button></div>`};
- const resumeGroupCard=x=>{const recent=x.items[0],n=x.items.length,free=x.items.filter(m=>m.practice).length,days=n-free,parts=[free?free+" vrij":"",days?days+" dag"+(days===1?"puzzel":"puzzels"):""].filter(Boolean).join(" · "),pc=recent.e.pc==null?0:recent.e.pc;if(n===1){const nv=recent.type==="nono"?nonoMetaVariant(recent):"",when=recent.practice?"Vrij puzzelen":recent.date===td?"Dagpuzzel · Vandaag":"Dagpuzzel · "+dnl(recent.date),detail=[when,LVN[recent.type]?LVL[recent.lvl]:""].filter(Boolean).join(" · ");return '<div class="hcontrow hcontsingle"><button class="hcont'+(nv?" nono-"+nv:"")+'" data-pk="'+recent.k+'" title="Ga verder met '+(TYPES[x.t]||x.t)+'">'+tIcon(x.t,false,recent.practice?nv:"")+'<span class="ctxt"><b>'+(TYPES[x.t]||x.t)+'</b><small>'+detail+'</small><small>'+pc+'% ingevuld</small></span>'+progRing(pc,x.t)+'<span class="hgo2">›</span></button><button class="hdelete" data-delete-pk="'+recent.k+'" title="Wis voortgang" aria-label="Wis voortgang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></button></div>'}return '<details class="hcontgroup" data-progress-group="'+x.t+'"><summary class="hcont" title="Bekijk openstaande '+(TYPES[x.t]||x.t)+'-puzzels">'+tIcon(x.t,false)+'<span class="ctxt"><b>'+(TYPES[x.t]||x.t)+'</b><small>'+n+' puzzels bezig · '+parts+'</small><small>Meest recent · '+pc+'%</small></span>'+progRing(pc,x.t)+'<span class="hgo2">›</span></summary><div class="hcontgroupitems">'+x.items.map(resumeCard).join("")+'</div></details>'};
+ const resumeGroupCard=x=>{const recent=x.items[0],n=x.items.length,free=x.items.filter(m=>m.practice).length,days=n-free,parts=[free?free+" vrij":"",days?days+" dag"+(days===1?"puzzel":"puzzels"):""].filter(Boolean).join(" · "),pc=recent.e.pc==null?0:recent.e.pc;if(n===1){const nv=recent.type==="nono"?nonoMetaVariant(recent):"",when=recent.practice?"Vrij puzzelen":recent.date===td?"Dagpuzzel · Vandaag":"Dagpuzzel · "+dnl(recent.date),detail=[when,LVN[recent.type]?LVL[recent.lvl]:""].filter(Boolean).join(" · ");return '<div class="hcontrow hcontsingle"><button class="hcont'+(nv?" nono-"+nv:"")+'" data-pk="'+recent.k+'" title="Ga verder met '+(TYPES[x.t]||x.t)+'">'+tIcon(x.t,false,recent.practice?nv:"")+'<span class="ctxt"><b>'+(TYPES[x.t]||x.t)+'</b><small>'+detail+'</small><small>'+pc+'% ingevuld</small></span>'+progRing(pc,x.t)+'<span class="hgo2">›</span></button><button class="hdelete" data-delete-pk="'+recent.k+'" title="Wis voortgang" aria-label="Wis voortgang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></button></div>'}return '<details class="hcontgroup" data-progress-group="'+x.t+'"><summary class="hcont" title="Kies uit '+n+' openstaande '+(TYPES[x.t]||x.t)+'-puzzels">'+tIcon(x.t,false)+'<span class="ctxt"><b>'+(TYPES[x.t]||x.t)+'</b><small>'+n+' puzzels bezig · '+parts+'</small><small>Meest recent · '+pc+'%</small></span>'+progRing(pc,x.t)+'<span class="hgo2 htoggle" aria-hidden="true">⌄</span></summary><div class="hcontgroupitems">'+x.items.map(resumeCard).join("")+'</div></details>'};
  const otherLabel=PHONE?"Groot scherm":"Telefoon",otherIcon=PHONE?"🖥️":"📱";
  const dayExact=(name,t,phone)=>{const u=uidOf(name),ty=dayTypeDevice(t,td,phone),sync=homeRaw.find(x=>!isFree(x)&&x.uid===u&&x.date===td&&x.type===ty);if(u!==uid)return sync||null;const loc=store[td+ty]?myRow(td,ty):null;return loc?Object.assign({},sync||{},loc):sync||null};
  const dayResultFor=(name,t)=>dayExact(name,t,PHONE),dayOtherResultFor=(name,t)=>dagVast(td)?dayExact(name,t,!PHONE):null;
