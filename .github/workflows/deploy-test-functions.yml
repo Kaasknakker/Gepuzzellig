@@ -51,5 +51,27 @@ jobs:
           grep -q '^MAIL_MODE=sink$' functions/.env.gepuzzellig-test
           ! grep -q 'kaasknakker.github.io' functions/.env.gepuzzellig-test
 
+      - name: Verify target before runtime update
+        run: |
+          test "$(gcloud config get-value project)" = "gepuzzellig-test"
+          test "$(gcloud functions describe sendInviteEmail --gen2 --region=europe-west1 --project=gepuzzellig-test --format='value(name)')" = "projects/gepuzzellig-test/locations/europe-west1/functions/sendInviteEmail"
+
+      - name: Update test Function runtime to Node 22
+        run: |
+          gcloud functions deploy sendInviteEmail \
+            --gen2 \
+            --region=europe-west1 \
+            --project=gepuzzellig-test \
+            --runtime=nodejs22 \
+            --source=functions \
+            --entry-point=sendInviteEmail \
+            --trigger-http \
+            --no-allow-unauthenticated \
+            --quiet
+
+      - name: Verify deployed runtime
+        run: |
+          test "$(gcloud functions describe sendInviteEmail --gen2 --region=europe-west1 --project=gepuzzellig-test --format='value(buildConfig.runtime)')" = "nodejs22"
+
       - name: Deploy only Functions to test
         run: npx --yes firebase-tools@15.34.1 deploy --only functions --project gepuzzellig-test --non-interactive --force
