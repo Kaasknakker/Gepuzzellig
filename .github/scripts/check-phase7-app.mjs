@@ -8,5 +8,6 @@ need(core,'data-puzzle-tab="favorites"','Favorieten-tab in Puzzelen');need(core,
 console.log('Fase 7 appcontract: favorieten, moeilijkheid, daily plan, vrije catalogus en navigatie geslaagd.');
 
 if(!core.includes('HVIEW==="puzzles"')) fail('zelfstandige Puzzelen-view ontbreekt');
-if(!core.includes('HVIEW="puzzles";renderHome()')) fail('Puzzelen-navigatie opent de zelfstandige view niet');
+if(!core.includes('HVIEW="puzzles";PUZZLETAB="favorites";renderHome()')) fail('Puzzelen-navigatie opent Favorieten niet');
+if(!core.includes('HVIEW="puzzles";PUZZLETAB="all";renderHome()')) fail('Meer puzzels opent Alle puzzels niet');
 if(core.includes('setHomeDestination=')) fail('oude verborgen Home/Puzzelen-wissel is nog aanwezig');
