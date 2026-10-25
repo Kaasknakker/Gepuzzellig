@@ -1742,7 +1742,7 @@ function clearHomeSkinAccent(){document.body.style.removeProperty("--home-accent
 function applyCurrentHomeStyle(){if(!document.body.classList.contains("home"))return;if(HVIEW==="score")setHomeSkin(SCOREWHO==="all"?GROUP_STYLE:styleForPlayer(SCOREWHO));else setHomeSkin(PROFILE_STYLE)}
 function updateStylePreview(style,kind){const box=$(kind==="group"?"#groupstylepreview":"#profstylepreview");if(!box)return;const x=cleanStyle(style,"shared",kind==="group"?"orange":"blue");
  box.className="stylepreview skin-"+x.theme+(x.theme==="season"?" season-"+seasonNow():"");box.style.setProperty("--home-accent",STYLE_ACCENTS[x.accent])}
-addEventListener("pdpreviewstyle",e=>{const d=e.detail||{};updateStylePreview(d,d.kind);if(document.body.classList.contains("home"))setHomeSkin(cleanStyle(d,d.kind==="group"?"shared":PROFILE_STYLE.theme,d.kind==="group"?"orange":PROFILE_STYLE.accent))});
+addEventListener("pdpreviewstyle",e=>{const d=e.detail||{},style=cleanStyle(d,d.kind==="group"?"shared":PROFILE_STYLE.theme,d.kind==="group"?"orange":PROFILE_STYLE.accent);updateStylePreview(d,d.kind);if(document.body.classList.contains("home")||!$("#authaccount")?.hidden||!$("#groupaccount")?.hidden)setHomeSkin(style)});
 addEventListener("pdrestorestyle",applyCurrentHomeStyle);
 let keyboardInput=false;
 document.addEventListener("keydown",e=>{if(e.key==="Tab"||e.key.startsWith("Arrow")){keyboardInput=true;document.body.classList.add("using-keyboard")}},true);
