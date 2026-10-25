@@ -1752,3 +1752,37 @@ body.newpick #npm{animation:gpPanelIn var(--motion-ui) var(--motion-ease) both}
 @media(prefers-reduced-motion:reduce){
  .pagein,#more.open,.daydetail,#hm:not([hidden]),#cm:not([hidden]),.authcover:not([hidden]),#hm:not([hidden])>.hc,#cm:not([hidden])>.hc,.authcover:not([hidden])>.authcard,#fin:not([hidden]),.peerlivepop:not([hidden]),#archp.open,#pmp.open,body.newpick #npm{animation:none!important}
 }
+
+
+/* Profiel en Groep voelen op grotere schermen als volwaardige hoofdpagina's. */
+@media(min-width:761px){
+ #authaccount.authcover,#groupaccount.authcover{background:var(--bg);backdrop-filter:none;-webkit-backdrop-filter:none;padding:18px max(24px,calc((100vw - 1180px)/2)) 42px}
+ #authaccount .authcard,#groupaccount .authcard{width:100%;max-width:1180px;min-height:calc(100dvh - 60px);box-sizing:border-box;border:0;border-radius:0;background:transparent;box-shadow:none;padding:18px 8px 36px}
+ #authaccount .authdialoghead,#groupaccount .authdialoghead{background:var(--bg)}
+}
+/* iPhone behoudt bewust de compacte éénkolomsweergave. */
+@media(max-width:760px){
+ #authaccount.authcover,#groupaccount.authcover{padding-inline:max(12px,env(safe-area-inset-left,0px));background:color-mix(in srgb,var(--bg) 94%,transparent)}
+ #authaccount .authcard,#groupaccount .authcard{width:min(430px,100%)}
+}
+
+/* Daginfo: geen blijvende iOS-focus/taprand, wel zichtbare toetsenbordfocus. */
+.dayitem .dayaction{-webkit-tap-highlight-color:transparent;outline:none}
+.dayitem .dayaction:focus:not(:focus-visible){outline:none;box-shadow:none}
+.dayitem .dayaction:focus-visible{outline:2px solid var(--pc);outline-offset:2px}
+
+/* Groepsleden: bewust extra ademruimte rechts van de chevron. */
+.sgroupperson{grid-template-columns:38px minmax(120px,1fr) minmax(68px,auto) minmax(92px,auto) 32px;padding-right:24px}
+.sgopen{width:32px;height:32px}
+@media(max-width:600px){.sgroupperson{grid-template-columns:34px minmax(0,1fr) auto 32px;padding-right:21px}}
+@media(max-width:430px){.sgroupperson{grid-template-columns:30px minmax(0,1fr) 48px 30px;padding-right:17px}.sgopen{width:30px}}
+
+/* Persoonlijke puzzelregels: compacte betekenisvolle iconen en één draaiende uitklapknop. */
+.personview .spmeta span{display:inline-flex;align-items:center;gap:4px}
+.personview .spmeta .stat-icon{width:13px;height:13px;flex:0 0 13px;opacity:.72}
+.spchev{display:inline-grid;place-items:center;width:27px;height:27px;margin-left:6px;border:1px solid var(--line);border-radius:50%;background:color-mix(in srgb,var(--card) 92%,var(--bg));transition:transform .22s var(--motion-ease),border-color .18s ease,background .18s ease;vertical-align:middle}
+.spchev svg{width:14px;height:14px;display:block}
+.spmain.open .spchev{transform:rotate(180deg);border-color:color-mix(in srgb,var(--pc) 38%,var(--line));background:color-mix(in srgb,var(--pc) 7%,var(--card))}
+.spdfreehead{margin-top:12px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+.spddaily{background:color-mix(in srgb,var(--pc) 3%,transparent)}
+@media(prefers-reduced-motion:reduce){.spchev{transition:none!important}}
