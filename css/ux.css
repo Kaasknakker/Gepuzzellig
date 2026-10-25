@@ -15,3 +15,9 @@
 @media(min-width:601px) and (max-width:1100px){.uxpeople{right:190px;width:112px}}
 @media(max-width:600px){.dayitem:has(>.uxpeople) .hdrow>.daypeer{display:none!important}.uxpeople{position:static;transform:none;width:auto;max-width:calc(100% - 12px);margin:0 6px 6px auto;padding:4px 9px}}
 .hdrow .uxsummary{font-size:11px;line-height:1.4;white-space:nowrap}
+
+
+/* UX-dialogs volgen dezelfde korte motion als de rest van de app. */
+.uxcover:not([hidden]){animation:gpCoverIn var(--motion-ui,210ms) var(--motion-ease,cubic-bezier(.2,.7,.3,1)) both}
+.uxcover:not([hidden])>.uxcard{animation:gpDialogIn var(--motion-ui,210ms) var(--motion-ease,cubic-bezier(.2,.7,.3,1)) both}
+@media(prefers-reduced-motion:reduce){.uxcover:not([hidden]),.uxcover:not([hidden])>.uxcard{animation:none!important}}
