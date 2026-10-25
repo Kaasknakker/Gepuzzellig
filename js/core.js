@@ -1165,7 +1165,7 @@ function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const 
   d.style.background=`hsl(${HUES[k]},${dark?"30%,30%":"50%,87%"})`;
   d.style.borderTop=r===0?thick:edge(i,i-N);d.style.borderBottom=r===N-1?thick:edge(i,i+N);d.style.borderLeft=c===0?thick:edge(i,i-1);d.style.borderRight=c===N-1?thick:edge(i,i+1);
   if(first[k]===i){const l=document.createElement("span");l.className="rl";l.textContent=p.rooms[k];l.title=p.rooms[k];let run=1;while(c+run<N&&p.reg[i+run]===k)run++;l.style.maxWidth=(run*ms-8)+"px";l.style.overflow="hidden";d.append(l)}
-  const t=p.obj[i];if(t){const e=document.createElement("span");e.className="ob"+(MOBJ[t].seat?" seat":" blk");e.textContent=MOBJ[t].e;e.title=MOBJ[t].n;d.append(e);if(!MOBJ[t].seat)d.classList.add("blk")}
+  const t=p.obj[i];if(t){const e=document.createElement("span");e.className="ob"+(MOBJ[t].seat?" seat":" blk");e.innerHTML=MOBJ[t].e;e.title=MOBJ[t].n;d.append(e);if(!MOBJ[t].seat)d.classList.add("blk")}
   const x=document.createElement("span");x.className="mx";x.textContent="×";d.append(x);
   const sl=document.createElement("span");sl.className="slot";d.append(sl);S.mcells[i]=d;g.append(d)}
  main.append(g);const pal=document.createElement("div");pal.id="mpal";
@@ -1174,7 +1174,7 @@ function rMur0(){const p=S.p,N=p.N,m=$("#mur");m.innerHTML="";S.mcells=[];const 
  pal.style.maxWidth=Math.max(ms*N,300)+"px";main.append(pal);
  const used=[...new Set(p.obj.filter(Boolean))],st=used.filter(t=>MOBJ[t].seat),bl=used.filter(t=>!MOBJ[t].seat);
  const lg=document.createElement("div");lg.id="mleg";lg.style.maxWidth=Math.max(ms*N,300)+"px";
- lg.innerHTML=(st.length?`Op ${st.map(t=>MOBJ[t].e).join(" ")} kun je zitten. `:"")+(bl.length?`Op ${bl.map(t=>MOBJ[t].e).join(" ")} kan niemand staan. `:"")+(PHONE?"":"<b>Naast</b> = recht ernaast in dezelfde ruimte (niet schuin, niet door een muur).");
+ lg.innerHTML=(st.length?`Op ${st.map(t=>`<span class="mlegicon" title="${MOBJ[t].n}">${MOBJ[t].e}</span>`).join(" ")} kun je zitten. `:"")+(bl.length?`Op ${bl.map(t=>`<span class="mlegicon" title="${MOBJ[t].n}">${MOBJ[t].e}</span>`).join(" ")} kan niemand staan. `:"")+(PHONE?"":"<b>Naast</b> = recht ernaast in dezelfde ruimte (niet schuin, niet door een muur).");
  main.append(lg);m.append(main);
  const cl=document.createElement("div");cl.id="mclues";cl.innerHTML="<h2>Wie was waar?</h2>";const ol=document.createElement("ul");
  p.ppl.forEach((nm,s)=>{const li=document.createElement("li");li.dataset.c=s;const txt=s===p.V?"<b>Het slachtoffer.</b> Was alleen met de moordenaar.":p.cardTxt[s];
