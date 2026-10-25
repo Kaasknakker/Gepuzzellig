@@ -7,5 +7,6 @@ for(const [needle,label] of [['ensureDailyPlan','daily plan snapshot'],['savePuz
 need(html,'id="profpuzzles"','profiel-UI');need(rules,'match /dailyPlans/{playerId}/days/{date}','daily plan rules');need(rules,'allow update, delete: if false','immutable daily plan');
 console.log('Fase 7 appcontract: favorieten, moeilijkheid, daily plan, vrije catalogus en navigatie geslaagd.');
 
-// Home/Puzzelen moet niet alleen logisch maar ook visueel kunnen wisselen.
-if(!css.includes('#home [data-home-section][hidden],#home [data-puzzles-section][hidden]{display:none!important}')) fail('Home/Puzzelen hidden-contract ontbreekt');
+if(!core.includes('HVIEW==="puzzles"')) fail('zelfstandige Puzzelen-view ontbreekt');
+if(!core.includes('HVIEW="puzzles";renderHome()')) fail('Puzzelen-navigatie opent de zelfstandige view niet');
+if(core.includes('setHomeDestination=')) fail('oude verborgen Home/Puzzelen-wissel is nog aanwezig');
