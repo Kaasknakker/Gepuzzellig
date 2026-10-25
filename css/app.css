@@ -57,9 +57,9 @@ nav button .tfeat{font-style:normal;font-size:.8em;margin-left:3px}nav button .t
 #potb.on{background:#6b6f78;color:#fff;border-color:#6b6f78}
 .c{position:relative}.c .nt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.52;transform:scale(.42)}.c .nt svg{width:100%;height:100%}
 /* Potlood blijft bewust kleiner en zachter dan een definitieve zet. */
-body[data-t=bin] .c .nt{inset:auto;left:7%;top:6%;width:28%;height:28%;transform:none;opacity:.44}
-body[data-t=bin] .c .nt svg path{stroke-width:1.05}
-body[data-t=bin] .c .nt svg circle{stroke-width:1.2}
+body[data-t=bin] .c .nt{inset:auto;left:8%;top:7%;width:36%;height:36%;transform:none;opacity:.68}
+body[data-t=bin] .c .nt svg path{stroke-width:1.35}
+body[data-t=bin] .c .nt svg circle{stroke-width:1.45}
 body[data-t=star] .c .nt{transform:none;opacity:.48;font-size:calc(var(--cs)*.34);font-weight:500;line-height:1;color:var(--mut)}
 body[data-t=star] .c .nt.nx::before{content:"×";font-size:calc(var(--cs)*.38);line-height:1;color:var(--mut);font-weight:400}
 body[data-t=star] .c .nt.ns::before{content:"☆";font-size:calc(var(--cs)*.36);line-height:1;color:var(--pc);font-weight:500}
