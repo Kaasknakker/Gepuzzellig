@@ -1891,3 +1891,45 @@ body.using-keyboard .dayitem .dayaction:focus-visible{outline:2px solid var(--pc
 @media(max-width:760px){#authaccount.authpage,#groupaccount.authpage{padding-top:env(safe-area-inset-top)}#authaccount.authpage .authcard,#groupaccount.authpage .authcard{max-width:none;padding-top:0}.authdialoghead{margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px}}
 #authbtn .authpersonicon{width:22px;height:22px;flex:0 0 22px}
 #more #authbtn{justify-content:flex-start}
+
+/* v202: laatste samenhangende pre-live UX-polish. */
+#authaccount.authpage,#groupaccount.authpage{background-color:var(--bg);background-image:var(--skin-bg,none);background-attachment:local;background-position:center top}
+#authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{top:0;border-bottom:1px solid color-mix(in srgb,var(--home-accent,var(--pc)) 26%,var(--line));background:color-mix(in srgb,var(--bg) 88%,transparent)}
+#authaccount.authpage .authcard,#groupaccount.authpage .authcard{padding-top:max(8px,env(safe-area-inset-top))!important}
+#authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{padding-top:4px}
+@media(min-width:761px){#authaccount .stylepreview,#groupaccount .stylepreview{display:none}}
+@media(max-width:760px){#authaccount .stylepreview,#groupaccount .stylepreview{max-height:118px;overflow:hidden}}
+
+/* Actieve hoofdnavigatie is een duidelijke bestemming, niet alleen een klein bolletje. */
+body.home .hmainnav button{position:relative;border:1px solid transparent;background:transparent;transition:background .22s ease,border-color .22s ease,transform .22s ease,color .22s ease}
+body.home .hmainnav button.on{background:color-mix(in srgb,var(--home-accent,var(--pc)) 14%,var(--card));border-color:color-mix(in srgb,var(--home-accent,var(--pc)) 42%,var(--line));color:var(--fg);box-shadow:inset 0 -3px 0 color-mix(in srgb,var(--home-accent,var(--pc)) 78%,transparent)}
+body.home .hmainnav button.on svg{color:var(--home-accent,var(--pc))}
+body.home .hmainnav button.on::before{transform:scale(1.25)}
+
+/* Dagregels: grotere informatiezone, zonder witte focusring na aanraken. */
+.dayitem{--day-info-w:58px}
+.dayitem .hdrow.dayaction,.dayitem .hdrow.dayaction:focus,.dayitem .hdrow.dayaction:active{top:0;right:0;bottom:0;width:var(--day-info-w);height:auto;min-width:var(--day-info-w);min-height:100%;border:0!important;border-left:1px solid color-mix(in srgb,var(--line) 55%,transparent)!important;border-radius:0;background:transparent!important;outline:0!important;box-shadow:none!important;-webkit-appearance:none;appearance:none}
+.dayitem .hdrow.dayaction:hover{background:color-mix(in srgb,var(--dayc) 8%,transparent)!important}
+.dayitem .dayinfo{width:34px;height:34px;margin:auto;border-radius:50%;color:color-mix(in srgb,var(--dayc) 58%,var(--mut))}
+.dayitem .dayinfo svg{width:22px;height:22px}
+body.using-keyboard .dayitem .dayaction:focus-visible{outline:2px solid var(--pc)!important;outline-offset:-3px!important}
+.daygroup summary{padding-right:calc(var(--day-info-w) + 10px)!important}
+@media(max-width:760px){.dayitem{--day-info-w:54px}.dayitem .hdrow.dayaction{right:0;width:var(--day-info-w);height:auto;min-height:100%}.daygroup summary{padding-right:calc(var(--day-info-w) + 6px)!important}}
+.daystatus .pdonut{min-width:30px;min-height:30px;transform:scale(1.08)}
+
+/* Betekenisvolle kleur blijft zichtbaar zonder het hele menu bont te maken. */
+#more #streak{display:flex;align-items:center;gap:8px;color:var(--fg)}
+#more #streak .streakicon{width:21px;height:21px;color:#e88918;fill:color-mix(in srgb,#e88918 18%,transparent)}
+#more .themeMenu button.on{color:var(--pc);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pc) 35%,var(--line))}
+#more #authbtn .authpersonicon{color:var(--pc)}
+#more .mlist #reset.arm{background:color-mix(in srgb,#d33 14%,transparent);color:#c22}
+
+/* Pagina's komen als één geheel binnen; geen halve fade tijdens async invulling. */
+.pagein{animation:pageWholeIn 420ms cubic-bezier(.16,.78,.28,1) both!important}
+@keyframes pageWholeIn{0%{opacity:0;transform:translateY(16px)}55%{opacity:.72}100%{opacity:1;transform:none}}
+#authaccount.authpage:not([hidden]),#groupaccount.authpage:not([hidden]){animation:pageWholeIn 420ms cubic-bezier(.16,.78,.28,1) both}
+
+/* Niet-puzzelweergaven houden overal een natuurlijk verticaal iOS-scrolloppervlak. */
+body.home #home,#authaccount.authpage,#groupaccount.authpage,#side,#more{overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+body.home #home{min-height:calc(100dvh + 2px)}
+body:not(.home) #stage{overscroll-behavior:none}
