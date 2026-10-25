@@ -1963,3 +1963,12 @@ body:not(.home):not(.newpick) #stage{overscroll-behavior:none}
 :root[data-theme=dark] #authaccount.authpage,:root[data-theme=dark] #groupaccount.authpage{background-image:var(--pp-d,var(--page-pattern,none))!important}
 #authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{top:0!important;margin-top:0!important}
 #authaccount.authpage .authcard,#groupaccount.authpage .authcard{padding-top:0!important}
+
+/* v205: infoactie terug naar compact uiterlijk; hitbox slechts bescheiden groter. */
+.dayitem{--day-info-w:48px}
+.dayitem .hdrow.dayaction,.dayitem .hdrow.dayaction:focus,.dayitem .hdrow.dayaction:active{top:50%!important;right:4px!important;bottom:auto!important;transform:translateY(-50%)!important;width:44px!important;height:48px!important;min-width:44px!important;min-height:48px!important;border:0!important;border-radius:12px!important;background:transparent!important;box-shadow:none!important;outline:0!important}
+.dayitem .dayaction .dayinfo{width:30px!important;height:30px!important;margin:auto!important;border:1px solid color-mix(in srgb,var(--fg) 18%,transparent)!important;border-radius:50%!important;background:transparent!important;color:var(--fg)!important;opacity:.68}
+.dayitem .dayaction .dayinfo svg{width:20px!important;height:20px!important}
+.dayitem .hdrow.dayaction:hover .dayinfo{background:color-mix(in srgb,var(--fg) 6%,transparent)!important;opacity:.85}
+.daygroup summary{padding-right:calc(var(--day-info-w) + 8px)!important}
+@media(max-width:760px){.dayitem{--day-info-w:46px}.dayitem .hdrow.dayaction{right:2px!important;width:42px!important;height:46px!important;min-width:42px!important;min-height:46px!important}.daygroup summary{padding-right:calc(var(--day-info-w) + 6px)!important}}
