@@ -1562,3 +1562,29 @@ details.hcontgroup>summary,.hcontsingle .hcont{box-shadow:none}
 @media(max-width:430px){
  .hmainnav button{gap:6px}.hmainnav .uiicon{width:16px;height:16px}
 }
+
+
+/* Thema-afstemming: patroon als textuur, kaarten als onderdeel van dezelfde achtergrond. */
+body.nieuw{--surface-card:color-mix(in srgb,var(--card) 96%,var(--page-tone));--surface-soft:color-mix(in srgb,var(--card) 90%,var(--page-tone));--surface-line:color-mix(in srgb,var(--line) 82%,transparent);--surface-shadow:color-mix(in srgb,var(--sh) 70%,transparent)}
+body.nieuw::before{opacity:.78}
+body.nieuw.home .hcard,body.nieuw.home .tile,body.nieuw.home .hmainnav,body.nieuw.home .sgrouplist{background:var(--surface-card);border-color:var(--surface-line)}
+body.nieuw.home .hcard{box-shadow:0 4px 14px var(--surface-shadow)}
+body.nieuw.home .tile{box-shadow:0 2px 0 color-mix(in srgb,var(--line) 76%,transparent)}
+body.nieuw.home .hmainnav{background:color-mix(in srgb,var(--surface-card) 92%,transparent)}
+body.nieuw.home .hmainnav button.on{background:color-mix(in srgb,var(--card) 94%,var(--page-tone));box-shadow:0 1px 4px var(--surface-shadow)}
+body.nieuw.home .daygroup,body.nieuw.home .hcontgroup,body.nieuw.home .sgroupperson{border-color:color-mix(in srgb,var(--line) 62%,transparent)}
+body.nieuw.home .daygroup:hover,body.nieuw.home .hcontgroup:hover,body.nieuw.home .sgroupperson:hover{background:color-mix(in srgb,var(--pc) 4%,var(--surface-card))}
+body.nieuw.home .pdonut::after{background:var(--surface-card)}
+/* Persoonlijke patronen blijven herkenbaar, maar concurreren minder met inhoud. */
+:is(body.home,.stylepreview)[class*="skin-"]::before{opacity:.72}
+.stylepreview{--surface-card:color-mix(in srgb,var(--card) 95%,var(--page-tone))}
+/* Puzzelachtergronden zijn functionele sfeer en daarom nog rustiger dan Home-thema's. */
+body.nieuw:not(.home)::before{opacity:.58}
+@media(prefers-color-scheme:dark){
+ :root:not([data-theme=light]) body.nieuw{--surface-card:color-mix(in srgb,var(--card) 94%,var(--page-tone));--surface-soft:color-mix(in srgb,var(--card) 88%,var(--page-tone));--surface-line:color-mix(in srgb,var(--line) 76%,transparent)}
+ :root:not([data-theme=light]) body.nieuw::before{opacity:.62}
+ :root:not([data-theme=light]) body.nieuw:not(.home)::before{opacity:.48}
+}
+:root[data-theme=dark] body.nieuw{--surface-card:color-mix(in srgb,var(--card) 94%,var(--page-tone));--surface-soft:color-mix(in srgb,var(--card) 88%,var(--page-tone));--surface-line:color-mix(in srgb,var(--line) 76%,transparent)}
+:root[data-theme=dark] body.nieuw::before{opacity:.62}
+:root[data-theme=dark] body.nieuw:not(.home)::before{opacity:.48}
