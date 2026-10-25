@@ -244,7 +244,7 @@ function load(type,practice,fresh,date,skipPersist){if(!practice&&dayProgressLim
    if(type==="m24"&&sv0.r){S.r=sv0.r;setRound()}
    if(sv0.str&&S.str)S.str=new Set(sv0.str);if(sv0.nt)S.nt=Object.assign({},sv0.nt);if(type!=="m24"){S.hist=Array.isArray(sv0.hist)?sv0.hist.slice(-60):[];S.redo=Array.isArray(sv0.redo)?sv0.redo.slice(-30):[]}S.pen=0;S.mist=sv0.mist||0;S.hints=sv0.hints||0;restoreHintUsage(sv0);S._saveAt=sv0.at||0;{const oldEl=+sv0.el||0,safeEl=oldEl>=0&&oldEl<=MAX_REASONABLE_MS?oldEl:0;S.start=Date.now()-safeEl}S.pauseAt=0;S.resumed=true}catch(e){}}
   $("#msg").textContent=S.done?(S.arch?"Al klaar in ":"Vandaag al klaar in ")+fmt(S.secs):(!practice&&type===featOf(S.date))?(PHONE?"⭐ Van de dag":"⭐ Puzzel van de dag"+(S.hard?" (weekend 💪)":"")):S.arch?"Dagpuzzel van "+dnl(S.date)+(S.hard?" 💪":""):S.hard?"Weekendpuzzel: wat pittiger 💪":"";setT(S.resumed?fmt(Math.round(playMs()/1000)):fmt(S.secs));
-  try{updTabs()}catch(e){}render();ub();setTimeout(()=>pingOnline(true),0)},30)}
+  try{updTabs()}catch(e){}render();ub();window.dispatchEvent(new CustomEvent("pdpuzzleloaded",{detail:{type,practice:!!practice,date:S.date}}));setTimeout(()=>pingOnline(true),0)},30)}
 
 const LANDQ=matchMedia("(orientation:landscape) and (min-aspect-ratio:23/20)");
 const availBot=()=>{const b=$("#pbot");if(b&&!PHONE&&document.body.classList.contains("tablet")&&(document.body.classList.contains("layout-rail")||LANDQ.matches)&&!window.LAYOUT_BOTTOM)return innerHeight+(window.scrollY||0)-14-HINTPAD;return b?b.getBoundingClientRect().top+(window.scrollY||0)-(PHONE?8:18)-HINTPAD:innerHeight-14};

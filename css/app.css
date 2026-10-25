@@ -1719,3 +1719,7 @@ body.nieuw:not(.home)::before{opacity:.58}
 
 /* Murdoku v3: bordspelachtige objectillustraties met stevige contour en vaste kleuren. */
 .mobjicon{overflow:visible}.mobjicon .fill{stroke:#111820;stroke-width:1.35;stroke-linejoin:round}.mobjicon .line{fill:none;stroke:#111820;stroke-width:1.45;stroke-linecap:round;stroke-linejoin:round}.mobjicon .line.thin{stroke-width:.85}.mobjicon .dot{fill:#111820}.mobjicon .red{fill:#ee4058}.mobjicon .gray{fill:#7d8794}.mobjicon .blue{fill:#6f9fe8}.mobjicon .blue2{fill:#9fc0f2}.mobjicon .cream{fill:#f7f0dc}.mobjicon .orange{fill:#f29a45}.mobjicon .orange2{fill:#df7d2e}.mobjicon .gold{fill:#e8b94e}.mobjicon .brown{fill:#9b6a43}.mobjicon .green{fill:#63ad68}.mobjicon .terracotta{fill:#c96e50}.mobjicon .charcoal{fill:#3f4855}.mobjicon .cyan{fill:#78c7d6}.mobjicon .teal{fill:#5ba8a0}.mobjicon .purple{fill:#8d6bc4}.mobjicon .pink{fill:#e780ad}.mobjicon .navy{fill:#50668e}
+
+
+/* Fase 9: generieke, rustige stap-voor-stap tutorial. */
+.tutorialcard{max-width:34rem}.tutorialprogress{font-size:.82rem;color:var(--mut);margin:.15rem 0 .65rem}.tutorialtext{line-height:1.55;margin:.4rem 0 1rem}.tutorialactions{display:flex;gap:.55rem;justify-content:flex-end;flex-wrap:wrap}.tutorialactions .tutorialskip{margin-right:auto}.tutorialrestart{display:block;margin-top:.8rem;width:max-content;max-width:100%}@media(max-width:560px){.tutorialactions{display:grid;grid-template-columns:1fr 1fr}.tutorialactions .tutorialskip{grid-column:1/-1;width:100%}.tutorialactions button{width:100%}}
