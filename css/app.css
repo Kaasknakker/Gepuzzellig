@@ -1588,3 +1588,19 @@ body.nieuw:not(.home)::before{opacity:.58}
 :root[data-theme=dark] body.nieuw{--surface-card:color-mix(in srgb,var(--card) 94%,var(--page-tone));--surface-soft:color-mix(in srgb,var(--card) 88%,var(--page-tone));--surface-line:color-mix(in srgb,var(--line) 76%,transparent)}
 :root[data-theme=dark] body.nieuw::before{opacity:.62}
 :root[data-theme=dark] body.nieuw:not(.home)::before{opacity:.48}
+
+
+/* Groepsoverzicht: drie informatiedelen mogen nooit buiten hun kaart drukken. */
+.sco:not(.personview)>.hgrid2.sh2>.hcard{min-width:0;overflow:hidden}
+.sco:not(.personview) .scompare{grid-template-columns:minmax(78px,.7fr) minmax(68px,.5fr) minmax(0,1.8fr)}
+.sco:not(.personview) .scompare>*{min-width:0}
+.sco:not(.personview) .scompare span{overflow-wrap:anywhere}
+.sco:not(.personview) .shm,.sco:not(.personview) .shp,.sco:not(.personview) .shg{min-width:0;max-width:100%}
+.sco:not(.personview) .shg{grid-template-columns:repeat(16,minmax(0,1fr))}
+@media(min-width:1100px){
+ #home .sco:not(.personview)>.hgrid2.sh2{grid-template-columns:minmax(0,1.08fr) minmax(0,1fr) minmax(0,1.08fr);gap:14px}
+}
+@media(min-width:761px) and (max-width:1099px){
+ #home .sco:not(.personview)>.hgrid2.sh2{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+ #home .sco:not(.personview)>.hgrid2.sh2>.hcard:last-child{grid-column:1/-1}
+}
