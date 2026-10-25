@@ -1639,6 +1639,8 @@ body.nieuw:not(.home)::before{opacity:.58}
 }
 
 
+/* Statistiekiconen: compact in gedeelde uitleg; persoonlijke statistieken verfijnen dit verder. */
+.sco .stat-icon{width:16px;height:16px;display:inline-block;vertical-align:-3px;flex:0 0 auto}
 /* Persoonlijke statistieken: functionele kleur, één lijniconentaal. */
 .personview .stat-icon{width:18px;height:18px;display:inline-block;vertical-align:-3px;flex:0 0 auto}
 .personview .smic .stat-icon{width:24px;height:24px;vertical-align:0}
