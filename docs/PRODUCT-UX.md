@@ -201,3 +201,22 @@ Bij gebruik van dit document altijd onderscheid maken tussen:
 - commerciële functies en monetisatie.
 
 Nieuwe gebruikerstests of aantoonbaar betere oplossingen mogen richtinggevende punten veranderen. Wijzig een vast productkader alleen bewust en documenteer waarom.
+
+
+## 16. Groepsoverzicht na livegang
+
+Het huidige groepsoverzicht bevat waardevolle informatie, maar toont te veel daarvan tegelijk. Na de productiemigratie wordt dit gericht herontworpen; dit is bewust geen pre-live migratieblokker.
+
+Vaste richting:
+- de groepspagina begint met een compacte samenvatting van de groep en relevante activiteit;
+- scheid **Overzicht**, **Activiteit** en **Statistieken** in duidelijke secties/tabs in plaats van één lange dashboardpagina;
+- Overzicht toont leden compact met status, recente activiteit en relevante weekvoortgang;
+- Activiteit bevat de dag/week-matrix en tijdsgebonden groepsactiviteit;
+- Statistieken bevat per-puzzelverdeling, vergelijkbare tijden en langere trends;
+- ontwerp de ledenweergave en matrix voor groepen groter dan zes personen: niet onbeperkt alle leden en alle puzzels tegelijk in één groeiend raster;
+- geef de eigen gebruiker en relevante/actieve leden voorrang en bied een expliciete route naar **Alle leden**;
+- voorkom dat toekomstige extra puzzelsoorten de matrix steeds breder of drukker maken; gebruik samenvatting, filtering of drill-down;
+- details van één persoon horen op de persoonsweergave, niet dubbel op het groepsoverzicht;
+- behoud de lichte sociale toon: inzicht en samen puzzelen boven ranglijsten en harde competitie.
+
+De exacte tabindeling en responsive presentatie worden na livegang gevalideerd met echte schermgroottes en groepen van verschillende omvang.
