@@ -17,7 +17,18 @@ function murNamePool(){
 const murCastSig=()=>murNamePool().map(x=>x[0]).join("|");
 function murTag(p,s){const nm=String(p.ppl[s]||"?");for(let n=1;n<=Math.min(3,nm.length);n++){const q=nm.slice(0,n).toLocaleLowerCase("nl");if(p.ppl.filter(x=>String(x).slice(0,n).toLocaleLowerCase("nl")===q).length===1)return nm.slice(0,n)}return nm.slice(0,1)+(s+1)}
 const MROOM=[["in de keuken","Keuken"],["in de eetkamer","Eetkamer"],["in de woonkamer","Woonkamer"],["in de badkamer","Badkamer"],["in de logeerkamer","Logeerkamer"],["in de slaapkamer","Slaapkamer"],["in de hal","Hal"],["op de zolder","Zolder"],["in de werkkamer","Werkkamer"],["in de bibliotheek","Bibliotheek"],["in de serre","Serre"],["in de garage","Garage"]];
-const MOBJ={stoel:{e:"🪑",n:"stoel",seat:1},bed:{e:"🛏️",n:"bed",seat:1},bank:{e:"🛋️",n:"bank",seat:1},tafel:{e:"🍽️",n:"tafel"},plant:{e:"🪴",n:"plant"},tv:{e:"📺",n:"tv"},kast:{e:"🗄️",n:"kast"},cadeau:{e:"🎁",n:"cadeau"},piano:{e:"🎹",n:"piano"}};
+const murObjIcon=(body,cls="")=>'<svg class="mobjicon '+cls+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+body+'</svg>';
+const MOBJ={
+ stoel:{e:murObjIcon('<path d="M7 11V5.5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2V11"/><path d="M5 11h14v4H5z"/><path d="M7 15v5M17 15v5"/>'),n:"stoel",seat:1},
+ bed:{e:murObjIcon('<path d="M4 19V8M20 19v-6a3 3 0 0 0-3-3H9a3 3 0 0 0-3 3"/><path d="M4 15h16"/><path d="M7 10V7h5v3"/>'),n:"bed",seat:1},
+ bank:{e:murObjIcon('<path d="M6 12V8.5A2.5 2.5 0 0 1 8.5 6h7A2.5 2.5 0 0 1 18 8.5V12"/><path d="M5 11a2 2 0 0 0-2 2v4h18v-4a2 2 0 0 0-2-2"/><path d="M6 17v2M18 17v2"/>'),n:"bank",seat:1},
+ tafel:{e:murObjIcon('<path d="M4 8h16v4H4z"/><path d="M7 12v8M17 12v8"/><path d="M8 6h8"/>'),n:"tafel"},
+ plant:{e:murObjIcon('<path d="M12 14V6"/><path d="M12 9c-4 0-5-2-5-5 3 0 5 1 5 5z"/><path d="M12 11c4 0 5-2 5-5-3 0-5 1-5 5z"/><path d="M7 14h10l-1.5 6h-7z"/>'),n:"plant"},
+ tv:{e:murObjIcon('<rect x="3.5" y="5" width="17" height="12" rx="2"/><path d="m9 21 3-4 3 4M8 21h8"/>'),n:"tv"},
+ kast:{e:murObjIcon('<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M12 3v18M9.5 12h.01M14.5 12h.01"/>'),n:"kast"},
+ cadeau:{e:murObjIcon('<path d="M4 10h16v11H4zM3 7h18v3H3zM12 7v14"/><path d="M12 7c-3.5 0-5-1-5-2.5S8.2 2 9.5 2C11.2 2 12 4 12 7zM12 7c3.5 0 5-1 5-2.5S15.8 2 14.5 2C12.8 2 12 4 12 7z"/>'),n:"cadeau"},
+ piano:{e:murObjIcon('<path d="M4 5h16v10H4z"/><path d="M6 15v5M18 15v5"/><path d="M7 9h10v6H7z"/><path d="M9 9v3M12 9v3M15 9v3"/>'),n:"piano"}
+};
 const MLV={1:6,2:7,3:8,4:5,5:6,6:7};
 function murRooms(N,K,R){for(let att=0;att<300;att++){const reg=Array(N*N).fill(-1);shuf([...Array(N*N).keys()],R).slice(0,K).forEach((c,k)=>{reg[c]=k});
   let free=N*N-K;while(free>0){const fr=[];for(let i=0;i<N*N;i++)if(reg[i]<0)for(const y of nb4(i,N))if(reg[y]>=0)fr.push([i,reg[y]]);const[i,g]=fr[R()*fr.length|0];reg[i]=g;free--}
