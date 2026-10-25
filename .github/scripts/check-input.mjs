@@ -198,14 +198,13 @@ for(const navigation of [false,true]){
  dismissHandlers.pointerdown(e);assert.equal(open,false);assert.equal(stopped,!navigation,'navigation acts immediately; background only dismisses');
  stopped=false;dismissHandlers.pointerdown(e);assert.equal(stopped,false,'next contact is not swallowed');
 }
+// Profiel en Groep zijn echte paginaweergaven: een achtergrondcontact mag ze niet sluiten.
 for(const id of ['authaccount','groupaccount']){
- const handlers={},cover={hidden:false},dialog=vm.createContext({Event:class{constructor(type){this.type=type}},window:{addEventListener:(name,fn)=>handlers[name]=fn,dispatchEvent(){}},document:{getElementById:key=>key===id?cover:null}});
+ const handlers={},cover={hidden:false},dialog=vm.createContext({window:{addEventListener:(name,fn)=>handlers[name]=fn},document:{getElementById:key=>key===id?cover:null}});
  vm.runInContext(core.slice(0,core.indexOf('function fastPenUI(')),dialog);
- cover.closest=()=>null;let stopped=0;
+ let stopped=0;
  const e={target:cover,detail:1,preventDefault(){stopped++},stopImmediatePropagation(){stopped++}};
- handlers.pointerdown(e);assert.equal(cover.hidden,true);assert(stopped>0,'backdrop contact is consumed');
- for(const type of ['pointerup','touchend','click']){stopped=0;handlers[type](e);assert(stopped>0,'dismissal never reaches underlying UI')}
- stopped=0;handlers.pointerdown({...e,target:{closest:()=>null}});assert.equal(stopped,0,'next contact remains usable');
+ handlers.pointerdown(e);assert.equal(cover.hidden,false);assert.equal(stopped,0,'page background does not navigate back');
 }
 // Run real save-and-return flow with Firestore's nested-array constraint.
 let saved={},captured=null,rendered=false,failSave=false,status={};
