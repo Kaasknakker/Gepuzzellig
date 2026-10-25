@@ -1387,3 +1387,27 @@ details.hcontgroup{display:block;border:0;background:transparent;align-self:star
 
 /* Lange profiel- en groepsvensters scrollen als één iOS-oppervlak; dat voelt soepeler dan een scrollvak ín een vaste overlay. */
 #authaccount.authcover,#groupaccount.authcover{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;touch-action:pan-y;padding-top:max(20px,env(safe-area-inset-top,0px));padding-bottom:max(20px,env(safe-area-inset-bottom,0px))}#authaccount.authcover[hidden],#groupaccount.authcover[hidden]{display:none}#authaccount .authcard,#groupaccount .authcard{max-height:none;overflow:visible;margin:0 auto;touch-action:auto}
+
+
+/* Productie-hotfix dagpuzzelregel: op telefoon blijven eigen status, actie en info gescheiden. */
+@media(max-width:760px){
+ .dayitem{--day-info-w:44px}
+ .dayitem .hdrow.dayaction{top:50%;right:4px;transform:translateY(-50%);width:42px;height:46px;min-width:42px;min-height:46px;border-radius:11px}
+ .daygroup summary{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;column-gap:8px;row-gap:5px;min-height:74px;padding:8px calc(var(--day-info-w) + 10px) 8px 4px}
+ .daygroup summary>.ticon{grid-column:1;grid-row:1/3;align-self:center}
+ .daycaption{display:contents}
+ .daycaption>.dname{grid-column:2;grid-row:1;align-self:end;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .daycaption>.daystatus{grid-column:2;grid-row:2;justify-self:start;align-self:start;justify-content:flex-start;min-width:0;padding:0;overflow:hidden}
+ .daycaption>.daypeers{grid-column:2;grid-row:3;justify-self:start;justify-content:flex-start;min-width:0;max-width:100%;margin:0;overflow:hidden;flex-wrap:nowrap}
+ .daygo{grid-column:3;grid-row:1/3;position:static!important;justify-self:end;align-self:center;min-width:58px;max-width:76px}
+ .daypeer{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+}
+@media(max-width:390px){
+ .daygroup summary{column-gap:5px;padding-left:2px;padding-right:52px}
+ .daygroup summary>.ticon{width:25px;height:25px}
+ .daycaption>.dname{font-size:13px}
+ .ownstatus{font-size:10px;white-space:nowrap}
+ .daystatus .pdonut{width:24px;height:24px}
+ .daygo{min-width:54px;padding:6px;font-size:9.5px}
+ .daypeer{font-size:9px}
+}
