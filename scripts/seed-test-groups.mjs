@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import {initializeApp} from "firebase-admin/app";
 import {getFirestore} from "firebase-admin/firestore";
-const PROJECT="gepuzzellig-test";
+const PROJECT="gepuzzellig-test"; // Test-only fixture seed; productie is hier bewust uitgesloten.
 if(process.env.GOOGLE_CLOUD_PROJECT!==PROJECT)throw new Error("Alleen toegestaan voor gepuzzellig-test");
 initializeApp({projectId:PROJECT});
 const db=getFirestore(),authUid="fVY1NyHBkMgrSd21AlVcBYzN7Td2",playerId="p_fVY1NyHBkMgrSd21AlVcBYzN7Td2",now=Date.now();
