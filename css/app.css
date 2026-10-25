@@ -1358,34 +1358,6 @@ body[data-t=mur][data-input-mode=fill] #inputmode button.on{background:var(--mod
 /* Afgeronde dagpuzzels zijn in de eigen voortgangskolom direct herkenbaar. */
 .daydone{color:var(--ok);font-weight:850}
 
-/* Testomgeving: herkenbaar zonder de bestaande Home-indeling te veranderen. */
-body.home #home .htestbanner{
- background:#f6d86b;
- color:#27220f;
- margin:-4px -10px 0;
- padding:10px 12px 12px;
- border:1px solid color-mix(in srgb,#b68a00 35%,var(--line));
- border-radius:16px;
-}
-body.home #home .htestbanner .mut{color:#665a2b}
-body.home #home .htestbanner .hbrand{margin-bottom:8px}
-body.home #home .htestmark{
- display:inline-flex;
- align-items:center;
- gap:4px;
- margin-left:2px;
- padding:3px 7px;
- border-radius:999px;
- background:rgba(255,255,255,.58);
- border:1px solid rgba(91,70,0,.18);
- font-size:10px;
- font-weight:900;
- letter-spacing:.08em;
- line-height:1.2;
-}
-body.phone.home #home .htestbanner{margin:-9px -4px 0;padding:9px 10px 10px;border-radius:14px}
-body.tablet.home #home .htestbanner{padding:12px 14px 14px}
-
 /* Fase 7: persoonlijke hoofdnavigatie en dagvoorkeuren */
 .hmainnav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 18px}.hmainnav button{min-width:0}.hmainnav button.on{box-shadow:inset 0 0 0 2px var(--home-accent,var(--pc))}.profileprefs{margin:16px 0;padding:14px;border:1px solid var(--line,#ddd);border-radius:14px}.profileprefs>small{display:block;font-weight:700;margin-bottom:4px}.prefrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,160px);gap:10px;align-items:center;padding:7px 0}.prefrow select{width:100%}@media(max-width:520px){.hmainnav{grid-template-columns:repeat(2,1fr)}.prefrow{grid-template-columns:1fr}}
 
@@ -2017,3 +1989,35 @@ body.home #home .hwrap:has(.hpuzzletabs) .puzzlecard{height:auto;align-self:star
  body.phone.home .hlivebadge.liveactivity b{font-size:12px}
  body.phone.home .hlivebadge.liveactivity small{font-size:10px}
 }
+
+/* v216: live Home-sfeer — speelser kleurgebruik zonder testbanner of structuurwijziging. */
+body.home .hhomehero{
+ margin:-4px -10px 0;
+ padding:10px 12px 12px;
+ border:1px solid color-mix(in srgb,var(--home-accent,#7a52d6) 18%,var(--line));
+ border-radius:16px;
+ background:
+  linear-gradient(120deg,color-mix(in srgb,#7a52d6 7%,var(--card)),color-mix(in srgb,#12b5a2 4%,var(--card)) 48%,color-mix(in srgb,#f2a000 6%,var(--card)));
+}
+body.home .hhomehero .hbrand{margin-bottom:8px}
+body.home .hmainnav{
+ background:linear-gradient(105deg,color-mix(in srgb,#7a52d6 5%,var(--card)),color-mix(in srgb,#2b9be6 3%,var(--card)) 55%,color-mix(in srgb,#12b5a2 4%,var(--card)));
+ border-color:color-mix(in srgb,var(--home-accent,#7a52d6) 14%,var(--line));
+}
+body.home .hmainnav button.on{
+ background:color-mix(in srgb,var(--home-accent,#7a52d6) 9%,var(--card));
+}
+body.home .daylist{
+ background:linear-gradient(115deg,color-mix(in srgb,#f2a000 3%,var(--card)),var(--card) 38%,color-mix(in srgb,#12b5a2 2.5%,var(--card)));
+ border-color:color-mix(in srgb,#f2a000 14%,var(--line));
+}
+body.home .continuecard,
+body.home .hcont{
+ background:linear-gradient(110deg,color-mix(in srgb,var(--pc) 4%,var(--card)),var(--card) 46%,color-mix(in srgb,#2b9be6 2%,var(--card)));
+}
+body.home .continuecard{border-color:color-mix(in srgb,var(--pc) 14%,var(--line))}
+body.home .hsection{border-color:color-mix(in srgb,var(--home-accent,#7a52d6) 10%,var(--line))}
+@media(max-width:560px){
+ body.phone.home .hhomehero{margin:-9px -4px 0;padding:9px 10px 10px;border-radius:14px}
+}
+body.tablet.home .hhomehero{padding:12px 14px 14px}
