@@ -1853,3 +1853,8 @@ body.newpick #npm{animation:gpPanelIn var(--motion-ui) var(--motion-ease) both}
  :root:not([data-theme=dark]) body.home .hsection{border-color:color-mix(in srgb,var(--line) 78%,#d4a82f)}
  :root:not([data-theme=dark]) body.home .hmorepuzzles{background:color-mix(in srgb,var(--card) 88%,#f4d96f)!important;border-color:color-mix(in srgb,var(--line) 75%,#d4a82f)!important}
 }
+
+/* Pre-live scrollstabiliteit: voorkom horizontale sprong tussen korte en lange Puzzelen-tabs. */
+@supports (scrollbar-gutter:stable){html{scrollbar-gutter:stable}}
+/* Murdoku-cast: het leesvlak zelf mag op touch/Pencil direct verticaal scrollen. */
+.murcastbox textarea{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
