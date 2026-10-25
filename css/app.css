@@ -1858,3 +1858,17 @@ body.newpick #npm{animation:gpPanelIn var(--motion-ui) var(--motion-ease) both}
 @supports (scrollbar-gutter:stable){html{scrollbar-gutter:stable}}
 /* Murdoku-cast: het leesvlak zelf mag op touch/Pencil direct verticaal scrollen. */
 .murcastbox textarea{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+
+/* Pre-live polish v198: neutrale hoofdnavigatie, veilige iPad-randen en ruimere groepschevrons. */
+body.home .hmainnav button::before{background:var(--mut)!important;opacity:.42}
+body.home .hmainnav button.on::before{background:var(--home-accent,#d7aa2b)!important;opacity:1}
+@supports (padding-top:env(safe-area-inset-top)){body{background-color:var(--bg)}#authaccount.authpage,#groupaccount.authpage{padding-top:env(safe-area-inset-top);background:var(--bg)}}
+#authaccount.authpage .authcard,#groupaccount.authpage .authcard{padding-top:0!important}
+.sgroupperson{padding-right:28px;grid-template-columns:38px minmax(120px,1fr) minmax(68px,auto) minmax(92px,auto) 34px}
+.sgopen{justify-self:center;margin-right:2px}
+/* Info-knop: touchfocus mag visueel niet blijven hangen; toetsenbordfocus blijft via input-modality zichtbaar. */
+.dayitem .dayaction:focus-visible{outline:0!important}
+body.using-keyboard .dayitem .dayaction:focus-visible{outline:2px solid var(--pc)!important;outline-offset:2px!important}
+/* Iets duidelijkere, maar rustige pagina-overgang. */
+.pagein{animation-duration:360ms!important}
+@keyframes pagein{from{opacity:.18;transform:translateY(12px) scale(.994)}to{opacity:1;transform:none}}
