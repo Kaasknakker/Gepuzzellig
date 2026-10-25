@@ -1701,3 +1701,24 @@ body.nieuw:not(.home)::before{opacity:.58}
  .daypeer.glance{font-size:9px}
  .daypeer.glance b{max-width:50px}
 }
+
+
+/* Home is nu Vandaag; de volledige catalogus woont op de bestemming Puzzelen. */
+.hpuzzlecta{margin-top:20px}
+.hpuzzlectabtn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:18px;text-align:left;padding:15px 17px;border:1px solid var(--line);color:var(--fg);background:var(--card);cursor:pointer}
+.hpuzzlectabtn>span:first-child{display:grid;gap:3px}
+.hpuzzlectabtn b{font-size:14px}
+.hpuzzlectabtn small{font-size:11px;color:var(--mut);font-weight:650}
+.hpuzzlectabtn .hgo{white-space:nowrap;color:var(--home-accent,var(--pc));font-weight:850}
+.hpuzzlespage .hsection{margin-top:24px}
+.hpuzzlespage .freegrid{margin-top:10px}
+.daypeer.glance.summary{background:transparent;padding:0;gap:7px}
+.daypeer.glance.summary b{font-weight:700;color:var(--mut)}
+.daypeer.glance.summary em{font-size:9px;color:var(--mut);font-style:normal;font-weight:650}
+.daypeer.glance>span{font-size:9px;color:var(--mut);font-weight:650}
+@media(max-width:760px){
+ .hpuzzlectabtn{padding:13px 14px}
+ .hpuzzlectabtn small{max-width:210px}
+ .hpuzzlespage .hmainnav{margin-bottom:18px}
+ .daypeer.glance.summary b{max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
