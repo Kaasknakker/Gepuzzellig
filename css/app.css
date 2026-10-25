@@ -2021,7 +2021,15 @@ body.home #home .hwrap:has(.hpuzzletabs) .puzzlecard{height:auto;align-self:star
 @media(prefers-reduced-motion:reduce){.pcarddailychoices{transition:none!important}}
 
 
-/* v209 test-only: visuele proef voor online aanwezigheid; nog geen echte presence. */
-.sgidentity>b{display:flex;align-items:center;gap:7px;min-width:0;flex-wrap:wrap}
-.sgonline{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;line-height:1;color:var(--ok);white-space:nowrap}
-.sgonline>i{display:block;width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 14%,transparent)}
+
+
+/* v210: bestaande presence hersteld; op iPhone blijft de onlineknop bewust compact. */
+@media(max-width:560px){
+ body.phone .peerlive{min-height:30px;padding:4px 8px;gap:5px;font-size:11px}
+ body.phone .peerlive>i{width:7px;height:7px;box-shadow:0 0 0 2px color-mix(in srgb,var(--ok) 15%,transparent)}
+ body.phone #prow #peerLive{min-height:30px;max-width:31vw;padding:4px 7px;gap:5px}
+ body.phone #prow #peerLive span{font-size:11px}
+ body.phone.home .hlivebadge.liveactivity{padding:6px 9px}
+ body.phone.home .hlivebadge.liveactivity b{font-size:12px}
+ body.phone.home .hlivebadge.liveactivity small{font-size:10px}
+}

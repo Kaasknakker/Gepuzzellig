@@ -142,7 +142,7 @@ service cloud.firestore {
       return hasProfile()
         && request.resource.data.keys().hasOnly([
           'uid','group','name','date','type','at','progress','onlineAt',
-          'onlineType','onlinePractice','onlineLvl','onlineNono'
+          'onlineType','onlinePractice','onlineLvl','onlineNono','onlineView'
         ])
         && request.resource.data.keys().hasAll(['uid','group'])
         && request.resource.data.uid is string
@@ -170,6 +170,8 @@ service cloud.firestore {
         && request.resource.data.get('onlineLvl', 0) <= 6
         && request.resource.data.get('onlineNono', '') is string
         && request.resource.data.get('onlineNono', '') in ['','classic','color']
+        && request.resource.data.get('onlineView', '') is string
+        && request.resource.data.get('onlineView', '') in ['','home','puzzle']
         && request.resource.data.get('progress', {}) is map;
     }
 
