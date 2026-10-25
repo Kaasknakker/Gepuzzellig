@@ -1957,3 +1957,9 @@ body:not(.home):not(.newpick) #stage{overscroll-behavior:none}
 #authaccount.authpage:not([hidden]),#groupaccount.authpage:not([hidden]){animation:none!important}
 #authaccount.authpage.ui-reveal,#groupaccount.authpage.ui-reveal{animation:pageReadyIn 180ms ease-out both!important}
 @media(prefers-reduced-motion:reduce){.pagein,#authaccount.authpage.ui-reveal,#groupaccount.authpage.ui-reveal{animation:none!important}}
+
+/* v204: full-page instellingen volgen het echte thema en blijven volledig onder de iOS-statuszone. */
+#authaccount.authpage,#groupaccount.authpage{background-color:var(--page-tone,var(--bg))!important;background-image:var(--page-pattern,none)!important;background-size:220px!important;background-position:center top!important;padding-top:max(env(safe-area-inset-top),12px)!important}
+:root[data-theme=dark] #authaccount.authpage,:root[data-theme=dark] #groupaccount.authpage{background-image:var(--pp-d,var(--page-pattern,none))!important}
+#authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{top:0!important;margin-top:0!important}
+#authaccount.authpage .authcard,#groupaccount.authpage .authcard{padding-top:0!important}
