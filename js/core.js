@@ -1598,9 +1598,9 @@ function phoneLayout(){document.body.classList.add("phone");const hd=$("header")
  const prow=document.createElement("div");prow.id="prow";main.insertBefore(prow,main.firstChild);const plive=document.createElement("button");plive.type="button";plive.id="peerLive";plive.className="peerlive";plive.hidden=true;plive.innerHTML="<i></i><span></span>";plive.setAttribute("aria-expanded","false");plive.onclick=e=>{e.stopPropagation();togglePeerLivePop()};const plivePop=document.createElement("div");plivePop.id="peerLivePop";plivePop.className="peerlivepop";plivePop.hidden=true;document.body.append(plivePop);prow.append(plive,pm);document.addEventListener("pointerdown",e=>{if(!plivePop.hidden&&!e.target.closest("#peerLive,#peerLivePop,[data-live-badge]")){plivePop.hidden=true;plive.setAttribute("aria-expanded","false")}},true);
  const pbot=document.createElement("div");pbot.id="pbot";document.body.append(pbot);
  prow.append($("#arch"),$("#hexstat"),$("#msg"));
- pbot.append($("#undo"),$("#redo"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✏️";$("#notewipe").innerHTML="🧹";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
+ pbot.append($("#undo"),$("#redo"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✎";$("#notewipe").innerHTML="×";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
  pmp.append($("#next"),$("#autocross"),$("#sbtn"),$("#helpb"),$("#ctrlb"),$("#reset"),$("#time"),$("#streak"),makeThemeSeg(),$("#authbtn"));$("#theme").hidden=true;
- $("#chk").innerHTML="✓<span> Klopt?</span>";$("#hintb").innerHTML="💡<span> Hint</span>";
+ $("#chk").innerHTML="✓<span> Klopt?</span>";$("#hintb").innerHTML="?<span> Hint</span>";
  pm.onclick=()=>pmp.classList.toggle("open");pmp.addEventListener("click",e=>{if(e.target.closest("button"))setTimeout(()=>pmp.classList.remove("open"),80)});
  document.addEventListener("pointerdown",e=>{if(pmp.classList.contains("open")&&!e.target.closest("#pmp,#pm")){pmp.classList.remove("open");e._closed=true}},true);
  const SH={bin:"Binair",star:"Star",nono:"Nono",hex:"Hex",plus:"Plus",mur:"Moord"};document.querySelectorAll("#tabs button").forEach(b=>{const sp=b.querySelector("span");if(sp&&SH[b.dataset.t])sp.textContent=SH[b.dataset.t]});
@@ -1628,7 +1628,7 @@ function nieuwLayout(){const B=document.body;B.classList.add("nieuw");
   const lst=(...ids)=>{const d=document.createElement("div");d.className="mlist";ids.forEach(i=>d.append($(i)));more.append(d)};
   const ic=(b,i,t)=>{b.innerHTML='<span class="ic">'+i+'</span><span>'+t+'</span>'};
   sec("Puzzel");lst("#arch","#next","#autocross");sec("Weergave");more.append(makeThemeSeg());sec("Overig");lst("#sbtn","#helpb","#ctrlb","#reset","#authbtn");more.append($("#streak"));$("#theme").hidden=true;
-  ic($("#arch"),"📅","Eerdere dagpuzzels");ic($("#next"),"🎲","Nog een puzzel");ic($("#sbtn"),"📊","Overzicht en statistieken");ic($("#helpb"),"❓","Uitleg van deze puzzel");ic($("#ctrlb"),"⌨️","Bediening");
+  ic($("#arch"),"↶","Eerdere dagpuzzels");ic($("#next"),"+","Nog een puzzel");ic($("#sbtn"),"▥","Overzicht en statistieken");ic($("#helpb"),"?","Uitleg van deze puzzel");ic($("#ctrlb"),"⌘","Bediening");
   {const r=$("#reset");r.innerHTML='<b class="ic">⟲</b><span>Reset</span>'}updTheme();
   $("#tbHome").onclick=showHome;$("#tbMore").onclick=e=>{e.stopPropagation();more.classList.toggle("open")};
   /* Het menu blijft open; alleen bij "Nog een puzzel" gaat het dicht. */
