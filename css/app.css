@@ -2021,3 +2021,55 @@ body.home .hsection{border-color:color-mix(in srgb,var(--home-accent,#7a52d6) 10
  body.phone.home .hhomehero{margin:-9px -4px 0;padding:9px 10px 10px;border-radius:14px}
 }
 body.tablet.home .hhomehero{padding:12px 14px 14px}
+
+/* v217: light mode krijgt dezelfde gelaagdheid als dark, met zachte Gepuzzellig-tinten. */
+:root[data-theme=light] body.home .hhomehero{
+ background:linear-gradient(120deg,#f5f0ff 0%,#f2fbf8 50%,#fff7e5 100%);
+ border-color:#d8cfea;
+ box-shadow:0 5px 18px rgba(73,58,112,.055);
+}
+:root[data-theme=light] body.home .hmainnav{
+ background:linear-gradient(105deg,#f3f0fb 0%,#f2f7fc 52%,#eef9f5 100%);
+ border-color:#d6d2e2;
+}
+:root[data-theme=light] body.home .hmainnav button.on{
+ background:#e9e5fa;
+ border-color:#b8b0db;
+}
+:root[data-theme=light] body.home .daylist{
+ background:linear-gradient(115deg,#fff8e9 0%,#fffdf7 48%,#f3fbf7 100%);
+ border-color:#dfcfaa;
+ box-shadow:0 6px 18px rgba(99,77,36,.055);
+}
+:root[data-theme=light] body.home .dayitem:first-child{
+ background:linear-gradient(90deg,rgba(242,160,0,.075),rgba(242,160,0,.018) 62%,transparent);
+}
+:root[data-theme=light] body.home .continuecard,
+:root[data-theme=light] body.home .hcont{
+ background:linear-gradient(105deg,color-mix(in srgb,var(--pc) 7%,#fffdf8),#fffdf8 48%,#f5f8ff 100%);
+ border-color:color-mix(in srgb,var(--pc) 18%,#d3c9b7);
+}
+:root[data-theme=light] body.home .hsection{border-color:#d8cfbd}
+@media(prefers-color-scheme:light){
+ :root:not([data-theme=dark]) body.home .hhomehero{
+  background:linear-gradient(120deg,#f5f0ff 0%,#f2fbf8 50%,#fff7e5 100%);
+  border-color:#d8cfea;box-shadow:0 5px 18px rgba(73,58,112,.055)
+ }
+ :root:not([data-theme=dark]) body.home .hmainnav{
+  background:linear-gradient(105deg,#f3f0fb 0%,#f2f7fc 52%,#eef9f5 100%);border-color:#d6d2e2
+ }
+ :root:not([data-theme=dark]) body.home .hmainnav button.on{background:#e9e5fa;border-color:#b8b0db}
+ :root:not([data-theme=dark]) body.home .daylist{
+  background:linear-gradient(115deg,#fff8e9 0%,#fffdf7 48%,#f3fbf7 100%);
+  border-color:#dfcfaa;box-shadow:0 6px 18px rgba(99,77,36,.055)
+ }
+ :root:not([data-theme=dark]) body.home .dayitem:first-child{
+  background:linear-gradient(90deg,rgba(242,160,0,.075),rgba(242,160,0,.018) 62%,transparent)
+ }
+ :root:not([data-theme=dark]) body.home .continuecard,
+ :root:not([data-theme=dark]) body.home .hcont{
+  background:linear-gradient(105deg,color-mix(in srgb,var(--pc) 7%,#fffdf8),#fffdf8 48%,#f5f8ff 100%);
+  border-color:color-mix(in srgb,var(--pc) 18%,#d3c9b7)
+ }
+ :root:not([data-theme=dark]) body.home .hsection{border-color:#d8cfbd}
+}
