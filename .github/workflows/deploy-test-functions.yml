@@ -50,4 +50,4 @@ jobs:
           ! grep -q 'kaasknakker.github.io' functions/.env.gepuzzellig-test
 
       - name: Deploy only Functions to test
-        run: npx --yes firebase-tools@15.34.1 deploy --only functions --project gepuzzellig-test --non-interactive
+        run: npx --yes firebase-tools@15.34.1 deploy --only functions --project gepuzzellig-test --non-interactive --force
