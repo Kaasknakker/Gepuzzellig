@@ -15,11 +15,11 @@ for(const [pid,name] of [["test-noor","Noor"],["test-sam","Sam"],["test-finn","F
 const plans={
  [playerId]:{favoritePuzzleTypes:["bin","star","plus","hex"],difficulties:{bin:"normal",star:"hard",plus:"easy",hex:"normal"}},
  "test-noor":{favoritePuzzleTypes:["bin","plus"],difficulties:{bin:"easy",plus:"hard"}},
- "test-sam":{favoritePuzzleTypes:["bin","star","hex"],difficulties:{bin:"hard",star:"normal",hex:"easy"}},
- "test-finn":{favoritePuzzleTypes:["star","plus","nono"],difficulties:{star:"easy",plus:"normal",nono:"hard"}},
+ "test-sam":{favoritePuzzleTypes:["bin","star","hex","plus","nono","mur","kak","m24"],difficulties:{bin:"hard",star:"normal",hex:"easy",plus:"normal",nono:"hard",mur:"easy",kak:"normal",m24:"hard"}},
+ "test-finn":{favoritePuzzleTypes:["star","plus","nono","bin","hex","mur","kak","m24","krop","slither"],difficulties:{star:"easy",plus:"normal",nono:"hard",bin:"normal",hex:"easy",mur:"hard",kak:"normal",m24:"easy",krop:"hard",slither:"normal"}},
  "test-mila":{favoritePuzzleTypes:["bin","hex","plus","mur"],difficulties:{bin:"normal",hex:"hard",plus:"easy",mur:"normal"}},
  "test-daan":{favoritePuzzleTypes:["bin","star"],difficulties:{bin:"easy",star:"hard"}},
- "test-zoe":{favoritePuzzleTypes:["plus","hex","nono"],difficulties:{plus:"hard",hex:"normal",nono:"easy"}}
+ "test-zoe":{favoritePuzzleTypes:["plus","hex","nono","bin","star","mur","kak","m24","krop","slither","sudoku","tents"],difficulties:{plus:"hard",hex:"normal",nono:"easy",bin:"normal",star:"hard",mur:"easy",kak:"normal",m24:"hard",krop:"easy",slither:"normal",sudoku:"hard",tents:"easy"}}
 };
 for(const g of groups){put("groups/"+g.id,{name:g.name,ownerAuthUid:authUid,inviteCode:g.id==="g_testduo"?"TESTDUO2":"TESTZES6",theme:"shared",accent:g.accent,murdokuNames:[],createdAt:now,updatedAt:now});
  for(const [pid,name] of g.members){const joinedAt=now-10*86400000,role=pid===playerId?"admin":"member",plan=plans[pid];put("groups/"+g.id+"/members/"+pid,{playerId:pid,displayName:name,role,status:"approved",requestedAt:joinedAt,approvedAt:joinedAt,joinedAt,approvedByPlayerId:playerId,updatedAt:now});put("playerMemberships/"+pid+"/groups/"+g.id,{groupId:g.id,role,status:"approved",joinedAt,updatedAt:now});put("groupDailyPlans/"+g.id+"/items/"+today+"_"+pid,{schemaVersion:1,groupId:g.id,playerId:pid,displayName:name,date:today,...plan,createdAt:now-3600000,sharedAt:now})}}
