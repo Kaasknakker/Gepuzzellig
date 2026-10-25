@@ -15,7 +15,9 @@ const required=[
 ];
 for(const [name,needle] of required.slice(0,-1))if(!src.includes(needle))throw new Error('Functions fase 6 ontbreekt: '+name);
 if(src.includes(required.at(-1)[1]))throw new Error('APP_URL is nog hardcoded');
-if(!src.includes('secrets: isTestProject() ? [] : [POSTMARK_SERVER_TOKEN, POSTMARK_FROM]'))throw new Error('Test sink mag geen Postmarksecrets binden');
+if(!src.includes('const POSTMARK_SERVER_TOKEN = usesPostmarkDelivery() ? defineSecret("POSTMARK_SERVER_TOKEN") : null;'))throw new Error('Sinkmodus mag Postmarksecret niet declareren');
+if(!src.includes('const POSTMARK_FROM = usesPostmarkDelivery() ? defineSecret("POSTMARK_FROM") : null;'))throw new Error('Sinkmodus mag Postmark-afzendersecret niet declareren');
+if(!src.includes('secrets: usesPostmarkDelivery() ? [POSTMARK_SERVER_TOKEN, POSTMARK_FROM] : []'))throw new Error('Sinkmodus mag geen Postmarksecrets binden');
 const sinkBlock=src.slice(src.indexOf('if (env.mode === "sink")'),src.indexOf('if (env.mode === "allowlist"'));
 if(sinkBlock.includes('fetch('))throw new Error('Test sink mag geen netwerkmail versturen');
 const wf=fs.readFileSync('.github/workflows/deploy-test-functions.yml','utf8');

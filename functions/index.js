@@ -7,8 +7,6 @@ const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 
 initializeApp();
 
-const POSTMARK_SERVER_TOKEN = defineSecret("POSTMARK_SERVER_TOKEN");
-const POSTMARK_FROM = defineSecret("POSTMARK_FROM");
 const APP_URL = () => process.env.APP_URL || "https://kaasknakker.github.io/Gepuzzellig/";
 const MAIL_MODE = () => process.env.MAIL_MODE || "postmark";
 const MAIL_ALLOWLIST = () => process.env.MAIL_ALLOWLIST || "";
@@ -19,6 +17,9 @@ const appUrl = () => normalizedUrl(APP_URL());
 const mailMode = () => String(MAIL_MODE() || "postmark").trim().toLowerCase();
 const allowlist = () => new Set(String(MAIL_ALLOWLIST() || "").split(",").map(x => x.trim().toLowerCase()).filter(Boolean));
 const isTestProject = () => projectId() === "gepuzzellig-test";
+const usesPostmarkDelivery = () => mailMode() !== "sink";
+const POSTMARK_SERVER_TOKEN = usesPostmarkDelivery() ? defineSecret("POSTMARK_SERVER_TOKEN") : null;
+const POSTMARK_FROM = usesPostmarkDelivery() ? defineSecret("POSTMARK_FROM") : null;
 const assertEnvironmentSafe = () => {
   const pid = projectId(), mode = mailMode(), url = appUrl();
   if (pid === "gepuzzellig-test") {
@@ -70,7 +71,7 @@ async function deliverInvite({ to, subject, textBody, htmlBody }) {
 
 exports.sendInviteEmail = onCall({
   region: "europe-west1",
-  secrets: isTestProject() ? [] : [POSTMARK_SERVER_TOKEN, POSTMARK_FROM],
+  secrets: usesPostmarkDelivery() ? [POSTMARK_SERVER_TOKEN, POSTMARK_FROM] : [],
   timeoutSeconds: 30,
   memory: "256MiB",
 }, async (request) => {
