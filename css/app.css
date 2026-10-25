@@ -1610,3 +1610,30 @@ body.nieuw:not(.home)::before{opacity:.58}
 @media(max-width:760px){
  .daypeer.summary{max-width:100%;overflow:hidden;text-overflow:ellipsis}
 }
+
+
+/* Groepsweergave v2: vaste navigatie-iconen, compacte teamblik en inhoudsgestuurde kaarten. */
+.sviews button{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.sviews button .uiicon{width:16px;height:16px;flex:0 0 16px}
+.daypeer.glance{display:inline-flex;align-items:center;justify-content:flex-end;gap:5px;min-width:0;width:auto;background:transparent!important;border:0!important;padding:0!important;white-space:nowrap}
+.daypeer.glance b{overflow:hidden;text-overflow:ellipsis;font-size:11px}
+.daypeer.glance i{font-style:normal;font-weight:900;color:var(--mut)}
+.daypeer.glance.done i,.daypeer.glance.summary i{color:var(--ok)}
+.daypeer.glance.busy i{color:var(--dayc)}
+.daypeer.glance em{font-style:normal;color:var(--mut);font-size:10px;font-weight:700}
+.dayaction:focus:not(:focus-visible),.dayaction:active{outline:none!important;box-shadow:none!important}
+.dayaction:focus:not(:focus-visible) .dayinfo,.dayaction:active .dayinfo{outline:none!important;box-shadow:none!important}
+/* De onderste groepssectie gebruikt breedte op inhoud, niet drie geforceerde gelijke dashboardkolommen. */
+#home .sco:not(.personview)>.hgrid2.sh2{display:grid!important;grid-template-columns:minmax(300px,.9fr) minmax(380px,1.25fr)!important;gap:14px!important;align-items:start}
+#home .sco:not(.personview)>.hgrid2.sh2>.hcard{min-width:0;width:auto;max-width:100%;box-sizing:border-box}
+#home .sco:not(.personview)>.hgrid2.sh2>.hcard:last-child{grid-column:1/-1}
+.sco:not(.personview) .scompare{grid-template-columns:minmax(74px,.65fr) minmax(64px,.5fr) minmax(0,1.45fr);gap:7px}
+.sco:not(.personview) .scompare span{white-space:normal;overflow-wrap:break-word}
+@media(min-width:1280px){
+ #home .sco:not(.personview)>.hgrid2.sh2{grid-template-columns:minmax(330px,.9fr) minmax(420px,1.2fr) minmax(330px,.9fr)!important}
+ #home .sco:not(.personview)>.hgrid2.sh2>.hcard:last-child{grid-column:auto}
+}
+@media(max-width:900px){
+ #home .sco:not(.personview)>.hgrid2.sh2{grid-template-columns:1fr!important}
+ #home .sco:not(.personview)>.hgrid2.sh2>.hcard:last-child{grid-column:auto}
+}
