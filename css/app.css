@@ -1786,3 +1786,43 @@ body.newpick #npm{animation:gpPanelIn var(--motion-ui) var(--motion-ease) both}
 .spdfreehead{margin-top:12px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
 .spddaily{background:color-mix(in srgb,var(--pc) 3%,transparent)}
 @media(prefers-reduced-motion:reduce){.spchev{transition:none!important}}
+
+
+/* Laatste consistente paginapolish. */
+:root{--motion-fast:190ms;--motion-ui:270ms;--motion-ease:cubic-bezier(.16,.78,.28,1)}
+.pagein{animation-duration:280ms!important}
+@keyframes pagein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes gpDialogIn{from{opacity:.08;transform:translateY(10px) scale(.982)}to{opacity:1;transform:none}}
+@keyframes gpPanelIn{from{opacity:.08;transform:translateY(9px)}to{opacity:1;transform:none}}
+
+/* Profiel en Groep zijn echte pagina's, geen klikbare modal-achtergrond. */
+#authaccount.authpage,#groupaccount.authpage{position:fixed;inset:0;z-index:70;overflow:auto;background:var(--bg);backdrop-filter:none;-webkit-backdrop-filter:none;cursor:default}
+#authaccount.authpage .authcard,#groupaccount.authpage .authcard{max-width:1180px;margin:0 auto;background:transparent;box-shadow:none;border:0;border-radius:0;min-height:100dvh}
+#authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{position:sticky;top:0;z-index:2;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#authaccount.authpage .authx,#groupaccount.authpage .authx{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+#authaccount.authpage .authx .uiicon,#groupaccount.authpage .authx .uiicon{width:21px;height:21px}
+@media(max-width:760px){#authaccount.authpage,#groupaccount.authpage{padding:0 12px 28px}#authaccount.authpage .authcard,#groupaccount.authpage .authcard{width:100%;max-width:520px;padding-top:10px}}
+
+/* Home-info: Safari mag na aanraken geen blijvende witte knoprand tonen. */
+.dayitem .dayaction,.dayitem .dayaction:focus,.dayitem .dayaction:active{outline:0!important;box-shadow:none!important;-webkit-tap-highlight-color:transparent!important}
+.dayitem .dayaction:focus-visible{outline:2px solid var(--pc)!important;outline-offset:2px!important}
+.dayinfo{pointer-events:none}
+
+/* Meer puzzels is een bewuste secundaire knop in plaats van losse linktekst. */
+.hmorepuzzles{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:8px 12px!important;border:1px solid var(--line)!important;border-radius:11px!important;background:var(--card)!important;color:var(--fg)!important;font-weight:800;box-shadow:none!important}
+.hmorepuzzles:hover{background:color-mix(in srgb,var(--pc) 7%,var(--card))!important;border-color:color-mix(in srgb,var(--pc) 30%,var(--line))!important}
+.hmorepuzzles span{display:inline-grid;place-items:center;width:18px;height:18px;font-size:18px;line-height:1;transition:transform var(--motion-fast) var(--motion-ease)}
+.hmorepuzzles:hover span{transform:translateX(2px)}
+
+/* Persoonlijke uitklapper: geometrisch gecentreerd en het hele rondje draait. */
+.sphead strong{display:flex;align-items:center;justify-content:flex-end;gap:7px}
+.spchev{box-sizing:border-box;display:grid!important;place-items:center!important;width:28px!important;height:28px!important;min-width:28px;margin:0!important;padding:0!important;line-height:0;transform-origin:50% 50%}
+.spchev svg{display:block;width:14px!important;height:14px!important;margin:0;transform:translateY(-.25px)}
+.spmain.open .spchev{transform:rotate(180deg)}
+
+/* Puzzelmenu: functionele iconen overal dezelfde lijnstijl. */
+#more .themeMenu .uiicon,#pmp .themeMenu .uiicon{width:18px;height:18px;display:block;margin:auto}
+#reset b{display:grid;place-items:center}
+#reset b .uiicon{width:18px;height:18px}
+#reset{color:var(--fg)!important}
+#reset.arm{color:var(--bad)!important;border-color:color-mix(in srgb,var(--bad) 45%,var(--line))!important}
