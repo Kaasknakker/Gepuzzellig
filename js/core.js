@@ -46,7 +46,7 @@ function penScrollDialogs(){
  document.addEventListener('pointerdown',e=>{
   last=null;
   if(e.pointerType!=='pen'||e.button>0)return;
-  const card=e.target.closest?.('.authcard'),scroller=card?.closest('#authaccount,#groupaccount')||card;
+  const card=e.target.closest?.('.authcard'),scroller=card&&typeof card.closest==='function'?(card.closest('#authaccount,#groupaccount')||card):card;
   if(!card||!scroller||e.target.closest('input,textarea,select,[contenteditable="true"]'))return;
   const max=Math.max(0,scroller.scrollHeight-scroller.clientHeight),top=Math.max(0,Math.min(max,scroller.scrollTop));
   drag={card:scroller,target:e.target,action:e.target.closest('button,a[href],summary,[role="button"]'),pid:e.pointerId,y:e.clientY,top,moved:false};
