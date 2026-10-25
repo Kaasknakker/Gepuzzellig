@@ -22,6 +22,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Node instellen
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - name: Java 21 instellen voor Firestore-emulator
         uses: actions/setup-java@v4
         with:
@@ -32,30 +36,49 @@ jobs:
       - name: Fase 2 Firestore-rules controleren
         run: npm run test:rules
 
-      - name: Run app checks
+      - name: Client syntax controleren
         run: |
-          node .github/scripts/check-app.mjs
-          node .github/scripts/check-puzzle-registry.mjs
-          node .github/scripts/check-ux.mjs
-          node .github/scripts/check-input.mjs
-          node .github/scripts/check-pluszle-doubletap.mjs
-          node .github/scripts/check-completion.mjs
-          node .github/scripts/check-autocross.mjs
-          node .github/scripts/check-hints.mjs
-          node .github/scripts/check-hint-guidance.mjs
-          node .github/scripts/check-hint-presentation.mjs
-          node .github/scripts/check-murdoku.mjs
-          node .github/scripts/check-binair.mjs
-          node .github/scripts/check-hexcells.mjs
-          node .github/scripts/check-phase4-migration.mjs
-          node .github/scripts/check-phase5-migration.mjs
-          node .github/scripts/check-phase6-functions.mjs
-          node .github/scripts/check-phase7-app.mjs
-          node .github/scripts/check-phase7-migration.mjs
-          node .github/scripts/check-phase8-app.mjs
           node --check js/puzzle-registry.js
           node --check js/core.js
           node --check js/firebase.js
+      - name: App controleren
+        run: node .github/scripts/check-app.mjs
+      - name: Puzzelregistratie controleren
+        run: node .github/scripts/check-puzzle-registry.mjs
+      - name: Opslag en UX-regressies controleren
+        run: node .github/scripts/check-ux.mjs
+      - name: Tikken en Pencil-bediening controleren
+        run: node .github/scripts/check-input.mjs
+      - name: Pluszle dubbeltik controleren
+        run: node .github/scripts/check-pluszle-doubletap.mjs
+      - name: Afrondingsdag en resultaatidentiteit controleren
+        run: node .github/scripts/check-completion.mjs
+      - name: Automatische kruisjes controleren
+        run: node .github/scripts/check-autocross.mjs
+      - name: Stapsgewijze hints controleren
+        run: node .github/scripts/check-hints.mjs
+      - name: Puzzelspecifieke hintafleidingen controleren
+        run: node .github/scripts/check-hint-guidance.mjs
+      - name: Korte hintpresentatie en uitklappen controleren
+        run: node .github/scripts/check-hint-presentation.mjs
+      - name: Murdoku controleren
+        run: node .github/scripts/check-murdoku.mjs
+      - name: Binair controleren
+        run: node .github/scripts/check-binair.mjs
+      - name: Hexcells controleren
+        run: node .github/scripts/check-hexcells.mjs
+      - name: Fase 4 migratie controleren
+        run: node .github/scripts/check-phase4-migration.mjs
+      - name: Fase 5 migratie controleren
+        run: node .github/scripts/check-phase5-migration.mjs
+      - name: Fase 6 Functions controleren
+        run: node .github/scripts/check-phase6-functions.mjs
+      - name: Fase 7 app controleren
+        run: node .github/scripts/check-phase7-app.mjs
+      - name: Fase 7 migratie controleren
+        run: node .github/scripts/check-phase7-migration.mjs
+      - name: Fase 8 app controleren
+        run: node .github/scripts/check-phase8-app.mjs
 
       - name: Build test-only hosting directory
         run: |
