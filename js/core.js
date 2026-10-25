@@ -1870,7 +1870,7 @@ if(NIEUW){showHome();HOMEREADY=true}
 /* Laat de uiteindelijke layout eerst volledig berekenen en schilder hem daarna in één keer. */
 requestAnimationFrame(()=>document.documentElement.removeAttribute("data-ui-pending"));
 
-$("#notewipe").textContent=PHONE?"🧹":"🧹 Wissen";$("#notewipe").setAttribute("aria-label","Wis alle potloodnotities");
+$("#notewipe").textContent=PHONE?"⌫":"Wis aantekeningen";$("#notewipe").setAttribute("aria-label","Wis alle aantekeningen");$("#notewipe").setAttribute("title","Wis alle aantekeningen");
 const checkFeedback=document.createElement("div");checkFeedback.id="checkfeedback";document.body.append(checkFeedback);
 
 // Dezelfde standknoppen voor Binair, Star Battle en Murdoku.
