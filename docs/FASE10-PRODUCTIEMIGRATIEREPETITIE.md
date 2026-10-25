@@ -1,30 +1,43 @@
 # Fase 10 — productiemigratierepetitie
 
-Status: tooling voorbereid op `develop`; de fase is pas afgerond na een repetitie op een **verse kopie/export van de actuele productiegegevens**.
+Status: **afgerond op 25 oktober 2026** op een verse, read-only JSON-kopie van de toen actuele productiegegevens.
 
 ## Veiligheidsgrens
 
-Fase 10 schrijft niet naar productie-Firestore en wijzigt `main` niet. `scripts/rehearse-production-migration.mjs` leest uitsluitend een lokaal JSON-snapshot. Zonder `--apply` is het een pure dry-run. Met `--apply` ontstaan alleen twee nieuwe lokale bestanden naast de snapshot: een gemigreerde kandidaat en een rapport. Legacydata blijft in de kandidaat aanwezig.
+Fase 10 heeft niet naar productie-Firestore geschreven en heeft `main` niet gewijzigd. `scripts/rehearse-production-migration.mjs` leest uitsluitend een lokaal JSON-snapshot. Zonder `--apply` is het een pure dry-run. Met `--apply` ontstaan alleen lokale kandidaat- en rapportbestanden naast de snapshot. De productie-snapshot, kandidaat en het volledige rapport worden vanwege productiegegevens niet in GitHub opgeslagen.
 
-## Repetitie
+## Uitgevoerde repetitie
+
+De productiegegevens zijn read-only uit Firebase-project `gepuzzelig` gelezen naar een lokaal snapshot. De bronhash is vóór en na de repetitie gelijk gebleven.
+
+Uitkomst:
+- profiles: 2 → 2;
+- groups: 1;
+- memberships: 2;
+- legacy result-documenten: 97;
+- unieke logische resultaten: 76;
+- gecontroleerde legacy-dubbelen: 21;
+- conflicterende dubbelen: 0;
+- gemigreerde resultaten: 76;
+- progress-items: 12 → 12;
+- blockers/orphans: 0;
+- dry-run: geslaagd;
+- lokale `--apply`: geslaagd;
+- herhaalde `--apply`: byte-identieke kandidaat, dus deterministisch/idempotent;
+- rollbackcontrole: bron-snapshot bleef ongewijzigd en kan de lokale kandidaat volledig vervangen.
+
+Tijdens de eerste repetitie bleek dat productie 21 dubbele legacy-resultaatdocumenten bevatte die dezelfde logische speler/datum/puzzelcombinatie representeerden. De Fase-10-tooling is daarop aangescherpt: alleen inhoudelijk equivalente records mogen als gecontroleerde deduplicatie samenvallen; een inhoudelijk verschil op dezelfde logische sleutel wordt een harde blocker. Daardoor wordt deduplicatie expliciet gerapporteerd in plaats van stil overschreven.
+
+## Repetitiecommando's
 
 `node scripts/rehearse-production-migration.mjs <verse-productie-snapshot.json>`
 
-Controleer vóór vervolg dat `checks.blockers` leeg is en de result/progress-aantallen gelijk zijn. Het rapport bevat SHA-256 van bron en kandidaat, orphan-detectie, mapping van profiles/playerId/groups/results/status/progress/preferences, per-player aggregaten voor resultaat-aantal/tijd/datums, een deterministische steekproef van accounts en rollbackinformatie.
-
-Pas daarna mag lokaal een kandidaatbestand worden gemaakt:
+Pas na een groene dry-run:
 
 `node scripts/rehearse-production-migration.mjs <verse-productie-snapshot.json> --apply`
 
-## Nog nodig om Fase 10 af te ronden
+## Conclusie en grens naar Fase 11
 
-1. Maak een verse, read-only export/kopie van **actuele productiegegevens**.
-2. Bewaar die ongewijzigd als rollbackbron.
-3. Draai de dry-run en archiveer het rapport.
-4. Onderzoek iedere blocker/orphan; niet negeren.
-5. Draai `--apply` alleen lokaal nadat de dry-run groen is.
-6. Vergelijk de deterministische accountsteekproef met de productiebron.
-7. Herhaal de rollbackrepetitie door de bronhash te verifiëren en de kandidaat weg te gooien/hergenereren.
-8. Pas als deze repetitie groen is, kan Fase 11 worden voorbereid. Live mutaties/deploys blijven een apart expliciet goedkeuringsmoment.
+Fase 10 bewijst dat de op 25 oktober 2026 gekopieerde productiegegevens zonder bekende blocker naar de nieuwe datastructuur kunnen worden omgezet. Dit is **geen toestemming om productie te migreren** en de snapshot mag niet als latere livebron worden gebruikt: productie kan intussen wijzigen.
 
-De CI-test gebruikt uitsluitend synthetische fixturedata en bewijst de werking van de tooling; hij vervangt de verplichte repetitie op een verse productie-export niet.
+Fase 11 blijft een apart expliciet goedkeuringsmoment. Voor livegang moet opnieuw een verse productieback-up/export worden gemaakt, moet de migratie-dry-run tegen exact die actuele snapshot groen zijn en moeten de pre/post-invarianten opnieuw worden gecontroleerd. Legacydata wordt bij livegang nog niet verwijderd.
