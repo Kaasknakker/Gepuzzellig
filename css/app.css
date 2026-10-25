@@ -2007,3 +2007,15 @@ body.home #home .hwrap:has(.hpuzzletabs) .puzzlecardfoot{margin-top:10px}
 
 /* Binair-potlood iets terug voor meer onderscheid met definitieve invoer. */
 body[data-t=bin] .c .nt{left:7%;top:6%;width:58%;height:58%;opacity:.54}
+
+
+/* v208: safe-area sluit aan op de banner; favorietkaarten groeien onafhankelijk. */
+#authaccount.authpage::before,#groupaccount.authpage::before{
+  content:"";position:fixed;z-index:30;top:0;left:0;right:0;
+  height:max(env(safe-area-inset-top),12px);
+  background:var(--bg);
+  pointer-events:none;
+}
+body.home #home .hwrap:has(.hpuzzletabs) .puzzlecatalog{align-items:start}
+body.home #home .hwrap:has(.hpuzzletabs) .puzzlecard{height:auto;align-self:start}
+@media(prefers-reduced-motion:reduce){.pcarddailychoices{transition:none!important}}
