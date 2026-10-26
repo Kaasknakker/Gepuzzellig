@@ -62,7 +62,8 @@ body.phone #pbot #potb,body.phone #pbot #notewipe{flex:0 0 46px;font-size:18px;p
 .c svg{width:74%;height:74%;pointer-events:none}
 .c.f{background:var(--fill)}
 .c.sel{background:var(--sel)}
-.c.pick{background:var(--sel)}
+.c.pick{background:color-mix(in srgb,var(--acc) 16%,var(--card))}
+.c.g.pick{background:color-mix(in srgb,var(--acc) 16%,color-mix(in srgb,var(--line) 45%,var(--card)))}
 .c.dup{background:var(--dup)}
 .c.dg0{background:#c9f58f}.c.dg1{background:#9fd8ff}.c.dg2{background:#ffd08a}.c.dg3{background:#f7b6d8}.c.dg4{background:#d9c2ff}.c.dg5{background:#fff3a3}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]) .c.dg0{background:#3d6b1c}:root:not([data-theme=light]) .c.dg1{background:#1d5a8a}:root:not([data-theme=light]) .c.dg2{background:#8a5a14}:root:not([data-theme=light]) .c.dg3{background:#8a2f5f}:root:not([data-theme=light]) .c.dg4{background:#5a3f9a}:root:not([data-theme=light]) .c.dg5{background:#7a6d12}}
