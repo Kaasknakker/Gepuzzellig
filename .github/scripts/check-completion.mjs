@@ -9,7 +9,7 @@ const elements={};
 const c=vm.createContext({
  assert,console,Date,Set,Map,Promise,
  S:{},store:{},SG:{},XS:{},uid:'me',lastRows:[],TYPES:{star:'Star Battle'},
- $:id=>elements[id]??=({value:id==='#group'?'group':'Speler',textContent:'',classList:{add(){}}}),
+ $:id=>elements[id]??=({value:id==='#group'?'group':'Speler',textContent:'',classList:{add(){},remove(){}}}),
  dstr:()=>today,playMs:()=>10000,clearOnline(){},clearFreeProgressType(){},progDel:k=>deleted.push(k),progKey:(_t,_p,d,sf)=>d+'star'+sf,
  hideHint(){},setT(){},fmt:String,badges:()=>'',TSHOW:false,render(){},celebrate(){},hintTotals:()=>({look:0,reason:0,move:0,legacy:0}),
  freeLoc:()=>free,lsSet(){},renderStats(){},dbSave:r=>{sent.push(r);return Promise.resolve()},
