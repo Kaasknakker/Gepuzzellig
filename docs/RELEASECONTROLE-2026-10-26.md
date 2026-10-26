@@ -18,6 +18,12 @@ Peter meldt dat de kernpaden op iPad, iPhone en pc zijn getest zonder bijzonderh
 
 Peter heeft expliciet ingestemd met de privacygrens: persoonlijke historie blijft behouden; ontbrekende historische toetredingsdata geven geen automatische toegang tot onbewijsbare oude groepsactiviteit. Behoud bestaande canonical memberships; gebruik voor ontbrekende legacydata de conservatieve snapshotgrens uit het draaiboek.
 
+## Aanvullende cutover-hardening
+
+Na de eerste releasecontrole is één migratierisico expliciet dichtgezet: de nieuwe client gebruikt de legacy collecties `results` en `status` alleen nog als read-fallback, daarom zijn clientwrites naar die twee collecties in de release-rules geblokkeerd. De Firestore-emulatortest controleert dat bestaande legacydata leesbaar blijft voor de eigenaar, maar create/update/delete door clients wordt geweigerd. Dit voorkomt dat een oude tab of PWA na de migratie nog niet-gemigreerde gameplaydata kan toevoegen.
+
+Dit is een rules-/test-/draaiboekwijziging; de webclient blijft v228. Gebruik bij livegang altijd de dan actuele volledige `develop`-HEAD als release-SHA en herhaal de exacte CI- en testdeploymentcontrole.
+
 ## Productiegrens
 
 Dit is releasevoorbereiding. Main en productie zijn niet gewijzigd. De actuele productie-export onder bewezen freeze, uitvoerbare runtime-/providerback-ups, actuele preflight en expliciet productieakkoord blijven vereist vóór de feitelijke migratie. De productiedatum voor nieuwe dagpuzzelvoorkeuren wordt bij de geplande cutover vastgesteld. Volg docs/FASE11-LIVEGANG.md.
