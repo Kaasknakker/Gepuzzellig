@@ -19,7 +19,7 @@ on:
     paths: ["css/**", "js/**", "index.html", "test/visual/**", ".github/workflows/visual-check.yml"]
 
 permissions:
-  contents: read
+  contents: write   # alleen nodig om de allereerste baseline in de branch te committen
 
 jobs:
   visual:
@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Code ophalen
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
       - name: Node instellen
         uses: actions/setup-node@v4
         with:
@@ -67,3 +69,14 @@ jobs:
         with:
           name: baseline
           path: test/visual/baseline/
+      # Alleen de allereerste keer (geen baseline in de branch) en nooit op main:
+      # commit de baseline uit deze omgeving, zodat volgende runs ermee vergelijken.
+      - name: Eerste baseline committen
+        if: steps.snap.outputs.baseline == 'nieuw' && github.ref_name != 'main' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add test/visual/baseline
+          git commit -m "Leg visuele baseline vast (gemaakt door de workflow Visuele controle)"
+          git push origin HEAD:${{ github.head_ref || github.ref_name }}
+          echo "::notice title=Baseline gecommit::De baseline staat nu in de branch. Start een nieuwe run (nieuwe commit) om ermee te vergelijken."

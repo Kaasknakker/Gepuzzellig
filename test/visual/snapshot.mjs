@@ -232,3 +232,13 @@ else {
   if (bad.length) process.exitCode = 1;
 }
 if (errors.length) { console.log("Fouten in de app tijdens de controle:"); for (const e of errors) console.log("  " + e); process.exitCode = 1; }
+
+// In GitHub Actions ook als meldingen (annotations), zodat de uitkomst zonder log zichtbaar is.
+if (process.env.GITHUB_ACTIONS) {
+  const esc = t => String(t).replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
+  const bad = results.filter(r => r.status !== "gelijk");
+  const kop = UPDATE ? `Baseline vastgelegd: ${made.length} screenshots` : `${results.length - bad.length}/${results.length} gelijk aan de baseline`;
+  console.log(`::notice title=Visuele controle::${esc(`${kop}. Dekking ${covered.size}/${allSelectors.size} CSS-regels. Fouten: ${errors.length}.`)}`);
+  if (bad.length) console.log(`::error title=Visuele verschillen::${esc(bad.slice(0, 40).map(r => `${r.status} ${r.file}`).join("\n"))}`);
+  if (errors.length) console.log(`::error title=Schermen niet geopend::${esc(errors.slice(0, 40).join("\n"))}`);
+}

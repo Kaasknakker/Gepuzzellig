@@ -77,7 +77,7 @@ Uitkomst: `test/visual/out/` (nieuw), `test/visual/baseline/` (vastgelegd), `tes
 
 Belangrijk:
 
-- **De baseline moet worden gemaakt in dezelfde omgeving als waarin wordt vergeleken.** Lettertypen verschillen per machine. Gebruik daarom bij voorkeur de GitHub-workflow `Visuele controle` (zie `.github/workflows/visual-check.yml`), en commit de baseline uit die workflow.
+- **De baseline moet worden gemaakt in dezelfde omgeving als waarin wordt vergeleken.** Lettertypen verschillen per machine. Daarom maakt de GitHub-workflow `Visuele controle` (`.github/workflows/visual-check.yml`) de baseline zelf: staat er nog geen `test/visual/baseline/` in de branch, dan legt de workflow die vast en commit hem één keer in die branch (nooit op `main`). Bewust bijwerken na een goedgekeurde visuele wijziging: verwijder de betrokken bestanden uit `baseline/`, of de hele map, en laat de workflow opnieuw draaien. De uitkomst staat als melding (annotation) bij de run.
 - Commit `out/`, `diff/` en `rapport.json` niet.
 - Wijzig `fixture.json`, `FIXED_TIME` en `scripts/seed-test-groups.mjs` niet tijdens het opruimen; dan verandert iedere screenshot.
 - Dit is Chromium, geen Safari. De controle bewijst dat de opmaak gelijk blijft, niet dat alles op een echte iPad werkt. Daarom blijft regel 8 gelden.
