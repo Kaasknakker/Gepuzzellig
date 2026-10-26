@@ -101,6 +101,7 @@ jobs:
             --exclude '.github/' \
             --exclude '.test-dist/' \
             --exclude 'docs/' \
+            --exclude 'test/' \
             --exclude 'functions/' \
             --exclude 'node_modules/' \
             --exclude 'firebase.json' \
