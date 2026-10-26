@@ -335,19 +335,12 @@ service cloud.firestore {
     }
 
     match /results/{id} {
-      // Legacy resultaten blijven voor de eigenaar leesbaar. Sociale groepslezing loopt in Fase 8
-      // via groupActivity, zodat joinedAt ook werkelijk door rules wordt afgedwongen.
+      // Legacy resultaten blijven alleen voor compatibiliteit leesbaar.
+      // Na de migratie schrijft de nieuwe client uitsluitend naar playerResults/groupActivity.
+      // Oude clients mogen daarom geen nieuwe legacy-resultaten meer toevoegen of wijzigen.
       allow read: if isAdmin()
         || (hasProfile() && resource.data.uid == myPlayer());
-      allow create: if validResult(id);
-      allow update: if validResult(id)
-        && resource.data.uid == myPlayer()
-        && approvedMember(resource.data.group, myPlayer())
-        && request.resource.data.uid == resource.data.uid
-        && request.resource.data.group == resource.data.group
-        && request.resource.data.date == resource.data.date
-        && request.resource.data.type == resource.data.type;
-      allow delete: if isOwner();
+      allow create, update, delete: if false;
     }
 
     // Sociale presence bevat nooit een persoonlijk bord of legacy progress.
@@ -359,15 +352,11 @@ service cloud.firestore {
     }
 
     match /status/{id} {
+      // Legacy status/progress blijft alleen als read-fallback beschikbaar.
+      // Presence en persoonlijke voortgang schrijven in het nieuwe model naar presence/progress.
       allow read: if isAdmin()
         || (hasProfile() && resource.data.uid == myPlayer());
-      allow create: if validStatus(id);
-      allow update: if validStatus(id)
-        && resource.data.uid == myPlayer()
-        && approvedMember(resource.data.group, myPlayer())
-        && request.resource.data.uid == resource.data.uid
-        && request.resource.data.group == resource.data.group;
-      allow delete: if isOwner();
+      allow create, update, delete: if false;
     }
 
     // Fase 7: een daily plan is een persoonlijke, onveranderlijke snapshot van de keuzes voor die datum.
