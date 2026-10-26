@@ -23,7 +23,7 @@ const themeSegment=core.indexOf("function makeThemeSeg");
 assert(themeHelper>=0&&themeHelper<themeUpdater&&themeUpdater<themeSegment);
 count++;
 
-const context={S:null,GV:1,MGV:1,PGV:1,BGV:1,HGV:1,PKEY:'test',dstr:()=> '2026-10-23',addDays:()=> '2026-10-15',nonoDayVariant:()=> 'color',
+const context={progressDeletedAt:()=>0,rememberProgressDeletion:()=>0,S:null,GV:1,MGV:1,PGV:1,BGV:1,HGV:1,PKEY:'test',dstr:()=> '2026-10-23',addDays:()=> '2026-10-15',nonoDayVariant:()=> 'color',
  progAll:()=>JSON.parse(JSON.stringify(saved)),lsSet:(k,v)=>{saved=JSON.parse(v);return true},playMs:()=>1000,
  cloudPushProgress:(...args)=>pushes.push(args),cloudClearProgress:k=>clears.push(k),$:()=>({value:'groep'}),
  UX:{saves:new Map(),storage(){},paintStorage(){}},tijd:n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')};

@@ -29,6 +29,10 @@ try{
  const personalResult={schemaVersion:3,playerId:solo.playerId,name:'Solo',groupId:'',puzzleDate:'2026-10-24',completedOn:'2026-10-24',puzzleType:'bin',resultType:'bin.2',mode:'daily',difficulty:'2',variant:'',deviceVariant:'ipad',puzzleKey:'2026-10-24:bin.2',secs:120,mist:0,hints:0,emo:'',note:'',legacyResultId:'',createdAt:400,updatedAt:400};
  await assertSucceeds(setDoc(doc(db(solo),'playerResults',solo.playerId,'items','daily-bin'),personalResult));await assertFails(setDoc(doc(db(outsider),'playerResults',solo.playerId,'items','bad'),{...personalResult,playerId:solo.playerId,puzzleKey:'bad'}));
  await assertSucceeds(setDoc(doc(db(solo),'progress',solo.playerId,'items','phase4-free'),{schemaVersion:3,legacyKey:'p:star.3',playerId:solo.playerId,puzzleType:'star',mode:'free',puzzleKey:'p:star.3',difficulty:'3',variant:'',deviceVariant:'ipad',state:{k:'p:star.3',pc:25},progressPercent:25,startedAt:410,updatedAt:411}));await assertFails(getDoc(doc(db(outsider),'progress',solo.playerId,'items','daily-bin')));
+ const deletion={schemaVersion:3,legacyKey:'d:2026-10-24:bin.2',playerId:solo.playerId,puzzleType:'bin',mode:'daily',puzzleKey:'d:2026-10-24:bin.2',difficulty:'2',variant:'',deviceVariant:'',state:{k:'d:2026-10-24:bin.2',at:450,pc:0,deleted:true},progressPercent:0,startedAt:450,updatedAt:450};
+ await assertSucceeds(setDoc(doc(db(solo),'progress',solo.playerId,'items','deleted-daily'),deletion));
+ await assertFails(getDoc(doc(db(outsider),'progress',solo.playerId,'items','deleted-daily')));
+ await assertFails(setDoc(doc(db(outsider),'progress',solo.playerId,'items','deleted-daily'),deletion));
  // Solo -> pending: canonical membership en inverse index moeten in dezelfde batch worden geschreven.
  const request={playerId:solo.playerId,displayName:'Solo',role:'member',status:'pending',requestedAt:500,approvedAt:0,joinedAt:0,approvedByPlayerId:'',updatedAt:500};
  {const x=db(solo),b=writeBatch(x);b.set(doc(x,'groups',fx.group.id,'members',solo.playerId),request);b.set(doc(x,'playerMemberships',solo.playerId,'groups',fx.group.id),indexOf(request,fx.group.id));await assertSucceeds(b.commit())}

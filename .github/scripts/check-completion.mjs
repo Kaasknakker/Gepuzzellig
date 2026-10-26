@@ -19,7 +19,7 @@ const c=vm.createContext({
 });
 for(const [a,b]of [
  ['function myRow(','function dbSave('],['function finish(){','setInterval(()=>{if(S.start'],
- ['const baseT=','const freeLvl='],['function allRows(){','function streakOf('],
+ ['const baseT=','const freeLvl='],['function allRows(','function streakOf('],
  ['function pullMine(','/* Tijden die nog niet'],['function resync(','addEventListener("pdready",startBoard)']
 ])vm.runInContext(section(a,b),c);
 vm.runInContext('globalThis.statsRows=statsRows',c);
@@ -53,6 +53,6 @@ assert.equal(c.XS['2026-10-20star.3'].completedOn,today,'new device receives com
 c.lastRows=rows.map(({completedOn,...r})=>r);
 assert.equal(c.allRows()[0].completedOn,today,'local metadata supplements older cached snapshot');
 c.store={'2020-01-01star.3':15};c.XS={'2020-01-01star.3':{completedOn:today}};sent=[];
-c.resync([]);assert.equal(sent.length,1,'old archive puzzle completed recently syncs offline result');
+c.resync([]);assert.equal(sent.filter(r=>!r.type.startsWith('v~')).length,1,'old archive puzzle completed recently syncs offline result');assert.equal(sent.filter(r=>r.type.startsWith('v~')).length,1,'offline free result also syncs personally');
 assert.equal(sent[0].date,'2020-01-01');assert.equal(sent[0].completedOn,today);
 console.log('OK: afrondingsdag na middernacht, vaste puzzelidentiteit, oude resultaten, lokale opslag en synchronisatie');

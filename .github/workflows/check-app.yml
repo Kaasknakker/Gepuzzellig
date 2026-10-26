@@ -71,6 +71,8 @@ jobs:
         run: node .github/scripts/check-completion.mjs
       - name: Bestaande dagpuzzels exact hervatten
         run: node .github/scripts/check-daily-resume.mjs
+      - name: Persoonlijke voortgang en wissen controleren
+        run: node .github/scripts/check-personal-progress.mjs
       - name: Automatische kruisjes controleren
         run: node .github/scripts/check-autocross.mjs
       - name: Stapsgewijze hints controleren

@@ -144,7 +144,7 @@ const save=()=>{try{localStorage.setItem("pd2",JSON.stringify(store))}catch(e){}
 const saveSG=()=>{try{localStorage.setItem("pdscoregroups",JSON.stringify(SG))}catch(e){}};
 const legacyGroup=()=>window.PD_SETUP&&window.PD_SETUP.group||"";
 const scoreGroup=k=>SG[k]||legacyGroup();
-const localDoneInGroup=(k,g)=>!!store[k]&&scoreGroup(k).toLowerCase()===String(g||"").toLowerCase();
+const localDone=k=>!!store[k];
 let uid="x";
 const lsGet=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
 const autoCrossPrefs=Object.fromEntries(["star","nono","mur"].map(t=>[t,lsGet("pdautocross:"+t)!=="off"]));
@@ -237,7 +237,7 @@ function load(type,practice,fresh,date,skipPersist,resumeKey){const resumedDaily
   const N=p.N||0;
   if(type==="bin")S.cur=p.giv.slice();else if(type==="kak")S.cur=Array(p.W*p.H).fill(0);else if(type==="m24"){S.r=0;setRound()}else if(type==="hex"){S.hx={rev:new Set([...p.rev0,...(p.zs||[])])};S.cs={}}else if(type==="mur"){S.cur=Array(N*N).fill(-1);S.ms=0;S.mxm=false;S.str=new Set()}else if(type==="plus"){S.cur=Array(p.W*p.H).fill(0);S.str=new Set()}else S.cur=Array(type==="nono"||type==="plus"?p.W*p.H:N*N).fill(0);
   const key=S.date+type+sf0;
-  if(!practice&&localDoneInGroup(key,$("#group").value)){S.done=true;S.secs=store[key];
+  if(!practice&&localDone(key)){S.done=true;S.secs=store[key];
    if(type==="bin")S.cur=p.sol.slice();else if(type==="star")S.cur=p.sol.map(v=>v?2:0);else if(type==="nono")S.cur=p.sol.slice();else if(type==="kak")S.cur=p.sol.slice();else if(type==="hex")p.sol.forEach((v,i)=>S.hx.rev.add(i));else if(type==="plus")S.cur=p.sol.map(v=>v?1:2);else if(type==="mur")S.cur=solCur(p)}
   if(!S.done&&sv0&&sv0.seed===seed&&((type!=="hex"&&type!=="plus"&&type!=="nono")||sv0.gv===GV)&&(type!=="hex"||(sv0.hv||"h1")===S.hv)&&(type!=="bin"||(sv0.bv||"b1")===S.bv)&&(type!=="mur"||sv0.mv===S.mv)&&(type!=="plus"||sv0.pv===PGV)){try{
    if(sv0.cur&&S.cur&&sv0.cur.length===S.cur.length)S.cur=sv0.cur.slice();
@@ -1272,12 +1272,12 @@ const badges=(r,t)=>{t=String(t).split(".")[0];const a=[];if(r.mist===0)a.push("
 const badgeLong=(r,t)=>{t=String(t).split(".")[0];const a=[];if(r.mist===0)a.push(`<svg class="stat-icon ico-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/><path d="m15.5 8.5 4-4M17 4.5h2.5V7"/></svg> foutloos`);else if(r.mist>0)a.push(r.mist===1?"1 fout gezien":r.mist+" fouten gezien");
  if(HINTT.includes(t)){if(r.hints===0)a.push(`<svg class="stat-icon ico-hint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.2 14.5A6 6 0 1 1 15.8 14.5c-1.1.8-1.3 1.5-1.3 2.5h-5c0-1-.2-1.7-1.3-2.5z"/><path d="M9.5 18h5M10.5 21h3"/></svg> zonder hint`);else if(r.hints>0)a.push(hintSummary(r))}return a.join(" · ")};
 const quickBadges=(r,t)=>{if(!r)return"";t=String(t).split(".")[0];const a=[];if(r.mist!=null)a.push(r.mist===0?'<span class="rq good rq-target" title="Foutloos"><svg class="stat-icon ico-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/><path d="m15.5 8.5 4-4M17 4.5h2.5V7"/></svg></span>':'<span class="rq rq-bad" title="'+r.mist+(r.mist===1?" fout":" fouten")+'"><svg class="stat-icon ico-cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg><b>'+r.mist+'</b></span>');if(HINTT.includes(t)&&r.hints!=null)a.push(r.hints===0?'<span class="rq good rq-hint" title="Zonder hint"><svg class="stat-icon ico-hint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.2 14.5A6 6 0 1 1 15.8 14.5c-1.1.8-1.3 1.5-1.3 2.5h-5c0-1-.2-1.7-1.3-2.5z"/><path d="M9.5 18h5M10.5 21h3"/></svg></span>':'<span class="rq rq-hint" title="'+hintSummary(r)+'"><svg class="stat-icon ico-hint" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.2 14.5A6 6 0 1 1 15.8 14.5c-1.1.8-1.3 1.5-1.3 2.5h-5c0-1-.2-1.7-1.3-2.5z"/><path d="M9.5 18h5M10.5 21h3"/></svg><b>'+r.hints+'</b></span>');return a.join("")};
-function ownDayResult(date,t){const ty=t+sfx(dagLv(t,date)),g=($("#group").value||"").trim().toLowerCase(),sync=lastRows.find(x=>x.uid===uid&&x.date===date&&x.type===ty&&(x.group||"").toLowerCase()===g);let r=localDoneInGroup(date+ty,g)?myRow(date,ty):sync?Object.assign({},sync):null;if(r&&sync){if(r.mist==null&&sync.mist!=null)r.mist=sync.mist;if(r.hints==null&&sync.hints!=null)r.hints=sync.hints;if(!r.hintSteps&&sync.hintSteps)r.hintSteps=sync.hintSteps;if(!r.secs&&sync.secs)r.secs=sync.secs}if(r){r.type=ty;r.secs=r.secs||store[date+ty]||0}return r}
+function ownDayResult(date,t){const ty=t+sfx(dagLv(t,date)),sync=lastRows.find(x=>x.uid===uid&&x.date===date&&x.type===ty);let r=localDone(date+ty)?myRow(date,ty):sync?Object.assign({},sync):null;if(r&&sync){if(r.mist==null&&sync.mist!=null)r.mist=sync.mist;if(r.hints==null&&sync.hints!=null)r.hints=sync.hints;if(!r.hintSteps&&sync.hintSteps)r.hintSteps=sync.hintSteps;if(!r.secs&&sync.secs)r.secs=sync.secs}if(r){r.type=ty;r.secs=r.secs||store[date+ty]||0}return r}
 function myRow(date,type){const x=XS[date+type]||{},r={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date,type,secs:store[date+type]||1,uid};
  if(x.mist!=null)r.mist=x.mist;if(x.hints!=null)r.hints=x.hints;if(x.hintSteps)r.hintSteps=x.hintSteps;if(x.completedOn)r.completedOn=x.completedOn;return r}
 function dbSave(row){if(!window.PD_DB)return Promise.resolve();
  return window.PD_DB.save(row).catch(e=>{const compatible=Object.assign({},row);delete compatible.hintSteps;
- return window.PD_DB.save(compatible).catch(()=>{const b={};BASEF.forEach(k=>b[k]=row[k]);OLDRULES=true;board(lastRows);return window.PD_DB.save(b)})})}
+ return window.PD_DB.save(compatible).catch(()=>{const b={};BASEF.forEach(k=>b[k]=row[k]);if(row.personalOnly)b.personalOnly=true;OLDRULES=true;board(lastRows);return window.PD_DB.save(b)})})}
 function resRow(r,td){if(r.uid===uid&&XS[(r.puzzleDate||r.date)+r.type]){const x=XS[(r.puzzleDate||r.date)+r.type];r=Object.assign({},r,{mist:x.mist!=null?x.mist:r.mist,hints:x.hints!=null?x.hints:r.hints})}
  const d=document.createElement("div");d.className="row";const a=document.createElement("span"),b=document.createElement("span");a.textContent=playerNameUid(r.uid,r.name)+" ✓ "+badges(r,r.type);b.className="mut";b.textContent=TSHOW?fmt(r.secs):"";d.append(a,b);return d}
 /* Puzzel van de dag: elke dag één vaste soort, voor iedereen dezelfde. De andere dagpuzzels kunnen, maar hoeven niet. */
@@ -1330,14 +1330,14 @@ document.addEventListener("pointerdown",e=>{const f=$("#fin");if(f&&!f.hidden&&!
 /* ---- Reeksen en weekstand ---- */
 const addDays=(ds,n)=>{const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d+n).toLocaleDateString("sv")};
 const dnl=ds=>{const[y,m,d]=ds.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("nl-NL",{weekday:"short",day:"numeric",month:"short"}).replace(".","")};
-function allRows(){const g=$("#group").value.trim().toLowerCase(),seen=new Set(),out=[];
+function allRows(personal=false){const g=$("#group").value.trim().toLowerCase(),seen=new Set(),out=[];
  const add=r=>{if(!TYPES[baseT(r)])return;const k=r.uid+"|"+r.date+"|"+r.type;if(seen.has(k))return;seen.add(k);const x=r.uid===uid&&XS[(r.puzzleDate||r.date)+r.type];out.push(!r.completedOn&&x&&x.completedOn?{...r,completedOn:x.completedOn}:r)};
- lastRows.filter(r=>(r.group||"").toLowerCase()===g).forEach(add);
- freeLoc().filter(r=>String(r.group||legacyGroup()).toLowerCase()===g).forEach(r=>add({...r,name:$("#name").value||"Speler",group:g,uid}));
- for(const k in store){const m=/^(\d{4}-\d\d-\d\d)(.+)$/.exec(k);if(m&&scoreGroup(k).toLowerCase()===g)add({name:$("#name").value||"Speler",group:g,date:m[1],type:m[2],secs:store[k],uid})}
+ lastRows.filter(r=>(personal&&r.uid===uid)||(r.group||"").toLowerCase()===g).forEach(add);
+ freeLoc().filter(r=>personal||String(r.group||legacyGroup()).toLowerCase()===g).forEach(r=>add({...r,name:$("#name").value||"Speler",group:g,uid}));
+ for(const k in store){const m=/^(\d{4}-\d\d-\d\d)(.+)$/.exec(k);if(m&&(personal||scoreGroup(k).toLowerCase()===g))add({name:$("#name").value||"Speler",group:g,date:m[1],type:m[2],secs:store[k],uid})}
  return out}
 function streakOf(rows,u){const ds=new Set(rows.filter(r=>r.uid===u).map(r=>r.date));let d=dstr();if(!ds.has(d))d=addDays(d,-1);let n=0;while(ds.has(d)){n++;d=addDays(d,-1)}return n}
-function renderStats(){const raw=allRows(),all=statsRows(raw),rows=all.filter(r=>!isFree(r)),frs=all.filter(isFree),today=dstr(),dow=(new Date().getDay()+6)%7,mon=addDays(today,-dow),sun=addDays(mon,6);
+function renderStats(){const raw=allRows(true),all=statsRows(raw),rows=all.filter(r=>!isFree(r)),frs=all.filter(isFree),today=dstr(),dow=(new Date().getDay()+6)%7,mon=addDays(today,-dow),sun=addDays(mon,6);
  const pl=new Map();groupPlayers().forEach(p=>pl.set(uidOf(p),playerName(p)));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});
  const sc=new Map([...pl.keys()].map(u=>[u,{pts:0,n:0,w:0,fw:0,ft:0}])),grp=new Map();
  rows.filter(r=>r.date>=mon&&r.date<=sun).forEach(r=>{const k=r.date+"|"+r.type;if(!grp.has(k))grp.set(k,[]);grp.get(k).push(r)});
@@ -1457,17 +1457,18 @@ function startBoard(){if(ADMIN_READONLY||!window.PD_DB||!window.PD_PROFILE_LINKE
 function mergeRows(oud,nieuw){const m=new Map();const k=r=>(r.group||"")+"|"+r.uid+"|"+r.date+"|"+r.type;oud.forEach(r=>m.set(k(r),r));nieuw.forEach(r=>m.set(k(r),r));return[...m.values()]}
 /* Andersom: dagpuzzels die volgens het scorebord al af zijn, maar die dit apparaat niet (meer) kent
    (bijv. andere browser, beginscherm-app tegenover Safari, gewiste gegevens), ook hier als klaar markeren. */
-function pullMine(rows){let ch=false,g=$("#group").value.trim().toLowerCase();
- rows.forEach(r=>{if(r.uid!==uid||(r.group||"").toLowerCase()!==g||!r.date||!r.type||String(r.type).startsWith("v~")||!(r.secs>0))return;const k=r.date+r.type;
-  if(!store[k]||scoreGroup(k)!==(r.group||legacyGroup())){store[k]=r.secs;SG[k]=r.group||legacyGroup();ch=true;if(!XS[k]&&(r.mist!=null||r.hints!=null)){XS[k]={};if(r.mist!=null)XS[k].mist=r.mist;if(r.hints!=null)XS[k].hints=r.hints;if(r.hintSteps)XS[k].hintSteps=r.hintSteps}}
+function pullMine(rows){let ch=false;
+ rows.forEach(r=>{if(r.uid!==uid||!r.date||!r.type||String(r.type).startsWith("v~")||!(r.secs>0))return;const k=r.date+r.type;
+  if(!store[k]){store[k]=r.secs;SG[k]=r.group||legacyGroup();ch=true;if(!XS[k]&&(r.mist!=null||r.hints!=null)){XS[k]={};if(r.mist!=null)XS[k].mist=r.mist;if(r.hints!=null)XS[k].hints=r.hints;if(r.hintSteps)XS[k].hintSteps=r.hintSteps}}
   if(r.completedOn&&!XS[k]?.completedOn){XS[k]={...XS[k],completedOn:r.completedOn};ch=true}
  });
  if(!ch)return;save();saveSG();try{xsSave()}catch(e){}
- if(S.p&&!S.practice&&!S.done&&localDoneInGroup(S.date+S.type+S.sf,g)){progDel(progKey(S.type,false,S.date,S.sf));load(S.type,false,false,S.date)}}
+ if(S.p&&!S.practice&&!S.done&&localDone(S.date+S.type+S.sf)){progDel(progKey(S.type,false,S.date,S.sf));load(S.type,false,false,S.date)}}
 /* Tijden die nog niet op het scorebord staan (bijv. offline gespeeld) alsnog versturen. */
 function resync(rows){if(!window.PD_DB||resync.done)return;resync.done=true;const from=addDays(dstr(),-14);
- Object.keys(store).forEach(k=>{const d=k.slice(0,10),t=k.slice(10);if((XS[k]?.completedOn||d)<from||!/^\d{4}-\d\d-\d\d$/.test(d)||!t||scoreGroup(k)!==$("#group").value.trim())return;
-  if(!rows.some(r=>r.uid===uid&&r.date===d&&r.type===t&&(r.group||"")===scoreGroup(k)))dbSave(myRow(d,t)).catch(()=>{})})}
+ Object.keys(store).forEach(k=>{const d=k.slice(0,10),t=k.slice(10);if((XS[k]?.completedOn||d)<from||!/^\d{4}-\d\d-\d\d$/.test(d)||!t)return;
+  if(!rows.some(r=>r.uid===uid&&r.date===d&&r.type===t))dbSave({...myRow(d,t),group:scoreGroup(k),personalOnly:true}).catch(()=>{resync.done=false})});
+ freeLoc().forEach(r=>{if(!/^\d{4}-\d\d-\d\d$/.test(r.date)||r.date<from||!String(r.type).startsWith("v~")||!(r.secs>0))return;if(!rows.some(x=>x.uid===uid&&x.date===r.date&&x.type===r.type))dbSave({...r,name:$("#name").value.trim()||"Speler",uid,personalOnly:true}).catch(()=>{resync.done=false})})}
 addEventListener("pdready",startBoard);addEventListener("pdready",()=>setTimeout(()=>pullCloudProgress(true),300));
 if("serviceWorker"in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){
  /* iOS kan een beginscherm-app lang in het geheugen houden. Controleer daarom ook bij terugkeer naar de app op een nieuwe worker. */
@@ -1526,9 +1527,12 @@ function progAll(){try{return JSON.parse(lsGet(PKEY)||"{}")}catch(e){return{}}}
 function progKey(t,pr,d,sf){const nv=t==="nono"&&S&&S.type==="nono"&&S.nv==="color"?"c":"";return pr?"p:"+t+sf+nv:"d:"+d+":"+t+sf}
 const cloudProgKey=k=>encodeURIComponent(k).replace(/\./g,"%2E");
 const cloudProgOk=()=>!PHONE&&uid&&uid!=="x"&&window.PD_DB&&window.PD_DB.saveProgress;
-let cloudProgLast={},cloudProgCleared={},cloudProgPullAt=0,cloudProgPulling=false;
+let cloudProgLast={},cloudProgPullAt=0,cloudProgPulling=false;
+function progressDeletions(){try{return JSON.parse(lsGet("pdprogdeleted:"+uid)||"{}")}catch(e){return{}}}
+function progressDeletedAt(k){return Number(progressDeletions()[k])||0}
+function rememberProgressDeletion(k,at){const marks=progressDeletions();marks[k]=Math.max(Number(marks[k])||0,at);lsSet("pdprogdeleted:"+uid,JSON.stringify(marks));return marks[k]}
 function progressRelevant(k){return true}
-function progressSolved(k,e){const g=String(e&&e.group||legacyGroup()).toLowerCase();if(k.startsWith("d:")){const a=k.split(":"),sk=a[1]+a.slice(2).join(":");return localDoneInGroup(sk,g)}if(k.startsWith("p:")&&e&&e.seed){const sid=String(e.seed).replace(/\W/g,"").slice(-8);return freeLoc().some(r=>String(r.group||legacyGroup()).toLowerCase()===g&&String(r.type).endsWith("~"+sid))}return false}
+function progressSolved(k,e){if(k.startsWith("d:")){const a=k.split(":"),sk=a[1]+a.slice(2).join(":");return localDone(sk)}if(k.startsWith("p:")&&e&&e.seed){const sid=String(e.seed).replace(/\W/g,"").slice(-8);const m=progressMeta(k,e);return [...freeLoc(),...lastRows.filter(r=>r.uid===uid)].some(r=>m&&String(r.type).split("~")[1]?.split(".")[0]===m.type&&String(r.type).endsWith("~"+sid))}return false}
 function progressPct(){if(!S||!S.p)return 0;const p=S.p,cur=S.cur,ratio=(a,b)=>b?Math.max(a>0?1:0,Math.min(99,Math.round(100*a/b))):0;
  if(S.type==="bin"&&cur){let a=0,b=0;for(let i=0;i<cur.length;i++)if(!p.giv||p.giv[i]<0){b++;if(cur[i]>=0)a++}return ratio(a,b)}
  if(["star","nono","plus"].includes(S.type)&&cur)return ratio(cur.filter(v=>v!==0).length,cur.length);
@@ -1538,13 +1542,14 @@ function progressPct(){if(!S||!S.p)return 0;const p=S.p,cur=S.cur,ratio=(a,b)=>b
  if(S.type==="m24")return ratio(S.r||0,5);return 0}
 /* Firestore kan geen bordlijsten direct in een geschiedenislijst bewaren. Alleen de cloudversie krijgt een omhullend object. */
 function cloudProgressHistory(e,encode){const out=Object.assign({},e);for(const key of ["hist","redo"])if(Array.isArray(out[key]))out[key]=out[key].map(step=>encode?(Array.isArray(step)?{board:step}:step):(step&&Array.isArray(step.board)?step.board:step));return out}
-function cloudPushProgress(k,e,force){if(!cloudProgOk()||!e||progressSolved(k,e))return;if(navigator.onLine===false){UX.storage(k,{at:e.at,remote:"failed"});return}const now=Date.now();if(!force&&now-(cloudProgLast[k]||0)<60000)return;cloudProgLast[k]=now;
+function cloudPushProgress(k,e,force){if(!cloudProgOk()||!e||progressSolved(k,e)||(Number(e.at)||0)<=progressDeletedAt(k))return;if(navigator.onLine===false){UX.storage(k,{at:e.at,remote:"failed"});return}const now=Date.now();if(!force&&now-(cloudProgLast[k]||0)<60000)return;cloudProgLast[k]=now;
  const entry=Object.assign(cloudProgressHistory(e,true),{k}),saveStarted=Date.now();UX.storage(k,{at:e.at,remote:"saving"});
- return Promise.resolve().then(()=>window.PD_DB.saveProgress({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",ck:cloudProgKey(k),entry})).then(()=>{if(typeof cloudProgCleared!=="undefined"&&(cloudProgCleared[k]||0)>=saveStarted)return cloudClearProgress(k);UX.storage(k,{at:e.at,remote:"saved"})}).catch(()=>{cloudProgLast[k]=Date.now();UX.storage(k,{at:e.at,remote:"failed"})})}
-function cloudClearProgress(k){if(!cloudProgOk()||!window.PD_DB.clearProgress)return;window.PD_DB.clearProgress({uid,group:$("#group").value.trim(),ck:cloudProgKey(k)}).catch(()=>{})}
-function progDel(k){const a=progAll();if(k in a){delete a[k];lsSet(PKEY,JSON.stringify(a))}cloudProgCleared[k]=Date.now();cloudClearProgress(k)}
+ return Promise.resolve().then(()=>window.PD_DB.saveProgress({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",ck:cloudProgKey(k),entry})).then(()=>{if(progressDeletedAt(k)>=(Number(e.at)||saveStarted))return cloudClearProgress(k);UX.storage(k,{at:e.at,remote:"saved"})}).catch(()=>{cloudProgLast[k]=Date.now();UX.storage(k,{at:e.at,remote:"failed"})})}
+function cloudClearProgress(k){if(!cloudProgOk()||!window.PD_DB.clearProgress)return;window.PD_DB.clearProgress({uid,group:$("#group").value.trim(),ck:cloudProgKey(k),at:progressDeletedAt(k)||Date.now()}).catch(()=>{})}
+function progDel(k){const a=progAll(),at=Math.max(Date.now(),Number(a[k]?.at)||0);if(k in a){delete a[k];lsSet(PKEY,JSON.stringify(a))}rememberProgressDeletion(k,at);cloudClearProgress(k)}
 function mergeCloudProgress(mp){if(PHONE||!mp)return false;const a=progAll(),remote={};let ch=false,reload=false,curk=S&&S.p?progKey(S.type,S.practice,S.date,S.sf):"";
- Object.values(mp).forEach(raw=>{if(!raw||!raw.k)return;const e=cloudProgressHistory(raw,false);remote[e.k]=e;const k=e.k;if(!progressRelevant(k)||progressSolved(k,e)){cloudClearProgress(k);return}const l=a[k];if(!l||(e.at||0)>(l.at||0)){const z=Object.assign({},e);delete z.k;a[k]=z;ch=true;if(k===curk&&!document.body.classList.contains("home")&&(e.at||0)>(S._saveAt||0))reload=true}});
+ Object.values(mp).forEach(raw=>{if(!raw||!raw.k)return;const e=cloudProgressHistory(raw,false);remote[e.k]=e;const k=e.k,l=a[k];if(e.deleted){const at=rememberProgressDeletion(k,Number(e.at)||0);if(l&&(Number(l.at)||0)<=at){delete a[k];ch=true}if(k===curk&&(!l||(Number(l.at)||0)<=at))S.discarded=true;return}if((Number(e.at)||0)<=progressDeletedAt(k)){cloudClearProgress(k);return}if(!progressRelevant(k)||progressSolved(k,e)){cloudClearProgress(k);return}if(!l||(e.at||0)>(l.at||0)){const z=Object.assign({},e);delete z.k;a[k]=z;ch=true;if(k===curk&&!document.body.classList.contains("home")&&(e.at||0)>(S._saveAt||0))reload=true}});
+ for(const[k,at]of Object.entries(progressDeletions()))if(!a[k]||(Number(a[k].at)||0)<=at){if(a[k]){delete a[k];ch=true}if(!remote[k]?.deleted||(Number(remote[k].at)||0)<at)cloudClearProgress(k)}
  const now=Date.now();for(const[k,e0]of Object.entries(a)){if(!progressRelevant(k)||progressSolved(k,e0))continue;let e=e0;if(!e.at&&!remote[k]){e=Object.assign({},e,{at:now});a[k]=e;ch=true}const r=remote[k];if(!r||(e.at||0)>(r.at||0))cloudPushProgress(k,e,true)}
  if(ch&&!lsSet(PKEY,JSON.stringify(a))&&curk)UX.storage(curk,{local:false,remote:"saved"});if(reload&&S&&S.p&&!S.done){const t=S.type,pr=S.practice,d=S.date;S.start=0;if(pr)load(t,pr,false,d);else load(t,false,false,d,false,curk)}else if(document.body.classList.contains("home"))try{renderHome()}catch(e){}return ch}
 function pullCloudProgress(force){if(PHONE||!uid||uid==="x"||!window.PD_DB||!window.PD_DB.getProgress||cloudProgPulling)return Promise.resolve(false);const now=Date.now();if(!force&&now-cloudProgPullAt<15000)return Promise.resolve(false);cloudProgPullAt=now;cloudProgPulling=true;
@@ -1552,7 +1557,7 @@ function pullCloudProgress(force){if(PHONE||!uid||uid==="x"||!window.PD_DB||!win
 function persist(forceCloud){if(S.discarded||!S.p||S.done||!S.start||!S.seed)return;const a=progAll();let pruned=false;
  const k=progKey(S.type,S.practice,S.date,S.sf),pc=progressPct();
  /* Alleen bordinvoer of eigen aantekeningen maken dit een lopende puzzel; hints bekijken en controleren niet. */
- if(pc<=0&&!(S.nt&&Object.values(S.nt).some(Boolean))&&!(S.cs&&Object.values(S.cs).some(Boolean))&&!(S.str&&S.str.size)){if(k in a){delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;UX.saves.delete(k);UX.paintStorage();return}
+ if(pc<=0&&!(S.nt&&Object.values(S.nt).some(Boolean))&&!(S.cs&&Object.values(S.cs).some(Boolean))&&!(S.str&&S.str.size)){if(k in a){rememberProgressDeletion(k,Math.max(Date.now(),Number(a[k].at)||0));delete a[k];pruned=true;cloudClearProgress(k)}if(pruned)lsSet(PKEY,JSON.stringify(a));S._saveAt=0;UX.saves.delete(k);UX.paintStorage();return}
  const e={seed:S.seed,gv:GV,mv:S.mv||MGV,pv:PGV,el:playMs(),pen:0,mist:S.mist||0,hints:S.hints||0,hintLedger:S.hintLedger||{},hintLegacy:S.hintLegacy||0,seenErrors:S.seenErrors||{},pc,group:$("#group").value.trim()};
  if(S.type==="nono")e.nv=S.nv;
  if(S.type==="bin")e.bv=S.bv||BGV;if(S.type==="hex")e.hv=S.hv||HGV;
@@ -1561,7 +1566,7 @@ function persist(forceCloud){if(S.discarded||!S.p||S.done||!S.start||!S.seed)ret
     Maak 24 heeft een eigen ronde-state en laten we hier bewust buiten. */
  if(S.type!=="m24"){if(S.hist&&S.hist.length)e.hist=S.hist.slice(-60);if(S.redo&&S.redo.length)e.redo=S.redo.slice(-30)}
  const prev=a[k],plain=x=>{if(!x)return"";const q=Object.assign({},x);delete q.at;return JSON.stringify(q)},changed=!prev||plain(prev)!==plain(e);
- e.at=changed?Date.now():(prev.at||Date.now());a[k]=e;S._saveAt=e.at;const local=lsSet(PKEY,JSON.stringify(a));UX.storage(k,{at:e.at,local,remote:changed?"local":(UX.saves.get(k)||{}).remote});if(changed||forceCloud)cloudPushProgress(k,e,!!forceCloud)}
+ e.at=changed?Math.max(Date.now(),progressDeletedAt(k)+1):(prev.at||Date.now());a[k]=e;S._saveAt=e.at;const local=lsSet(PKEY,JSON.stringify(a));UX.storage(k,{at:e.at,local,remote:changed?"local":(UX.saves.get(k)||{}).remote});if(changed||forceCloud)cloudPushProgress(k,e,!!forceCloud)}
 setInterval(persist,3000);
 document.addEventListener("visibilitychange",()=>{if(document.hidden){pausePlay();persist(true)}else pullCloudProgress(true).finally(()=>resumePlay())});
 addEventListener("blur",()=>{pausePlay();persist(true)});
@@ -1649,15 +1654,15 @@ window.PD_MENU_PAGE_TOP=menuPageTop;
 function showHome(){if($("#checkfeedback"))$("#checkfeedback").textContent="";document.body.classList.remove("layout-wide","layout-rail","layout-bottom");window.LAYOUT_BOTTOM=false;RANDOM=false;if(HOMEREADY)pauseAndPersistActive(true);HVIEW="";HDOPEN="";clearHint();const m=$("#more");if(m)m.classList.remove("open");toggleSide(false);document.body.classList.remove("newpick");document.body.classList.add("home");if(window.PD_APPLY_SW_UPDATE&&window.PD_APPLY_SW_UPDATE())return;const np=$("#npm");if(np)np.hidden=true;tapMode();renderHome();if(HOMEREADY)pageIn($("#home"));window.PD_MENU_PAGE_TOP?.();pingOnline(true)}
 const dayLvDevice=(t,ds,phone)=>{if(!dagVast(ds))return null;return semanticLevel(t,dailyDifficultyFor(t,ds),phone)};
 const dayTypeDevice=(t,ds,phone)=>{const l=dayLvDevice(t,ds,phone);return t+sfx(l||dagLv(t,ds))};
-function myDone(td,t){if(!dagVast(td)){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))||""}const ty=dayTypeDevice(t,td,PHONE),k=td+ty,g=($("#group").value||"").trim().toLowerCase();return localDoneInGroup(k,g)||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty&&(r.group||"").toLowerCase()===g)?k:""}
-function myDoneOther(td,t){if(!dagVast(td))return"";const ty=dayTypeDevice(t,td,!PHONE),k=td+ty,g=($("#group").value||"").trim().toLowerCase();return localDoneInGroup(k,g)||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty&&(r.group||"").toLowerCase()===g)?k:""}
+function myDone(td,t){if(!dagVast(td)){const re=new RegExp("^"+td+t+"(\\.\\d)?$");return Object.keys(store).find(k=>re.test(k))||""}const ty=dayTypeDevice(t,td,PHONE),k=td+ty;return localDone(k)||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty)?k:""}
+function myDoneOther(td,t){if(!dagVast(td))return"";const ty=dayTypeDevice(t,td,!PHONE),k=td+ty;return localDone(k)||lastRows.some(r=>r.uid===uid&&r.date===td&&r.type===ty)?k:""}
 function progressMeta(k,e){let m;if((m=/^d:(\d{4}-\d\d-\d\d):([a-z0-9]+)(?:\.(\d))?$/.exec(k))){const t=m[2],d=m[1];return{k,e,practice:false,date:d,type:t,lvl:+(m[3]||2),color:t==="nono"&&(["classic","color"].includes(e?.nv)?e.nv==="color":nonoDayVariant(d)==="color")}};
  if((m=/^p:([a-z0-9]+?)(?:\.(\d))?(c)?$/.exec(k)))return{k,e,practice:true,date:dstr(),type:m[1],lvl:+(m[2]||2),color:!!m[3]};return null}
 const nonoMetaVariant=m=>m&&m.type==="nono"?(m.color?"color":"classic"):"";
 function currentSessionMeta(){return S&&S.p?{type:S.type,practice:!!S.practice,date:S.date,nv:S.nv,lvl:S.lvl,done:!!S.done,pc:progressPct(),key:S.practice?progKey(S.type,S.practice,S.date,S.sf):""}:null}
 function pauseAndPersistActive(forceCloud){if(!S||!S.p||S.done||!S.start)return false;pausePlay();persist(!!forceCloud);return true}
 function setFreePreferences(t,l,nv){if(LVN[t]&&l){LV[t]=l;lsSet("pdlvl",JSON.stringify(LV))}if(t==="nono"&&nv){nonoVariant=nv;lsSet("pdnvar",nv)}}
-function progressList(filter={},source){const{practice=null,type="",date="",variant=""}=filter,g=$("#group").value.trim().toLowerCase();return Object.entries(source||progAll()).map(([k,e])=>progressMeta(k,e)).filter(m=>m&&String(m.e.group||legacyGroup()).toLowerCase()===g&&progressRelevant(m.k)&&!progressSolved(m.k,m.e)&&(practice===null||m.practice===practice)&&(!type||m.type===type)&&(!date||m.date===date)&&(!variant||m.type!=="nono"||nonoMetaVariant(m)===variant)).sort((a,b)=>(b.e.at||0)-(a.e.at||0))}
+function progressList(filter={},source){const{practice=null,type="",date="",variant=""}=filter;return Object.entries(source||progAll()).map(([k,e])=>progressMeta(k,e)).filter(m=>m&&!m.e.deleted&&progressRelevant(m.k)&&!progressSolved(m.k,m.e)&&(practice===null||m.practice===practice)&&(!type||m.type===type)&&(!date||m.date===date)&&(!variant||m.type!=="nono"||nonoMetaVariant(m)===variant)).sort((a,b)=>(b.e.at||0)-(a.e.at||0))}
 function freeProgressList(t,nv){return progressList({practice:true,type:t||"",variant:nv||""})}
 function clearFreeProgressType(t,keep,nv){let target=nv||"";if(t==="nono"&&!target&&keep){const e=progAll()[keep],m=progressMeta(keep,e);target=nonoMetaVariant(m)}freeProgressList(t).forEach(m=>{if(m.k!==keep&&(t!=="nono"||!target||nonoMetaVariant(m)===target))progDel(m.k)})}
 function latestFreeProgress(t,nv){if(t==="nono"&&!nv){for(const v of["classic","color"]){const a=freeProgressList(t,v);a.slice(1).forEach(m=>progDel(m.k))}return freeProgressList(t)[0]||null}const a=freeProgressList(t,nv),m=a[0]||null;a.slice(1).forEach(x=>progDel(x.k));return m}
@@ -1812,7 +1817,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  const datum=now.toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}),g=($("#group").value||"").trim().toLowerCase(),others=groupPlayers().filter(p=>uidOf(p)!==uid),types=favoriteTypes().filter(t=>TYPES[t]),allTypes=Object.keys(TYPES),raadselsOK=g==="peter-aart-jk4hv92t"||String(GROUP_NAME||"").trim().toLowerCase()==="rekensukkels";
  const pa=progAll(),busyMeta=t=>progressList({practice:false,type:t,date:td},pa)[0]||null;
  const progRing=(p,t)=>p==null?"":`<span class="pdonut" aria-label="${p}% ingevuld" title="${p}% ingevuld; dit zegt niet of de vakjes correct zijn" style="--p:${p};--ring:${TCOL[t]||"var(--pc)"}"><b>${p}%</b></span>`;
- const active=progressList({},pa),dayActive=active.filter(m=>!m.practice),freeActive=active.filter(m=>m.practice),olderDay=dayActive.filter(m=>m.date!==td),activeGroups=allTypes.map(t=>({t,items:active.filter(m=>m.type===t)})).filter(x=>x.items.length),homeRaw=allRows();
+ const active=progressList({},pa),dayActive=active.filter(m=>!m.practice),freeActive=active.filter(m=>m.practice),olderDay=dayActive.filter(m=>m.date!==td),activeGroups=allTypes.map(t=>({t,items:active.filter(m=>m.type===t)})).filter(x=>x.items.length),homeRaw=allRows(true);
  const resumeCard=m=>{const nv=m.type==="nono"?(m.color?"color":"classic"):"",name=m.practice?FREE_NAME(m.type,nv):(TYPES[m.type]||m.type),badge=!m.practice&&nv?`<span class="nvbadge ${nv}">${nv==="color"?"Kleur":"Klassiek"}</span>`:"",sub=[m.practice?"Vrij puzzelen":m.date===td?"Vandaag":dnl(m.date),LVN[m.type]?LVL[m.lvl]:""].filter(Boolean).join(" · ");return`<div class="hcontrow"><button class="hcont${nv?" nono-"+nv:""}" data-pk="${m.k}" title="Ga verder met ${name}">${tIcon(m.type,false,m.practice?nv:"")}<span class="ctxt"><b>${name}${badge}</b><small>${sub}</small></span>${progRing(m.e.pc==null?0:m.e.pc,m.type)}<span class="hgo2">›</span></button><button class="hdelete" data-delete-pk="${m.k}" title="Wis voortgang van ${name}" aria-label="Wis voortgang van ${name}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></button></div>`};
  const resumeGroupCard=x=>{const recent=x.items[0],n=x.items.length,free=x.items.filter(m=>m.practice).length,days=n-free,parts=[free?free+" vrij":"",days?days+" dag"+(days===1?"puzzel":"puzzels"):""].filter(Boolean).join(" · "),pc=recent.e.pc==null?0:recent.e.pc;if(n===1){const nv=recent.type==="nono"?nonoMetaVariant(recent):"",when=recent.practice?"Vrij puzzelen":recent.date===td?"Dagpuzzel · Vandaag":"Dagpuzzel · "+dnl(recent.date),detail=[when,LVN[recent.type]?LVL[recent.lvl]:""].filter(Boolean).join(" · ");return '<div class="hcontrow hcontsingle"><button class="hcont'+(nv?" nono-"+nv:"")+'" data-pk="'+recent.k+'" title="Ga verder met '+(TYPES[x.t]||x.t)+'">'+tIcon(x.t,false,recent.practice?nv:"")+'<span class="ctxt"><b>'+(TYPES[x.t]||x.t)+'</b><small>'+detail+'</small><small>'+pc+'% ingevuld</small></span>'+progRing(pc,x.t)+'<span class="hresumeaction">Verder</span></button><button class="hdelete" data-delete-pk="'+recent.k+'" title="Wis voortgang" aria-label="Wis voortgang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7"/></svg></button></div>'}return '<details class="hcontgroup" data-progress-group="'+x.t+'"><summary class="hcont" title="Kies uit '+n+' openstaande '+(TYPES[x.t]||x.t)+'-puzzels">'+tIcon(x.t,false)+'<span class="ctxt"><b>'+(TYPES[x.t]||x.t)+'</b><small>'+n+' puzzels bezig · '+parts+'</small><small>Meest recent · '+pc+'%</small></span>'+progRing(pc,x.t)+'<span class="hresumeaction hgroupaction"><span class="hchoose">Kies '+n+'</span><span class="hclose">Sluit</span></span></summary><div class="hcontgroupitems">'+x.items.map(resumeCard).join("")+'</div></details>'};
  const otherLabel=PHONE?"Groot scherm":"Telefoon",otherIcon=PHONE?"🖥️":"📱";

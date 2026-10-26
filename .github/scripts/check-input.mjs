@@ -210,7 +210,7 @@ for(const id of ['authaccount','groupaccount']){
 let saved={},captured=null,rendered=false,failSave=false,status={};
 const flags=new Set(),elements={};
 function noNestedArrays(value){if(Array.isArray(value)){for(const item of value){assert(!Array.isArray(item),'Firestore rejects direct nested arrays');noNestedArrays(item)}}else if(value&&typeof value==='object')for(const item of Object.values(value))noNestedArrays(item)}
-const home=vm.createContext({console,Date,Promise,Array,Object,Set,
+const home=vm.createContext({progressDeletedAt:()=>0,rememberProgressDeletion:()=>0,console,Date,Promise,Array,Object,Set,
  S:null,HOMEREADY:true,RANDOM:false,HVIEW:'',HDOPEN:'',GV:'test',MGV:'test',PGV:'test',BGV:'test',HGV:'test',PKEY:'progress',uid:'test',cloudProgLast:{},
  navigator:{onLine:true},cloudProgOk:()=>true,progressSolved:()=>false,cloudProgKey:k=>k,
  progAll:()=>JSON.parse(JSON.stringify(saved)),lsSet:(k,v)=>{saved=JSON.parse(v);return true},dstr:()=> '2026-10-23',addDays:()=> '2026-10-15',playMs:()=>1000,
