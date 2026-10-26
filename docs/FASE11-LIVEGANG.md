@@ -60,6 +60,24 @@ De tool herstelt vóór de migratie bestaande documentwaarden en verwijdert uits
 
 Herstel daarnaast de vastgelegde oude rules, Functions, Auth-providerconfiguratie en client voordat het onderhoudsvenster wordt opgeheven. Doe dit niet blind vanuit de huidige main wanneer een andere versie is vastgelegd. Journals wijzigen nooit Auth-accounts. Ontbreekt hersteltoegang of klopt één postcheck niet, dan blijft de applicatie onder freeze totdat het is opgelost.
 
+## Legacy-write-lock en cutovervolgorde
+
+De release-rules maken de oude gameplaycollecties `results` en `status` read-only. De nieuwe client schrijft resultaten, voortgang en presence uitsluitend naar `playerResults`/`groupActivity`, `progress` en `presence`. Daardoor kan een achtergebleven oude tab/PWA na de datamigratie geen nieuwe niet-gemigreerde gameplaydata meer toevoegen. Legacy reads blijven voorlopig bestaan voor compatibiliteit en controle.
+
+Hanteer bij de echte cutover deze volgorde:
+
+1. rond de hardware-/PWA-controle op de exacte releasekandidaat in de geïsoleerde testomgeving af;
+2. start na expliciet productieakkoord de freeze en verifieer dat gewone clientwrites werkelijk geblokkeerd zijn;
+3. leg runtime-/providerback-ups vast, maak de verse productie-snapshot en draai de actuele dry-run/`--apply` naar lokale kandidaat en rapport;
+4. voer de gecontroleerde productiemigratie uit en rond alle postchecks af terwijl de freeze nog actief is;
+5. markeer het journal met `mark-migration-client-active.mjs` direct vóór het punt waarop de release publiek weer kan schrijven; vanaf dit moment is automatische rollback bewust niet meer toegestaan;
+6. zet exact dezelfde releasecommit op `main`. De productie-rulesworkflow en GitHub Pages kunnen daarna in verschillende volgorde afronden; de legacy write-lock voorkomt in dat overgangsvenster nieuwe oude gameplaywrites. Behandel de site tot volledige verificatie nog als onderhoud;
+7. deploy de productie-Functions uitsluitend vanaf diezelfde `main`-release en controleer de exacte Functionsversie;
+8. verifieer dat Pages/client, normale Firestore-rules en Functions allemaal bij de goedgekeurde release horen en voer daarna de korte productie-smoke-test met bestaande accounts uit;
+9. faalt iets ná stap 5, activeer opnieuw de freeze en volg het post-activatie herstelpad; gebruik dan niet de automatische pre-client rollback.
+
+De bestaande automatische Firestore-rulesworkflow op een push naar `main` is hierdoor geen dataverliesrisico voor oude gameplaywrites, maar de volgorde van Pages en rules is niet deterministisch. Plan daarom een zichtbaar onderhoudsvenster en beschouw de productie pas als vrijgegeven nadat beide deployments en Functions expliciet zijn geverifieerd.
+
 ## Clientactivatie en gegevens daarna
 
 Voordat nieuwe clients mogen schrijven, registreer je dit eenmalig:
