@@ -1568,9 +1568,19 @@ function persist(forceCloud){if(S.discarded||!S.p||S.done||!S.start||!S.seed)ret
  const prev=a[k],plain=x=>{if(!x)return"";const q=Object.assign({},x);delete q.at;return JSON.stringify(q)},changed=!prev||plain(prev)!==plain(e);
  e.at=changed?Math.max(Date.now(),progressDeletedAt(k)+1):(prev.at||Date.now());a[k]=e;S._saveAt=e.at;const local=lsSet(PKEY,JSON.stringify(a));UX.storage(k,{at:e.at,local,remote:changed?"local":(UX.saves.get(k)||{}).remote});if(changed||forceCloud)cloudPushProgress(k,e,!!forceCloud)}
 setInterval(persist,3000);
+/* Desktop: de klik waarmee een inactief Gepuzzellig-venster weer focus krijgt mag geen puzzelactie zijn.
+   Dit geldt voor het hele speelvlak, dus ook lege achtergrond die normaal de invulstand wisselt.
+   Alleen een echte muis op een desktop/fine-pointer valt hieronder; touch en Pencil blijven ongemoeid. */
+let activationClickPending=false,activationClickTimer=0,activationClickTarget=null,activationClickUntil=0;
+const desktopPlayView=()=>!!(S&&S.p&&!document.body.classList.contains("home")&&!document.body.classList.contains("newpick"));
+const desktopMouse=()=>matchMedia("(hover:hover) and (pointer:fine)").matches;
+function armActivationClick(){activationClickPending=true;activationClickTarget=null;activationClickUntil=0;clearTimeout(activationClickTimer)}
+function expireActivationClick(){clearTimeout(activationClickTimer);activationClickTimer=setTimeout(()=>{activationClickPending=false;activationClickTarget=null;activationClickUntil=0},320)}
+document.addEventListener("pointerdown",e=>{if(!activationClickPending||e.pointerType!=="mouse"||e.button!==0||!desktopMouse()||!desktopPlayView())return;activationClickPending=false;activationClickTarget=e.target;activationClickUntil=performance.now()+600;e.preventDefault();e.stopImmediatePropagation()},true);
+document.addEventListener("click",e=>{if(!activationClickTarget||performance.now()>activationClickUntil)return;const same=e.target===activationClickTarget||activationClickTarget.contains?.(e.target)||e.target.contains?.(activationClickTarget);if(!same)return;activationClickTarget=null;activationClickUntil=0;e.preventDefault();e.stopImmediatePropagation()},true);
 document.addEventListener("visibilitychange",()=>{if(document.hidden){pausePlay();persist(true)}else pullCloudProgress(true).finally(()=>resumePlay())});
-addEventListener("blur",()=>{pausePlay();persist(true)});
-addEventListener("focus",()=>{if(!document.hidden&&playScreenActive())pullCloudProgress(true).finally(()=>resumePlay())});
+addEventListener("blur",()=>{armActivationClick();pausePlay();persist(true)});
+addEventListener("focus",()=>{if(activationClickPending)expireActivationClick();if(!document.hidden&&playScreenActive())pullCloudProgress(true).finally(()=>resumePlay())});
 addEventListener("pagehide",()=>{pausePlay();persist(true)});
 addEventListener("pageshow",()=>{pullCloudProgress(true).finally(()=>resumePlay())});
 /* ---- Controleren ---- */
