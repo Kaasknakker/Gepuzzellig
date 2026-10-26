@@ -88,6 +88,13 @@ exports.sendInviteEmail = onCall({
 
   const profile = profileSnap.data() || {}, invite = inviteSnap.data() || {};
   if (invite.createdByAuthUid !== uid || invite.createdByPlayerId !== profile.playerId) throw new HttpsError("permission-denied", "Deze uitnodiging is niet van jou.");
+  const groupId = String(invite.suggestedGroupId || "");
+  if (groupId) {
+    const memberSnap = await db.doc("groups/" + groupId + "/members/" + profile.playerId).get();
+    if (!memberSnap.exists || memberSnap.data().status !== "approved") {
+      throw new HttpsError("permission-denied", "Je bent geen goedgekeurd lid meer van deze groep.");
+    }
+  }
   if (invite.revoked || invite.usedByAuthUid) throw new HttpsError("failed-precondition", "Deze uitnodiging is niet meer actief.");
   const expiresAt = invite.expiresAt && typeof invite.expiresAt.toMillis === "function" ? invite.expiresAt.toMillis() : 0;
   if (!expiresAt || expiresAt <= Date.now()) throw new HttpsError("failed-precondition", "Deze uitnodiging is verlopen.");

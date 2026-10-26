@@ -20,10 +20,6 @@ service cloud.firestore {
       return myProfile().playerId;
     }
 
-    function myGroup() {
-      return myProfile().groupId;
-    }
-
     // Peter is de beschermde eigenaar. Nieuwe accounts krijgen altijd een p_<authUid>-id
     // en kunnen deze identiteit dus nooit verkrijgen.
     function isOwner() {
@@ -44,7 +40,7 @@ service cloud.firestore {
 
     // Fase 2: nieuw persoons-/membershipmodel naast de legacy groepskoppeling.
     function ownsPlayer(playerId) {
-      return signedIn()
+      return hasProfile() && myPlayer() == playerId
         && exists(/databases/$(database)/documents/players/$(playerId))
         && get(/databases/$(database)/documents/players/$(playerId)).data.authUid == request.auth.uid;
     }
@@ -66,11 +62,8 @@ service cloud.firestore {
         && get(membershipPath(groupId, playerId)).data.status == 'approved';
     }
     function groupAdmin(groupId, playerId) {
-      return (approvedMember(groupId, playerId)
-          && get(membershipPath(groupId, playerId)).data.role == 'admin')
-        || (signedIn()
-          && exists(/databases/$(database)/documents/groups/$(groupId))
-          && get(/databases/$(database)/documents/groups/$(groupId)).data.get('ownerAuthUid','') == request.auth.uid);
+      return approvedMember(groupId, playerId)
+        && get(membershipPath(groupId, playerId)).data.role == 'admin';
     }
     function validMembership(playerId) {
       return request.resource.data.keys().hasOnly([
@@ -91,7 +84,7 @@ service cloud.firestore {
 
     function validResult(id) {
       return hasProfile()
-        && myGroup().size() > 0
+        && ownsPlayer(myPlayer())
         && request.resource.data.keys().hasOnly([
           'name','group','date','type','secs','uid','mist','hints','hintSteps','emo','note','completedOn'
         ])
@@ -102,7 +95,7 @@ service cloud.firestore {
         && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 30
         && request.resource.data.group is string
-        && request.resource.data.group == myGroup()
+        && approvedMember(request.resource.data.group, myPlayer())
         && request.resource.data.date is string
         && request.resource.data.date.size() <= 10
         && (!('completedOn' in request.resource.data) || (
@@ -148,7 +141,7 @@ service cloud.firestore {
         && request.resource.data.uid is string
         && request.resource.data.uid == myPlayer()
         && request.resource.data.group is string
-        && (request.resource.data.group == myGroup() || approvedMember(request.resource.data.group, myPlayer()))
+        && approvedMember(request.resource.data.group, myPlayer())
         && id == request.resource.data.group + '_' + request.resource.data.uid
         && request.resource.data.get('name', '') is string
         && request.resource.data.get('name', '').size() <= 30
@@ -180,6 +173,9 @@ service cloud.firestore {
       allow get: if ownsPlayer(playerId);
       allow list: if false;
       allow create: if signedIn()
+        && existsAfter(/databases/$(database)/documents/profiles/$(request.auth.uid))
+        && getAfter(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.authUid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.playerId == playerId
         && request.resource.data.keys().hasOnly(['playerId','authUid','displayName','createdAt','updatedAt'])
         && request.resource.data.keys().hasAll(['playerId','authUid','displayName','createdAt','updatedAt'])
         && request.resource.data.playerId == playerId
@@ -346,7 +342,7 @@ service cloud.firestore {
       allow create: if validResult(id);
       allow update: if validResult(id)
         && resource.data.uid == myPlayer()
-        && (resource.data.group == myGroup() || approvedMember(resource.data.group, myPlayer()))
+        && approvedMember(resource.data.group, myPlayer())
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.group == resource.data.group
         && request.resource.data.date == resource.data.date
@@ -354,13 +350,21 @@ service cloud.firestore {
       allow delete: if isOwner();
     }
 
+    // Sociale presence bevat nooit een persoonlijk bord of legacy progress.
+    match /presence/{id} {
+      allow read: if isAdmin() || (hasProfile() && approvedMember(resource.data.group, myPlayer()));
+      allow create, update: if validStatus(id) && ownsPlayer(myPlayer())
+        && !request.resource.data.keys().hasAny(['progress']);
+      allow delete: if ownsPlayer(resource.data.uid);
+    }
+
     match /status/{id} {
       allow read: if isAdmin()
-        || (hasProfile() && (resource.data.group == myGroup() || approvedMember(resource.data.group, myPlayer())));
+        || (hasProfile() && resource.data.uid == myPlayer());
       allow create: if validStatus(id);
       allow update: if validStatus(id)
         && resource.data.uid == myPlayer()
-        && (resource.data.group == myGroup() || approvedMember(resource.data.group, myPlayer()))
+        && approvedMember(resource.data.group, myPlayer())
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.group == resource.data.group;
       allow delete: if isOwner();
@@ -385,15 +389,8 @@ service cloud.firestore {
     }
 
     match /profiles/{authUid} {
-      allow get: if signedIn()
-        && (
-          request.auth.uid == authUid
-          || isAdmin()
-          || (hasProfile() && myGroup().size() > 0 && resource.data.groupId == myGroup())
-        );
-
-      allow list: if isAdmin()
-        || (hasProfile() && myGroup().size() > 0 && resource.data.groupId == myGroup());
+      allow get: if signedIn() && (request.auth.uid == authUid || isAdmin());
+      allow list: if isAdmin();
 
       // Een nieuw profiel kan alleen ontstaan uit een geldige, e-mailgebonden uitnodiging.
       allow create: if signedIn()
@@ -482,26 +479,7 @@ service cloud.firestore {
           && request.resource.data.get('preferences', {'favoritePuzzleTypes': [], 'dailyDifficulty': {}, 'tutorials': {}}).get('dailyDifficulty',{}) is map
           && request.resource.data.get('preferences', {'favoritePuzzleTypes': [], 'dailyDifficulty': {}, 'tutorials': {}}).get('tutorials',{}) is map
           && request.resource.data.groupId is string
-          && (
-            request.resource.data.groupId == resource.data.groupId
-            || (
-              groupExists(request.resource.data.groupId)
-              && (
-                get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.ownerAuthUid == request.auth.uid
-                || (
-                  request.resource.data.get('groupJoinCode','').size() >= 6
-                  && exists(/databases/$(database)/documents/groupInvites/$(request.resource.data.get('groupJoinCode','')))
-                  && get(/databases/$(database)/documents/groupInvites/$(request.resource.data.get('groupJoinCode',''))).data.groupId == request.resource.data.groupId
-                )
-                || (
-                  resource.data.get('inviteCode','').size() >= 8
-                  && exists(/databases/$(database)/documents/accessInvites/$(resource.data.get('inviteCode','')))
-                  && get(/databases/$(database)/documents/accessInvites/$(resource.data.get('inviteCode',''))).data.usedByAuthUid == request.auth.uid
-                  && get(/databases/$(database)/documents/accessInvites/$(resource.data.get('inviteCode',''))).data.suggestedGroupId == request.resource.data.groupId
-                )
-              )
-            )
-          )
+          && request.resource.data.groupId == resource.data.groupId
           && request.resource.data.updatedAt is int
           && request.resource.data.updatedAt >= 0
         )
@@ -539,6 +517,7 @@ service cloud.firestore {
         && indexAfterMatches(groupId, playerId)
         && (
           (ownsPlayer(playerId)
+            && groupExists(groupId)
             && request.resource.data.status == 'pending'
             && request.resource.data.role == 'member'
             && request.resource.data.get('approvedAt', 0) == 0
@@ -546,6 +525,7 @@ service cloud.firestore {
             && request.resource.data.get('approvedByPlayerId', '') == '')
           ||
           (ownsPlayer(playerId)
+            && !exists(/databases/$(database)/documents/groups/$(groupId))
             && request.resource.data.status == 'approved'
             && request.resource.data.role == 'admin'
             && request.resource.data.get('joinedAt',0) > 0
@@ -560,6 +540,8 @@ service cloud.firestore {
         && request.resource.data.playerId == resource.data.playerId
         && request.resource.data.get('displayName','') == resource.data.get('displayName','')
         && request.resource.data.requestedAt == resource.data.requestedAt
+        && (resource.data.status != 'approved' || request.resource.data.status != 'approved'
+          || request.resource.data.joinedAt == resource.data.joinedAt)
         && (playerId != myPlayer()
           || (resource.data.status == 'approved' && resource.data.role == 'admin'
             && request.resource.data.status == 'approved' && request.resource.data.role == 'admin'));
@@ -569,15 +551,15 @@ service cloud.firestore {
     }
 
     match /groups/{groupId} {
-      allow get: if (hasProfile() && approvedMember(groupId, myPlayer()))
-        || (hasProfile() && myGroup() == groupId)
-        || (signedIn() && resource.data.get('ownerAuthUid','') == request.auth.uid)
-        || isAdmin();
+      allow get: if (hasProfile() && approvedMember(groupId, myPlayer())) || isAdmin();
       allow list: if isAdmin();
 
       // Nieuwe groepen krijgen altijd een willekeurig id "g_…" (zoals de app ze maakt). Zo kan niemand
       // een groep aanmaken onder het id van een bestaande (oude) groep en zich daar eigenaar van maken.
-      allow create: if hasProfile()
+      allow create: if hasProfile() && ownsPlayer(myPlayer())
+        && existsAfter(membershipPath(groupId, myPlayer()))
+        && getAfter(membershipPath(groupId, myPlayer())).data.status == 'approved'
+        && getAfter(membershipPath(groupId, myPlayer())).data.role == 'admin'
         && groupId.matches('g_[a-z0-9]{6,20}')
         && request.resource.data.keys().hasOnly([
           'name','ownerAuthUid','inviteCode','theme','accent','murdokuNames','createdAt','updatedAt'
@@ -602,7 +584,7 @@ service cloud.firestore {
         && request.resource.data.updatedAt >= 0;
 
       allow update: if signedIn()
-        && (resource.data.get('ownerAuthUid', '') == request.auth.uid || (hasProfile() && groupAdmin(groupId, myPlayer())))
+        && hasProfile() && ownsPlayer(myPlayer()) && groupAdmin(groupId, myPlayer())
         && request.resource.data.keys().hasOnly([
           'name','ownerAuthUid','inviteCode','theme','accent','murdokuNames','createdAt','updatedAt'
         ])
@@ -628,7 +610,7 @@ service cloud.firestore {
       allow list: if isAdmin();
 
       allow create: if hasProfile()
-        && (request.resource.data.ownerAuthUid == request.auth.uid || groupAdmin(request.resource.data.groupId, myPlayer()))
+        && ownsPlayer(myPlayer()) && groupAdmin(request.resource.data.groupId, myPlayer())
         && request.resource.data.keys().hasOnly([
           'groupId','ownerAuthUid','createdAt'
         ])
@@ -638,7 +620,7 @@ service cloud.firestore {
         && request.resource.data.ownerAuthUid is string
         && request.resource.data.createdAt is int
         && request.resource.data.createdAt >= 0
-        && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.ownerAuthUid == request.auth.uid
+        && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.ownerAuthUid == request.resource.data.ownerAuthUid
         && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.inviteCode == code;
 
       allow update: if false;
@@ -652,7 +634,7 @@ service cloud.firestore {
 
       allow create: if hasProfile()
         && request.resource.data.suggestedGroupId is string
-        && (request.resource.data.suggestedGroupId == myGroup() || approvedMember(request.resource.data.suggestedGroupId, myPlayer()))
+        && (request.resource.data.suggestedGroupId == '' || approvedMember(request.resource.data.suggestedGroupId, myPlayer()))
         && code == request.resource.data.code
         && request.resource.data.keys().hasOnly([
           'code','email','createdByAuthUid','createdByPlayerId','createdByName',

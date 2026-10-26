@@ -68,3 +68,5 @@ try{
  await assertFails(getDoc(doc(db(outsider),'groupDailyPlans',fx.group.id,'items','2026-10-24_'+member.playerId)));
  console.log('Fase 2-8 Firestore-rules: solo, persoonlijke data, memberships, joinedAt-sociale projecties en laatste-adminbescherming geslaagd.');
 }finally{await env.cleanup()}
+
+await import('./check-security-boundaries.mjs');

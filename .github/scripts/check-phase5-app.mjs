@@ -8,7 +8,7 @@ const must=[
  ['goedkeuren','approveMembership'],
  ['inverse index','playerMemberships'],
  ['groepswissel','pdactivegroup:'],
- ['legacy fallback','currentProfile&&currentProfile.groupId||""'],
+ ['actuele memberships','watchMyMemberships'],
  ['persoonlijke resultaten','playerResults'],
  ['persoonlijke voortgang','progress",o.uid,"items"']
 ];
