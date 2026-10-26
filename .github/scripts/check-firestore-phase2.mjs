@@ -70,3 +70,4 @@ try{
 }finally{await env.cleanup()}
 
 await import('./check-security-boundaries.mjs');
+await import('./check-migration-emulator.mjs');

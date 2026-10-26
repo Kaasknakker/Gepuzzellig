@@ -41,3 +41,7 @@ Pas na een groene dry-run:
 Fase 10 bewijst dat de op 25 oktober 2026 gekopieerde productiegegevens zonder bekende blocker naar de nieuwe datastructuur kunnen worden omgezet. Dit is **geen toestemming om productie te migreren** en de snapshot mag niet als latere livebron worden gebruikt: productie kan intussen wijzigen.
 
 Fase 11 blijft een apart expliciet goedkeuringsmoment. Voor livegang moet opnieuw een verse productieback-up/export worden gemaakt, moet de migratie-dry-run tegen exact die actuele snapshot groen zijn en moeten de pre/post-invarianten opnieuw worden gecontroleerd. Legacydata wordt bij livegang nog niet verwijderd.
+
+## Aanscherping na pre-migratiecontrole
+
+Bovenstaande aantallen zijn historisch bewijs van de toen gebruikte tooling en bron. Stap 4 gebruikt inmiddels contractversie 2: volledige subcollectie-/Auth-inventaris, unieke identiteit, behoud van ondersteunde voorkeuren en dagplannen, striktere inhoudelijke deduplicatie, exacte bron-/release-/toolingbinding en een hersteljournal. Conflicterende of niet-bewezen bestaande gegevens worden niet stil overschreven. Een nieuwe volledige snapshot en nieuwe repetitie blijven verplicht; de oude 76-resultatenuitkomst is geen actuele GO. Zie FASE11-LIVEGANG.md voor freeze, privacykeuze, apply en herstel.

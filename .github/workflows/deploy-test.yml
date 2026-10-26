@@ -86,6 +86,13 @@ jobs:
       - name: Fase 8 app controleren
         run: node .github/scripts/check-phase8-app.mjs
 
+      - name: Fase 10 actuele preflight controleren
+        run: node .github/scripts/check-phase10-rehearsal.mjs
+      - name: Fase 11 migratie en herstel controleren
+        run: node .github/scripts/check-phase11-live.mjs
+      - name: Volledige read-only snapshot en backuptypes controleren
+        run: node .github/scripts/check-phase11-snapshot.mjs
+
       - name: Build test-only hosting directory
         run: |
           mkdir -p .test-dist

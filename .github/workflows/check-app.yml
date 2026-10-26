@@ -49,6 +49,8 @@ jobs:
         run: node .github/scripts/check-phase10-rehearsal.mjs
       - name: Fase 11 livegangtooling controleren
         run: node .github/scripts/check-phase11-live.mjs
+      - name: Volledige read-only snapshot en backuptypes controleren
+        run: node .github/scripts/check-phase11-snapshot.mjs
       - name: Functions syntax controleren
         run: node --check functions/index.js
       - name: Client syntax controleren
