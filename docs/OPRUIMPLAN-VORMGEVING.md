@@ -85,7 +85,7 @@ Belangrijk:
 
 **Klaar wanneer:** twee opeenvolgende runs zonder codewijziging zijn volledig gelijk, in GitHub Actions.
 
-Getest op `develop` v228 (Chromium 1.63, lokaal): zie de stand onderaan dit hoofdstuk.
+Getest op `develop` v228. Lokaal (Chromium 1.63): twee runs zonder wijziging 406/406 gelijk. In GitHub Actions maakte de eerste run 408 screenshots zonder fouten (iets meer dan lokaal doordat lettertypen anders lopen) en committe de baseline; zie PR #21 voor de vergelijkingsrun. Een run duurt in GitHub ±20 minuten, waarvan ±12 voor het installeren van Playwright; dat kan later sneller met het officiële Playwright-image (daarna eenmalig opnieuw een baseline maken).
 
 ### Fase 0b — Dekking
 
