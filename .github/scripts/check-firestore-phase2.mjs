@@ -12,8 +12,16 @@ try{
   await setDoc(doc(db,'groups',fx.group.id),{name:fx.group.name,ownerAuthUid:'auth-admin',inviteCode:'rules01',theme:'shared',accent:'blue',murdokuNames:[],createdAt:1,updatedAt:1});
   for(const m of Object.values(fx.memberships)){await setDoc(doc(db,'groups',fx.group.id,'members',m.playerId),m);await setDoc(doc(db,'playerMemberships',m.playerId,'groups',fx.group.id),indexOf(m,fx.group.id));}
   await setDoc(doc(db,'progress','p_solo','items','daily-bin'),{playerId:'p_solo',puzzleType:'bin',mode:'daily',puzzleKey:'bin:fixture',difficulty:'normal',state:{cells:[]},progressPercent:20,startedAt:10,updatedAt:20});
+  const legacyMember=fx.players.member,legacyGroup=fx.group.id;
+  const legacyResultId=legacyGroup+'_2026-10-24_bin.2_'+legacyMember.playerId,legacyStatusId=legacyGroup+'_'+legacyMember.playerId;
+  await setDoc(doc(db,'results',legacyResultId),{uid:legacyMember.playerId,group:legacyGroup,name:'Member',date:'2026-10-24',type:'bin.2',secs:90,mist:0,hints:0,hintSteps:{look:0,reason:0,move:0,legacy:0},emo:'',note:''});
+  await setDoc(doc(db,'status',legacyStatusId),{uid:legacyMember.playerId,group:legacyGroup,name:'Member',date:'2026-10-24',type:'bin.2',at:100,progress:{'d:2026-10-24:bin.2':{k:'d:2026-10-24:bin.2',pc:25}}});
  });
  const db=p=>env.authenticatedContext(p.authUid).firestore(),{solo,pending,member,admin,outsider}=fx.players;
+ const legacyResultId=fx.group.id+'_2026-10-24_bin.2_'+member.playerId,legacyStatusId=fx.group.id+'_'+member.playerId;
+ await assertSucceeds(getDoc(doc(db(member),'results',legacyResultId)));await assertFails(updateDoc(doc(db(member),'results',legacyResultId),{secs:91}));await assertFails(deleteDoc(doc(db(member),'results',legacyResultId)));
+ await assertSucceeds(getDoc(doc(db(member),'status',legacyStatusId)));await assertFails(updateDoc(doc(db(member),'status',legacyStatusId),{at:101}));await assertFails(deleteDoc(doc(db(member),'status',legacyStatusId)));
+ await assertFails(getDoc(doc(db(outsider),'results',legacyResultId)));await assertFails(getDoc(doc(db(outsider),'status',legacyStatusId)));
  const anonUid='auth-new-anon',anonPlayer='p_'+anonUid,anonDb=env.authenticatedContext(anonUid,{firebase:{sign_in_provider:'anonymous'}}).firestore();
  const anonProfile={authUid:anonUid,playerId:anonPlayer,displayName:'Solo tester',groupId:'',role:'user',accountState:'anonymous',createdAt:300,updatedAt:300,inviteCode:'',invitedByAuthUid:'',groupJoinCode:'',theme:'shared',accent:'blue',preferences:{favoritePuzzleTypes:['bin','star','nono'],dailyDifficulty:{bin:'normal',star:'normal',nono:'normal',hex:'normal',plus:'normal',mur:'normal'}}};
  await assertSucceeds(setDoc(doc(anonDb,'profiles',anonUid),anonProfile));await assertSucceeds(setDoc(doc(anonDb,'players',anonPlayer),{playerId:anonPlayer,authUid:anonUid,displayName:'Solo tester',createdAt:300,updatedAt:300}));
@@ -66,7 +74,7 @@ try{
  await assertSucceeds(setDoc(doc(db(member),'groupDailyPlans',fx.group.id,'items','2026-10-24_'+member.playerId),sharedPlan));
  await assertSucceeds(getDoc(doc(db(admin),'groupDailyPlans',fx.group.id,'items','2026-10-24_'+member.playerId)));
  await assertFails(getDoc(doc(db(outsider),'groupDailyPlans',fx.group.id,'items','2026-10-24_'+member.playerId)));
- console.log('Fase 2-8 Firestore-rules: solo, persoonlijke data, memberships, joinedAt-sociale projecties en laatste-adminbescherming geslaagd.');
+ console.log('Fase 2-8 Firestore-rules: solo, persoonlijke data, legacy gameplay read-only, memberships, joinedAt-sociale projecties en laatste-adminbescherming geslaagd.');
 }finally{await env.cleanup()}
 
 await import('./check-security-boundaries.mjs');
