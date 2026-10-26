@@ -195,7 +195,9 @@ for (const file of made) {
   const outB64 = readFileSync(join(dirs.out, file)).toString("base64");
   const basePath = join(dirs.base, file);
   if (UPDATE) { writeFileSync(basePath, Buffer.from(outB64, "base64")); continue; }
-  if (!existsSync(basePath)) { results.push({ file, status: "nieuw" }); continue; }
+  // Ontbreekt een baselinebestand (bewust verwijderd om te vernieuwen, of een nieuw scherm),
+  // dan wordt het aangemaakt. Dat telt niet als fout; in GitHub wordt het daarna gecommit.
+  if (!existsSync(basePath)) { writeFileSync(basePath, Buffer.from(outB64, "base64")); results.push({ file, status: "nieuw" }); continue; }
   const baseB64 = readFileSync(basePath).toString("base64");
   const r = await cmp.evaluate(async ([a, b, tol]) => {
     const load = s => new Promise(res => { const i = new Image(); i.onload = () => res(i); i.src = "data:image/png;base64," + s; });
@@ -225,9 +227,9 @@ console.log(`Dekking: ${covered.size}/${allSelectors.size} CSS-regels raken een 
 
 if (UPDATE) console.log(`Baseline vastgelegd: ${made.length} screenshots in test/visual/baseline/`);
 else {
-  const bad = results.filter(r => r.status !== "gelijk");
-  for (const r of bad) console.log(`  ${r.status.padEnd(18)} ${r.file}`);
-  console.log(`${results.length - bad.length}/${results.length} gelijk aan de baseline.${bad.length ? " Verschillen staan in test/visual/diff/." : ""}`);
+  const bad = results.filter(r => r.status !== "gelijk" && r.status !== "nieuw"), nieuw = results.filter(r => r.status === "nieuw");
+  for (const r of [...bad, ...nieuw]) console.log(`  ${r.status.padEnd(18)} ${r.file}`);
+  console.log(`${results.length - bad.length - nieuw.length}/${results.length} gelijk aan de baseline${nieuw.length ? `, ${nieuw.length} nieuw vastgelegd` : ""}.${bad.length ? " Verschillen staan in test/visual/diff/." : ""}`);
   writeFileSync(join(HERE, "rapport.json"), JSON.stringify({ at: new Date().toISOString(), results }, null, 1));
   if (bad.length) process.exitCode = 1;
 }
@@ -236,8 +238,8 @@ if (errors.length) { console.log("Fouten in de app tijdens de controle:"); for (
 // In GitHub Actions ook als meldingen (annotations), zodat de uitkomst zonder log zichtbaar is.
 if (process.env.GITHUB_ACTIONS) {
   const esc = t => String(t).replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
-  const bad = results.filter(r => r.status !== "gelijk");
-  const kop = UPDATE ? `Baseline vastgelegd: ${made.length} screenshots` : `${results.length - bad.length}/${results.length} gelijk aan de baseline`;
+  const bad = results.filter(r => r.status !== "gelijk" && r.status !== "nieuw"), nieuw = results.filter(r => r.status === "nieuw");
+  const kop = UPDATE ? `Baseline vastgelegd: ${made.length} screenshots` : `${results.length - bad.length - nieuw.length}/${results.length} gelijk aan de baseline${nieuw.length ? `, ${nieuw.length} nieuw vastgelegd (${nieuw.slice(0, 10).map(r => r.file).join(", ")})` : ""}`;
   console.log(`::notice title=Visuele controle::${esc(`${kop}. Dekking ${covered.size}/${allSelectors.size} CSS-regels. Fouten: ${errors.length}.`)}`);
   if (bad.length) console.log(`::error title=Visuele verschillen::${esc(bad.slice(0, 40).map(r => `${r.status} ${r.file}`).join("\n"))}`);
   if (errors.length) console.log(`::error title=Schermen niet geopend::${esc(errors.slice(0, 40).join("\n"))}`);

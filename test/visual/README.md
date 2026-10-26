@@ -27,7 +27,7 @@ Schermnamen staan bovenaan `snapshot.mjs` (`SCREENS`).
 ## In GitHub Actions
 
 - De workflow **Visuele controle** draait bij pull requests en pushes naar `develop` die de app of deze map raken.
-- Staat er nog geen `baseline/` in de branch, dan maakt de workflow die en commit hem één keer zelf (nooit op `main`).
-- Bewust bijwerken na een goedgekeurde wijziging: verwijder de betrokken bestanden in `baseline/` en laat de workflow opnieuw draaien.
+- Ontbreken er bestanden in `baseline/` (eerste keer, nieuw scherm of bewust verwijderd), dan legt de workflow die vast en commit ze in de branch (nooit op `main`). Echte verschillen worden nooit automatisch overgenomen: die maken de run rood.
+- Bewust bijwerken na een goedgekeurde wijziging: verwijder precies de betrokken bestanden in `baseline/` (bijvoorbeeld `git rm test/visual/baseline/*opgelost-kaart*`) in dezelfde commit als de wijziging.
 - De uitkomst staat als melding bij de run (aantal gelijk, dekking, verschillen); de screenshots en verschilbeelden staan in het artifact `visuele-controle`.
 - Duur: ±20 minuten, waarvan ±12 voor het installeren van Playwright.

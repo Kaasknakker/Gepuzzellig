@@ -69,14 +69,15 @@ jobs:
         with:
           name: baseline
           path: test/visual/baseline/
-      # Alleen de allereerste keer (geen baseline in de branch) en nooit op main:
-      # commit de baseline uit deze omgeving, zodat volgende runs ermee vergelijken.
-      - name: Eerste baseline committen
-        if: steps.snap.outputs.baseline == 'nieuw' && github.ref_name != 'main' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+      # Nieuwe of bewust verwijderde baselinebestanden: commit wat de workflow heeft vastgelegd
+      # (nooit op main), zodat volgende runs ermee vergelijken. Verschillen worden nooit automatisch overgenomen.
+      - name: Nieuwe baselinebestanden committen
+        if: success() && github.ref_name != 'main' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
         run: |
+          if [ -z "$(git status --porcelain test/visual/baseline)" ]; then echo "Geen nieuwe baselinebestanden."; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add test/visual/baseline
-          git commit -m "Leg visuele baseline vast (gemaakt door de workflow Visuele controle)"
+          git commit -m "Leg nieuwe visuele baselinebestanden vast (workflow Visuele controle)"
           git push origin HEAD:${{ github.head_ref || github.ref_name }}
-          echo "::notice title=Baseline gecommit::De baseline staat nu in de branch. Start een nieuwe run (nieuwe commit) om ermee te vergelijken."
+          echo "::notice title=Baseline bijgewerkt::Nieuwe baselinebestanden staan nu in de branch."
