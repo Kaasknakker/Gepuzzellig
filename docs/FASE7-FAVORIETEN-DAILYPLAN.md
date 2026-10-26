@@ -8,7 +8,7 @@ Status: geïmplementeerd op `develop` op 24 oktober 2026.
 - `profiles/{authUid}.preferences.dailyDifficulty` bewaart per actief puzzeltype `easy | normal | hard`.
 - De puzzle registry is de bron voor actieve puzzels, starterfavorieten en de mapping van semantische moeilijkheid naar wide/phone-generatorlevels.
 - Nieuwe spelers starten met Binair, Star Battle en Nonogram. Bestaande profielen zonder preferences krijgen bij de compatibiliteitsbackfill alle vóór Fase 7 actieve puzzels, zodat bestaand gedrag niet stilzwijgend verdwijnt.
-- Wijzigingen gelden vanaf de volgende kalenderdag. Dagpuzzels t/m 24 oktober 2026 behouden de bestaande weekday/weekend-levelmapping.
+- Wijzigingen gelden vanaf de volgende kalenderdag. Productie behoudt de bestaande weekday/weekend-levelmapping totdat bij de goedgekeurde cutover een expliciete `PD_SETUP.dailyPreferencesFrom` wordt ingesteld. De testconfig gebruikt 25 oktober 2026; die testdatum is geen productiedatum.
 
 ## Daily plan
 
@@ -32,3 +32,9 @@ Legacy `groupId`, oude results/status, compatibility-readers en Functions-scheid
 2. Controleer dat Home vandaag stabiel blijft en Vrij puzzelen nog alle actieve puzzelsoorten toont.
 3. Controleer Home / Vrij puzzelen / Groepen / Profiel op iPad/iPhone/desktop en met touch/Pencil/muis waar relevant.
 4. Maak met een nieuw solo-testaccount een profiel en controleer dat de starterset Binair, Star Battle en Nonogram is.
+
+## Pre-migratiefix: bestaande dagpuzzels behouden
+
+Hervatten gebruikt de opgeslagen dagpuzzelsleutel (type, datum en niveau), ook na apparaat- of voorkeurwisseling en bij de limiet van 50 open dagpuzzels. Opgeslagen Binair-, Hexcells- en Murdoku-generatorversies blijven leidend. Nonogram bewaart de variant expliciet; oude records zonder variant gebruiken de bestaande datumregel. Cloudverversing van een geopende dagpuzzel behoudt dezelfde sleutel.
+
+`check-daily-resume.mjs` controleert de legacykalender, expliciete ingangsdatum, vaste dagplannen en 72 hervat-/opslagpaden (zes actieve soorten × zes niveaus × twee apparaatklassen). De test gebruikt de echte laad-/opslagfuncties met geïsoleerde DOM-/generatorgrenzen; bestaande puzzelgeneratortests blijven aanvullend nodig.

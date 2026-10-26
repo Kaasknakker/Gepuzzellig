@@ -22,3 +22,7 @@ Fase 11 vereist een verse productie-export na change freeze. De Fase-10-snapshot
 
 ## Rollback
 Rollbackpunt is de verse pre-cutover-export plus de pre-cutover main/rules/functions. Bij falende postchecks: stop nieuwe writes/activatie, herstel oude client/rules/functions en diagnoseer. Legacycollecties blijven intact; destructieve cleanup hoort niet bij Fase 11.
+
+## Dagpuzzel-ingangsdatum
+
+Vóór clientactivatie moet `PD_SETUP.dailyPreferencesFrom` in de productieconfig bewust worden vastgesteld en gereviewd. Kies de eerste volledige nieuwe puzzeldag na cutover, zodat een dag die al op de oude productieclient is begonnen niet achteraf van niveau verandert. Zonder deze instelling blijft productie veilig de oude weekday/weekend-keuze gebruiken. Neem nooit de datum uit `config.test.js` over als productiecutover. Bestaande open puzzels blijven via hun opgeslagen sleutel hervatbaar. Controleer zondag 25 oktober 2026 (wide niveau 3 / telefoon niveau 6), oude phone/wide-voortgang en een archiefpuzzel na voorkeurwijziging.

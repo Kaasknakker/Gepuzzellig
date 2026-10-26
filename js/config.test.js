@@ -1,5 +1,5 @@
 /* Testomgeving: uitsluitend Firebase-project gepuzzellig-test. */
-window.PD_SETUP={players:["Peter","Aart"],group:"peter-aart-jk4hv92t",groupName:"Puzzelsukkels",ownerPlayerId:"u-peter"};
+window.PD_SETUP={dailyPreferencesFrom:"2026-10-25",players:["Peter","Aart"],group:"peter-aart-jk4hv92t",groupName:"Puzzelsukkels",ownerPlayerId:"u-peter"};
 window.FIREBASE_CONFIG={
  apiKey:"AIzaSyDh22J77G0rWiQ501wEE_FYwgZf3Elpu28",
  authDomain:"gepuzzellig-test.firebaseapp.com",
