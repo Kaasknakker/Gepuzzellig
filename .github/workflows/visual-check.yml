@@ -1,0 +1,69 @@
+name: Visuele controle
+
+# Vergelijkt de app met de vastgelegde screenshots in test/visual/baseline/.
+# - Ontbreekt de baseline (eerste keer), dan wordt hij gemaakt en als artifact "baseline" bewaard.
+#   Die bestanden worden daarna bewust in test/visual/baseline/ gecommit.
+# - Handmatig starten met "update" aan maakt ook een nieuwe baseline (alleen mogelijk vanaf main).
+# Zie test/visual/README.md en docs/OPRUIMPLAN-VORMGEVING.md.
+on:
+  workflow_dispatch:
+    inputs:
+      update:
+        description: "Baseline opnieuw vastleggen"
+        type: boolean
+        default: false
+  pull_request:
+    paths: ["css/**", "js/**", "index.html", "test/visual/**", ".github/workflows/visual-check.yml"]
+  push:
+    branches: [develop]
+    paths: ["css/**", "js/**", "index.html", "test/visual/**", ".github/workflows/visual-check.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  visual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      NODE_PATH: /tmp/pw/node_modules
+    steps:
+      - name: Code ophalen
+        uses: actions/checkout@v4
+      - name: Node instellen
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Playwright installeren (buiten de repository, vaste versie)
+        run: |
+          npm install --prefix /tmp/pw --no-audit --no-fund playwright@1.63.0
+          /tmp/pw/node_modules/.bin/playwright install --with-deps chromium
+      - name: Testdata maken
+        run: node test/visual/make-fixture.mjs
+      - name: Screenshots maken en vergelijken
+        id: snap
+        run: |
+          if [ "${{ inputs.update }}" = "true" ] || [ ! -d test/visual/baseline ]; then
+            node test/visual/snapshot.mjs --update
+            echo "baseline=nieuw" >> "$GITHUB_OUTPUT"
+            echo "::notice::Nieuwe baseline vastgelegd. Download het artifact 'baseline' en commit het in test/visual/baseline/."
+          else
+            node test/visual/snapshot.mjs
+          fi
+      - name: Resultaat bewaren
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visuele-controle
+          path: |
+            test/visual/out/
+            test/visual/diff/
+            test/visual/rapport.json
+            test/visual/dekking.json
+          if-no-files-found: ignore
+      - name: Nieuwe baseline bewaren
+        if: steps.snap.outputs.baseline == 'nieuw'
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline
+          path: test/visual/baseline/
