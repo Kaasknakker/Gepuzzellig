@@ -38,7 +38,7 @@ nav button .tfeat{font-style:normal;font-size:.8em;margin-left:3px}nav button .t
 #board h2.feat{color:var(--pc,#c97a00)}
 .pw.busy{background:transparent!important;color:var(--mut)!important;border:1.5px dashed currentColor;box-sizing:border-box;opacity:.85}.pw.busy.now{opacity:1;animation:busyp 1.6s ease-in-out infinite}@keyframes busyp{50%{opacity:.45}}
 #board .row.busy{color:var(--mut);font-style:italic}
-#potb.on{background:#6b6f78;color:#fff;border-color:#6b6f78}
+#potb.on{background:#7455b8;color:#fff;border-color:#7455b8}
 .c{position:relative}.c .nt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.52;transform:scale(.42)}.c .nt svg{width:100%;height:100%}
 /* Potlood blijft bewust kleiner en zachter dan een definitieve zet. */
 body[data-t=bin] .c .nt{inset:auto;left:6%;top:5%;width:64%;height:64%;transform:none;opacity:.56}
@@ -49,7 +49,7 @@ body[data-t=star] .c .nt.nx::before{content:"×";font-size:calc(var(--cs)*.38);l
 body[data-t=star] .c .nt.ns::before{content:"☆";font-size:calc(var(--cs)*.36);line-height:1;color:var(--pc);font-weight:500}
 body[data-t=star] .c.sv{color:#c97a00!important}
 .c .nt.dot{transform:none}.c .nt.dot::before{content:"";width:calc(var(--cs)*.2);height:calc(var(--cs)*.2);border-radius:50%;background:var(--mut);opacity:.75}
-.mc .mnt{position:absolute;left:3px;right:3px;bottom:2px;display:flex;flex-wrap:wrap;gap:0 3px;justify-content:center;font-size:calc(var(--ms)*.2);line-height:1.05;pointer-events:none;font-weight:600;opacity:.56}
+.mc .mnt{position:absolute;left:3px;right:3px;bottom:2px;z-index:7;display:flex;flex-wrap:wrap;gap:0 3px;justify-content:center;padding:1px 3px;border-radius:5px;background:color-mix(in srgb,var(--card) 86%,transparent);font-size:calc(var(--ms)*.2);line-height:1.05;pointer-events:none;font-weight:700;opacity:.88}
 .mc .mnt.nxo{top:0;bottom:0;align-items:center;font-size:calc(var(--ms)*.42);font-weight:500}.mc .mnt .mnx{color:var(--mut);font-style:normal;opacity:.5}
 body.potlood #grid,body.potlood #mgrid{outline:2px dashed #6b6f78;outline-offset:6px}
 body.phone #pbot #potb,body.phone #pbot #notewipe{flex:0 0 46px;font-size:18px;padding:11px 0}
@@ -164,7 +164,7 @@ svg .shake{animation:shake .35s}
 #mgrid{display:grid;border-radius:6px;box-shadow:0 8px 24px var(--sh);touch-action:none}
 .mc{position:relative;width:var(--ms);height:var(--ms);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .mc .rl{position:absolute;top:2px;left:3px;z-index:3;white-space:nowrap;padding:0 3px;border-radius:4px;background:color-mix(in srgb,var(--card) 70%,transparent);font-size:max(8px,calc(var(--ms)*.14));font-weight:800;text-transform:uppercase;letter-spacing:.03em;opacity:.55;pointer-events:none}
-.mc .ob{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--ms)*.5);pointer-events:none;transition:all .15s}.mc.blk{cursor:not-allowed}.mc.on .ob{inset:auto 2px 0 auto;font-size:calc(var(--ms)*.28)}
+.mc .ob{position:absolute;inset:7%;z-index:1;display:flex;align-items:center;justify-content:center;font-size:calc(var(--ms)*.46);pointer-events:none;transition:all .15s}.mc.blk{cursor:not-allowed}.mc.on .ob{inset:auto 3px 2px auto;z-index:2;font-size:calc(var(--ms)*.24)}
 .mc .mx{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:calc(var(--ms)*.42);color:color-mix(in srgb,var(--fg) 38%,transparent);pointer-events:none;font-weight:300}.mc.xx .mx{display:flex}.mc.xm .mx{color:var(--fg);font-weight:700;font-size:calc(var(--ms)*.5)}.tok.xt{background:#6b6f78;font-size:15px}
 #mgrid{outline:3px solid transparent;outline-offset:3px;transition:outline-color .12s}#mgrid.pmode{outline-color:color-mix(in srgb,var(--pc) 55%,transparent)}#mgrid.mxmode{outline-color:#6b6f78}.mc.xx .ob.seat{opacity:.55}
 .tok.vt{background:#4a4a52;outline:2px dashed #c33;outline-offset:1px}
@@ -174,7 +174,7 @@ svg .shake{animation:shake .35s}
 #mclues li .tok{width:28px;height:28px;min-width:28px;min-height:28px;font-size:14px;flex:none}#mclues li span{padding-top:3px}
 .mc .it{position:absolute;right:3px;bottom:1px;font-size:calc(var(--ms)*.3);pointer-events:none}
 .mc .vic{position:absolute;left:4px;bottom:1px;font-size:calc(var(--ms)*.34);pointer-events:none}
-.mc .slot{pointer-events:none;display:flex}
+.mc .slot{position:relative;z-index:6;pointer-events:none;display:flex}
 .tok{display:inline-flex;align-items:center;justify-content:center;width:calc(var(--ms,44px)*.56);height:calc(var(--ms,44px)*.56);min-width:24px;min-height:24px;border-radius:50%;color:#fff;font-weight:800;font-size:calc(var(--ms,44px)*.34);box-shadow:0 2px 0 rgba(0,0,0,.25)}
 .mc.conf{outline:3px solid #e5484d;outline-offset:-3px;z-index:1}
 .mc.ht{outline:4px solid #e8590c;outline-offset:-4px;z-index:2}#mclues li.hr{box-shadow:inset 0 0 0 2px rgba(47,111,237,.6);border-radius:6px}
@@ -186,7 +186,7 @@ svg .shake{animation:shake .35s}
 .pb.placed{opacity:.55}
 #mclues{max-width:340px;min-width:220px;flex:1 1 250px;overflow:auto;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 16px 14px}
 
-#mclues li{cursor:pointer;line-height:1.35}
+#mclues li{cursor:pointer;line-height:1.35;touch-action:pan-y}#mclues li:focus-visible{outline:2px solid var(--pc);outline-offset:2px}
 #mclues li.str{text-decoration:line-through;opacity:.4}
 #macc{margin-top:10px}
 .mq{margin-bottom:8px}
@@ -2044,3 +2044,15 @@ body.tablet.home .hhomehero{padding:12px 14px 14px}
  :root:not([data-theme=dark]) body.home .hcont{background:linear-gradient(105deg,color-mix(in srgb,var(--pc) 7%,#fffdf8),#fffdf8 48%,#f5f8ff 100%);border-color:color-mix(in srgb,var(--pc) 18%,#d3c9b7)}
  :root:not([data-theme=dark]) body.home .hsection{border-color:#d8cfbd}
 }
+
+/* v225 pre-live interactiepolish: functionele kleur, Murdoku-lagen en controlefeedback. */
+#potb:not(.on)>span:first-child{color:#7455b8;font-weight:850}
+#hintb .uiicon{color:#c58a18}
+#chk{color:color-mix(in srgb,var(--ok) 82%,var(--fg))}
+#tools #undo b,#tools #redo b{color:color-mix(in srgb,var(--pc) 72%,var(--fg))}
+#helpb .uiicon,#ctrlb .uiicon{color:color-mix(in srgb,var(--pc) 62%,var(--fg))}
+#mgrid.checkgood,#grid.checkgood{animation:boardCheckGood .72s ease-out}
+#mgrid.checkbad,#grid.checkbad{animation:boardCheckBad .72s ease-out}
+@keyframes boardCheckGood{0%{box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 88%,transparent),0 8px 24px var(--sh)}100%{box-shadow:0 0 0 0 transparent,0 8px 24px var(--sh)}}
+@keyframes boardCheckBad{0%{box-shadow:0 0 0 4px color-mix(in srgb,#d84b4b 88%,transparent),0 8px 24px var(--sh)}100%{box-shadow:0 0 0 0 transparent,0 8px 24px var(--sh)}}
+@media(prefers-reduced-motion:reduce){#mgrid.checkgood,#grid.checkgood{outline:3px solid var(--ok)}#mgrid.checkbad,#grid.checkbad{outline:3px solid #d84b4b}}
