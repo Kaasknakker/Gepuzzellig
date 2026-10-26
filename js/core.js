@@ -530,7 +530,7 @@ function check(){const{type,p,cur}=S;let ok;
 
 function finish(){const completedOn=dstr();S.secs=Math.max(1,Math.round(playMs()/1000));S.done=true;clearOnline(true);if(S.type==="nono"){const g=$("#grid");if(g)g.classList.add("nfin")}if(S.practice)clearFreeProgressType(S.type,null,S.type==="nono"?S.nv:null);else progDel(progKey(S.type,false,S.date,S.sf));hideHint();if(S.type==="hex")S.p.sol.forEach((v,i)=>S.hx.rev.add(i));
  setT(fmt(S.secs));
- $("#msg").classList.remove("warn");$("#msg").classList.add("good");$("#msg").textContent=(S.practice?"Opgelost!":"Klaar!"+(TSHOW?" "+fmt(S.secs):""));if(S.practice)$("#next").classList.add("pulse");
+ const fm=$("#msg");if(fm.classList){fm.classList.remove("warn");fm.classList.add("good")}fm.textContent=(S.practice?"Opgelost!":"Klaar!"+(TSHOW?" "+fmt(S.secs):""));if(S.practice)$("#next").classList.add("pulse");
  if(S.type!=="m24")render();
  celebrate();
  if(S.practice){const sid=String(S.seed).replace(/\W/g,"").slice(-8),row={name:$("#name").value.trim()||"Speler",group:$("#group").value.trim(),date:completedOn,type:"v~"+S.type+S.sf+"~"+sid,secs:S.secs,uid,mist:S.mist||0,hints:S.hints||0,hintSteps:hintTotals()};
