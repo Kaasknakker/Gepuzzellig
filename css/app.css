@@ -1282,6 +1282,7 @@ body.tablet #topbar #peerLive span{max-width:180px}
 
 /* Vaststaande Binair-vakjes zijn herkenbaar, met een rustiger grijstint. */
 body[data-t=bin] #grid .c.g{background:color-mix(in srgb,var(--line) 22%,var(--card))}
+body[data-t=bin] #grid .c.g.pick{background:color-mix(in srgb,var(--acc) 16%,color-mix(in srgb,var(--line) 22%,var(--card)))}
 body[data-t=bin] #grid .c.g.dup{background:color-mix(in srgb,var(--dup) 65%,color-mix(in srgb,var(--line) 22%,var(--card)))}
 body[data-input-mode] #nmode .ncb.on i{box-shadow:0 0 0 2px #fff}
 body[data-input-mode] #hexsvg.mb,body[data-input-mode] #hexsvg.mz{box-shadow:0 0 0 7px var(--mode-tint),0 8px 24px var(--sh)}
