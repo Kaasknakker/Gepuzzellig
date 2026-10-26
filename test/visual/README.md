@@ -23,3 +23,11 @@ Schermnamen staan bovenaan `snapshot.mjs` (`SCREENS`).
 - `dekking.json` laat zien welke CSS-regels op geen enkel vastgelegd scherm iets raken; die worden niet bewaakt.
 - `make-fixture.mjs` past de seed-data op drie gedocumenteerde punten aan (typeformaat, opgeloste Pluszle, speelbare Binair).
 - Een volledige run (406 screenshots) duurt lokaal ±6 minuten met 2 processorkernen.
+
+## In GitHub Actions
+
+- De workflow **Visuele controle** draait bij pull requests en pushes naar `develop` die de app of deze map raken.
+- Staat er nog geen `baseline/` in de branch, dan maakt de workflow die en commit hem één keer zelf (nooit op `main`).
+- Bewust bijwerken na een goedgekeurde wijziging: verwijder de betrokken bestanden in `baseline/` en laat de workflow opnieuw draaien.
+- De uitkomst staat als melding bij de run (aantal gelijk, dekking, verschillen); de screenshots en verschilbeelden staan in het artifact `visuele-controle`.
+- Duur: ±20 minuten, waarvan ±12 voor het installeren van Playwright.
