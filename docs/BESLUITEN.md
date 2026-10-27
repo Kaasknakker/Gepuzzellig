@@ -11,7 +11,7 @@ Iedere bouwer leest dit bestand vóór een stap uit het verbeterplan. Een beslui
 | **B4** | **Start-knoppen in de persoonlijke kleur** op Home; op Puzzelen mag de puzzelkleur. De persoonlijke kleur komt ook terug in de achtergrondtint, het welkomstvak en de navigatie. | Stappen **D2**, **D4**, **S1**, **S5**. |
 | **B5** | **Groepspagina in drie delen: Overzicht · Activiteit · Statistieken**, zoals `PRODUCT-UX.md` §16. Op de iPhone begint de pagina met een compacte ledenlijst met de week. | Stap **S2**. |
 | **B6** | **Woordenlijst overgenomen** zoals in `VERBETERPLAN.md` hoofdstuk 5. Later aanpassen mag. | Stap **T1** en alle nieuwe teksten. |
-| **B7** | **Grotere tekst tot de grootste maat.** Eén stap boven standaard zonder enig probleem; de grootste toegankelijkheidsmaat zonder overlap (scrollen mag). | Stap **D1** (meetbaar maken in de visuele controle). |
+| **B7** | **Grotere tekst tot de grootste maat.** Bij een web-app betekent dat: inzoomen (aA in Safari, ⌘+ op de Mac). Tot 130 % zonder enig probleem; daarboven zonder overlap (scrollen mag). De iOS-instelling voor tekstgrootte geldt niet voor web-apps. | Stap **D1** (zoomtest in de visuele controle). |
 
 ## Woordenlijst (B6)
 

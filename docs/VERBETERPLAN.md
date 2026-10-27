@@ -100,13 +100,13 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S0 | Twee weken stabiliseren en verzamelen | proces | livegang | open | |
 | F1 | Vangnet samenvoegen (PR #21) | techniek | S0, G2 | open | #21 |
 | F2 | Seed-script: typeformaat dagresultaten | techniek | F1 | open | |
-| F3 | Klaar-kaart: icoon `.stat-icon` op maat (naar voren gehaald, vóór de livegang) | zichtbaar | – | in review | #22 |
+| F3 | Vóór de livegang: Klaar-icoon, hint-lampje iPhone, “Reeks: 1 dag”, terugknop hint “← Stap 2”, groepsteksten (v229) | zichtbaar | – | in review | #22 |
 | B1–B7 | Productbesluiten — zie `docs/BESLUITEN.md` | besluit (Peter) | – | klaar (27 okt) | |
 | B1-O | Onderzoek: één dagpuzzel voor telefoon en groot scherm? | onderzoek | B1 | open | |
 | O1 | Dode CSS-regels weg | onzichtbaar | F1 | open | |
 | O2 | Dubbele CSS-regels samenvoegen, per onderdeel | onzichtbaar | O1 | open | |
 | O3 | CSS splitsen per onderdeel | onzichtbaar | O2 | open | |
-| D1 | Vaste lettergroottes die meegroeien ★ | zichtbaar | O3, B6 | open | |
+| D1 | Vaste lettergroottes, werkt goed bij zoomen ★ | zichtbaar | O3 | open | |
 | D2 | Kleuren en persoonlijke kleur ★ | zichtbaar | O3, B4 | open | |
 | D3 | Eén icoonset, emoji vervangen | zichtbaar | D2, B3 | open | |
 | D4 | Knoppen en bediening gelijktrekken | zichtbaar | D1, D2 | open | |
@@ -141,7 +141,8 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 
 | Datum | Wie | Punt | Voorstel |
 | --- | --- | --- | --- |
-| | | | |
+| 27 okt | Claude | Vangnet: de opslagmelding (“bewaard en gesynchroniseerd” / “bewaard”) hangt af van timing in de nagebootste database en gaf één keer een vals verschil (`ipad-light-bin-controleer`). | In `snapshot.mjs` wachten tot de opslagmelding stabiel is, of die melding in de controle verbergen. Meenemen bij P3. |
+| 27 okt | Claude | Puzzelkop bij zoom 130 %: “Puzzel van de dag” afgekapt, “tijd tonen” over twee regels. | Meenemen in D1. |
 
 ---
 
@@ -253,12 +254,13 @@ Volledig beschreven in `docs/OPRUIMPLAN-VORMGEVING.md`, hoofdstuk 4 en 5. Sameng
 
 Vanaf hier verandert het uiterlijk. Per stap: eerst op de testsite laten zien, Peter keurt goed, dan pas de baseline bijwerken.
 
-### D1 — Vaste lettergroottes die meegroeien ★
+### D1 — Vaste lettergroottes ★
 
-- **Waarom:** nu 88 verschillende lettergroottes, 107 keer kleiner dan 12 px, “Start” is 9,5 px. Bijna alles staat in vaste pixels, waardoor de iOS-instelling voor grotere tekst grotendeels niets doet en de navigatie in elkaar loopt (“PuzzelenGroepen”).
-- **Wat:** zes maten als variabelen in `rem`, met een minimum van 12 px en op de iPhone hulptekst minimaal 14 px. Alle tekst omzetten, per onderdeel. Navigatie en knoppen mogen meegroeien en zo nodig afbreken of in twee regels gaan.
-- **Vangnet:** alle schermen veranderen; per onderdeel een PR, zodat per keer duidelijk is welke schermen veranderen.
-- **Klaar wanneer:** < 10 losse lettergroottes buiten de variabelen; niets onder 12 px; met 130 % tekst geen overlap op Home, puzzels, groepen en profiel (B7).
+- **Waarom:** 88 verschillende lettergroottes, 107 keer kleiner dan 12 px, “Start” is 9,5 px.
+- **Hoe grotere tekst werkt bij een web-app** (gemeten 27 oktober): de iOS-instelling voor tekstgrootte geldt níet voor websites en web-apps. Mensen vergroten met **zoomen**: de aA-knop in Safari op iPhone/iPad, ⌘+ of de standaard paginazoom op de Mac. Getest met zoom 125 % en 150 % (Mac) en 115 % en 130 % (iPad): niets loopt in elkaar, geen horizontaal scrollen. Alleen in de puzzelkop wordt “Puzzel van de dag” afgekapt en breekt “tijd tonen” over twee regels. Zoomen vergroot echter alles even veel, dus wie inzoomt omdat de kleinste tekst onleesbaar is, krijgt een minder handige indeling. Daarom: de kleinste tekst groter, niet de structuur.
+- **Wat:** zes maten als variabelen (in `rem`), minimum 12 px, op de iPhone hulptekst minimaal 14 px. Alle tekst omzetten, per onderdeel. Puzzelkop: label en knoppen passen bij 130 % zoom.
+- **Vangnet:** alle schermen veranderen; per onderdeel een PR. Een zoomtest (Mac 150 %, iPad 130 %, iPhone 115 %) toevoegen aan `test/visual/` als extra schermen.
+- **Klaar wanneer:** < 10 losse lettergroottes buiten de variabelen; niets onder 12 px; bij de zoomtest geen overlap, afkapping of horizontaal scrollen (B7).
 
 ### D2 — Kleuren en persoonlijke kleur ★
 
