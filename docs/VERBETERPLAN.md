@@ -124,6 +124,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S8 | iPhone-navigatie onderaan (B2) ★ | zichtbaar | S1 | open | |
 | S9 | Nonogram kleur: foutmarkering die de kleur laat staan (bug) | zichtbaar | – (kan direct na S0) | open | |
 | S10 | Murdoku: aanwijzing markeren als “nog nodig” (vlaggetje, B8 = c) | nieuw (klein) | D3 | open | |
+| S11 | Pencil in profiel- en groepsmenu: tik op Terug genegeerd, scrollen stroef (bug, ook in main) | bug | – (na de livegang) | in review | #25 |
 | T1 | Woordenlijst doorvoeren, jargon weg | tekst | B1-O, S1–S7 | open | |
 | T2 | Uitleg per puzzel inkorten | tekst | T1 | open | |
 | T3 | Hints Murdoku herschrijven ★ | tekst | T1 | open | |
