@@ -967,7 +967,7 @@ body.phone .personview .spmeta{font-size:10px}body.phone .spdrow{grid-template-c
 /* Home responsive finetuning: op iPhone geen dubbele puzzelnavigatie; op iPad grotere typografie zonder extra verticale ruimte. */
 /* iOS legt aan de bovenrand een visuele fade over scrollende inhoud. Houd de mobiele bediening daar bewust onder. */
 body.phone header{display:none!important}
-body.phone.home #home .hwrap{padding-top:28px}
+body.phone.home #home .hwrap{padding-top:36px}
 body.phone:not(.home):not(.newpick) #prow{
  display:flex;
  align-items:center;
@@ -1849,7 +1849,7 @@ body.using-keyboard .dayitem .dayaction:focus-visible{outline:2px solid var(--pc
 /* v200: Profiel en Groep gebruiken op alle schermgroottes hetzelfde volledige-paginamodel. */
 #authaccount.authpage,#groupaccount.authpage{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));padding-bottom:max(28px,env(safe-area-inset-bottom))}
 #authaccount.authpage .authcard,#groupaccount.authpage .authcard{width:100%;max-width:1180px;min-height:100dvh;margin:0 auto}
-@media(max-width:760px){#authaccount.authpage,#groupaccount.authpage{padding-top:env(safe-area-inset-top)}#authaccount.authpage .authcard,#groupaccount.authpage .authcard{max-width:none;padding-top:0}.authdialoghead{margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px}}
+@media(max-width:760px){#authaccount.authpage .authcard,#groupaccount.authpage .authcard{max-width:none;padding-top:0}.authdialoghead{margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px}}
 #authbtn .authpersonicon{width:22px;height:22px;flex:0 0 22px}
 #more #authbtn{justify-content:flex-start}
 
@@ -1920,7 +1920,7 @@ body:not(.home):not(.newpick) #stage{overscroll-behavior:none}
 @media(prefers-reduced-motion:reduce){.pagein,#authaccount.authpage.ui-reveal,#groupaccount.authpage.ui-reveal{animation:none!important}}
 
 /* v204: full-page instellingen volgen het echte thema en blijven volledig onder de iOS-statuszone. */
-#authaccount.authpage,#groupaccount.authpage{background-color:var(--page-tone,var(--bg))!important;background-image:var(--page-pattern,none)!important;padding-top:max(env(safe-area-inset-top),12px)!important}
+#authaccount.authpage,#groupaccount.authpage{--auth-safe-top:max(env(safe-area-inset-top),12px);--auth-safe-bg:var(--bg);background-color:var(--page-tone,var(--bg))!important;background-image:var(--page-pattern,none)!important;padding-top:var(--auth-safe-top)!important}
 :root[data-theme=dark] #authaccount.authpage,:root[data-theme=dark] #groupaccount.authpage{background-image:var(--pp-d,var(--page-pattern,none))!important}
 #authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{top:0!important;margin-top:0!important}
 #authaccount.authpage .authcard,#groupaccount.authpage .authcard{padding-top:0!important}
@@ -1970,11 +1970,14 @@ body.home #home .hwrap:has(.hpuzzletabs) .puzzlecardfoot{margin-top:10px}
 body[data-t=bin] .c .nt{left:7%;top:6%;width:58%;height:58%;opacity:.54}
 
 
-/* v208: safe-area sluit aan op de banner; favorietkaarten groeien onafhankelijk. */
+/* Canonieke safe-area voor Profiel en Groep: één bron voor paginapadding en vaste bovenkap. */
+@media(max-width:760px){
+ #authaccount.authpage,#groupaccount.authpage{--auth-safe-top:calc(env(safe-area-inset-top) + 16px);--auth-safe-bg:var(--page-tone,var(--bg))}
+}
 #authaccount.authpage::before,#groupaccount.authpage::before{
   content:"";position:fixed;z-index:30;top:0;left:0;right:0;
-  height:max(env(safe-area-inset-top),12px);
-  background:var(--bg);
+  height:var(--auth-safe-top);
+  background:var(--auth-safe-bg);
   pointer-events:none;
 }
 body.home #home .hwrap:has(.hpuzzletabs) .puzzlecatalog{align-items:start}
