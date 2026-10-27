@@ -1600,6 +1600,7 @@ body.nieuw:not(.home)::before{opacity:.58}
 
 
 /* Statistiekiconen: compact in gedeelde uitleg; persoonlijke statistieken verfijnen dit verder. */
+.stat-icon{width:1em;height:1em;display:inline-block;vertical-align:-.15em;flex:0 0 auto}
 .sco .stat-icon{width:16px;height:16px;display:inline-block;vertical-align:-3px;flex:0 0 auto}
 /* Persoonlijke statistieken: functionele kleur, één lijniconentaal. */
 .personview .stat-icon{width:18px;height:18px;display:inline-block;vertical-align:-3px;flex:0 0 auto}
