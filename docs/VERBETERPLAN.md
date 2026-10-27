@@ -101,6 +101,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | G1 | Oude branches controleren en opruimen | GitHub | – | open | |
 | G2 | Screenshots van het vangnet uit de hoofdgeschiedenis (eigen branch) | GitHub | – | open | |
 | S0 | Twee weken stabiliseren en verzamelen | proces | livegang | open | |
+| F0 | CSS-ratchet in Check Gepuzzellig: `!important`, herhaalde selectors, lettergroottes en kleuren kunnen alleen omlaag (eerste stap na de livegang, samen met #24) | techniek | livegang | in review | #28 |
 | F1 | Vangnet samenvoegen (PR #21, na G2) | techniek | S0, G2 | open | #21 |
 | F2 | Seed-script: typeformaat dagresultaten | techniek | F1 | open | |
 | F3 | Vóór de livegang: Klaar-icoon, hint-lampje iPhone, “Reeks: 1 dag”, terugknop hint “← Stap 2”, groepsteksten (v229) | zichtbaar | – | samengevoegd 27 okt, test Peter | #22 |
