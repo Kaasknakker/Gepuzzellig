@@ -113,12 +113,13 @@ jobs:
           rm -f .test-dist/js/config.test.js
           grep -q 'projectId:"gepuzzellig-test"' .test-dist/js/config.js
           ! grep -q 'projectId:"gepuzzelig"' .test-dist/js/config.js
-          # App-naam "Gepuzzellig Test" alleen op de testsite; de bron blijft "Gepuzzellig".
-          sed -i -e 's/name%22%3A%22Gepuzzellig%22%2C%22short_name%22%3A%22Gepuzzellig%22/name%22%3A%22Gepuzzellig%20Test%22%2C%22short_name%22%3A%22Gepuzzellig%20Test%22/' \
-                 -e 's/apple-mobile-web-app-title" content="Gepuzzellig"/apple-mobile-web-app-title" content="Gepuzzellig Test"/' .test-dist/index.html
+          # Productiebranding blijft in de bron; alleen de geïsoleerde testbuild krijgt testnaam + testicoon.
+          node .github/scripts/prepare-test-branding.mjs .test-dist/index.html
           grep -q 'Gepuzzellig%20Test' .test-dist/index.html
           grep -q 'apple-mobile-web-app-title" content="Gepuzzellig Test"' .test-dist/index.html
+          grep -q '%2327220f' .test-dist/index.html
           ! grep -q 'Gepuzzellig%20Test' index.html
+          ! grep -q '%2327220f' index.html
 
       - name: Authenticate to test Firebase project
         uses: google-github-actions/auth@v3
