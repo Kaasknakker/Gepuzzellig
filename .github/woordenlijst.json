@@ -1,0 +1,17 @@
+{
+  "note": "Woorden die volgens docs/BESLUITEN.md (B6) niet in zichtbare teksten horen. check-code-budget.mjs telt ze; het aantal mag alleen omlaag. Aanvullen wanneer de woordenlijst in BESLUITEN.md verandert.",
+  "verboden": [
+    { "woord": "puzzle ?key", "gebruik": "geen interne namen in beeld" },
+    { "woord": "memberships?", "gebruik": "groep, groepslid" },
+    { "woord": "admin", "gebruik": "beheerder" },
+    { "woord": "cast", "gebruik": "personen (Murdoku)" },
+    { "woord": "foutmoment(en)?", "gebruik": "fout" },
+    { "woord": "apparaatvariant(en)?", "gebruik": "op de telefoon / op een groot scherm" },
+    { "woord": "telefoonvariant(en)?", "gebruik": "op de telefoon" },
+    { "woord": "groot-schermvariant(en)?", "gebruik": "op een groot scherm" },
+    { "woord": "dagen reeks", "gebruik": "Reeks: 3 dagen" },
+    { "woord": "vrije? vakjes?", "gebruik": "leeg vakje / lege vakjes" },
+    { "woord": "zetjes?", "gebruik": "hint, klein duwtje" },
+    { "woord": "daily", "gebruik": "dagpuzzel" }
+  ]
+}
