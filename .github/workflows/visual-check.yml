@@ -1,0 +1,83 @@
+name: Visuele controle
+
+# Vergelijkt de app met de vastgelegde screenshots in test/visual/baseline/.
+# - Ontbreekt de baseline (eerste keer), dan wordt hij gemaakt en als artifact "baseline" bewaard.
+#   Die bestanden worden daarna bewust in test/visual/baseline/ gecommit.
+# - Handmatig starten met "update" aan maakt ook een nieuwe baseline (alleen mogelijk vanaf main).
+# Zie test/visual/README.md en docs/OPRUIMPLAN-VORMGEVING.md.
+on:
+  workflow_dispatch:
+    inputs:
+      update:
+        description: "Baseline opnieuw vastleggen"
+        type: boolean
+        default: false
+  pull_request:
+    paths: ["css/**", "js/**", "index.html", "test/visual/**", ".github/workflows/visual-check.yml"]
+  push:
+    branches: [develop]
+    paths: ["css/**", "js/**", "index.html", "test/visual/**", ".github/workflows/visual-check.yml"]
+
+permissions:
+  contents: write   # alleen nodig om de allereerste baseline in de branch te committen
+
+jobs:
+  visual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      NODE_PATH: /tmp/pw/node_modules
+    steps:
+      - name: Code ophalen
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+      - name: Node instellen
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Playwright installeren (buiten de repository, vaste versie)
+        run: |
+          npm install --prefix /tmp/pw --no-audit --no-fund playwright@1.63.0
+          /tmp/pw/node_modules/.bin/playwright install --with-deps chromium
+      - name: Testdata maken
+        run: node test/visual/make-fixture.mjs
+      - name: Screenshots maken en vergelijken
+        id: snap
+        run: |
+          if [ "${{ inputs.update }}" = "true" ] || [ ! -d test/visual/baseline ]; then
+            node test/visual/snapshot.mjs --update
+            echo "baseline=nieuw" >> "$GITHUB_OUTPUT"
+            echo "::notice::Nieuwe baseline vastgelegd. Download het artifact 'baseline' en commit het in test/visual/baseline/."
+          else
+            node test/visual/snapshot.mjs
+          fi
+      - name: Resultaat bewaren
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visuele-controle
+          path: |
+            test/visual/out/
+            test/visual/diff/
+            test/visual/rapport.json
+            test/visual/dekking.json
+          if-no-files-found: ignore
+      - name: Nieuwe baseline bewaren
+        if: steps.snap.outputs.baseline == 'nieuw'
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline
+          path: test/visual/baseline/
+      # Nieuwe of bewust verwijderde baselinebestanden: commit wat de workflow heeft vastgelegd
+      # (nooit op main), zodat volgende runs ermee vergelijken. Verschillen worden nooit automatisch overgenomen.
+      - name: Nieuwe baselinebestanden committen
+        if: success() && github.ref_name != 'main' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+        run: |
+          if [ -z "$(git status --porcelain test/visual/baseline)" ]; then echo "Geen nieuwe baselinebestanden."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add test/visual/baseline
+          git commit -m "Leg nieuwe visuele baselinebestanden vast (workflow Visuele controle)"
+          git push origin HEAD:${{ github.head_ref || github.ref_name }}
+          echo "::notice title=Baseline bijgewerkt::Nieuwe baselinebestanden staan nu in de branch."
