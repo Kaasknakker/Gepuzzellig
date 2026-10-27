@@ -218,7 +218,7 @@ function showHintLevel(h,level,focusNext){
  if(h.stale){next.textContent="Vernieuw hint voor dit bord";next.onclick=()=>{clearHint();hintGo()}}
  else if(level<3){next.textContent=level===1?"Geef een tweede duwtje":"Toon de volledige hint";next.onclick=()=>showHintLevel(h,level+1,true)}
  else{next.textContent=h.move.btn;next.onclick=doStep}
- if(level>1&&!h.stale){const back=add("button","hintback","← "+names[level-2]);back.onclick=()=>showHintLevel(h,level-1,true)}
+ if(level>1&&!h.stale){const back=add("button","hintback","← Stap "+(level-1));back.setAttribute("aria-label","Terug naar stap "+(level-1));back.onclick=()=>showHintLevel(h,level-1,true)}
  add("div","hintusage",hintSummary({hints:S.hints,hintSteps:hintTotals()}));
  layoutHintCard(h);
  persist(true);if(focusNext)next.focus({preventScroll:true});
