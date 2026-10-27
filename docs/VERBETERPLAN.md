@@ -122,6 +122,8 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S6 | Hexcells-bediening en tellers | zichtbaar | D4 | open | |
 | S7 | Puzzelmenu en hintpaneel | zichtbaar | D4 | open | |
 | S8 | iPhone-navigatie onderaan (B2) ★ | zichtbaar | S1 | open | |
+| S9 | Nonogram kleur: foutmarkering die de kleur laat staan (bug) | zichtbaar | – (kan direct na S0) | open | |
+| S10 | Murdoku: aanwijzing markeren als “nog nodig” | nieuw (klein) | B8, D3 | open | |
 | T1 | Woordenlijst doorvoeren, jargon weg | tekst | B1-O, S1–S7 | open | |
 | T2 | Uitleg per puzzel inkorten | tekst | T1 | open | |
 | T3 | Hints Murdoku herschrijven ★ | tekst | T1 | open | |
@@ -162,6 +164,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | **B5** | Opzet groepspagina. | Zoals in `PRODUCT-UX.md` §16: Overzicht · Activiteit · Statistieken | **Overnemen**, met op de iPhone als eerste een compacte ledenlijst met de week. |
 | **B6** | Woordenlijst. | Zie tabel hieronder | **Overnemen of aanpassen.** |
 | **B7** | Welke grotere-tekstinstelling moet minimaal werken? | iOS-tekstgrootte tot “groot” / tot de grootste toegankelijkheidsmaat | **Tot één stap boven standaard zonder enig probleem**, en de grootste toegankelijkheidsmaat zonder overlap (scrollen mag). |
+| **B8** | Hoe markeer je een Murdoku-aanwijzing als “nog nodig”? (S10) | a) tik wisselt drie standen: open → nog nodig → afgehandeld · b) tik = afstrepen zoals nu, lang indrukken = nog nodig · c) tik = afstrepen zoals nu, plus een klein vlagknopje rechts op elk kaartje | **c)** zichtbaar en zonder nieuw gebaar; bestaande gewoonte (tikken = afstrepen) blijft. |
 
 **Voorstel woordenlijst (B6)**
 
@@ -366,6 +369,24 @@ Vanaf hier verandert het uiterlijk. Per stap: eerst op de testsite laten zien, P
 
 - Home · Puzzelen · Groepen · Profiel als balk onderaan, met veilige schermrand. Kop op Home wordt compacter.
 - **Vangnet:** alle iPhone-schermen buiten de puzzels.
+
+
+### S9 — Nonogram kleur: foutmarkering die de kleur laat staan
+
+- **Waarom (bug):** bij controleren krijgt een fout vakje een rode achtergrond (`.c.bad{background:#e5484d!important}`). In een kleurnonogram is rood een puzzelkleur: een fout rood vakje blijft even rood, en een fout blauw vakje wordt rood geverfd. Je ziet dus niet wát er fout is, en de markering verandert de ingevulde kleur.
+- **Wat:** de foutmarkering vervangt nooit de ingevulde kleur. Voorstel (proef 27 oktober): de eigen kleur blijft, met een donkere arcering, een dikke donkere rand en een klein “!”-rondje in de hoek. Dezelfde stijl voor alle puzzels (Binair, Star Battle, Pluszle, klassieke nonogram), zodat “fout” overal hetzelfde eruitziet; Murdoku gebruikt al een rand.
+- Werkt voor kleurenblinden doordat het patroon en het “!” de betekenis dragen, niet de kleur.
+- **Vangnet:** `bin-controleer`, `mur-geplaatst`, plus een nieuw scherm met een gecontroleerde kleurnonogram met fouten (toevoegen aan `SCREENS`).
+- **Klaar wanneer:** op een kleurnonogram is na controleren elk fout vakje herkenbaar, in elke kleur, in licht en donker; de ingevulde kleur blijft zichtbaar.
+- Mag als losse bugfix direct na de stabilisatieperiode, vóór het ontwerpsysteem; in D2 gaat de kleur dan mee in de variabelen.
+
+### S10 — Murdoku: aanwijzing markeren als “nog nodig”
+
+- **Waarom:** nu kun je een aanwijzingskaartje alleen afstrepen (tik). Soms heb je een aanwijzing deels gebruikt maar heb je hem later nog nodig; dat wil je kunnen aangeven zonder hem af te strepen.
+- **Wat (volgens B8):** een derde stand naast open en afgestreept: *nog nodig*, herkenbaar aan een vlaggetje (icoonset D3), een gekleurde rand links en een lichte achtergrond. Afgestreept en nog nodig sluiten elkaar uit.
+- Wordt bewaard en gesynchroniseerd zoals het afstrepen (`S.str`), telt niet als fout of hint, en werkt met touch, Pencil, muis en toetsenbord. Aanraakvlak ≥ 44 px.
+- **Vangnet:** `dag-mur`, `hint-mur-*`, `mur-geplaatst`.
+- Eventueel later dezelfde stand voor andere aanwijzingen (Nonogram-, Pluszle-, Hexcells-lijnen); niet in deze stap.
 
 ---
 
