@@ -127,7 +127,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S10 | Murdoku: aanwijzing markeren als “nog nodig” (vlaggetje, B8 = c) | nieuw (klein) | D3 | open | |
 | S11 | Pencil in profiel- en groepsmenu: tik op Terug genegeerd, scrollen stroef (bug, ook in main) | bug | – (na de livegang) | in review | #25 |
 | S12 | iPhone-hint in de onderbalk te klein: kaart krijgt alleen de hoogte van de knoppenbalk (`js/layout.js`, `tray`), tekst past er nauwelijks in (ook in main) | bug | – (eerste na de livegang) | open | |
-| S13 | iPhone Home: bovenrand vervaagt onder de iOS-statusbalk. Oorzaak: develop zette `status-bar-style=black-translucent`, main niet | bug | – (vóór de livegang, als Peter akkoord is) | in review | #29 |
+| S13 | iPhone-web-app: bovenrand Home vervaagt (in Safari goed, als web-app niet; main wel goed). #29 (statusbalk-regel weg) loste het in de web-app níet op. Volgende verdachte: `#home` als eigen scrollcontainer van `100dvh` bovenop de veilige marge, waardoor de pagina zelf net te hoog wordt en iOS zijn vervaging toont | bug | – (na de livegang) | open | #29 (deel) |
 | T1 | Woordenlijst doorvoeren, jargon weg | tekst | B1-O, S1–S7 | open | |
 | T2 | Uitleg per puzzel inkorten | tekst | T1 | open | |
 | T3 | Hints Murdoku herschrijven ★ | tekst | T1 | open | |
