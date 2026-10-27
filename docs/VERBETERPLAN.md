@@ -1,10 +1,12 @@
-# Verbeterplan Gepuzzellig
+# Operatie Bezemwagen — verbeterplan Gepuzzellig
+
+> **Operatie Bezemwagen**: de bezemwagen rijdt achteraan en veegt op wat is blijven liggen. Geen nieuwe functies, wel alles nalopen, opruimen en afmaken wat in de haast van de afgelopen weken is achtergebleven. Gebruik deze naam in branches, PR's en commits van dit plan, bijvoorbeeld `chatgpt/bezemwagen-D1-lettergroottes` of “Bezemwagen D1: vaste lettergroottes”.
 
 Status: plan, opgesteld 27 oktober 2026 op basis van `develop` v228.
 Eigenaar: Peter. Uitvoering: ChatGPT, Claude of allebei, stap voor stap.
 Eerst de app goed maken; pas daarna de App Store of nieuwe puzzels overwegen (hoofdstuk 13).
 
-Dit plan bundelt alle bevindingen uit de review van 26–27 oktober: opmaak, kleur, iconen, bediening, Murdoku, hints, teksten, toegankelijkheid, snelheid en privacy. Voor het opruimen van de CSS verwijst het naar `docs/OPRUIMPLAN-VORMGEVING.md`; dat document blijft de gedetailleerde werkwijze voor die stappen.
+Dit plan (Operatie Bezemwagen) bundelt alle bevindingen uit de review van 26–27 oktober: opmaak, kleur, iconen, bediening, Murdoku, hints, teksten, toegankelijkheid, snelheid en privacy. Voor het opruimen van de CSS verwijst het naar `docs/OPRUIMPLAN-VORMGEVING.md`; dat document blijft de gedetailleerde werkwijze voor die stappen.
 
 ---
 
@@ -38,7 +40,7 @@ Bouwer en reviewer mogen per stap wisselen. Een vaste rolverdeling is niet nodig
 
 ### Vaste regels (gelden voor iedere stap)
 
-1. **Eén stap per pull request.** Branchnaam: `<wie>/<stap-id>-<korte-naam>`, bijvoorbeeld `chatgpt/D1-lettergroottes` of `claude/S4-murdoku-bord`.
+1. **Eén stap per pull request.** Branchnaam: `<wie>/bezemwagen-<stap-id>-<korte-naam>`, bijvoorbeeld `chatgpt/bezemwagen-D1-lettergroottes` of `claude/bezemwagen-S4-murdoku-bord`. PR-titel begint met “Bezemwagen 〈ID〉:”.
 2. **Altijd vanaf de actuele `develop`.** Nooit rechtstreeks naar `develop` of `main` pushen.
 3. **De checks moeten groen zijn** voordat Peter samenvoegt: *Check Gepuzzellig* en *Visuele controle*.
 4. **Visuele verschillen alleen waar de stap dat zegt.** Elke stap noemt onder *Vangnet* welke schermen mogen veranderen. Verandert er een ander scherm, dan is de stap niet klaar. Bewuste verschillen: de baselinebestanden van precies die schermen verwijderen in dezelfde PR (zie `test/visual/README.md`).
@@ -49,7 +51,7 @@ Bouwer en reviewer mogen per stap wisselen. Een vaste rolverdeling is niet nodig
 
 ### Standaardopdracht (kopiëren en de stap invullen)
 
-> Voer stap **〈ID〉** uit volgens `docs/VERBETERPLAN.md` op de actuele `develop`. Lees eerst `docs/AI-WERKWIJZE.md`, `docs/TESTOMGEVING.md`, `docs/VERBETERPLAN.md` (hoofdstuk 2 en stap 〈ID〉), `docs/BESLUITEN.md` (zodra die bestaat) en bij CSS-werk `docs/OPRUIMPLAN-VORMGEVING.md`. Werk in een eigen branch en open een pull request naar `develop`. Voer alleen deze stap uit. De checks *Check Gepuzzellig* en *Visuele controle* moeten groen zijn; alleen de schermen die bij de stap onder *Vangnet* staan mogen veranderen. Werk de statustabel bij. Meld in de PR: wat er veranderd is, welke schermen veranderd zijn, en wat ik op iPad en iPhone moet testen.
+> Operatie Bezemwagen: voer stap **〈ID〉** uit volgens `docs/VERBETERPLAN.md` op de actuele `develop`. Lees eerst `docs/AI-WERKWIJZE.md`, `docs/TESTOMGEVING.md`, `docs/VERBETERPLAN.md` (hoofdstuk 2 en stap 〈ID〉), `docs/BESLUITEN.md` (zodra die bestaat) en bij CSS-werk `docs/OPRUIMPLAN-VORMGEVING.md`. Werk in een eigen branch en open een pull request naar `develop`. Voer alleen deze stap uit. De checks *Check Gepuzzellig* en *Visuele controle* moeten groen zijn; alleen de schermen die bij de stap onder *Vangnet* staan mogen veranderen. Werk de statustabel bij. Meld in de PR: wat er veranderd is, welke schermen veranderd zijn, en wat ik op iPad en iPhone moet testen.
 
 ### Reviewopdracht
 

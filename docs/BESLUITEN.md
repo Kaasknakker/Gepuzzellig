@@ -1,6 +1,6 @@
 # Productbesluiten Gepuzzellig
 
-Genomen door Peter op 27 oktober 2026, bij `docs/VERBETERPLAN.md` (stappen B1–B7).
+Genomen door Peter op 27 oktober 2026, bij Operatie Bezemwagen (`docs/VERBETERPLAN.md`, stappen B1–B7).
 Iedere bouwer leest dit bestand vóór een stap uit het verbeterplan. Een besluit wijzigen kan alleen Peter; noteer dan datum en reden in de tabel onderaan.
 
 | ID | Besluit | Gevolg in het verbeterplan |
