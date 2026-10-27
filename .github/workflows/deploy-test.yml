@@ -5,6 +5,12 @@ on:
     branches:
       - develop
   workflow_dispatch:
+    inputs:
+      seed_test_groups:
+        description: "Testgroepen opnieuw seeden"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -131,7 +137,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v3
 
       - name: Seed Fase 8 testgroepen
-        if: contains(github.event.head_commit.message, '[seed-test-groups]')
+        if: contains(github.event.head_commit.message, '[seed-test-groups]') || (github.event_name == 'workflow_dispatch' && inputs.seed_test_groups)
         env:
           GOOGLE_CLOUD_PROJECT: gepuzzellig-test
         run: node scripts/seed-test-groups.mjs
