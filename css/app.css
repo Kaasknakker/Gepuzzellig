@@ -1920,7 +1920,7 @@ body:not(.home):not(.newpick) #stage{overscroll-behavior:none}
 @media(prefers-reduced-motion:reduce){.pagein,#authaccount.authpage.ui-reveal,#groupaccount.authpage.ui-reveal{animation:none!important}}
 
 /* v204: full-page instellingen volgen het echte thema en blijven volledig onder de iOS-statuszone. */
-#authaccount.authpage,#groupaccount.authpage{background-color:var(--page-tone,var(--bg))!important;background-image:var(--page-pattern,none)!important;padding-top:max(env(safe-area-inset-top),12px)!important}
+#authaccount.authpage,#groupaccount.authpage{--auth-safe-top:max(env(safe-area-inset-top),12px);--auth-safe-bg:var(--bg);background-color:var(--page-tone,var(--bg))!important;background-image:var(--page-pattern,none)!important;padding-top:var(--auth-safe-top)!important}
 :root[data-theme=dark] #authaccount.authpage,:root[data-theme=dark] #groupaccount.authpage{background-image:var(--pp-d,var(--page-pattern,none))!important}
 #authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{top:0!important;margin-top:0!important}
 #authaccount.authpage .authcard,#groupaccount.authpage .authcard{padding-top:0!important}
@@ -1970,16 +1970,15 @@ body.home #home .hwrap:has(.hpuzzletabs) .puzzlecardfoot{margin-top:10px}
 body[data-t=bin] .c .nt{left:7%;top:6%;width:58%;height:58%;opacity:.54}
 
 
-/* v208: safe-area sluit aan op de banner; favorietkaarten groeien onafhankelijk. */
+/* Canonieke safe-area voor Profiel en Groep: één bron voor paginapadding en vaste bovenkap. */
+@media(max-width:760px){
+ #authaccount.authpage,#groupaccount.authpage{--auth-safe-top:calc(env(safe-area-inset-top) + 16px);--auth-safe-bg:var(--page-tone,var(--bg))}
+}
 #authaccount.authpage::before,#groupaccount.authpage::before{
   content:"";position:fixed;z-index:30;top:0;left:0;right:0;
-  height:max(env(safe-area-inset-top),12px);
-  background:var(--bg);
+  height:var(--auth-safe-top);
+  background:var(--auth-safe-bg);
   pointer-events:none;
-}
-@media(max-width:760px){
- #authaccount.authpage,#groupaccount.authpage{padding-top:calc(env(safe-area-inset-top) + 16px)!important}
- #authaccount.authpage::before,#groupaccount.authpage::before{height:calc(env(safe-area-inset-top) + 16px);background:var(--page-tone,var(--bg))}
 }
 body.home #home .hwrap:has(.hpuzzletabs) .puzzlecatalog{align-items:start}
 body.home #home .hwrap:has(.hpuzzletabs) .puzzlecard{height:auto;align-self:start}
