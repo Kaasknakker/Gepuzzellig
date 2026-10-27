@@ -332,8 +332,12 @@ let drag2=null,binLastTap={t:0,i:-1,h:0,note:false};
 let G2=null;
 function binCell(x,y){const g=G2;if(!g)return -1;const c=Math.floor((x-g.x)/g.cs),r=Math.floor((y-g.y)/g.cs);return c<0||r<0||c>=g.W||r>=g.H?-1:r*g.W+c}
 /* Terwijl de Pencil het scherm raakt, tellen aanrakingen van hand of duim op het speelveld niet mee. */
-let penAct=null;addEventListener("pointerdown",e=>{if(e.pointerType==="pen")penAct={id:e.pointerId,t:performance.now()};else if(penAct&&performance.now()-penAct.t<4000&&e.target.closest&&e.target.closest("#grid,#hexsvg,#mgrid")){e.stopPropagation();e.preventDefault()}},true);
-const penUp=e=>{if(e.pointerType==="pen"&&penAct&&penAct.id===e.pointerId)penAct=null};addEventListener("pointerup",penUp,true);addEventListener("pointercancel",penUp,true);
+let penAct=null,penActTimer=0;
+const refreshPenAct=e=>{if(e.pointerType!=="pen")return;clearTimeout(penActTimer);penAct={id:e.pointerId,t:performance.now()};penActTimer=setTimeout(()=>{if(penAct&&penAct.id===e.pointerId)penAct=null},900)};
+addEventListener("pointerdown",refreshPenAct,true);
+addEventListener("pointermove",e=>{if(e.pointerType==="pen"&&penAct&&penAct.id===e.pointerId)refreshPenAct(e)},true);
+addEventListener("pointerdown",e=>{if(e.pointerType==="pen")return;if(penAct&&performance.now()-penAct.t<900&&e.target.closest&&e.target.closest("#grid,#hexsvg,#mgrid")){e.stopPropagation();e.preventDefault()}},true);
+const penUp=e=>{if(e.pointerType==="pen"&&penAct&&penAct.id===e.pointerId){penAct=null;clearTimeout(penActTimer);penActTimer=0}};addEventListener("pointerup",penUp,true);addEventListener("pointercancel",penUp,true);
 /* Gedeelde vakjes-geometrie: rekent met offsetLeft/offsetTop, dus een vakje dat net 'popt' (vergroot) verschuift de raakzone niet. */
 function gridGeo(W){const g=$("#grid"),gr=g.getBoundingClientRect(),a=S.cells[0],b=S.cells[1]||a,d=S.cells[W]||a,relative=a.offsetParent===g;
  return{x:gr.left+a.offsetLeft-(relative?0:g.offsetLeft),y:gr.top+a.offsetTop-(relative?0:g.offsetTop),pw:(b.offsetLeft-a.offsetLeft)||a.offsetWidth,ph:(d.offsetTop-a.offsetTop)||a.offsetHeight}}
@@ -764,7 +768,7 @@ function rHex(){if(!S.p||S.type!=="hex"||!S.hx)return;{const hs=$("#hexstat");if
  const LP={},VC={};P.lineShow.forEach(j=>{const l=P.lines[j],k=l.vq+","+l.vr;VC[k]=(VC[k]||0)+1});const shared=j=>VC[P.lines[j].vq+","+P.lines[j].vr]>1;{const used=[];P.lineShow.forEach(j=>{const l=P.lines[j],[x,y]=px(l.vq,l.vr),ang0=l.d===0?-90:l.d===1?30:-30,ang=TR?90-ang0:ang0,sg=l.d!==1?1:-1,rad=ang*Math.PI/180,ux=Math.cos(rad)*sg,uy=Math.sin(rad)*sg;let k=shared(j)?1.2:.5,tp;for(let t=0;t<6;t++){tp=[x-ux*sz*k,y-uy*sz*k];if(!used.some(q=>Math.hypot(q[0]-tp[0],q[1]-tp[1])<sz*.9))break;k+=.45}used.push(tp);LP[j]=tp})}
  const ext=[...pts.map(p=>[p[0],p[1],sz*1.2]),...Object.values(LP).map(p=>[p[0],p[1],sz*.85])];
  const x0=Math.min(...ext.map(p=>p[0]-p[2])),x1=Math.max(...ext.map(p=>p[0]+p[2])),y0=Math.min(...ext.map(p=>p[1]-p[2])),y1=Math.max(...ext.map(p=>p[1]+p[2]));
- const asp=(x1-x0)/(y1-y0);let h,wd;if(S._hexFit){h=S._hexFit.h;wd=S._hexFit.wd}else{const top=w.getBoundingClientRect().top+(window.scrollY||0),fit=Math.min((availBot()-top-(S.hint?10:0))/(y1-y0),(document.body.classList.contains("hintdock")?parseFloat(getComputedStyle($("#stage")).getPropertyValue("--hint-board-height"))-32:Infinity)/(y1-y0),($("#stage").clientWidth-(S.hint?28:PHONE?2:10))/(x1-x0));h=(y1-y0)*Math.max(.4,Math.min(window.LAYOUT_ORIGINAL||innerWidth<=2000?2.45:1.7,fit));wd=h*asp;S._hexFit={h,wd}};
+ const asp=(x1-x0)/(y1-y0);let h,wd;if(S._hexFit){h=S._hexFit.h;wd=S._hexFit.wd}else{const top=w.getBoundingClientRect().top+(window.scrollY||0),hexFrameBottom=document.body.classList.contains("tablet")?8:0,fit=Math.min((availBot()-top-hexFrameBottom-(S.hint?10:0))/(y1-y0),(document.body.classList.contains("hintdock")?parseFloat(getComputedStyle($("#stage")).getPropertyValue("--hint-board-height"))-32:Infinity)/(y1-y0),($("#stage").clientWidth-(S.hint?28:PHONE?2:10))/(x1-x0));h=(y1-y0)*Math.max(.4,Math.min(window.LAYOUT_ORIGINAL||innerWidth<=2000?2.45:1.7,fit));wd=h*asp;S._hexFit={h,wd}};
  window._hg={sz,cells:pts.slice(0,P.cells.length),lines:P.lineShow.map((j,k)=>shared(j)?[LP[j][0],LP[j][1],j,LP[j][0],LP[j][1]]:[LP[j][0],LP[j][1],j,pts[P.cells.length+k][0],pts[P.cells.length+k][1]])};
  const hp=(x,y,r)=>[0,1,2,3,4,5].map(k=>{const a=Math.PI/3*k+(TR?Math.PI/6:0);return(x+r*Math.cos(a)).toFixed(1)+","+(y+r*Math.sin(a)).toFixed(1)}).join(" ");
  let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x0} ${y0} ${x1-x0} ${y1-y0}" width="${wd}" height="${h}" style="max-width:none;touch-action:none">`;const H=S.hint;
@@ -1074,13 +1078,13 @@ function reset(){if(S.done||!S.p)return;clearHint();
 $("#potb").onclick=()=>setPotlood(!potlood);$("#notewipe").onclick=clearAllNotes;function bindFastHistoryButton(id,fn){const b=$(id);let fastAt=0;b.onpointerdown=e=>{if(e.pointerType!=="touch"&&e.pointerType!=="pen")return;e.preventDefault();fastAt=performance.now();fn()};b.onclick=()=>{if(performance.now()-fastAt<500)return;fn()}}bindFastHistoryButton("#undo",undo);bindFastHistoryButton("#redo",redo);$("#reset").onclick=reset;
 /* Reset is op touchscreens makkelijk per ongeluk te raken. Bij echte voortgang moet je daarom twee keer tikken. */
 let resetArm=0;
-function disarmReset(){if(resetArm){clearTimeout(resetArm);resetArm=0}const b=$("#reset");if(!b)return;b.classList.remove("arm");const sp=b.querySelector("span");if(sp)sp.textContent="Reset"}
+function disarmReset(){if(resetArm){clearTimeout(resetArm);resetArm=0}const b=$("#reset");if(!b)return;b.classList.remove("arm");const sp=b.querySelector("span:not(.ic)")||b.querySelector("span");if(sp)sp.textContent="Reset"}
 function safeReset(){if(S.done||!S.p)return;let changed=false;
  if(S.type!=="m24"&&S.cur){const z=initCur();changed=z.length===S.cur.length&&z.some((v,i)=>v!==S.cur[i])}
  changed=changed||!!(S.nt&&Object.keys(S.nt).length)||(S.type==="m24"&&!!(S.hist&&S.hist.length));
  if(!changed){reset();return}
  if(resetArm){disarmReset();reset();const m=$("#msg");m.classList.remove("good","warn");m.textContent="Bord opnieuw begonnen";setTimeout(()=>{if(m.textContent==="Bord opnieuw begonnen")m.textContent=""},1800);return}
- const b=$("#reset");b.classList.add("arm");const sp=b.querySelector("span");if(sp)sp.textContent="Nogmaals";const m=$("#msg");m.classList.remove("good");m.classList.add("warn");m.textContent="Nogmaals op Reset tikken om het bord te wissen";
+ const b=$("#reset");b.classList.add("arm");const sp=b.querySelector("span:not(.ic)")||b.querySelector("span");if(sp)sp.textContent="Nogmaals";const m=$("#msg");m.classList.remove("good");m.classList.add("warn");m.textContent="Nogmaals op Reset tikken om het bord te wissen";
  resetArm=setTimeout(()=>{resetArm=0;b.classList.remove("arm");if(sp)sp.textContent="Reset";if(m.textContent.includes("Nogmaals op Reset")){m.textContent="";m.classList.remove("warn")}},2600)}
 $("#reset").onclick=safeReset;
 
@@ -1290,15 +1294,17 @@ function updTabs(){const td=dstr(),ft=featOf(td);
 function toggleSide(on){const sd=$("#side");if(sd)sd.classList.toggle("open",on)}
 /* Korte opgelost-kaart: hoe het ging en wat de ander van deze puzzel heeft. Verdwijnt vanzelf of met een tik. */
 let finT=0;
-function showFin(date,type){const f=$("#fin"),me=XS[date+type]||{},t=type.split(".")[0],lv=+(type.split(".")[1]||2),ot=othersTxt(),g=$("#group").value.trim().toLowerCase();
+function showFin(date,type){const f=$("#fin"),me=XS[date+type]||{},t=type.split(".")[0],lv=+(type.split(".")[1]||2),g=$("#group").value.trim().toLowerCase();
  f.innerHTML="";const x=document.createElement("button");x.className="hx";x.textContent="✕";x.setAttribute("aria-label","Sluiten");x.onclick=()=>{f.hidden=true};f.append(x);
  const h=document.createElement("div");h.className="ft";h.textContent="Klaar!";f.append(h);
  const sub=document.createElement("div");sub.className="mut";sub.textContent=TYPES[t]+(LVN[t]?" · "+lvLabel(lv):"")+" · "+dnl(date)+(isWk(date)?" · weekend":"");f.append(sub);picLine(f);
  const bl=badgeLong(me,t);if(bl){const b=document.createElement("div");b.className="fb";b.innerHTML=bl;f.append(b)}
- const oth=lastRows.filter(r=>r.uid!==uid&&(r.group||"").toLowerCase()===g&&r.date===date&&r.type===type),o=document.createElement("div");o.className="fo";
- if(oth.length)o.textContent=oth.map(r=>r.name+" had hem ook af").join(", ");
- else{const ol=lastRows.filter(r=>r.uid!==uid&&(r.group||"").toLowerCase()===g&&r.date===date&&r.type!==type&&r.type.split(".")[0]===t);
-  o.textContent=ol.length?ol.map(r=>r.name+" deed vandaag "+lvLabel(+(r.type.split(".")[1]||2))).join(", ")+".":ot+" heeft deze puzzel nog niet af."}
+ const peers=groupPlayers().filter(p=>uidOf(p)!==uid),doneRows=lastRows.filter(r=>r.uid!==uid&&(r.group||"").toLowerCase()===g&&r.date===date&&String(r.type||"").split(".")[0]===t),doneIds=new Set(doneRows.map(r=>r.uid)),doneNames=peers.filter(p=>doneIds.has(uidOf(p))).map(playerName),o=document.createElement("div");o.className="fo";
+ if(!peers.length)o.textContent="Je speelt deze puzzel solo.";
+ else if(peers.length===1){const n=playerName(peers[0]);o.textContent=n+(doneIds.has(uidOf(peers[0]))?" heeft deze puzzel al af.":" heeft deze puzzel nog niet af.")}
+ else if(!doneNames.length)o.textContent="Nog niemand in je groep heeft deze puzzel af.";
+ else if(doneNames.length<=2)o.textContent=(doneNames.length===2?doneNames.join(" en "):doneNames[0])+(doneNames.length===1?" heeft":" hebben")+" deze puzzel al af.";
+ else o.textContent=doneNames.length+" van de "+peers.length+" anderen hebben deze puzzel al af.";
  f.append(o);
  if(OLDRULES){const w=document.createElement("div");w.className="mut sm";w.style.marginTop="6px";w.textContent="Let op: foutloos/hintstatus wordt nog niet gedeeld. Werk in Firebase de regels bij (stappenplan, stap 3).";f.append(w)}
  finActs(f,false,date,t);finShow(f)}
