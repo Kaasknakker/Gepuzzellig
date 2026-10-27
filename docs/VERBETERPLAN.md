@@ -126,6 +126,8 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S9 | Nonogram kleur: foutmarkering die de kleur laat staan (bug) | zichtbaar | – (kan direct na S0) | open | |
 | S10 | Murdoku: aanwijzing markeren als “nog nodig” (vlaggetje, B8 = c) | nieuw (klein) | D3 | open | |
 | S11 | Pencil in profiel- en groepsmenu: tik op Terug genegeerd, scrollen stroef (bug, ook in main) | bug | – (na de livegang) | in review | #25 |
+| S12 | iPhone-hint in de onderbalk te klein: kaart krijgt alleen de hoogte van de knoppenbalk (`js/layout.js`, `tray`), tekst past er nauwelijks in (ook in main) | bug | – (eerste na de livegang) | open | |
+| S13 | iPhone Home: bovenrand vervaagt onder de iOS-statusbalk (ook na v231); eerst meten op een echt toestel | bug | – (na S12) | open | |
 | T1 | Woordenlijst doorvoeren, jargon weg | tekst | B1-O, S1–S7 | open | |
 | T2 | Uitleg per puzzel inkorten | tekst | T1 | open | |
 | T3 | Hints Murdoku herschrijven ★ | tekst | T1 | open | |
@@ -149,6 +151,8 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | Datum | Wie | Punt | Voorstel |
 | --- | --- | --- | --- |
 | 27 okt | Claude | Vangnet: de opslagmelding (“bewaard en gesynchroniseerd” / “bewaard”) hangt af van timing in de nagebootste database en gaf één keer een vals verschil (`ipad-light-bin-controleer`). | In `snapshot.mjs` wachten tot de opslagmelding stabiel is, of die melding in de controle verbergen. Meenemen bij P3. |
+| 27 okt | Peter/Claude | v231 (#27) loste de iPhone-hint niet op: de wijziging zat in `placeHint` in `core.js`, maar de hint wordt op alle schermen door `js/layout.js` geplaatst (met `!important`), dus de nieuwe code doet niets. | Dode tak opruimen bij S12; de echte fix in `testChooseCard` (layout.js): de kaart mag op iPhone met de inhoud meegroeien tot ca. 40 % van het scherm, het bord schuift mee omhoog. Testen met het vangnet. |
+| 27 okt | Peter/Claude | Bovenrand Home op iPhone: v231 verhoogde alleen de bovenruimte (28 → 36 px). De iOS-vervaging is in de testbrowser niet na te bootsen. | Bij S13 eerst een schermafbeelding van een echt toestel, dan pas één vaste oplossing (zoals de vaste bovenkap die Profiel en Groep al hebben), geen pixels bijschuiven. |
 | 27 okt | Claude | Puzzelkop bij zoom 130 %: “Puzzel van de dag” afgekapt, “tijd tonen” over twee regels. | Meenemen in D1. |
 
 ---
