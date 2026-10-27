@@ -40,6 +40,16 @@ Doel van dit plan: **zelfde uiterlijk, veel minder code, en daarna één vast sy
 7. **Bij twijfel terugdraaien.** Een verschil dat niet binnen een kwartier verklaard is: commit terugdraaien en kleiner opnieuw proberen.
 8. **Peter test op het echte apparaat per afgeronde fase**, niet per commit.
 
+### Automatisch afgedwongen: het CSS-budget
+
+`.github/scripts/check-css-budget.mjs` draait in *Check Gepuzzellig* en vergelijkt de CSS met `.github/css-budget.json`: aantal `!important`, herhaalde selectorblokken (dezelfde selector in dezelfde `@media`-context opnieuw gedefinieerd), verschillende lettergroottes, lettergroottes onder 12 px en verschillende kleurcodes.
+
+- **Hoger dan het budget = rode check.** Dan voegt de wijziging een pleister toe; pas de bestaande regel aan.
+- **Lager = ook rood, met instructie** om de verbetering vast te leggen (`--update`) in dezelfde PR. Zo kan het budget alleen omlaag.
+- Een nieuw onderdeel met eigen, nieuwe selectors past gewoon binnen het budget.
+- Het budget verhogen kan alleen met een bewust besluit van Peter; de reden staat dan in de PR.
+- In iedere PR die CSS raakt: de tabel van `node .github/scripts/check-css-budget.mjs --report` (voor en na) in de beschrijving.
+
 ## 3. Fase 0 — Het vangnet: visuele controle
 
 Bestanden in `test/visual/`:

@@ -61,6 +61,8 @@ jobs:
           node --check js/firebase.js
       - name: App controleren
         run: node .github/scripts/check-app.mjs
+      - name: CSS-budget (ratchet) controleren
+        run: node .github/scripts/check-css-budget.mjs
       - name: Puzzelregistratie controleren
         run: node .github/scripts/check-puzzle-registry.mjs
       - name: Opslag en UX-regressies controleren
