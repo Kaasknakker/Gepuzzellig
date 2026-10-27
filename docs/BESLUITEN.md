@@ -12,7 +12,7 @@ Iedere bouwer leest dit bestand vóór een stap uit het verbeterplan. Een beslui
 | **B5** | **Groepspagina in drie delen: Overzicht · Activiteit · Statistieken**, zoals `PRODUCT-UX.md` §16. Op de iPhone begint de pagina met een compacte ledenlijst met de week. | Stap **S2**. |
 | **B6** | **Woordenlijst overgenomen** zoals in `VERBETERPLAN.md` hoofdstuk 5. Later aanpassen mag. | Stap **T1** en alle nieuwe teksten. |
 | **B7** | **Grotere tekst tot de grootste maat.** Bij een web-app betekent dat: inzoomen (aA in Safari, ⌘+ op de Mac). Tot 130 % zonder enig probleem; daarboven zonder overlap (scrollen mag). De iOS-instelling voor tekstgrootte geldt niet voor web-apps. | Stap **D1** (zoomtest in de visuele controle). |
-| **B8** | *Open* — hoe een Murdoku-aanwijzing als “nog nodig” wordt gemarkeerd (zie `VERBETERPLAN.md`, B8 en S10). | Stap **S10** wacht op dit besluit. |
+| **B8** | **Murdoku-aanwijzing markeren als “nog nodig” met een vlaggetje** rechts op elk kaartje (optie c, gekozen 27 oktober). Tikken op het kaartje blijft afstrepen zoals nu; het vlaggetje zet “nog nodig” aan of uit. Afgestreept en nog nodig sluiten elkaar uit. | Stap **S10**. |
 
 ## Woordenlijst (B6)
 

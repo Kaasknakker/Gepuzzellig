@@ -123,7 +123,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S7 | Puzzelmenu en hintpaneel | zichtbaar | D4 | open | |
 | S8 | iPhone-navigatie onderaan (B2) ★ | zichtbaar | S1 | open | |
 | S9 | Nonogram kleur: foutmarkering die de kleur laat staan (bug) | zichtbaar | – (kan direct na S0) | open | |
-| S10 | Murdoku: aanwijzing markeren als “nog nodig” | nieuw (klein) | B8, D3 | open | |
+| S10 | Murdoku: aanwijzing markeren als “nog nodig” (vlaggetje, B8 = c) | nieuw (klein) | D3 | open | |
 | T1 | Woordenlijst doorvoeren, jargon weg | tekst | B1-O, S1–S7 | open | |
 | T2 | Uitleg per puzzel inkorten | tekst | T1 | open | |
 | T3 | Hints Murdoku herschrijven ★ | tekst | T1 | open | |
@@ -383,7 +383,7 @@ Vanaf hier verandert het uiterlijk. Per stap: eerst op de testsite laten zien, P
 ### S10 — Murdoku: aanwijzing markeren als “nog nodig”
 
 - **Waarom:** nu kun je een aanwijzingskaartje alleen afstrepen (tik). Soms heb je een aanwijzing deels gebruikt maar heb je hem later nog nodig; dat wil je kunnen aangeven zonder hem af te strepen.
-- **Wat (volgens B8):** een derde stand naast open en afgestreept: *nog nodig*, herkenbaar aan een vlaggetje (icoonset D3), een gekleurde rand links en een lichte achtergrond. Afgestreept en nog nodig sluiten elkaar uit.
+- **Wat (besluit B8 = c):** tikken op het kaartje blijft afstrepen zoals nu. Rechts op elk kaartje komt een klein vlaggetje (icoonset D3); dat zet de stand *nog nodig* aan of uit. Een kaartje dat nog nodig is krijgt een gekleurde rand links en een lichte achtergrond. Afgestreept en nog nodig sluiten elkaar uit: afstrepen haalt het vlaggetje weg, en andersom.
 - Wordt bewaard en gesynchroniseerd zoals het afstrepen (`S.str`), telt niet als fout of hint, en werkt met touch, Pencil, muis en toetsenbord. Aanraakvlak ≥ 44 px.
 - **Vangnet:** `dag-mur`, `hint-mur-*`, `mur-geplaatst`.
 - Eventueel later dezelfde stand voor andere aanwijzingen (Nonogram-, Pluszle-, Hexcells-lijnen); niet in deze stap.
