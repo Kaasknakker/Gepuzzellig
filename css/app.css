@@ -1849,7 +1849,7 @@ body.using-keyboard .dayitem .dayaction:focus-visible{outline:2px solid var(--pc
 /* v200: Profiel en Groep gebruiken op alle schermgroottes hetzelfde volledige-paginamodel. */
 #authaccount.authpage,#groupaccount.authpage{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));padding-bottom:max(28px,env(safe-area-inset-bottom))}
 #authaccount.authpage .authcard,#groupaccount.authpage .authcard{width:100%;max-width:1180px;min-height:100dvh;margin:0 auto}
-@media(max-width:760px){#authaccount.authpage,#groupaccount.authpage{padding-top:env(safe-area-inset-top)}#authaccount.authpage .authcard,#groupaccount.authpage .authcard{max-width:none;padding-top:0}.authdialoghead{margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px}}
+@media(max-width:760px){#authaccount.authpage .authcard,#groupaccount.authpage .authcard{max-width:none;padding-top:0}.authdialoghead{margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px}}
 #authbtn .authpersonicon{width:22px;height:22px;flex:0 0 22px}
 #more #authbtn{justify-content:flex-start}
 
