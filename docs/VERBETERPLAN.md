@@ -68,7 +68,7 @@ Na elke samengevoegde stap op de testsite (`https://gepuzzellig-test.web.app`):
 ## 3. Volgorde en afhankelijkheden
 
 ```text
-V  Vóór de livegang ─────────────► (migratie live)
+V, G1, G2  Vóór de livegang ──────► (migratie live)
                                         │
 S0 Stabiliseren (2 weken) ◄─────────────┘
 F  Fundament ──► B Besluiten ──► O Opruimen (onzichtbaar)
@@ -95,10 +95,12 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | --- | --- | --- | --- | --- | --- |
 | V1 | App-naam “Gepuzzellig Test” alleen op testsite | techniek | – | open | |
 | V2 | Jargon “puzzleKey” uit het groepsoverzicht | tekst | – | open | |
+| G1 | Oude branches controleren en opruimen | GitHub | – | open | |
+| G2 | Screenshots van het vangnet uit de hoofdgeschiedenis (eigen branch) | GitHub | – | open | |
 | S0 | Twee weken stabiliseren en verzamelen | proces | livegang | open | |
-| F1 | Vangnet samenvoegen (PR #21) | techniek | S0 | open | #21 |
+| F1 | Vangnet samenvoegen (PR #21) | techniek | S0, G2 | open | #21 |
 | F2 | Seed-script: typeformaat dagresultaten | techniek | F1 | open | |
-| F3 | Klaar-kaart: icoon `.stat-icon` op maat (naar voren gehaald, vóór de livegang) | zichtbaar | – | in review | |
+| F3 | Klaar-kaart: icoon `.stat-icon` op maat (naar voren gehaald, vóór de livegang) | zichtbaar | – | in review | #22 |
 | B1–B7 | Productbesluiten — zie `docs/BESLUITEN.md` | besluit (Peter) | – | klaar (27 okt) | |
 | B1-O | Onderzoek: één dagpuzzel voor telefoon en groot scherm? | onderzoek | B1 | open | |
 | O1 | Dode CSS-regels weg | onzichtbaar | F1 | open | |
@@ -126,6 +128,10 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | P2 | Snelheid op trage telefoon | techniek | P1 | open | |
 | P3 | Visuele controle sneller in GitHub | techniek | F1 | open | |
 | P4 | `core.js` opsplitsen bij aanraking | techniek | doorlopend | open | |
+| G3 | `proef-layout.html` niet meer committen | GitHub | F1 | open | |
+| G4 | Documentatie: archief, overzicht en README | GitHub | F1 | open | |
+| G5 | Workflows bijwerken (Node 24-acties, vaste Ubuntu-versie) | GitHub | F1 | open | |
+| G6 | Versienummer en cache automatisch ophogen | GitHub | O3 | open | |
 | Q1 | Privacyverklaring | tekst | – | open | |
 | Q2 | Online-status uit te zetten | zichtbaar | D4 | open | |
 | Q3 | Namen en merken op een rij | besluit | – | open | |
@@ -445,6 +451,40 @@ Bekende problemen (uit 8 opeenvolgende hints):
 ### Q3 — Namen en merken
 
 - Lijst van puzzelnamen die van een ander zijn (Hexcells, Murdoku, Pluszle; Star Battle, Binair en Nonogram zijn algemene namen voor een puzzelsoort) met per naam: houden voor privégebruik / vervangen bij publicatie. Brainstormnamen staan in `PRODUCT-UX.md` §11.
+
+---
+
+## 12b. G — GitHub opruimen
+
+### G1 — Oude branches
+
+- 14 branches van 23 oktober (`codex/…`, `proef/…`, `fix/…`, `feature/…`, `release/…`) lopen 557–594 commits achter op `develop`; een paar hebben 1–3 eigen commits.
+- **Wat:** per branch controleren of de inhoud van die eigen commits al in `develop` zit (bijvoorbeeld met `git cherry` of door de wijziging in `develop` op te zoeken). Zo ja: branch verwijderen. Zo nee: in de statustabel melden; Peter beslist. Overzicht van wat verwijderd is in de PR of in een commentaar.
+- Mag vóór de livegang (verandert niets aan `develop` of `main`).
+- **Klaar wanneer:** alleen `main`, `develop` en branches van open PR's bestaan nog.
+
+### G2 — Screenshots uit de hoofdgeschiedenis ★
+
+- De baseline van de visuele controle is ±33 MB aan PNG's; samengevoegd in `develop` komt dat voorgoed in de geschiedenis van `develop` en `main`, en iedere vernieuwing voegt meer toe.
+- **Wat:** de baseline in een aparte branch `visuele-baseline` (zonder app-code). De workflow haalt die branch op in `test/visual/baseline/`, vergelijkt, en commit nieuwe of bewust verwijderde baselinebestanden naar `visuele-baseline` in plaats van naar de PR-branch. Baselinebestanden uit PR #21 verwijderen vóór het samenvoegen (squash-merge, zodat ook de tussentijdse PNG-commits niet in `develop` komen).
+- **Klaar wanneer:** `develop` bevat geen PNG's onder `test/visual/`; twee workflowruns zonder wijziging volledig gelijk; een bewust verwijderd baselinebestand wordt opnieuw vastgelegd in `visuele-baseline`.
+
+### G3 — `proef-layout.html`
+
+- Dit gegenereerde bestand (720 KB) wordt bij elke wijziging opnieuw gecommit. **Wat:** laten bouwen in de workflow (of alleen op verzoek) en uit de repo halen; `experiments/layout/build.mjs --check` blijft in de controle.
+
+### G4 — Documentatie
+
+- 19 documenten in `docs/`, veel van afgeronde fases. **Wat:** afgeronde fasedocumenten naar `docs/archief/`; één `docs/README.md` als inhoudsopgave (wat is actueel, wat is historie); een korte `README.md` in de hoofdmap: wat Gepuzzellig is, hoe je lokaal test, waar plan en besluiten staan.
+- `AI-WERKWIJZE.md` en `TESTOMGEVING.md` blijven op hun plek (worden door opdrachten genoemd).
+
+### G5 — Workflows
+
+- GitHub waarschuwt dat de gebruikte acties op Node 20 draaien (wordt uitgefaseerd) en dat `ubuntu-latest` overgaat naar Ubuntu 26. **Wat:** acties naar versies op Node 24; een vaste runner-versie, zodat een update van GitHub de visuele controle niet onverwacht verandert. Na een runnerwissel eenmalig de baseline vernieuwen.
+
+### G6 — Versienummer automatisch
+
+- Commits als “Verhoog frontendversie naar v205” en “Ververs frontendcache naar v205” komen steeds in paren. **Wat:** één script of workflowstap die `?v=` in `index.html` en de cacheversie in `sw.js` samen ophoogt; `check-app.mjs` blijft controleren dat alles dezelfde versie heeft.
 
 ---
 
