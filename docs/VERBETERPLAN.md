@@ -98,8 +98,9 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S0 | Twee weken stabiliseren en verzamelen | proces | livegang | open | |
 | F1 | Vangnet samenvoegen (PR #21) | techniek | S0 | open | #21 |
 | F2 | Seed-script: typeformaat dagresultaten | techniek | F1 | open | |
-| F3 | Klaar-kaart: icoon `.stat-icon` op maat | zichtbaar | F1 | open | |
-| B1–B7 | Productbesluiten | besluit (Peter) | F1 | open | |
+| F3 | Klaar-kaart: icoon `.stat-icon` op maat (naar voren gehaald, vóór de livegang) | zichtbaar | – | in review | |
+| B1–B7 | Productbesluiten — zie `docs/BESLUITEN.md` | besluit (Peter) | – | klaar (27 okt) | |
+| B1-O | Onderzoek: één dagpuzzel voor telefoon en groot scherm? | onderzoek | B1 | open | |
 | O1 | Dode CSS-regels weg | onzichtbaar | F1 | open | |
 | O2 | Dubbele CSS-regels samenvoegen, per onderdeel | onzichtbaar | O1 | open | |
 | O3 | CSS splitsen per onderdeel | onzichtbaar | O2 | open | |
@@ -115,8 +116,8 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S5 | Puzzelen-pagina | zichtbaar | D1–D4 | open | |
 | S6 | Hexcells-bediening en tellers | zichtbaar | D4 | open | |
 | S7 | Puzzelmenu en hintpaneel | zichtbaar | D4 | open | |
-| S8 | iPhone-navigatie (alleen bij B2 = onderaan) ★ | zichtbaar | S1, B2 | open | |
-| T1 | Woordenlijst doorvoeren, jargon weg | tekst | B6, S1–S7 | open | |
+| S8 | iPhone-navigatie onderaan (B2) ★ | zichtbaar | S1 | open | |
+| T1 | Woordenlijst doorvoeren, jargon weg | tekst | B1-O, S1–S7 | open | |
 | T2 | Uitleg per puzzel inkorten | tekst | T1 | open | |
 | T3 | Hints Murdoku herschrijven ★ | tekst | T1 | open | |
 | T4 | Hints Hexcells herschrijven | tekst | T3 | open | |
@@ -140,7 +141,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 
 ## 5. B — Productbesluiten (Peter)
 
-Deze besluiten neemt Peter. De bouwer schrijft ze daarna vast in `docs/BESLUITEN.md` (één PR), zodat iedere volgende stap ze kan lezen. Per besluit staat een aanbeveling; afwijken mag altijd.
+**Genomen op 27 oktober 2026; zie `docs/BESLUITEN.md`.** Peter koos bij alle zeven de aanbeveling. B1 leidt tot een onderzoeksstap (B1-O) voordat er gekozen wordt. De tabel hieronder laat de afweging zien.
 
 | ID | Vraag | Opties | Aanbeveling |
 | --- | --- | --- | --- |
@@ -167,6 +168,12 @@ Deze besluiten neemt Peter. De bouwer schrijft ze daarna vast in `docs/BESLUITEN
 | Op de telefoon / op een groot scherm | telefoonvariant, apparaatvariant | alleen als B1 dat nog nodig maakt |
 | Fout | foutmoment | |
 | Hint, klein duwtje, volledige hint | zetje | |
+
+### B1-O — Onderzoek: één dagpuzzel voor telefoon en groot scherm?
+
+- **Waarom:** nu krijgt de telefoon een eigen dagpuzzel; telefoonvoortgang wordt niet gedeeld en het verschil moet op drie plekken met lange tekst worden uitgelegd.
+- **Wat:** alleen onderzoek, geen code. Voor beide opties (a: één puzzel met een bordvorm die zich aanpast; b: kleinere telefoonvariant die als dezelfde dagpuzzel telt) beschrijven wat er verandert aan generators, dagpuzzelidentiteit, resultaten, voortgang en synchronisatie, statistieken en de bestaande gegevens na de migratie. Met een inschatting van de omvang en een advies.
+- **Uitkomst:** `docs/ONDERZOEK-B1-VARIANTEN.md`; Peter kiest daarna en legt het vast in `BESLUITEN.md`.
 
 ---
 
@@ -344,7 +351,7 @@ Vanaf hier verandert het uiterlijk. Per stap: eerst op de testsite laten zien, P
   - de teller (“1 klein zetje · 3 volledige hints”) uit het hintpaneel; die hoort op de Klaar-kaart.
 - **Vangnet:** `bin-menu`, `hint-*`.
 
-### S8 — iPhone-navigatie onderaan ★ (alleen als B2 = onderaan)
+### S8 — iPhone-navigatie onderaan ★ (besluit B2)
 
 - Home · Puzzelen · Groepen · Profiel als balk onderaan, met veilige schermrand. Kop op Home wordt compacter.
 - **Vangnet:** alle iPhone-schermen buiten de puzzels.
