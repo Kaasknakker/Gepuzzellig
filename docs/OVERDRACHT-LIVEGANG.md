@@ -12,7 +12,7 @@ Doel: precies weten wat er sinds `develop` 362c65f (v228) is veranderd, wat nog 
 | PR | Inhoud | Wanneer samenvoegen | Raakt runtime? |
 | --- | --- | --- | --- |
 | **#22** | Kleine fixes vóór de livegang (v229): Klaar-icoon op maat (ook iconen in daginfo zichtbaar), hint-lampje op iPhone, “Reeks: 1 dag”, terugknop hint “← Stap 2”, groepsteksten (“Groepen waar je lid van bent”, “beheerder”), **V1** app-naam “Gepuzzellig” in de bron (testnaam alleen via `deploy-test.yml`, bewaakt door `check-app.mjs`), **V2** geen “puzzleKey” meer in beeld. | **Vóór** de livegang | Ja: `index.html`, `sw.js`, `css/app.css`, `js/core.js`, `js/hints.js`, `js/firebase.js`, `.github/workflows/deploy-test.yml`, `.github/scripts/check-app.mjs` |
-| **#23** | Alleen documenten: werkregels in `AI-WERKWIJZE.md` (branches, PR's, één bouwer tegelijk), `VERBETERPLAN.md`, `BESLUITEN.md`, `OPRUIMPLAN-VORMGEVING.md`, dit document. | **Vóór** de livegang (geen runtime) | Nee (`docs/` gaat niet mee naar Hosting) |
+| **#23** | Alleen documenten: werkregels in `AI-WERKWIJZE.md` (branches, PR's, één bouwer tegelijk), `VERBETERPLAN.md` (Operatie Bezemwagen), `BESLUITEN.md`, `OPRUIMPLAN-VORMGEVING.md`, dit document. | **Vóór** de livegang (geen runtime) | Nee (`docs/` gaat niet mee naar Hosting) |
 | **#21** | Visuele controle (`test/visual/`, workflow *Visuele controle*), uitsluiting `test/` in de testdeploy. | **Pas ná** de livegang, en pas na stap G2 (screenshots naar een eigen branch) | Nee, maar ±33 MB PNG's; niet samenvoegen vóór G2 |
 
 #22 en #23 raken geen gemeenschappelijke bestanden en kunnen in willekeurige volgorde.
@@ -55,7 +55,7 @@ Doel: precies weten wat er sinds `develop` 362c65f (v228) is veranderd, wat nog 
 3. Peter test op de testsite (iPad, iPhone, Mac): de testpunten uit #22, plus de kernpaden uit `RELEASECONTROLE-2026-10-26.md`.
 4. Beslispunt **3a** nemen en zo nodig verwerken (eigen PR naar `develop`, daarna stap 2 en 3 opnieuw).
 5. Gebruik deze `develop`-HEAD als release-SHA en volg `FASE11-LIVEGANG.md` vanaf het begin (freeze, back-ups, snapshot, dry-run, apply, postchecks, clientactivatie, `main`, Functions, smoke-test). De oude release-SHA uit `RELEASECONTROLE-2026-10-26.md` is niet meer de releasekandidaat.
-6. Na de livegang: de statustabel in `VERBETERPLAN.md` bijwerken (V1–V3 op *klaar*), en verder met stap **S0** (twee weken stabiliseren). PR #21 blijft tot stap G2/F1 openstaan.
+6. Na de livegang: de statustabel in `VERBETERPLAN.md` bijwerken (V1–V3 op *klaar*), en verder met Operatie Bezemwagen, stap **S0** (twee weken stabiliseren). PR #21 blijft tot stap G2/F1 openstaan.
 
 ## 5. Werkregels (sinds 27 oktober)
 
