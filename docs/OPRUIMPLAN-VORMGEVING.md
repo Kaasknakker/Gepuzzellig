@@ -1,5 +1,7 @@
 # Opruimplan vormgeving Gepuzzellig
 
+> Onderdeel van `docs/VERBETERPLAN.md` (stappen F1–F3, O1–O3 en D1–D5). Dit document beschrijft de werkwijze voor het opruimen in detail; de volgorde en status staan in het verbeterplan.
+
 Status: plan, nog niet uitvoeren vóór de productiemigratie (Fase 11) live en stabiel is.
 Doelbranch: `develop`. Productie (`main`) pas na expliciet akkoord van Peter.
 Opgesteld: 26 oktober 2026, op basis van `develop` v228.
