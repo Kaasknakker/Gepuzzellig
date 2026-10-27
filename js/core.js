@@ -1353,7 +1353,7 @@ function renderStats(){const raw=allRows(true),all=statsRows(raw),rows=all.filte
  const h2=document.createElement("h2");h2.textContent="Reeks";el.append(h2);
  [...pl.entries()].forEach(([u,nm])=>{const n=streakOf(rows,u),d=document.createElement("div");d.className="row";const a=document.createElement("span"),b=document.createElement("span");a.textContent=nm;b.textContent=(n?"🔥 ":"")+n+(n===1?" dag":" dagen");d.append(a,b);el.append(d)});
  const note=document.createElement("div");note.className="mut sm";note.style.marginTop="6px";note.textContent="Geen wedstrijd: gewoon kijken hoeveel we samen oplossen. = foutloos, = zonder hint. Reeks: dagen achter elkaar minstens één dagpuzzel.";el.append(note);
-$("#streak b").textContent=streakOf(rows,uid);renderOver(all,pl)}
+{const sv=streakOf(rows,uid);$("#streak b").textContent=sv;const su=$("#streak .streakunit");if(su)su.textContent=sv===1?"dag":"dagen";}renderOver(all,pl)}
 const TCOL=Object.fromEntries(Object.entries(PUZZLE_REGISTRY).map(([t,p])=>[t,p.color]));
 let OPER=lsGet("pdper")||"maand",ODAYS=21,SVIEW="today";
 const baseT=r=>isFree(r)?r.type.split("~")[1].split(".")[0]:r.type.split(".")[0];
@@ -1621,7 +1621,7 @@ function phoneLayout(){document.body.classList.add("phone");const hd=$("header")
  prow.append($("#arch"),$("#hexstat"),$("#msg"));
  pbot.append($("#undo"),$("#redo"),$("#nmode"),$("#pmode"),$("#mb"),$("#mz"),$("#potb"),$("#notewipe"),$("#hintb"),$("#chk"));$("#potb").innerHTML="✎";$("#notewipe").innerHTML="×";$("#pxb").textContent="✕";$("#pob").textContent="○";$("#nf").textContent="■";$("#nx").textContent="✕";
  pmp.append($("#next"),$("#autocross"),$("#sbtn"),$("#helpb"),$("#ctrlb"),$("#reset"),$("#time"),$("#streak"),makeThemeSeg(),$("#authbtn"));$("#theme").hidden=true;
- $("#chk").innerHTML="✓<span> Klopt?</span>";$("#hintb").innerHTML="?<span> Hint</span>";
+ $("#chk").innerHTML="✓<span> Klopt?</span>";{const ico=$("#hintb").querySelector("svg");$("#hintb").innerHTML=(ico?ico.outerHTML:"")+"<span> Hint</span>";}
  pm.onclick=()=>pmp.classList.toggle("open");pmp.addEventListener("click",e=>{if(e.target.closest("button"))setTimeout(()=>pmp.classList.remove("open"),80)});
  document.addEventListener("pointerdown",e=>{if(pmp.classList.contains("open")&&!e.target.closest("#pmp,#pm")){pmp.classList.remove("open");e._closed=true}},true);
  const SH={bin:"Binair",star:"Star",nono:"Nono",hex:"Hex",plus:"Plus",mur:"Moord"};document.querySelectorAll("#tabs button").forEach(b=>{const sp=b.querySelector("span");if(sp&&SH[b.dataset.t])sp.textContent=SH[b.dataset.t]});
