@@ -967,7 +967,7 @@ body.phone .personview .spmeta{font-size:10px}body.phone .spdrow{grid-template-c
 /* Home responsive finetuning: op iPhone geen dubbele puzzelnavigatie; op iPad grotere typografie zonder extra verticale ruimte. */
 /* iOS legt aan de bovenrand een visuele fade over scrollende inhoud. Houd de mobiele bediening daar bewust onder. */
 body.phone header{display:none!important}
-body.phone.home #home .hwrap{padding-top:28px}
+body.phone.home #home .hwrap{padding-top:36px}
 body.phone:not(.home):not(.newpick) #prow{
  display:flex;
  align-items:center;
@@ -1976,6 +1976,10 @@ body[data-t=bin] .c .nt{left:7%;top:6%;width:58%;height:58%;opacity:.54}
   height:max(env(safe-area-inset-top),12px);
   background:var(--bg);
   pointer-events:none;
+}
+@media(max-width:760px){
+ #authaccount.authpage,#groupaccount.authpage{padding-top:calc(env(safe-area-inset-top) + 16px)!important}
+ #authaccount.authpage::before,#groupaccount.authpage::before{height:calc(env(safe-area-inset-top) + 16px);background:var(--page-tone,var(--bg))}
 }
 body.home #home .hwrap:has(.hpuzzletabs) .puzzlecatalog{align-items:start}
 body.home #home .hwrap:has(.hpuzzletabs) .puzzlecard{height:auto;align-self:start}
