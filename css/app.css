@@ -967,7 +967,7 @@ body.phone .personview .spmeta{font-size:10px}body.phone .spdrow{grid-template-c
 /* Home responsive finetuning: op iPhone geen dubbele puzzelnavigatie; op iPad grotere typografie zonder extra verticale ruimte. */
 /* iOS legt aan de bovenrand een visuele fade over scrollende inhoud. Houd de mobiele bediening daar bewust onder. */
 body.phone header{display:none!important}
-body.phone.home #home .hwrap{padding-top:36px}
+body.phone.home #home .hwrap{padding-top:18px}
 body.phone:not(.home):not(.newpick) #prow{
  display:flex;
  align-items:center;
