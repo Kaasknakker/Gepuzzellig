@@ -42,7 +42,7 @@ Eén tot drie manieren per som, alleen waar het echt iets toevoegt.
 - Het antwoord klopt bij elke seed, de getallen zijn mooi, en de zoeklus heeft een einde (maximaal aantal pogingen met een vaste terugvaloptie).
 - Testen over veel seeds, zoals bij R1 (zie de PR-beschrijving).
 
-## Hoe een som meerdere manieren krijgt (R3, techniek)
+## Hoe een som meerdere manieren krijgt (R3, techniek en stijl)
 
 In `raadsels.html` is `uitwerking` van een sjabloon:
 
@@ -51,11 +51,18 @@ In `raadsels.html` is `uitwerking` van een sjabloon:
 
 Een stap is tekst, of `ts("tekst", kop, rijen)` voor een klein tabelletje (proberen). De uitleg verschijnt direct na een goed antwoord; wie het opgeeft, krijgt hem via "Toon uitwerking".
 
-Regels bij een extra manier:
+### Stijl van de uitleg (Peter, 28 oktober 2026)
 
-- De eerste manier is de bestaande uitwerking, ongewijzigd. Tekst, vraag, antwoord en hints van de som veranderen niet.
+- **Volgorde:** eerst slim redeneren in gewone woorden over de situatie, dan "met formules" (letters), dan eventueel proberen. Alleen manieren die echt iets toevoegen.
+- **Letters eerst uitleggen** ("k is een lege kan"), vergelijkingen nummeren, één bewerking per regel.
+- **Controle:** de eerste manier eindigt met een stap die met "Controle" begint: het antwoord ingevuld in elke zin van de som.
+- **Zeg "probeer", nooit "gok".** In een proeftabel staat het goede antwoord op de laatste rij, en alleen die rij heeft het label "klopt".
+- Korte zinnen, zoals een goede rekendocent. Geen tekst van Beter Rekenen overnemen.
+
+### Eisen bij een extra manier
+
+- Tekst, vraag, antwoord en hints van de som veranderen niet.
 - Elke manier eindigt bij hetzelfde antwoord. Rekenstappen als `a × b = c` worden in de test nagerekend.
-- Bij een gok-tabel staat het goede antwoord op de laatste rij en heeft alleen die rij het label "klopt".
 - Op een iPhone (390 px breed) moet een tabel in beeld passen.
 
 Proef (28 oktober 2026): Twee keer wegen, Twee bestellingen, Moeder en dochter (3 manieren), Leeftijden in de familie, Eerlijk verdelen, Samen klussen, Cacao mengen, Knikkers over, Fietsen huren en Procent meer dan ….
