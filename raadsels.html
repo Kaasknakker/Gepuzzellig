@@ -405,12 +405,21 @@ const RAAD=[
    uitwerking:[`${n} foto's: ${n} × ${nl(W)} = ${nl(n*W)} pixels.`,`${n-1} overlappen van ${nl(W*p/100)} pixels = ${nl((n-1)*W*p/100)} pixels die dubbel zijn.`,`${nl(n*W)} − ${nl((n-1)*W*p/100)} = ${nl(tot)} pixels.`]}}}},
 {id:"palindroom",naam:"De kilometerteller",gen(R){
  const pal=x=>{const s=String(x);return s===s.split("").reverse().join("")};
- for(;;){const P=+(()=>{const a=rint(R,1,9),b=rint(R,0,9),c=rint(R,0,9);return""+a+b+c+b+a})();let Q=P+1;while(!pal(Q))Q++;const d=Q-P,m=rpick(R,[30,45,60,75,80,90,100,120,150]),v=d*60/m;if(!Number.isInteger(v)||v<30||v>130)continue;
-  const auto=rpick(R,["Dacia Sandero","Dacia Duster","Dacia Jogger"]),dur=m%60?(m>60?`${Math.floor(m/60)} uur en ${m%60} minuten`:`${m} minuten`):`${m/60} uur`;
-  return{tekst:`Op de kilometerteller van de ${auto} staat ${nl(P)}. Dat getal lees je van voor naar achter en van achter naar voor hetzelfde. Na precies ${dur} rijden ziet ${nm(R)} dat er wéér zo'n getal op de teller staat: het eerstvolgende.`,
+ /* Meestal vijf cijfers (abcba), soms zes (abccba). In bijna de helft van de tellers staat een 9 in het midden;
+    dan is het volgende spiegelgetal 110 of 11 km verder in plaats van 100 (zes cijfers: 1100). */
+ const tel=()=>{const zes=rint(R,1,100)<=25,a=rint(R,1,9),b=rint(R,0,9),c=rint(R,1,100)<=45?9:rint(R,0,8);return+(zes?""+a+b+c+c+b+a:""+a+b+c+b+a)};
+ const SNEL=[30,40,45,50,55,60,70,75,80,90,100,110,120];
+ const kies=()=>{for(let g=0;g<500;g++){const P=tel();let Q=P+1;while(!pal(Q))Q++;const d=Q-P,lang=d>=1000,v=rpick(R,SNEL),m=d*60/v;
+   if(!Number.isInteger(m)||m<(lang?480:5)||m>(lang?960:150)||(d>=100&&m%5))continue;return[P,Q,d,v,m]}return null};
+ const[P,Q,d,v,m]=kies()||[12321,12421,100,60,100];
+ const s=String(P),n=s.length,c9=s[2]==="9",b9=s[1]==="9",
+  midden=n===5?"het middelste cijfer":"de twee middelste cijfers",ernaast=n===5?"het cijfer ernaast":"de cijfers ernaast",
+  tip=!c9?`Maak ${midden} één hoger en spiegel de rest.`:!b9?`${midden[0].toUpperCase()+midden.slice(1)} ${n===5?"is al 9 en kan":"zijn al 9 en kunnen"} niet hoger. Maak ${ernaast} één hoger en zet het midden op 0.`:`De cijfers tussen het eerste en het laatste cijfer zijn allemaal 9. Maak het eerste cijfer één hoger, zet alles ertussen op 0 en zet de spiegel van het eerste cijfer achteraan.`;
+ const auto=rpick(R,["Dacia Sandero","Dacia Duster","Dacia Jogger"]),dur=m%60?(m>60?`${Math.floor(m/60)} uur en ${m%60} minuten`:`${m} minuten`):`${m/60} uur`;
+ return{tekst:`Op de kilometerteller van de ${auto} staat ${nl(P)}. Dat getal lees je van voor naar achter en van achter naar voor hetzelfde. Na precies ${dur} rijden ziet ${nm(R)} dat er wéér zo'n getal op de teller staat: het eerstvolgende.`,
    vraag:`De gemiddelde snelheid was ….. km/u.`,eenheid:"km/u",ans:v,
-   hints:[`Wat is het eerstvolgende getal na ${nl(P)} dat van achter naar voor hetzelfde is? De eerste twee cijfers en de laatste twee horen bij elkaar.`,`Dat is ${nl(Q)}. Er is dus ${d} km gereden.`],
-   uitwerking:[`Het eerstvolgende palindroom na ${nl(P)} is ${nl(Q)}.`,`Gereden: ${nl(Q)} − ${nl(P)} = ${d} km in ${m} minuten.`,`${d} : ${m} × 60 = ${v} km/u.`]}}}},
+   hints:[`Wat is het eerstvolgende getal na ${nl(P)} dat van achter naar voor hetzelfde is? ${tip}`,`Dat is ${nl(Q)}. Er is dus ${nl(d)} km gereden.`],
+   uitwerking:[`Het eerstvolgende palindroom na ${nl(P)} is ${nl(Q)}.`,`Gereden: ${nl(Q)} − ${nl(P)} = ${nl(d)} km in ${dur}.`,m%60===0?`${nl(d)} : ${m/60} = ${v} km/u.`:`${nl(d)} : ${m} × 60 = ${v} km/u.`]}}},
 {id:"banden",naam:"Banden rouleren",gen(R){
  for(;;){const n=rpick(R,[5,5,6]),D=rint(R,15,60)*1000,per=D*4/n;if(!Number.isInteger(per))continue;
   return{tekst:`${nm(R)} rijdt in ${n===5?"een Dacia met een volwaardig reservewiel":"een Dacia en heeft naast de vier banden ook nog een reservewiel en een extra losse band"}. Om de banden even zwaar te laten slijten, wisselt ${hz()} ze regelmatig, zodat alle ${n} banden precies evenveel kilometers op de weg hebben gemaakt. In totaal heeft de auto ${nl(D)} km gereden.`,
