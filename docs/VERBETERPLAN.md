@@ -144,6 +144,9 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | Q1 | Privacyverklaring | tekst | – | open | |
 | Q2 | Online-status uit te zetten | zichtbaar | D4 | open | |
 | Q3 | Namen en merken op een rij | besluit | – | open | |
+| R1 | Rekenraadsels: kilometerteller gevarieerder (nu bijna altijd 100 km; vaker een 9 in het midden of zes cijfers) | rekenraadsels | – (na de livegang, los van Bezemwagen: alleen `raadsels.html`) | open | |
+| R2 | Rekenraadsels: meer variatie in soorten sommen (Peters bronlijsten opnieuw aanleveren in `docs/rekenraadsels-bron/`) | rekenraadsels | R1 | open | |
+| R3 | Rekenraadsels: uitwerking op 1–3 manieren (proberen · formule · slim redeneren), eerst proef met 10 sommen | rekenraadsels | R1 | open | |
 | E1 | Eindcontrole en twee weken spelen | proces | alles | open | |
 
 **Gevonden tijdens het werk** (nieuwe punten hier toevoegen, met datum en wie):
