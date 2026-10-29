@@ -1,10 +1,12 @@
-# Verbeterplan Gepuzzellig
+# Operatie Bezemwagen — verbeterplan Gepuzzellig
+
+> **Operatie Bezemwagen**: de bezemwagen rijdt achteraan en veegt op wat is blijven liggen. Geen nieuwe functies, wel alles nalopen, opruimen en afmaken wat in de haast van de afgelopen weken is achtergebleven. Gebruik deze naam in branches, PR's en commits van dit plan, bijvoorbeeld `chatgpt/bezemwagen-D1-lettergroottes` of “Bezemwagen D1: vaste lettergroottes”.
 
 Status: plan, opgesteld 27 oktober 2026 op basis van `develop` v228.
 Eigenaar: Peter. Uitvoering: ChatGPT, Claude of allebei, stap voor stap.
 Eerst de app goed maken; pas daarna de App Store of nieuwe puzzels overwegen (hoofdstuk 13).
 
-Dit plan bundelt alle bevindingen uit de review van 26–27 oktober: opmaak, kleur, iconen, bediening, Murdoku, hints, teksten, toegankelijkheid, snelheid en privacy. Voor het opruimen van de CSS verwijst het naar `docs/OPRUIMPLAN-VORMGEVING.md`; dat document blijft de gedetailleerde werkwijze voor die stappen.
+Dit plan (Operatie Bezemwagen) bundelt alle bevindingen uit de review van 26–27 oktober: opmaak, kleur, iconen, bediening, Murdoku, hints, teksten, toegankelijkheid, snelheid en privacy. Voor het opruimen van de CSS verwijst het naar `docs/OPRUIMPLAN-VORMGEVING.md`; dat document blijft de gedetailleerde werkwijze voor die stappen.
 
 ---
 
@@ -38,7 +40,7 @@ Bouwer en reviewer mogen per stap wisselen. Een vaste rolverdeling is niet nodig
 
 ### Vaste regels (gelden voor iedere stap)
 
-1. **Eén stap per pull request.** Branchnaam: `<wie>/<stap-id>-<korte-naam>`, bijvoorbeeld `chatgpt/D1-lettergroottes` of `claude/S4-murdoku-bord`.
+1. **Eén stap per pull request.** Branchnaam: `<wie>/bezemwagen-<stap-id>-<korte-naam>`, bijvoorbeeld `chatgpt/bezemwagen-D1-lettergroottes` of `claude/bezemwagen-S4-murdoku-bord`. PR-titel begint met “Bezemwagen 〈ID〉:”.
 2. **Altijd vanaf de actuele `develop`.** Nooit rechtstreeks naar `develop` of `main` pushen.
 3. **De checks moeten groen zijn** voordat Peter samenvoegt: *Check Gepuzzellig* en *Visuele controle*.
 4. **Visuele verschillen alleen waar de stap dat zegt.** Elke stap noemt onder *Vangnet* welke schermen mogen veranderen. Verandert er een ander scherm, dan is de stap niet klaar. Bewuste verschillen: de baselinebestanden van precies die schermen verwijderen in dezelfde PR (zie `test/visual/README.md`).
@@ -49,7 +51,7 @@ Bouwer en reviewer mogen per stap wisselen. Een vaste rolverdeling is niet nodig
 
 ### Standaardopdracht (kopiëren en de stap invullen)
 
-> Voer stap **〈ID〉** uit volgens `docs/VERBETERPLAN.md` op de actuele `develop`. Lees eerst `docs/AI-WERKWIJZE.md`, `docs/TESTOMGEVING.md`, `docs/VERBETERPLAN.md` (hoofdstuk 2 en stap 〈ID〉), `docs/BESLUITEN.md` (zodra die bestaat) en bij CSS-werk `docs/OPRUIMPLAN-VORMGEVING.md`. Werk in een eigen branch en open een pull request naar `develop`. Voer alleen deze stap uit. De checks *Check Gepuzzellig* en *Visuele controle* moeten groen zijn; alleen de schermen die bij de stap onder *Vangnet* staan mogen veranderen. Werk de statustabel bij. Meld in de PR: wat er veranderd is, welke schermen veranderd zijn, en wat ik op iPad en iPhone moet testen.
+> Operatie Bezemwagen: voer stap **〈ID〉** uit volgens `docs/VERBETERPLAN.md` op de actuele `develop`. Lees eerst `docs/AI-WERKWIJZE.md`, `docs/TESTOMGEVING.md`, `docs/VERBETERPLAN.md` (hoofdstuk 2 en stap 〈ID〉), `docs/BESLUITEN.md` (zodra die bestaat) en bij CSS-werk `docs/OPRUIMPLAN-VORMGEVING.md`. Werk in een eigen branch en open een pull request naar `develop`. Voer alleen deze stap uit. De checks *Check Gepuzzellig* en *Visuele controle* moeten groen zijn; alleen de schermen die bij de stap onder *Vangnet* staan mogen veranderen. Werk de statustabel bij. Meld in de PR: wat er veranderd is, welke schermen veranderd zijn, en wat ik op iPad en iPhone moet testen.
 
 ### Reviewopdracht
 
@@ -93,15 +95,16 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 
 | ID | Stap | Type | Afhankelijk van | Status | PR |
 | --- | --- | --- | --- | --- | --- |
-| V1 | App-naam “Gepuzzellig Test” alleen op testsite | techniek | – | in review | #22 |
-| V2 | Jargon “puzzleKey” uit het groepsoverzicht | tekst | – | in review | #22 |
-| V3 | Werkregels in `AI-WERKWIJZE.md`, overdracht livegang | documenten | – | in review | #23 |
+| V1 | App-naam “Gepuzzellig Test” alleen op testsite | techniek | – | samengevoegd 27 okt, test Peter | #22 |
+| V2 | Jargon “puzzleKey” uit het groepsoverzicht | tekst | – | samengevoegd 27 okt, test Peter | #22 |
+| V3 | Werkregels in `AI-WERKWIJZE.md`, overdracht livegang | documenten | – | klaar (27 okt) | #23 |
 | G1 | Oude branches controleren en opruimen | GitHub | – | open | |
 | G2 | Screenshots van het vangnet uit de hoofdgeschiedenis (eigen branch) | GitHub | – | open | |
 | S0 | Twee weken stabiliseren en verzamelen | proces | livegang | open | |
+| F0 | CSS-ratchet in Check Gepuzzellig: `!important`, herhaalde selectors, lettergroottes en kleuren kunnen alleen omlaag (eerste stap na de livegang, samen met #24) | techniek | livegang | in review | #28 |
 | F1 | Vangnet samenvoegen (PR #21, na G2) | techniek | S0, G2 | open | #21 |
 | F2 | Seed-script: typeformaat dagresultaten | techniek | F1 | open | |
-| F3 | Vóór de livegang: Klaar-icoon, hint-lampje iPhone, “Reeks: 1 dag”, terugknop hint “← Stap 2”, groepsteksten (v229) | zichtbaar | – | in review | #22 |
+| F3 | Vóór de livegang: Klaar-icoon, hint-lampje iPhone, “Reeks: 1 dag”, terugknop hint “← Stap 2”, groepsteksten (v229) | zichtbaar | – | samengevoegd 27 okt, test Peter | #22 |
 | B1–B7 | Productbesluiten — zie `docs/BESLUITEN.md` | besluit (Peter) | – | klaar (27 okt) | |
 | B1-O | Onderzoek: één dagpuzzel voor telefoon en groot scherm? | onderzoek | B1 | open | |
 | O1 | Dode CSS-regels weg | onzichtbaar | F1 | open | |
@@ -120,6 +123,11 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S6 | Hexcells-bediening en tellers | zichtbaar | D4 | open | |
 | S7 | Puzzelmenu en hintpaneel | zichtbaar | D4 | open | |
 | S8 | iPhone-navigatie onderaan (B2) ★ | zichtbaar | S1 | open | |
+| S9 | Nonogram kleur: foutmarkering die de kleur laat staan (bug) | zichtbaar | – (kan direct na S0) | open | |
+| S10 | Murdoku: aanwijzing markeren als “nog nodig” (vlaggetje, B8 = c) | nieuw (klein) | D3 | open | |
+| S11 | Pencil in profiel- en groepsmenu: tik op Terug genegeerd, scrollen stroef (bug, ook in main) | bug | – (na de livegang) | in review | #25 |
+| S12 | iPhone-hint in de onderbalk te klein: kaart krijgt alleen de hoogte van de knoppenbalk (`js/layout.js`, `tray`), tekst past er nauwelijks in (ook in main) | bug | – (eerste na de livegang) | open | |
+| S13 | iPhone-web-app: bovenrand Home vervaagt (in Safari goed, als web-app niet; main wel goed). #29 (statusbalk-regel weg) loste het in de web-app níet op. Volgende verdachte: `#home` als eigen scrollcontainer van `100dvh` bovenop de veilige marge, waardoor de pagina zelf net te hoog wordt en iOS zijn vervaging toont | bug | – (na de livegang) | open | #29 (deel) |
 | T1 | Woordenlijst doorvoeren, jargon weg | tekst | B1-O, S1–S7 | open | |
 | T2 | Uitleg per puzzel inkorten | tekst | T1 | open | |
 | T3 | Hints Murdoku herschrijven ★ | tekst | T1 | open | |
@@ -136,6 +144,9 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | Q1 | Privacyverklaring | tekst | – | open | |
 | Q2 | Online-status uit te zetten | zichtbaar | D4 | open | |
 | Q3 | Namen en merken op een rij | besluit | – | open | |
+| R1 | Rekenraadsels: kilometerteller gevarieerder (nu bijna altijd 100 km; vaker een 9 in het midden of zes cijfers) | rekenraadsels | – (na de livegang, los van Bezemwagen: alleen `raadsels.html`) | open | |
+| R2 | Rekenraadsels: meer variatie in soorten sommen (Peters bronlijsten opnieuw aanleveren in `docs/rekenraadsels-bron/`) | rekenraadsels | R1 | open | |
+| R3 | Rekenraadsels: uitwerking op 1–3 manieren (proberen · formule · slim redeneren), eerst proef met 10 sommen | rekenraadsels | R1 | open | |
 | E1 | Eindcontrole en twee weken spelen | proces | alles | open | |
 
 **Gevonden tijdens het werk** (nieuwe punten hier toevoegen, met datum en wie):
@@ -143,6 +154,8 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | Datum | Wie | Punt | Voorstel |
 | --- | --- | --- | --- |
 | 27 okt | Claude | Vangnet: de opslagmelding (“bewaard en gesynchroniseerd” / “bewaard”) hangt af van timing in de nagebootste database en gaf één keer een vals verschil (`ipad-light-bin-controleer`). | In `snapshot.mjs` wachten tot de opslagmelding stabiel is, of die melding in de controle verbergen. Meenemen bij P3. |
+| 27 okt | Peter/Claude | v231 (#27) loste de iPhone-hint niet op: de wijziging zat in `placeHint` in `core.js`, maar de hint wordt op alle schermen door `js/layout.js` geplaatst (met `!important`), dus de nieuwe code doet niets. | Dode tak opruimen bij S12; de echte fix in `testChooseCard` (layout.js): de kaart mag op iPhone met de inhoud meegroeien tot ca. 40 % van het scherm, het bord schuift mee omhoog. Testen met het vangnet. |
+| 29 okt | Peter | Nieuwe puzzel (later, ná het verbeteren van de app): **gokvrije Minesweeper** met eigen retro-uitstraling (Windows 95-gevoel, maar eigen smiley, vlag en kleuren). Borden worden door de app zelf met logica opgelost; vastgelopen borden worden aangepast of opnieuw gemaakt. Dagpuzzel met vast open startgebied, zodat iedereen hetzelfde bord heeft. | Oplosser grotendeels hergebruiken van de Hexcells-generator. Moeilijkheid sturen op soort redenering (enkel getal, combinaties, mijnen tellen). Hints zoals bij de andere puzzels. |
 | 27 okt | Claude | Puzzelkop bij zoom 130 %: “Puzzel van de dag” afgekapt, “tijd tonen” over twee regels. | Meenemen in D1. |
 
 ---
@@ -160,6 +173,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | **B5** | Opzet groepspagina. | Zoals in `PRODUCT-UX.md` §16: Overzicht · Activiteit · Statistieken | **Overnemen**, met op de iPhone als eerste een compacte ledenlijst met de week. |
 | **B6** | Woordenlijst. | Zie tabel hieronder | **Overnemen of aanpassen.** |
 | **B7** | Welke grotere-tekstinstelling moet minimaal werken? | iOS-tekstgrootte tot “groot” / tot de grootste toegankelijkheidsmaat | **Tot één stap boven standaard zonder enig probleem**, en de grootste toegankelijkheidsmaat zonder overlap (scrollen mag). |
+| **B8** | Hoe markeer je een Murdoku-aanwijzing als “nog nodig”? (S10) | a) tik wisselt drie standen: open → nog nodig → afgehandeld · b) tik = afstrepen zoals nu, lang indrukken = nog nodig · c) tik = afstrepen zoals nu, plus een klein vlagknopje rechts op elk kaartje | **c)** zichtbaar en zonder nieuw gebaar; bestaande gewoonte (tikken = afstrepen) blijft. |
 
 **Voorstel woordenlijst (B6)**
 
@@ -364,6 +378,24 @@ Vanaf hier verandert het uiterlijk. Per stap: eerst op de testsite laten zien, P
 
 - Home · Puzzelen · Groepen · Profiel als balk onderaan, met veilige schermrand. Kop op Home wordt compacter.
 - **Vangnet:** alle iPhone-schermen buiten de puzzels.
+
+
+### S9 — Nonogram kleur: foutmarkering die de kleur laat staan
+
+- **Waarom (bug):** bij controleren krijgt een fout vakje een rode achtergrond (`.c.bad{background:#e5484d!important}`). In een kleurnonogram is rood een puzzelkleur: een fout rood vakje blijft even rood, en een fout blauw vakje wordt rood geverfd. Je ziet dus niet wát er fout is, en de markering verandert de ingevulde kleur.
+- **Wat:** de foutmarkering vervangt nooit de ingevulde kleur. Voorstel (proef 27 oktober): de eigen kleur blijft, met een donkere arcering, een dikke donkere rand en een klein “!”-rondje in de hoek. Dezelfde stijl voor alle puzzels (Binair, Star Battle, Pluszle, klassieke nonogram), zodat “fout” overal hetzelfde eruitziet; Murdoku gebruikt al een rand.
+- Werkt voor kleurenblinden doordat het patroon en het “!” de betekenis dragen, niet de kleur.
+- **Vangnet:** `bin-controleer`, `mur-geplaatst`, plus een nieuw scherm met een gecontroleerde kleurnonogram met fouten (toevoegen aan `SCREENS`).
+- **Klaar wanneer:** op een kleurnonogram is na controleren elk fout vakje herkenbaar, in elke kleur, in licht en donker; de ingevulde kleur blijft zichtbaar.
+- Mag als losse bugfix direct na de stabilisatieperiode, vóór het ontwerpsysteem; in D2 gaat de kleur dan mee in de variabelen.
+
+### S10 — Murdoku: aanwijzing markeren als “nog nodig”
+
+- **Waarom:** nu kun je een aanwijzingskaartje alleen afstrepen (tik). Soms heb je een aanwijzing deels gebruikt maar heb je hem later nog nodig; dat wil je kunnen aangeven zonder hem af te strepen.
+- **Wat (besluit B8 = c):** tikken op het kaartje blijft afstrepen zoals nu. Rechts op elk kaartje komt een klein vlaggetje (icoonset D3); dat zet de stand *nog nodig* aan of uit. Een kaartje dat nog nodig is krijgt een gekleurde rand links en een lichte achtergrond. Afgestreept en nog nodig sluiten elkaar uit: afstrepen haalt het vlaggetje weg, en andersom.
+- Wordt bewaard en gesynchroniseerd zoals het afstrepen (`S.str`), telt niet als fout of hint, en werkt met touch, Pencil, muis en toetsenbord. Aanraakvlak ≥ 44 px.
+- **Vangnet:** `dag-mur`, `hint-mur-*`, `mur-geplaatst`.
+- Eventueel later dezelfde stand voor andere aanwijzingen (Nonogram-, Pluszle-, Hexcells-lijnen); niet in deze stap.
 
 ---
 
