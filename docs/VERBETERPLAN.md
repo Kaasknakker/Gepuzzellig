@@ -155,6 +155,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | --- | --- | --- | --- |
 | 27 okt | Claude | Vangnet: de opslagmelding (“bewaard en gesynchroniseerd” / “bewaard”) hangt af van timing in de nagebootste database en gaf één keer een vals verschil (`ipad-light-bin-controleer`). | In `snapshot.mjs` wachten tot de opslagmelding stabiel is, of die melding in de controle verbergen. Meenemen bij P3. |
 | 27 okt | Peter/Claude | v231 (#27) loste de iPhone-hint niet op: de wijziging zat in `placeHint` in `core.js`, maar de hint wordt op alle schermen door `js/layout.js` geplaatst (met `!important`), dus de nieuwe code doet niets. | Dode tak opruimen bij S12; de echte fix in `testChooseCard` (layout.js): de kaart mag op iPhone met de inhoud meegroeien tot ca. 40 % van het scherm, het bord schuift mee omhoog. Testen met het vangnet. |
+| 29 okt | Peter | Nieuwe puzzel (later, ná het verbeteren van de app): **gokvrije Minesweeper** met eigen retro-uitstraling (Windows 95-gevoel, maar eigen smiley, vlag en kleuren). Borden worden door de app zelf met logica opgelost; vastgelopen borden worden aangepast of opnieuw gemaakt. Dagpuzzel met vast open startgebied, zodat iedereen hetzelfde bord heeft. | Oplosser grotendeels hergebruiken van de Hexcells-generator. Moeilijkheid sturen op soort redenering (enkel getal, combinaties, mijnen tellen). Hints zoals bij de andere puzzels. |
 | 27 okt | Claude | Puzzelkop bij zoom 130 %: “Puzzel van de dag” afgekapt, “tijd tonen” over twee regels. | Meenemen in D1. |
 
 ---
