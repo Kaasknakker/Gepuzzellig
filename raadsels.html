@@ -91,6 +91,7 @@ h1{font-size:26px;font-weight:900;margin:0;letter-spacing:-.01em;text-wrap:balan
 .hints li b{color:var(--hint)}
 .uitw{background:color-mix(in srgb,var(--ok) 9%,var(--card));border:1px dashed color-mix(in srgb,var(--ok) 45%,var(--line));border-radius:14px;padding:10px 14px}
 .uitw ol{margin:4px 0 0;padding-left:22px}.uitw li{margin:3px 0}
+.uitw .svgw{margin:6px 0 2px}
 .uitw .of{text-align:center;font-weight:900;letter-spacing:.14em;font-size:13px;color:var(--mut);margin:12px 0 4px}
 .uitw .utab{overflow-x:auto;margin:6px 0 2px -20px}.uitw table{border-collapse:collapse;font-size:13px;max-width:100%;font-variant-numeric:tabular-nums}
 .uitw th,.uitw td{border:1px solid var(--line);padding:4px 4px;text-align:right}.uitw td{white-space:nowrap}.uitw td:last-child{white-space:normal}.uitw th{font-weight:800;font-size:12px;line-height:1.2;vertical-align:bottom;background:color-mix(in srgb,var(--fg) 6%,transparent)}
@@ -178,6 +179,7 @@ function uitlegBouw(uw,u){
   const ol=document.createElement("ol");
   stappen.forEach(st=>{const li=document.createElement("li");
    if(typeof st==="string")li.textContent=st;
+   else if(st.svg){li.append(document.createTextNode(st.t));const w=document.createElement("div");w.className="svgw";w.innerHTML=st.svg;li.append(w)}
    else{li.append(document.createTextNode(st.t));const w=document.createElement("div"),tb=document.createElement("table"),hr=document.createElement("tr");w.className="utab";
     st.tabel.kop.forEach(k=>{const c=document.createElement("th");c.textContent=k;hr.append(c)});tb.append(hr);
     st.tabel.rijen.forEach(r=>{const tr=document.createElement("tr");r.forEach(v=>{const c=document.createElement("td");c.textContent=v;tr.append(c)});tb.append(tr)});w.append(tb);li.append(w)}
@@ -995,6 +997,107 @@ const ZES3=[
    uitwerking:[`Na stop 1: 6 : ${nl((100-q)/100)} = ${nl(6/(1-q/100))} ton (stop 2 haalt er ${nl(6/(1-q/100)*q/100)} af).`,`Bij vertrek: ${nl(6/(1-q/100))} is ${b-a}/${b} deel, dus ${nl(load)} ton. Controle: ${f}% van ${nl(C)} = ${nl(load)}.`,`De laatste stop: altijd 6 ton.`]}}}}
 ];
 RAAD.push(...RAAD3);ZES.push(...ZES3);
+/* ===== Nieuwe soorten (R2), met plaatjes in de uitleg (R3). Plaatjes worden uit de getallen van de som getekend. ===== */
+const svgT=(x,y,t,o={})=>`<text x="${x}" y="${y}" font-size="${o.fs||11}" font-weight="${o.fw||700}" text-anchor="${o.a||"middle"}" style="fill:currentColor;${o.op?"opacity:"+o.op+";":""}paint-order:stroke;stroke:var(--paper);stroke-width:3px">${t}</text>`;
+function svgStaven({bars,line,over=[],max,min=0,w=360,h=160}){
+ const L=16,Rr=line?88:14,T=14,B=26,k=bars.length,st=(w-L-Rr)/k,bw=Math.min(40,st*.64),H=h-T-B,y=v=>T+H-(Math.max(v,min)-min)/(max-min)*H,X=i=>L+st*i+(st-bw)/2;
+ let s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Staafdiagram"><line x1="${L}" y1="${T+H}" x2="${w-Rr+(line?0:0)}" y2="${T+H}" stroke="currentColor" stroke-opacity=".4"/>`;
+ if(min>0)s+=`<path d="M${L-8},${T+H+2} l9,-7 M${L-8},${T+H-4} l9,-7" stroke="currentColor" stroke-opacity=".6" fill="none"/>`;
+ bars.forEach((b,i)=>{const x=X(i);s+=`<rect x="${x.toFixed(1)}" y="${y(b.v).toFixed(1)}" width="${bw.toFixed(1)}" height="${(T+H-y(b.v)).toFixed(1)}" rx="3" style="fill:${b.c==="x"?"var(--pc)":"var(--blauw)"};fill-opacity:${b.c==="x"?.85:.5}"/>`;
+  s+=svgT((x+bw/2).toFixed(1),T+H-6,b.t??nl(b.v),{fs:10.5});if(b.l)s+=svgT((x+bw/2).toFixed(1),h-9,b.l,{fw:600,op:.75,fs:10.5})});
+ over.forEach(o=>{const x=X(o.i),y1=y(o.tot),y2=y(o.van);s+=`<rect x="${x.toFixed(1)}" y="${y1.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(2,y2-y1).toFixed(1)}" rx="2" style="fill:${o.vul?"var(--pc)":"none"};fill-opacity:.9;stroke:var(--pc);stroke-width:1.5;stroke-dasharray:${o.vul?"0":"4 3"}"/>`;
+  if(o.t)s+=svgT((x+bw/2).toFixed(1),((y1+y2)/2+4).toFixed(1),o.t,{fs:9.5})});
+ if(line)s+=`<line x1="${L}" y1="${y(line.v).toFixed(1)}" x2="${w-Rr+6}" y2="${y(line.v).toFixed(1)}" stroke="currentColor" stroke-width="1.6" stroke-dasharray="6 4"/>`+svgT(w-Rr+10,(y(line.v)+4).toFixed(1),line.t,{a:"start",fs:10.5});
+ return s+`</svg>`}
+function svgGroepen({a,b,G,max,min=0,w=360,h=170}){
+ const L=16,Rr=88,T=14,B=34,H=h-T-B,tot=a.n+b.n,sx=(w-L-Rr)/tot,y=v=>T+H-(Math.max(v,min)-min)/(max-min)*H,xa=L,xb=L+a.n*sx;
+ let s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Twee groepen met hun gemiddelde"><line x1="${L}" y1="${T+H}" x2="${w-Rr}" y2="${T+H}" stroke="currentColor" stroke-opacity=".4"/>`;
+ if(min>0)s+=`<path d="M${L-8},${T+H+2} l9,-7 M${L-8},${T+H-4} l9,-7" stroke="currentColor" stroke-opacity=".6" fill="none"/>`;
+ s+=`<rect x="${xa.toFixed(1)}" y="${y(a.g).toFixed(1)}" width="${(a.n*sx).toFixed(1)}" height="${(T+H-y(a.g)).toFixed(1)}" style="fill:var(--blauw);fill-opacity:.5"/>`;
+ s+=`<rect x="${xb.toFixed(1)}" y="${y(b.g).toFixed(1)}" width="${(b.n*sx).toFixed(1)}" height="${(T+H-y(b.g)).toFixed(1)}" style="fill:var(--blauw);fill-opacity:.5"/>`;
+ s+=`<rect x="${xa.toFixed(1)}" y="${y(G).toFixed(1)}" width="${(a.n*sx).toFixed(1)}" height="${(y(a.g)-y(G)).toFixed(1)}" style="fill:none;stroke:var(--pc);stroke-width:1.5;stroke-dasharray:4 3"/>`;
+ s+=`<rect x="${xb.toFixed(1)}" y="${y(b.g).toFixed(1)}" width="${(b.n*sx).toFixed(1)}" height="${(y(G)-y(b.g)).toFixed(1)}" style="fill:var(--pc);fill-opacity:.85"/>`;
+ s+=`<line x1="${L}" y1="${y(G).toFixed(1)}" x2="${w-Rr+6}" y2="${y(G).toFixed(1)}" stroke="currentColor" stroke-width="1.6" stroke-dasharray="6 4"/>`+svgT(w-Rr+10,(y(G)+4).toFixed(1),"gemiddeld "+nl(G),{a:"start",fs:10.5});
+ s+=svgT((xa+a.n*sx/2).toFixed(1),T+H-6,nl(a.g)+" jaar",{fs:10.5});s+=svgT((xb+b.n*sx/2).toFixed(1),T+H-6,nl(b.g)+" jaar",{fs:10.5});
+ s+=svgT((xa+a.n*sx/2).toFixed(1),h-16,"groep A: "+a.n,{fw:600,fs:10.5});s+=svgT((xb+b.n*sx/2).toFixed(1),h-16,"groep B: "+(b.t||"?"),{fw:600,fs:10.5});
+ return s+`</svg>`}
+function svgSchaal({kaart,echt,keer,w=360,h=150}){
+ let s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Afstand op de kaart en in het echt"><g stroke="currentColor" stroke-width="3" stroke-linecap="round">`;
+ s+=`<line x1="30" y1="44" x2="110" y2="44" style="stroke:var(--blauw)"/><line x1="30" y1="112" x2="330" y2="112" style="stroke:var(--pc)"/></g>`;
+ s+=`<line x1="70" y1="52" x2="70" y2="98" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3"/><polygon points="64,96 76,96 70,106" style="fill:currentColor"/>`;
+ s+=`<line x1="30" y1="104" x2="30" y2="120" stroke="currentColor"/><line x1="330" y1="104" x2="330" y2="120" stroke="currentColor"/><line x1="30" y1="36" x2="30" y2="52" stroke="currentColor"/><line x1="110" y1="36" x2="110" y2="52" stroke="currentColor"/>`;
+ s+=svgT(70,26,kaart,{fs:12})+svgT(80,80,keer,{a:"start",fs:12})+svgT(180,138,echt+" (de tekening is niet op schaal)",{fs:12});
+ return s+`</svg>`}
+const RAAD4=[
+{id:"gemiddeld",naam:"Het gemiddelde verandert",vanaf:"2026-11-12",gen(R){
+ const var_=rint(R,0,2),wie=nm(R);
+ if(var_===0){const n=rint(R,3,7),g=rint(R,18,40),d=rint(R,1,3),h=g+(n+1)*d,T=n*g,T2=(n+1)*(g+d),jr=x=>x+" jaar";
+  return{tekst:`Bij de familiedag zijn ${n} mensen. Ze zijn gemiddeld ${g} jaar oud.\n${wie} komt er ook nog bij. Daardoor wordt het gemiddelde ${jr(d)} hoger.`,
+   vraag:`${wie} is ….. jaar oud.`,eenheid:"jaar",ans:h,
+   hints:[`Hoeveel jaar zijn de ${n} mensen samen? En hoeveel jaar zijn ${n+1} mensen samen, als het gemiddelde ${g+d} is?`,`Eerst samen ${n} × ${g} = ${T}. Daarna samen ${n+1} × ${g+d} = ${T2}. Het verschil is de leeftijd van ${wie}.`],
+   uitwerking:[[`${n} mensen van gemiddeld ${g} jaar zijn samen ${n} × ${g} = ${T} jaar.`,
+    `Met ${wie} erbij zijn het ${n+1} mensen, gemiddeld ${g+d} jaar.`,
+    `Samen zijn ze dan ${n+1} × ${g+d} = ${T2} jaar.`,
+    `${wie} is ${T2} − ${T} = ${h} jaar.`,
+    `Controle: ${T} + ${h} = ${T+h} jaar samen, en ${T+h} : ${n+1} = ${g+d}.`],
+   [`${wie} haalt het gemiddelde ${jr(d)} omhoog.`,
+    `Eerst moet ${wie} zelf ${g+d} jaar zijn: het nieuwe gemiddelde.`,
+    `Daarnaast moet ${wie} elk van de andere ${n} mensen nog ${jr(d)} bijgeven, zodat ook zij op ${g+d} komen. Dat is ${n} × ${d} = ${n*d} jaar extra.`,
+    {t:`Zo ziet dat eruit. De stippellijn is het nieuwe gemiddelde. Elk blauw staafje is een mens. De onderkant van de staafjes is weggelaten.`,svg:svgStaven({bars:[...Array.from({length:n},(_,i)=>({v:g,l:String(i+1)})),{v:h,c:"x",l:wie}],line:{v:g+d,t:"gemiddeld "+(g+d)},over:[...Array.from({length:n},(_,i)=>({i,van:g,tot:g+d})),{i:n,van:g+d,tot:h,vul:1,t:n+"×"+d}],min:Math.max(0,Math.floor((g-(h-g)/2)/5)*5),max:h+(h-g)*.04})},
+    `${wie} is ${g+d} + ${n*d} = ${h} jaar.`]]}}
+ if(var_===1){for(let tr=0;tr<500;tr++){const n=rint(R,4,6),ALL=[5,5.5,6,6.5,7,7.5,8,8.5,9],c=Array.from({length:n},()=>rpick(R,ALL)),sum=c.reduce((a,b)=>a+b,0),t=rpick(R,[6.5,7,7.5,8]),x=t*(n+1)-sum;
+   if(new Set(c).size<3||x<5.5||x>10||x*2!==Math.round(x*2)||x===t)continue;const S=c.reduce((a,b)=>a+(b-t),0),ab=Math.abs;
+   return{tekst:`${wie} heeft voor wiskunde de volgende cijfers gehaald: ${c.map(v=>nl(v)).join(", ")}.\nEr komt nog één toets. ${wie} wil voor wiskunde gemiddeld precies een ${nl(t)} staan.`,
+    vraag:`Voor de laatste toets moet ${wie} een ….. halen.`,eenheid:"",ans:x,
+    hints:[`Hoeveel punten zijn ${n+1} cijfers samen, als het gemiddelde ${nl(t)} moet zijn?`,`${n+1} × ${nl(t)} = ${nl(t*(n+1))} punten. Zoveel moeten alle cijfers samen opleveren. Hoeveel is er al?`],
+    uitwerking:[[`Met de laatste toets erbij zijn het ${n+1} cijfers.`,
+     `Gemiddeld ${nl(t)} betekent samen ${n+1} × ${nl(t)} = ${nl(t*(n+1))} punten.`,
+     `Nu is het samen ${c.map(v=>nl(v)).join(" + ")} = ${nl(sum)} punten.`,
+     `De laatste toets moet ${nl(t*(n+1))} − ${nl(sum)} = ${nl(x)} opleveren.`,
+     `Controle: ${nl(sum)} + ${nl(x)} = ${nl(sum+x)} punten, en ${nl(sum+x)} : ${n+1} = ${nl(t)}.`],
+    [`Kijk bij elk cijfer hoeveel het boven of onder ${nl(t)} zit: ${c.map(v=>`${nl(v)} is ${nl(ab(v-t))} ${v>=t?"boven":"onder"}`).join(", ")}.`,
+     `Samen zit ${wie} ${nl(ab(S))} punten ${S<0?"onder":"boven"} het doel.`,
+     {t:`Zo ziet dat eruit. De stippellijn is het doel. Elk blauw staafje is een toets. De onderkant van de staafjes is weggelaten.`,svg:svgStaven({bars:[...c.map((v,i)=>({v,l:String(i+1)})),{v:x,c:"x",l:"laatst"}],line:{v:t,t:"doel "+nl(t)},min:4,max:10.2})},
+     `De laatste toets moet dat goedmaken: ${nl(t)} ${S<0?"+":"−"} ${nl(ab(S))} = ${nl(x)}.`]]}}}
+ for(let tr=0;tr<3000;tr++){const nA=rint(R,4,16),gA=rint(R,20,45),gB=rint(R,gA+10,75),nB=rint(R,3,20),Gt=(nA*gA+nB*gB)/(nA+nB);if(!Number.isInteger(Gt)||Gt<=gA||Gt>=gB)continue;const G=Gt,tel=nA*(G-gA),sa=nA*gA,sb=nB*gB;
+  return{tekst:`Bij een wandeltocht lopen twee groepen. Groep A heeft ${nA} wandelaars, gemiddeld ${gA} jaar oud. Groep B heeft een aantal wandelaars, gemiddeld ${gB} jaar oud.\nAls ze samen lopen, zijn alle wandelaars gemiddeld precies ${G} jaar oud.`,
+   vraag:`In groep B zitten ….. wandelaars.`,eenheid:"wandelaars",ans:nB,
+   hints:[`Hoeveel jaar zit groep A samen onder het gemiddelde van ${G}?`,`Elke wandelaar van groep A zit ${G-gA} jaar onder ${G}: samen ${nA} × ${G-gA} = ${tel} jaar. Elke wandelaar van groep B zit ${gB-G} jaar erboven.`],
+   uitwerking:[[`Groep A zit gemiddeld ${G-gA} jaar onder het gemiddelde van ${G}. Bij ${nA} wandelaars is dat samen ${nA} × ${G-gA} = ${tel} jaar te weinig.`,
+    `Elke wandelaar van groep B zit ${gB-G} jaar boven ${G}. Die maken het goed.`,
+    {t:`Zo ziet dat eruit. Het stuk dat A tekortkomt, is net zo groot als het stuk dat B te veel heeft. De onderkant van de staven is weggelaten.`,svg:svgGroepen({a:{n:nA,g:gA},b:{n:nB,g:gB,t:String(nB)},G,min:Math.max(0,Math.floor((gA-(gB-gA))/5)*5),max:gB+(gB-gA)*.05})},
+    `Er zijn dus ${tel} : ${gB-G} = ${nB} wandelaars in groep B nodig.`,
+    `Controle: ${nA} × ${gA} + ${nB} × ${gB} = ${sa+sb} jaar samen, en ${sa+sb} : ${nA+nB} = ${G}.`],
+   [`Groep B heeft b wandelaars.`,
+    `Samen: ${nA} × ${gA} + b × ${gB} = ${G} × (${nA} + b).`,
+    `Haakjes uitwerken: ${sa} + ${gB}b = ${G*nA} + ${G}b.`,
+    `Dan is ${gB-G}b = ${G*nA} − ${sa} = ${G*nA-sa}.`,
+    `Dus b = ${tel} : ${gB-G} = ${nB}.`]]}}
+ return{tekst:`Bij een wandeltocht lopen twee groepen. Groep A heeft 10 wandelaars, gemiddeld 30 jaar oud. Groep B heeft een aantal wandelaars, gemiddeld 50 jaar oud.\nAls ze samen lopen, zijn alle wandelaars gemiddeld precies 40 jaar oud.`,vraag:`In groep B zitten ….. wandelaars.`,eenheid:"wandelaars",ans:10,hints:[`Hoeveel jaar zit groep A samen onder het gemiddelde van 40?`,`Elke wandelaar van groep A zit 10 jaar onder 40, elke wandelaar van groep B 10 jaar erboven.`],
+  uitwerking:[[`Groep A zit gemiddeld 10 jaar onder het gemiddelde van 40. Bij 10 wandelaars is dat samen 10 × 10 = 100 jaar te weinig.`,`Elke wandelaar van groep B zit 10 jaar boven 40.`,`Er zijn dus 100 : 10 = 10 wandelaars in groep B nodig.`,`Controle: 10 × 30 + 10 × 50 = 800 jaar samen, en 800 : 20 = 40.`],[`Groep B heeft b wandelaars.`,`Samen: 10 × 30 + b × 50 = 40 × (10 + b).`,`Dan is 10b = 400 − 300 = 100.`,`Dus b = 100 : 10 = 10.`]]}}},
+{id:"schaal",naam:"Op schaal",vanaf:"2026-11-12",gen(R){
+ const KS=[["wandelkaart",[25000,50000]],["fietskaart",[50000,100000]],["autokaart",[200000,250000,500000]]],v=rint(R,0,2);
+ for(let tr=0;tr<2000;tr++){const[soort,Ns]=rpick(R,KS),N=rpick(R,Ns),f=N/100000,d=rint(R,2,30),km=d*f;if(km<1||km>150||Math.round(km*10)!==km*10)continue;const wie=nm(R);
+  const plaatje=svgSchaal({kaart:nl(d)+" cm op de kaart",echt:nl(km)+" km in het echt",keer:"× "+nl(N)});
+  const stapN=`Schaal 1 : ${nl(N)} betekent: 1 cm op de kaart is ${nl(N)} cm in het echt.`,stapKm=`${nl(N)} cm is ${nl(N/100)} m, en dat is ${nl(f)} km.`;
+  if(v===0)return{tekst:`${wie} kijkt op een ${soort} met schaal 1 : ${nl(N)}. De afstand tussen twee punten is ${nl(d)} cm op de kaart.`,
+   vraag:`In het echt is dat ….. km.`,eenheid:"km",ans:km,
+   hints:[`Schaal 1 : ${nl(N)} betekent dat alles in het echt ${nl(N)} keer zo groot is. Reken eerst uit hoeveel km 1 cm op de kaart is.`,`${nl(N)} cm = ${nl(N/100)} m = ${nl(f)} km. Dus 1 cm op de kaart is ${nl(f)} km.`],
+   uitwerking:[[stapN,stapKm,`Eén cm op de kaart is dus ${nl(f)} km in het echt.`,{t:`Zo ziet dat eruit.`,svg:plaatje},`${nl(d)} cm op de kaart is ${nl(d)} × ${nl(f)} = ${nl(km)} km.`,`Controle: ${nl(km)} km is ${nl(km*100000)} cm, en ${nl(km*100000)} : ${nl(N)} = ${nl(d)} cm op de kaart.`],
+    [`Eén cm op de kaart hoort bij ${nl(f)} km in het echt.`,ts(`Reken in een verhoudingstabel: ${nl(d)} keer zoveel.`,["Op de kaart","In het echt"],[["1 cm",nl(f)+" km"],[nl(d)+" cm",nl(km)+" km"]]),`De afstand is ${nl(km)} km.`]]};
+  if(v===1)return{tekst:`${wie} wil ${nl(km)} km lopen en heeft een ${soort} met schaal 1 : ${nl(N)}.`,
+   vraag:`Op de kaart is dat ….. cm.`,eenheid:"cm",ans:d,
+   hints:[`Reken eerst uit hoeveel km 1 cm op de kaart is.`,`Schaal 1 : ${nl(N)}: 1 cm op de kaart is ${nl(N)} cm = ${nl(N/100)} m = ${nl(f)} km in het echt.`],
+   uitwerking:[[stapN,stapKm,`Eén cm op de kaart is dus ${nl(f)} km in het echt.`,`Hoe vaak past ${nl(f)} km in ${nl(km)} km? ${nl(km)} : ${nl(f)} = ${nl(d)}.`,{t:`Zo ziet dat eruit.`,svg:plaatje},`Op de kaart is dat ${nl(d)} cm.`,`Controle: ${nl(d)} × ${nl(f)} = ${nl(km)} km.`],
+    [`Eén cm op de kaart hoort bij ${nl(f)} km in het echt.`,ts(`Reken in een verhoudingstabel: hoeveel keer ${nl(f)} km is ${nl(km)} km?`,["Op de kaart","In het echt"],[["1 cm",nl(f)+" km"],[nl(d)+" cm",nl(km)+" km"]]),`Op de kaart is dat ${nl(d)} cm.`]]};
+  return{tekst:`${wie} meet op een ${soort} een afstand van ${nl(d)} cm. In het echt is dat ${nl(km)} km.`,
+   vraag:`De schaal van de kaart is 1 : …..`,eenheid:"",ans:N,
+   hints:[`Reken ${nl(km)} km eerst om naar cm.`,`${nl(km)} km = ${nl(km*1000)} m = ${nl(km*100000)} cm. Dat hoort bij ${nl(d)} cm op de kaart.`],
+   uitwerking:[[`${nl(km)} km is ${nl(km*1000)} m, en dat is ${nl(km*100000)} cm.`,`Dat is de afstand in het echt. Op de kaart is het ${nl(d)} cm.`,`Eén cm op de kaart is dus ${nl(km*100000)} : ${nl(d)} = ${nl(N)} cm in het echt.`,{t:`Zo ziet dat eruit.`,svg:plaatje},`De schaal is 1 : ${nl(N)}.`,`Controle: ${nl(d)} × ${nl(N)} = ${nl(km*100000)} cm. Dat is ${nl(km)} km.`],
+    [ts(`Zet het in een verhoudingstabel en reken terug naar 1 cm.`,["Op de kaart","In het echt"],[[nl(d)+" cm",nl(km)+" km"],["1 cm",nl(f)+" km"]]),`${nl(f)} km is ${nl(f*1000)} m, en dat is ${nl(N)} cm.`,`De schaal is 1 : ${nl(N)}.`]]}}
+ return{tekst:`Op een kaart met schaal 1 : 100.000 is een afstand 10 cm.`,vraag:`In het echt is dat ….. km.`,eenheid:"km",ans:10,hints:[`1 cm op de kaart is 100.000 cm in het echt.`,`100.000 cm = 1 km.`],uitwerking:[[`1 cm op de kaart is 100.000 cm = 1 km.`,`10 cm is 10 × 1 = 10 km.`,`Controle: 10 km is 1.000.000 cm, en 1.000.000 : 100.000 = 10 cm.`],[`1 cm hoort bij 1 km, dus 10 cm bij 10 km.`]]}}}
+];
+RAAD.push(...RAAD4);
 const $=s=>document.querySelector(s);
 /* Gewone UI-knoppen reageren bij Apple Pencil direct op pointerevents.
    Rekenmachine en kladcanvas hebben hun eigen Pencil-logica en vallen hier buiten. */
@@ -1057,7 +1160,9 @@ const FAM={treinen:"beweging",inhalen:"beweging",tegenliggers:"beweging",hond:"b
  /* nieuw (uit de lijst van Aart), vanaf 22 oktober 2026 */
  bekers:"logica",verdelen:"logica",poten:"logica",dagdelen:"logica",verstoppen:"procent",procentvan:"procent",terugrekenen:"procent",spelling:"procent",
  huisnummers:"getallen",verjaardag:"getallen",cijfersprong:"getallen",machten:"getallen",cijferplaatjes:"getallen",dobbel:"getallen",
- kubusdozen:"ruimte",voegen:"ruimte",steen:"ruimte",ribben:"ruimte",sleuven:"ruimte",klokwijzers:"tijd",picknick:"beweging"};
+ kubusdozen:"ruimte",voegen:"ruimte",steen:"ruimte",ribben:"ruimte",sleuven:"ruimte",klokwijzers:"tijd",picknick:"beweging",
+ /* nieuw (R2): doen mee als raadsel van de dag vanaf hun datum "vanaf" */
+ gemiddeld:"getallen",schaal:"ruimte"};
 const DAGPOOL=RAAD.filter(t=>FAM[t.id]);
 const dstr2=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 function dagReeks(tot){const out=[];const d=new Date(2026,9,1);for(;;){const ds=dstr2(d),R=RR(hashS("dagsoort|"+ds)),last=out.slice(-10).map(x=>x.t.id),fam=out.length?FAM[out[out.length-1].t.id]:"";

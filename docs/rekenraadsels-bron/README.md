@@ -12,10 +12,10 @@ De app heeft nu ongeveer 89 sjablonen in `raadsels.html`. Die dekken al: reizen 
 
 | Nr | Soort | Kern |
 | --- | --- | --- |
-| 1 | Op schaal | kaart of plattegrond, werkelijke afstand en omgekeerd |
+| 1 | Op schaal | kaart of plattegrond, werkelijke afstand en omgekeerd (**gebouwd**, 29 oktober 2026) |
 | 2 | Hectare en are | oppervlakte omrekenen, ontbrekende zijde zoeken |
 | 3 | Rechthoek en diagonaal | verhouding 3 : 4, diagonaal, grootste cirkel in een rechthoek |
-| 4 | Gemiddelde verandert | iemand komt erbij, samenvoegen, welk cijfer heb je nog nodig |
+| 4 | Gemiddelde verandert | iemand komt erbij, samenvoegen, welk cijfer heb je nog nodig (**gebouwd**, 29 oktober 2026) |
 | 5 | Kortingen na elkaar | korting op korting, btw als percentage, klok die te snel loopt |
 | 6 | Twee geheimzinnige getallen | som, verschil en product gegeven; oppervlakte gelijk aan omtrek |
 | 7 | Zakken en medailles | meerdere soorten met een totaal en een verband tussen de soorten |
@@ -66,3 +66,11 @@ Een stap is tekst, of `ts("tekst", kop, rijen)` voor een klein tabelletje (probe
 - Op een iPhone (390 px breed) moet een tabel in beeld passen.
 
 Proef (28 oktober 2026): Twee keer wegen, Twee bestellingen, Moeder en dochter (3 manieren), Leeftijden in de familie, Eerlijk verdelen, Samen klussen, Cacao mengen, Knikkers over, Fietsen huren en Procent meer dan ….
+
+## Plaatjes in de uitleg
+
+Een stap mag ook `{t:"tekst", svg:"<svg …>"}` zijn: de app zet het plaatje onder de tekst. De plaatjes worden uit de getallen van de som getekend (`svgStaven`, `svgGroepen`, `svgSchaal` in `raadsels.html`), met de kleuren van de pagina, dus goed in licht en donker en op iPhone en iPad. Staafjes mogen de onderkant weglaten om verschillen zichtbaar te maken; dat staat dan in de tekst bij het plaatje. Een plaatje staat alleen in de uitleg, nooit bij de vraag zelf.
+
+## Nieuwe soorten in de dagrotatie
+
+Nieuwe soorten hebben een datum `vanaf`. Voor die datum doen ze niet mee als raadsel van de dag, zodat de dagen ervoor niet veranderen. Je kunt ze wel meteen kiezen onder "Alle soorten". *Het gemiddelde verandert* en *Op schaal* starten op 12 november 2026; Peter kan die datum aanpassen. Vanaf die datum verschuift de rotatie van de dagen erna.
