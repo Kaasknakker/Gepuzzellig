@@ -1512,7 +1512,7 @@ function pollNu(){if(ADMIN_READONLY||!window.PD_DB||!window.PD_PROFILE_LINKED||!
  const n0=lastRows.length,j0=JSON.stringify(STAT);lastRows=mergeRows(lastRows,o.rows);if(o.stat)STAT=o.stat;if(lastRows.length!==n0||JSON.stringify(STAT)!==j0){pullMine(lastRows);board(lastRows)}}).catch(()=>{})}
 setInterval(pollNu,45000);addEventListener("pdready",()=>setTimeout(pollNu,3000));
 /* Terug in de app (bijv. na de iPad op slot): verbindingen opnieuw opzetten, zodat "bezig" en scores direct kloppen. */
-let lastVis=0;document.addEventListener("visibilitychange",()=>{if(document.hidden||!window.PD_DB)return;setTimeout(pollNu,800);if(listenDate!==dstr()||Date.now()-lastVis>20000){lastVis=Date.now();startBoard()}});addEventListener("pageshow",e=>{if(e.persisted&&window.PD_DB)startBoard()});
+let lastVis=Date.now();document.addEventListener("visibilitychange",()=>{if(document.hidden||!window.PD_DB)return;setTimeout(pollNu,800);/* Volledig opnieuw verbinden leest de hele geschiedenis opnieuw (telt als reads); de listeners herstellen zich zelf. Alleen bij een nieuwe dag of na lang wegzijn. */if(listenDate!==dstr()||Date.now()-lastVis>30*60000){lastVis=Date.now();startBoard()}});addEventListener("pageshow",e=>{if(e.persisted&&window.PD_DB)startBoard()});
 
 const SET=window.PD_SETUP||{players:["Speler"],group:"lokaal",groupName:"Groep"};$("#group").value=SET.group;
 function setMe(p,displayName){uid=uidOf(p);const nm=(displayName||playerName(p)||p).trim()||p;$("#name").value=nm;board(lastRows);setTimeout(()=>pullCloudProgress(true),0)}
