@@ -338,8 +338,15 @@ service cloud.firestore {
       // Legacy resultaten blijven alleen voor compatibiliteit leesbaar.
       // Na de migratie schrijft de nieuwe client uitsluitend naar playerResults/groupActivity.
       // Oude clients mogen daarom geen nieuwe legacy-resultaten meer toevoegen of wijzigen.
+      // Uitzondering voor de twee oorspronkelijke leden van Rekensukkels.
+      // Alleen hun oude groepsresultaten, uitsluitend zolang ze approved lid zijn.
+      // Nieuwe leden zien deze historie niet; legacy writes blijven verboden.
       allow read: if isAdmin()
-        || (hasProfile() && resource.data.uid == myPlayer());
+        || (hasProfile() && resource.data.uid == myPlayer())
+        || (hasProfile()
+          && myPlayer() in ['u-peter', 'u-aart']
+          && resource.data.group == 'peter-aart-jk4hv92t'
+          && approvedMember('peter-aart-jk4hv92t', myPlayer()));
       allow create, update, delete: if false;
     }
 
