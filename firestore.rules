@@ -347,7 +347,10 @@ service cloud.firestore {
       // Uitzondering voor de twee oorspronkelijke leden van Rekensukkels.
       // Alleen hun oude groepsresultaten, uitsluitend zolang ze approved lid zijn.
       // Nieuwe leden zien deze historie niet; legacy writes blijven verboden.
-      allow read: if isAdmin()
+      allow read: if isOwner()
+        // Een later toegevoegd (zelfs admin-)lid mag niet via de oude
+        // isAdmin()-uitzondering de historische Rekensukkels-data inzien.
+        || (isAdmin() && resource.data.group != 'peter-aart-jk4hv92t')
         || (hasProfile() && resource.data.uid == myPlayer())
         || (hasProfile()
           && myPlayer() in ['u-peter', 'u-aart']
