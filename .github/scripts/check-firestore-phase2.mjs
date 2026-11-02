@@ -36,6 +36,10 @@ try{
    await setDoc(doc(x,'playerMemberships',p.playerId,'groups',historicGid),indexOf(m,historicGid));
   }
   for(const p of [historicPeter,historicAart])await setDoc(doc(x,'results',historicGid+'_2026-10-22_bin.2_'+p.playerId),{uid:p.playerId,group:historicGid,name:p.authUid,date:'2026-10-22',type:'bin.2',secs:75});
+  for(const [suffix,when] of [['old',200],['new',350]]){
+   await setDoc(doc(x,'groupActivity',historicGid,'items',suffix),{groupId:historicGid,playerId:historicPeter.playerId,completedAt:when});
+   await setDoc(doc(x,'groupDailyPlans',historicGid,'items',suffix),{groupId:historicGid,playerId:historicPeter.playerId,sharedAt:when});
+  }
  });
  const historicRows=p=>getDocs(query(collection(db(p),'results'),where('group','==',historicGid)));
  await assertSucceeds(historicRows(historicPeter));
@@ -45,6 +49,17 @@ try{
  await assertFails(getDoc(doc(db(historicNew),'results',historicGid+'_2026-10-22_bin.2_u-aart')));
  await assertFails(getDoc(doc(db(historicAart),'results',legacyResultId)));
  await assertFails(updateDoc(doc(db(historicAart),'results',historicGid+'_2026-10-22_bin.2_u-peter'),{secs:80}));
+ // Nieuwe groepsleden kunnen geen activiteit/dagplannen van vóór joinedAt lezen,
+ // ook niet door een brede query te proberen.
+ await assertSucceeds(getDocs(query(collection(db(historicAart),'groupActivity',historicGid,'items'),where('completedAt','>=',100))));
+ await assertFails(getDoc(doc(db(historicNew),'groupActivity',historicGid,'items','old')));
+ await assertFails(getDocs(query(collection(db(historicNew),'groupActivity',historicGid,'items'),where('completedAt','>=',100))));
+ const freshActivity=await assertSucceeds(getDocs(query(collection(db(historicNew),'groupActivity',historicGid,'items'),where('completedAt','>=',300))));
+ if(freshActivity.size!==1)throw Error('Nieuw groepslid ziet niet uitsluitend nieuwe activiteit');
+ await assertFails(getDoc(doc(db(historicNew),'groupDailyPlans',historicGid,'items','old')));
+ await assertFails(getDocs(query(collection(db(historicNew),'groupDailyPlans',historicGid,'items'),where('sharedAt','>=',100))));
+ const freshPlans=await assertSucceeds(getDocs(query(collection(db(historicNew),'groupDailyPlans',historicGid,'items'),where('sharedAt','>=',300))));
+ if(freshPlans.size!==1)throw Error('Nieuw groepslid ziet niet uitsluitend nieuwe dagplannen');
  const anonUid='auth-new-anon',anonPlayer='p_'+anonUid,anonDb=env.authenticatedContext(anonUid,{firebase:{sign_in_provider:'anonymous'}}).firestore();
  const anonProfile={authUid:anonUid,playerId:anonPlayer,displayName:'Solo tester',groupId:'',role:'user',accountState:'anonymous',createdAt:300,updatedAt:300,inviteCode:'',invitedByAuthUid:'',groupJoinCode:'',theme:'shared',accent:'blue',preferences:{favoritePuzzleTypes:['bin','star','nono'],dailyDifficulty:{bin:'normal',star:'normal',nono:'normal',hex:'normal',plus:'normal',mur:'normal'}}};
  await assertSucceeds(setDoc(doc(anonDb,'profiles',anonUid),anonProfile));await assertSucceeds(setDoc(doc(anonDb,'players',anonPlayer),{playerId:anonPlayer,authUid:anonUid,displayName:'Solo tester',createdAt:300,updatedAt:300}));
