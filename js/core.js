@@ -67,25 +67,38 @@ const setDetailsOpen=smoothDetails();
 /* Pencil-scroll in accountvensters: begin elke veeg binnen de echte grenzen,
    zodat terug omhoog na de onderrand niet in iOS-overscroll blijft hangen. */
 function penScrollDialogs(){
- let drag=null,last=null,firing=false;
+ /* Tikdrempel: een Pencil beweegt bij een gewone tik vaak een paar pixels. Pas vanaf
+    SLOP px telt het als scrollen (zoals iOS zelf); daaronder is het een tik. */
+ const SLOP=12;
+ let drag=null,last=null,firing=false,glide=0;
  const remember=d=>{last={target:d.target,at:performance.now()}};
+ const stopGlide=()=>{if(glide){cancelAnimationFrame(glide);glide=0}};
  document.addEventListener('pointerdown',e=>{
-  last=null;
+  last=null;stopGlide();
   if(e.pointerType!=='pen'||e.button>0)return;
   const card=e.target.closest?.('.authcard'),scroller=card&&typeof card.closest==='function'?(card.closest('#authaccount,#groupaccount')||card):card;
   if(!card||!scroller||e.target.closest('input,textarea,select,[contenteditable="true"]'))return;
   const max=Math.max(0,scroller.scrollHeight-scroller.clientHeight),top=Math.max(0,Math.min(max,scroller.scrollTop));
-  drag={card:scroller,target:e.target,action:e.target.closest('button,a[href],summary,[role="button"]'),pid:e.pointerId,y:e.clientY,top,moved:false};
+  drag={card:scroller,target:e.target,action:e.target.closest('button,a[href],summary,[role="button"]'),pid:e.pointerId,y:e.clientY,top,moved:false,samples:[{t:performance.now(),y:e.clientY}]};
   scroller.scrollTop=top;e.preventDefault();scroller.setPointerCapture?.(e.pointerId);
  },true);
  document.addEventListener('pointermove',e=>{
   if(!drag||e.pointerId!==drag.pid)return;e.preventDefault();
-  const delta=drag.y-e.clientY;if(Math.abs(delta)>6)drag.moved=true;
+  const delta=drag.y-e.clientY;if(Math.abs(delta)>SLOP)drag.moved=true;
   if(drag.moved)drag.card.scrollTop=Math.max(0,Math.min(drag.card.scrollHeight-drag.card.clientHeight,drag.top+delta));
+  const now=performance.now();drag.samples.push({t:now,y:e.clientY});while(drag.samples.length>2&&now-drag.samples[0].t>100)drag.samples.shift();
+  /* Stilhouden vóór loslaten = geen vaart: alleen recente bewegingen tellen. */
  },{capture:true,passive:false});
+ /* Na een veeg rolt de pagina nog even door en remt af, zoals gewoon scrollen in iOS. */
+ const glideFrom=(el,v)=>{let prev=performance.now();const step=now=>{const dt=Math.min(32,now-prev);prev=now;
+   const max=el.scrollHeight-el.clientHeight,before=el.scrollTop;el.scrollTop=Math.max(0,Math.min(max,before+v*dt));
+   v*=Math.pow(0.95,dt/16);glide=(Math.abs(v)>0.02&&el.scrollTop!==before)?requestAnimationFrame(step):0};
+  glide=requestAnimationFrame(step)};
  const end=(e,cancel)=>{if(!drag||e.pointerId!==drag.pid)return;const d=drag;drag=null;e.preventDefault();remember(d);
   if(d.card.hasPointerCapture?.(e.pointerId))d.card.releasePointerCapture(e.pointerId);
-  if(!cancel&&!d.moved&&d.action?.isConnected&&!d.action.matches(':disabled')){firing=true;try{d.action.focus?.({preventScroll:true});d.action.click()}finally{firing=false}}
+  const tap=!cancel&&d.action?.isConnected&&!d.action.matches(':disabled')&&!d.moved;
+  if(tap){firing=true;try{d.action.focus?.({preventScroll:true});d.action.click()}finally{firing=false}return}
+  if(d.moved&&!cancel&&d.samples.length>1){const now=performance.now(),a=d.samples[0],b=d.samples[d.samples.length-1],dt=b.t-a.t;if(dt>0&&now-b.t<80){const v=(a.y-b.y)/dt;if(Math.abs(v)>0.25)glideFrom(d.card,v)}}
  };
  document.addEventListener('pointerup',e=>end(e,false),true);
  document.addEventListener('pointercancel',e=>end(e,true),true);
@@ -1499,7 +1512,7 @@ function pollNu(){if(ADMIN_READONLY||!window.PD_DB||!window.PD_PROFILE_LINKED||!
  const n0=lastRows.length,j0=JSON.stringify(STAT);lastRows=mergeRows(lastRows,o.rows);if(o.stat)STAT=o.stat;if(lastRows.length!==n0||JSON.stringify(STAT)!==j0){pullMine(lastRows);board(lastRows)}}).catch(()=>{})}
 setInterval(pollNu,45000);addEventListener("pdready",()=>setTimeout(pollNu,3000));
 /* Terug in de app (bijv. na de iPad op slot): verbindingen opnieuw opzetten, zodat "bezig" en scores direct kloppen. */
-let lastVis=0;document.addEventListener("visibilitychange",()=>{if(document.hidden||!window.PD_DB)return;setTimeout(pollNu,800);if(listenDate!==dstr()||Date.now()-lastVis>20000){lastVis=Date.now();startBoard()}});addEventListener("pageshow",e=>{if(e.persisted&&window.PD_DB)startBoard()});
+let lastVis=Date.now();document.addEventListener("visibilitychange",()=>{if(document.hidden||!window.PD_DB)return;setTimeout(pollNu,800);/* Volledig opnieuw verbinden leest de hele geschiedenis opnieuw (telt als reads); de listeners herstellen zich zelf. Alleen bij een nieuwe dag of na lang wegzijn. */if(listenDate!==dstr()||Date.now()-lastVis>30*60000){lastVis=Date.now();startBoard()}});addEventListener("pageshow",e=>{if(e.persisted&&window.PD_DB)startBoard()});
 
 const SET=window.PD_SETUP||{players:["Speler"],group:"lokaal",groupName:"Groep"};$("#group").value=SET.group;
 function setMe(p,displayName){uid=uidOf(p);const nm=(displayName||playerName(p)||p).trim()||p;$("#name").value=nm;board(lastRows);setTimeout(()=>pullCloudProgress(true),0)}

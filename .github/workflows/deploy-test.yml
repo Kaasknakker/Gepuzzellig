@@ -113,10 +113,13 @@ jobs:
             --exclude 'firebase.test.json' \
             --exclude '.firebaserc' \
             --exclude 'firestore.rules' \
+            --exclude '/CNAME' \
             --exclude 'FIREBASE_DEPLOY.md' \
             --exclude 'FUNCTIONS_SETUP.md'
           cp js/config.test.js .test-dist/js/config.js
           rm -f .test-dist/js/config.test.js
+          # De productie-domeinkoppeling hoort niet in Firebase Test Hosting.
+          test ! -e .test-dist/CNAME
           grep -q 'projectId:"gepuzzellig-test"' .test-dist/js/config.js
           ! grep -q 'projectId:"gepuzzelig"' .test-dist/js/config.js
           # Productiebranding blijft in de bron; alleen de geïsoleerde testbuild krijgt testnaam + testicoon.

@@ -1,6 +1,6 @@
 # Opruimplan vormgeving Gepuzzellig
 
-> Onderdeel van `docs/VERBETERPLAN.md` (stappen F1–F3, O1–O3 en D1–D5). Dit document beschrijft de werkwijze voor het opruimen in detail; de volgorde en status staan in het verbeterplan.
+> Onderdeel van Operatie Bezemwagen, `docs/VERBETERPLAN.md` (stappen F1–F3, O1–O3 en D1–D5). Dit document beschrijft de werkwijze voor het opruimen in detail; de volgorde en status staan in het verbeterplan.
 
 Status: plan, nog niet uitvoeren vóór de productiemigratie (Fase 11) live en stabiel is.
 Doelbranch: `develop`. Productie (`main`) pas na expliciet akkoord van Peter.
@@ -39,6 +39,23 @@ Doel van dit plan: **zelfde uiterlijk, veel minder code, en daarna één vast sy
 6. **Geen functionele wijzigingen** (JavaScript, Firestore, regels, migratie) in dezelfde commit als opruimwerk.
 7. **Bij twijfel terugdraaien.** Een verschil dat niet binnen een kwartier verklaard is: commit terugdraaien en kleiner opnieuw proberen.
 8. **Peter test op het echte apparaat per afgeronde fase**, niet per commit.
+
+### Automatisch afgedwongen: het code-budget
+
+`.github/scripts/check-code-budget.mjs` draait in *Check Gepuzzellig* en vergelijkt met `.github/code-budget.json`:
+
+- **CSS:** aantal `!important`, herhaalde selectorblokken (dezelfde selector in dezelfde `@media`-context opnieuw gedefinieerd), verschillende lettergroottes, lettergroottes onder 12 px, verschillende kleurcodes;
+- **JavaScript:** stil ingeslikte fouten (lege `catch`-blokken en `.catch(()=>{})`);
+- **Zichtbare tekst:** woorden uit `.github/woordenlijst.json` (de woordenlijst van `docs/BESLUITEN.md`, B6) in `index.html` en in tekst in `js/`.
+
+Regels:
+
+- **Hoger dan het budget = rode check.** Er is een pleister, een stille fout of een verboden woord bijgekomen; pas het bestaande aan.
+- **Lager = ook rood, met instructie** om de verbetering vast te leggen (`--update`) in dezelfde PR. Zo kan het budget alleen omlaag.
+- Een nieuw onderdeel met eigen, nieuwe selectors past gewoon binnen het budget.
+- Het budget verhogen kan alleen met een bewust besluit van Peter; de reden staat dan in de PR.
+- Verandert de woordenlijst in `BESLUITEN.md`, werk dan ook `.github/woordenlijst.json` bij.
+- In iedere PR die CSS, JS of teksten raakt: de tabel van `node .github/scripts/check-code-budget.mjs --report` (voor en na) in de beschrijving.
 
 ## 3. Fase 0 — Het vangnet: visuele controle
 
