@@ -152,7 +152,7 @@ function testHintElements(h,all=false){
 const testOverlap=(a,b,gap=8)=>a.left<b.right+gap&&a.right>b.left-gap&&a.top<b.bottom+gap&&a.bottom>b.top-gap;
 function testChooseCard(h){
  const area=testAvailableRect(),needed=testHintElements(h,true),w=Math.min(PHONE?270:330,area.width-12),height=Math.min(PHONE?248:320,area.height-12);
- if(PHONE&&S.type==='mur'){const pb=testRect($('#pbot'));return {left:4,top:pb.top,width:innerWidth-8,height:innerHeight-pb.top,tray:true}}
+ if(PHONE){const pb=testRect($('#pbot'));return {left:4,top:pb.top,width:innerWidth-8,height:innerHeight-pb.top,tray:true}}
  const make=(left,top)=>({left,top,width:w,height,right:left+w,bottom:top+height,tray:false});
  const board=testRect($('#playbox'));
  if(!PHONE)for(const c of [make(board.right+14,board.top+5),make(board.left,board.bottom+14)])if(c.left>=area.left&&c.right<=innerWidth-6&&c.bottom<=innerHeight-10&&!needed.some(r=>testOverlap(c,r)))return c;
@@ -182,11 +182,23 @@ function testPaintShade(h){
  }else for(const r of testHintElements(h))hole(r);
  defs.append(mask);testShade.append(defs);const shade=rect(area,getComputedStyle(document.documentElement).getPropertyValue('--bg').trim());shade.setAttribute('fill-opacity','.78');shade.setAttribute('mask','url(#layoutMask)');testShade.append(shade);
 }
-// Murdoku op de iPhone: de hint is een strook onderaan. Laat die met de tekst meegroeien (max. 40 % van het scherm)
-// en kort de aanwijzingenlijst erboven in, zodat de kaart niets afdekt.
+// iPhone: de hint is een strook onderaan. Laat die met de tekst meegroeien (max. 42 % van het scherm).
+// Murdoku: de aanwijzingenlijst erboven wordt korter. Andere puzzels: het bord schuift omhoog (zie testPhoneBoardY).
+function testPhoneBoardY(trayTop){
+ const play=testRect($('#playbox')),area=testAvailableRect(),y0=parseFloat($('#playbox').style.getPropertyValue('--phone-y'))||0;
+ const base=Math.max(0,(area.height-play.height)/2),top0=play.top-y0;
+ return Math.max(0,Math.min(base,trayTop-8-play.height-top0));
+}
 function testGrowTray(b,c){
- const copy=b.querySelector('.layout-copy'),max=Math.round(innerHeight*.4);
- if(!PHONE||S.type!=='mur'||!c.tray||!copy||c.height>=max)return c;
+ const copy=b.querySelector('.layout-copy');
+ if(!PHONE||!c.tray||!copy)return c;
+ let max=Math.round(innerHeight*.42);
+ if(S.type!=='mur'){
+  // Het bord moet na het omhoog schuiven nog helemaal boven de strook passen.
+  const play=testRect($('#playbox')),area=testAvailableRect(),y0=parseFloat($('#playbox').style.getPropertyValue('--phone-y'))||0;
+  max=Math.min(max,Math.round(innerHeight-(play.top-y0+play.height+8)));
+ }
+ if(c.height>=max)return c;
  const missing=copy.scrollHeight-copy.clientHeight;
  if(missing<=0)return c;
  const height=Math.min(max,c.height+missing);
@@ -213,6 +225,7 @@ function testHintPosition(h){
  const grown=testGrowTray(b,c);
  if(grown!==c){c=grown;setCard(c)}
  if(PHONE&&S.type==='mur'&&c.tray){const cl=$('#mclues');if(cl)cl.style.maxHeight=Math.max(60,c.top-6-testRect(cl).top)+'px'}
+ if(PHONE&&S.type!=='mur'&&c.tray)$('#playbox').style.setProperty('--phone-y',testPhoneBoardY(c.top)+'px');
  testScrollClue(h);
  testClueEmphasis(h);testPaintShade(h);
 }
@@ -225,7 +238,7 @@ function testClueEmphasis(h){
 const testBaseLayoutHint=layoutHintCard;
 layoutHintCard=function(h){if(testOriginal)return testBaseLayoutHint(h);repaintHint();testHintPosition(h)};
 const testBaseHide=hideHint;
-hideHint=function(){document.querySelectorAll('.layout-clue-focus').forEach(e=>e.classList.remove('layout-clue-focus'));testShade.setAttribute('hidden','');document.body.classList.remove('layout-tray-open');$('#hint').classList.remove('layout-hint','layout-tray');testBaseHide();if(PHONE&&S.type==='mur')testRefit()};
+hideHint=function(){document.querySelectorAll('.layout-clue-focus').forEach(e=>e.classList.remove('layout-clue-focus'));testShade.setAttribute('hidden','');document.body.classList.remove('layout-tray-open');$('#hint').classList.remove('layout-hint','layout-tray');testBaseHide();if(PHONE&&S.type==='mur')testRefit();else if(PHONE)testArrange()};
 const testBaseInvalidate=invalidateHint;
 invalidateHint=function(){testBaseInvalidate();if(!testOriginal){testClueEmphasis(S.hint);testPaintShade(S.hint)}};
 document.addEventListener('scroll',()=>{if(S.hint&&!testOriginal)testPaintShade(S.hint)},{passive:true,capture:true});
