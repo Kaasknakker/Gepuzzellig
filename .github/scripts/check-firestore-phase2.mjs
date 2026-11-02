@@ -29,7 +29,7 @@ try{
   const x=c.firestore();
   await setDoc(doc(x,'groups',historicGid),{name:'Rekensukkels',ownerAuthUid:historicPeter.authUid,inviteCode:'HISTORIC',theme:'shared',accent:'blue',murdokuNames:[],createdAt:1,updatedAt:1});
   for(const p of [historicPeter,historicAart,historicNew]){
-   await setDoc(doc(x,'profiles',p.authUid),{...profileDoc({...p,displayName:p.authUid}),groupId:historicGid});
+   await setDoc(doc(x,'profiles',p.authUid),{...profileDoc({...p,displayName:p.authUid}),groupId:historicGid,role:p===historicNew?'admin':'user'});
    await setDoc(doc(x,'players',p.playerId),playerDoc({...p,displayName:p.authUid}));
    const m={playerId:p.playerId,displayName:p.authUid,role:'member',status:'approved',requestedAt:1,approvedAt:10,joinedAt:p===historicNew?300:100,approvedByPlayerId:historicPeter.playerId,updatedAt:p===historicNew?300:100};
    await setDoc(doc(x,'groups',historicGid,'members',p.playerId),m);
