@@ -2,7 +2,7 @@ import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:asser
 const core=fs.readFileSync('js/core.js','utf8'),fb=fs.readFileSync('js/firebase.js','utf8'),line=(s,a)=>s.split('\n').find(x=>x.trim().startsWith(a)).trim(),section=(s,a,b)=>s.slice(s.indexOf(a),s.indexOf(b,s.indexOf(a)));
 const key='d:2026-10-25:bin.3',ck=encodeURIComponent(key).replace(/\./g,'%2E'),docs=new Map(),snap=data=>({exists:()=>!!data,data:()=>structuredClone(data)}),profile={playerId:'me',groupId:'old'};let group='other';
 docs.set('status/old_me',{progress:{[ck]:{k:key,at:100,pc:50,seed:'legacy-board',group:'old'}}});
-const f={doc:(_, ...p)=>p.join('/'),collection:(_, ...p)=>p.join('/'),getDocFromServer:async p=>snap(docs.get(p)),getDocsFromServer:async p=>({docs:[...docs].filter(([k])=>k.startsWith(p+'/')&&!k.slice(p.length+1).includes('/')).map(([k,d])=>({id:k.split('/').at(-1),data:()=>structuredClone(d)}))}),runTransaction:async(_,fn)=>fn({get:async p=>snap(docs.get(p)),set:(p,d)=>docs.set(p,structuredClone(d))}),query:(_,q)=>q,where:()=>''};
+const f={doc:(_, ...p)=>p.join('/'),collection:(_, ...p)=>p.join('/'),getDocFromServer:async p=>snap(docs.get(p)),getDocsFromServer:async q=>{const p=typeof q==='string'?q:q.c,w=typeof q==='string'?null:q.w;return{docs:[...docs].filter(([k,d])=>k.startsWith(p+'/')&&!k.slice(p.length+1).includes('/')&&(!w||w.op!=='>='||Number(d[w.fld])>=w.v)).map(([k,d])=>({id:k.split('/').at(-1),data:()=>structuredClone(d)}))}},runTransaction:async(_,fn)=>fn({get:async p=>snap(docs.get(p)),set:(p,d)=>docs.set(p,structuredClone(d))}),query:(c,w)=>({c,w}),where:(fld,op,v)=>({fld,op,v})};
 const c=vm.createContext({f,db:{},currentProfile:profile,activeGroupId:()=>group,window:{},console});
 vm.runInContext('window.PD_DB={'+['saveProgress:','clearProgress:','getProgress:'].map(n=>line(fb,n).replace(/,$/,'')).join(',')+'}',c);const api=c.window.PD_DB;
 const batch=()=>({set:(p,d)=>docs.set(p,structuredClone(d)),commit:async()=>{}});f.writeBatch=batch;
@@ -49,4 +49,11 @@ x.resync.done=false;x.resync([...x.lastRows,sent[1]]);assert.equal(sent.length,2
 x.lastRows.push(sent[1]);assert.equal(x.progressSolved('p:star.3',{seed:'qsample'}),true);assert.equal(x.progressSolved('p:bin.3',{seed:'qsample'}),false);
 // Personal view includes own history; social view retains current-group boundary.
 x.baseT=r=>r.type.split('.')[0];vm.runInContext(section(core,'function allRows(','function streakOf('),x);group='other';assert.equal(x.allRows(true).some(r=>r.uid==='me'),true);assert.equal(x.allRows().some(r=>r.uid==='me'),false);
+// Leesbudget: na de eerste volledige ronde leest getProgress alleen bijgewerkte documenten, maar geeft wel het volledige overzicht terug.
+{const real=f.getDocsFromServer;let n=0;f.getDocsFromServer=async q=>{const r=await real(q);n+=r.docs.length;return r};
+ for(let i=0;i<20;i++)docs.set('progress/me/items/old'+i,{legacyKey:'p:bin.'+i,state:{at:5,pc:10,seed:'s'+i},updatedAt:5});
+ api._prog=null;await api.getProgress(group,'me');const fullN=n;n=0;const before=Object.keys(await api.getProgress(group,'me')).length;
+ assert.ok(n<fullN,'tweede ronde leest niet alles opnieuw ('+n+' van '+fullN+')');assert.ok(before>=20,'volledig overzicht blijft beschikbaar');
+ await api.saveProgress({uid:'me',ck:'nieuw',entry:{k:'p:star.2',at:Date.now(),pc:20,seed:'z'}});n=0;const after=await api.getProgress(group,'me');
+ assert.equal(after.nieuw&&after.nieuw.seed,'z','nieuwe voortgang komt binnen via de bijgewerkte documenten');assert.ok(n<fullN,'ook dan geen volledige ronde');f.getDocsFromServer=real}
 console.log('OK: deletion/reload/legacy, stale save, newer restart, offline retry, account-scoped markers, group/solo progress and completion, result deduplication and bounded social view.');
