@@ -239,7 +239,11 @@ service cloud.firestore {
     // Een projectie mag alleen door de speler zelf worden geschreven, voor een approved membership,
     // en nooit voor activiteit van vóór joinedAt. Daardoor kan een nieuw groepslid geen oude historie delen.
     match /groupActivity/{groupId}/items/{activityId} {
-      allow get, list: if hasProfile() && ownsPlayer(myPlayer()) && approvedMember(groupId, myPlayer());
+      // Ook na toelating mag een nieuw lid geen eerdere groepsactiviteit opvragen.
+      // De client vraagt daarom uitsluitend completedAt >= eigen joinedAt op.
+      allow get, list: if hasProfile() && ownsPlayer(myPlayer())
+        && approvedMember(groupId, myPlayer())
+        && resource.data.completedAt >= get(membershipPath(groupId, myPlayer())).data.joinedAt;
       allow create, update: if hasProfile()
         && ownsPlayer(request.resource.data.playerId)
         && approvedMember(groupId, request.resource.data.playerId)
@@ -257,7 +261,9 @@ service cloud.firestore {
     }
 
     match /groupDailyPlans/{groupId}/items/{planId} {
-      allow get, list: if hasProfile() && ownsPlayer(myPlayer()) && approvedMember(groupId, myPlayer());
+      allow get, list: if hasProfile() && ownsPlayer(myPlayer())
+        && approvedMember(groupId, myPlayer())
+        && resource.data.sharedAt >= get(membershipPath(groupId, myPlayer())).data.joinedAt;
       allow create: if hasProfile()
         && ownsPlayer(request.resource.data.playerId)
         && approvedMember(groupId, request.resource.data.playerId)
@@ -338,8 +344,18 @@ service cloud.firestore {
       // Legacy resultaten blijven alleen voor compatibiliteit leesbaar.
       // Na de migratie schrijft de nieuwe client uitsluitend naar playerResults/groupActivity.
       // Oude clients mogen daarom geen nieuwe legacy-resultaten meer toevoegen of wijzigen.
-      allow read: if isAdmin()
-        || (hasProfile() && resource.data.uid == myPlayer());
+      // Uitzondering voor de twee oorspronkelijke leden van Rekensukkels.
+      // Alleen hun oude groepsresultaten, uitsluitend zolang ze approved lid zijn.
+      // Nieuwe leden zien deze historie niet; legacy writes blijven verboden.
+      allow read: if isOwner()
+        // Een later toegevoegd (zelfs admin-)lid mag niet via de oude
+        // isAdmin()-uitzondering de historische Rekensukkels-data inzien.
+        || (isAdmin() && resource.data.group != 'peter-aart-jk4hv92t')
+        || (hasProfile() && resource.data.uid == myPlayer())
+        || (hasProfile()
+          && myPlayer() in ['u-peter', 'u-aart']
+          && resource.data.group == 'peter-aart-jk4hv92t'
+          && approvedMember('peter-aart-jk4hv92t', myPlayer()));
       allow create, update, delete: if false;
     }
 
