@@ -11,6 +11,12 @@ const good=m=>console.log("OK: "+m);
 const strip=s=>s.split("?")[0].split("#")[0];
 const local=s=>!/^([a-z]+:)?\/\//i.test(s)&&!s.startsWith("data:");
 
+// De productie-URL moet bij elke volgende release behouden blijven, ook als
+// ontwikkelbranch en productiebranch weer worden samengevoegd.
+if(!fs.existsSync("CNAME"))bad("CNAME ontbreekt: gepuzzellig.nl moet in elke release staan");
+else if(!/^gepuzzellig\.nl\r?\n?$/.test(read("CNAME")))bad("CNAME moet exact gepuzzellig.nl bevatten");
+else good("productie-domein gepuzzellig.nl vastgelegd in CNAME");
+
 const html=read("index.html");
 // De bron draagt de productienaam; alleen de testdeploy zet "Gepuzzellig Test" in de testsite.
 if(/Gepuzzellig( |%20)Test/.test(html))bad("index.html bevat de testnaam 'Gepuzzellig Test'; die hoort alleen in de testdeploy");else good("app-naam in index.html is Gepuzzellig");
