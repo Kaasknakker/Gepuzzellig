@@ -239,7 +239,11 @@ service cloud.firestore {
     // Een projectie mag alleen door de speler zelf worden geschreven, voor een approved membership,
     // en nooit voor activiteit van vóór joinedAt. Daardoor kan een nieuw groepslid geen oude historie delen.
     match /groupActivity/{groupId}/items/{activityId} {
-      allow get, list: if hasProfile() && ownsPlayer(myPlayer()) && approvedMember(groupId, myPlayer());
+      // Ook na toelating mag een nieuw lid geen eerdere groepsactiviteit opvragen.
+      // De client vraagt daarom uitsluitend completedAt >= eigen joinedAt op.
+      allow get, list: if hasProfile() && ownsPlayer(myPlayer())
+        && approvedMember(groupId, myPlayer())
+        && resource.data.completedAt >= get(membershipPath(groupId, myPlayer())).data.joinedAt;
       allow create, update: if hasProfile()
         && ownsPlayer(request.resource.data.playerId)
         && approvedMember(groupId, request.resource.data.playerId)
@@ -257,7 +261,9 @@ service cloud.firestore {
     }
 
     match /groupDailyPlans/{groupId}/items/{planId} {
-      allow get, list: if hasProfile() && ownsPlayer(myPlayer()) && approvedMember(groupId, myPlayer());
+      allow get, list: if hasProfile() && ownsPlayer(myPlayer())
+        && approvedMember(groupId, myPlayer())
+        && resource.data.sharedAt >= get(membershipPath(groupId, myPlayer())).data.joinedAt;
       allow create: if hasProfile()
         && ownsPlayer(request.resource.data.playerId)
         && approvedMember(groupId, request.resource.data.playerId)
