@@ -182,19 +182,38 @@ function testPaintShade(h){
  }else for(const r of testHintElements(h))hole(r);
  defs.append(mask);testShade.append(defs);const shade=rect(area,getComputedStyle(document.documentElement).getPropertyValue('--bg').trim());shade.setAttribute('fill-opacity','.78');shade.setAttribute('mask','url(#layoutMask)');testShade.append(shade);
 }
+// Murdoku op de iPhone: de hint is een strook onderaan. Laat die met de tekst meegroeien (max. 40 % van het scherm)
+// en kort de aanwijzingenlijst erboven in, zodat de kaart niets afdekt.
+function testGrowTray(b,c){
+ const copy=b.querySelector('.layout-copy'),max=Math.round(innerHeight*.4);
+ if(!PHONE||S.type!=='mur'||!c.tray||!copy||c.height>=max)return c;
+ const missing=copy.scrollHeight-copy.clientHeight;
+ if(missing<=0)return c;
+ const height=Math.min(max,c.height+missing);
+ return {...c,height,top:innerHeight-height};
+}
+function testScrollClue(h){
+ if(!PHONE||S.type!=='mur'||!h.cards?.length)return;
+ const cl=$('#mclues'),el=cl.querySelector('[data-c="'+h.cards[0]+'"]');
+ if(el){const c=testRect(cl),r=testRect(el);if(r.top<c.top)cl.scrollTop-=c.top-r.top+6;else if(r.bottom>c.bottom)cl.scrollTop+=r.bottom-c.bottom+6}
+}
 function testHintPosition(h){
  if(!h)return;
- if(PHONE&&S.type==='mur'&&h.cards?.length){const cl=$('#mclues'),el=cl.querySelector('[data-c="'+h.cards[0]+'"]');if(el){const c=testRect(cl),r=testRect(el);if(r.top<c.top)cl.scrollTop-=c.top-r.top+6;else if(r.bottom>c.bottom)cl.scrollTop+=r.bottom-c.bottom+6}}
  const b=$('#hint');b.classList.remove('side');document.body.classList.remove('hintdock','hintside');HINTPAD=0;HINTSIDE=0;
  const key=[innerWidth,innerHeight].join('x');if(!h.testCard||h.testCardKey!==key){h.testCard=testChooseCard(h);h.testCardKey=key}
- const c=h.testCard;b.classList.add('layout-hint');b.classList.toggle('layout-tray',c.tray);document.body.classList.toggle('layout-tray-open',c.tray||!!c.replaceControls);
- for(const [k,v]of Object.entries({left:c.left,top:c.top,width:c.width,height:c.height}))b.style.setProperty('--card-'+k,Math.round(v)+'px');
+ let c=h.testCard;b.classList.add('layout-hint');b.classList.toggle('layout-tray',c.tray);document.body.classList.toggle('layout-tray-open',c.tray||!!c.replaceControls);
+ const setCard=card=>{for(const [k,v]of Object.entries({left:card.left,top:card.top,width:card.width,height:card.height}))b.style.setProperty('--card-'+k,Math.round(v)+'px')};
+ setCard(c);
  b.style.display='block';
  if(!b.querySelector('.layout-copy')){
   const copy=document.createElement('div');copy.className='layout-copy';const actions=document.createElement('div');actions.className='layout-actions';
   for(const e of [...b.children])if(e.matches('.hintnext,.hintback')){if(c.tray&&e.matches('.hintback')){e.setAttribute('aria-label',e.textContent);e.textContent='←'}actions.append(e)}else if(!e.matches('.hx,.hht'))copy.append(e);
   b.append(copy,actions);
  }
+ const grown=testGrowTray(b,c);
+ if(grown!==c){c=grown;setCard(c)}
+ if(PHONE&&S.type==='mur'&&c.tray){const cl=$('#mclues');if(cl)cl.style.maxHeight=Math.max(60,c.top-6-testRect(cl).top)+'px'}
+ testScrollClue(h);
  testClueEmphasis(h);testPaintShade(h);
 }
 function testClueEmphasis(h){
@@ -206,7 +225,7 @@ function testClueEmphasis(h){
 const testBaseLayoutHint=layoutHintCard;
 layoutHintCard=function(h){if(testOriginal)return testBaseLayoutHint(h);repaintHint();testHintPosition(h)};
 const testBaseHide=hideHint;
-hideHint=function(){document.querySelectorAll('.layout-clue-focus').forEach(e=>e.classList.remove('layout-clue-focus'));testShade.setAttribute('hidden','');document.body.classList.remove('layout-tray-open');$('#hint').classList.remove('layout-hint','layout-tray');testBaseHide()};
+hideHint=function(){document.querySelectorAll('.layout-clue-focus').forEach(e=>e.classList.remove('layout-clue-focus'));testShade.setAttribute('hidden','');document.body.classList.remove('layout-tray-open');$('#hint').classList.remove('layout-hint','layout-tray');testBaseHide();if(PHONE&&S.type==='mur')testRefit()};
 const testBaseInvalidate=invalidateHint;
 invalidateHint=function(){testBaseInvalidate();if(!testOriginal){testClueEmphasis(S.hint);testPaintShade(S.hint)}};
 document.addEventListener('scroll',()=>{if(S.hint&&!testOriginal)testPaintShade(S.hint)},{passive:true,capture:true});
