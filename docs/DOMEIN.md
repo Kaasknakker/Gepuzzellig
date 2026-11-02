@@ -5,6 +5,7 @@
 - `https://www.gepuzzellig.nl/` verwijst via GitHub Pages door naar `https://gepuzzellig.nl/`.
 - Oorspronkelijk GitHub Pages-projectadres: `https://kaasknakker.github.io/Gepuzzellig/` (GitHub Pages hoort dit automatisch naar het ingestelde custom domain door te sturen).
 - Test blijft afzonderlijk: **https://gepuzzellig-test.web.app/**; nooit het productiedomein aan test-Firebase of test-Hosting koppelen.
+- De testdeployment kopieert bewust geen root-`CNAME` naar Firebase Hosting (`.github/workflows/deploy-test.yml`, `--exclude '/CNAME'`) en controleert dat dit bestand afwezig is in `.test-dist`. Het rootbestand blijft wél in `develop` aanwezig voor toekomstige productiereleases.
 
 ## Vastleggen in Git
 - Het bestand `CNAME` in de root moet exact `gepuzzellig.nl` bevatten.
