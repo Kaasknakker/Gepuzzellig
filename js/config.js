@@ -1,5 +1,5 @@
 /* ===== STAP 4 van het stappenplan: plak hier jouw Firebase-gegevens ===== */
-window.PD_SETUP={players:["Peter","Aart"],group:"peter-aart-jk4hv92t",groupName:"Puzzelsukkels",ownerPlayerId:"u-peter"};
+window.PD_SETUP={dailyPreferencesFrom:"2026-11-03",players:["Peter","Aart"],group:"peter-aart-jk4hv92t",groupName:"Puzzelsukkels",ownerPlayerId:"u-peter"};
 window.FIREBASE_CONFIG={
  apiKey:"AIzaSyCaGDJRqSyCE1PZgFYcHiYP2Sobc3RuC_w",
  authDomain:"gepuzzelig.firebaseapp.com",

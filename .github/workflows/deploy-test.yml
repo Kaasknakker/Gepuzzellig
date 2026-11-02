@@ -5,6 +5,12 @@ on:
     branches:
       - develop
   workflow_dispatch:
+    inputs:
+      seed_test_groups:
+        description: "Testgroepen opnieuw seeden"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -107,18 +113,22 @@ jobs:
             --exclude 'firebase.test.json' \
             --exclude '.firebaserc' \
             --exclude 'firestore.rules' \
+            --exclude '/CNAME' \
             --exclude 'FIREBASE_DEPLOY.md' \
             --exclude 'FUNCTIONS_SETUP.md'
           cp js/config.test.js .test-dist/js/config.js
           rm -f .test-dist/js/config.test.js
+          # De productie-domeinkoppeling hoort niet in Firebase Test Hosting.
+          test ! -e .test-dist/CNAME
           grep -q 'projectId:"gepuzzellig-test"' .test-dist/js/config.js
           ! grep -q 'projectId:"gepuzzelig"' .test-dist/js/config.js
-          # App-naam "Gepuzzellig Test" alleen op de testsite; de bron blijft "Gepuzzellig".
-          sed -i -e 's/name%22%3A%22Gepuzzellig%22%2C%22short_name%22%3A%22Gepuzzellig%22/name%22%3A%22Gepuzzellig%20Test%22%2C%22short_name%22%3A%22Gepuzzellig%20Test%22/' \
-                 -e 's/apple-mobile-web-app-title" content="Gepuzzellig"/apple-mobile-web-app-title" content="Gepuzzellig Test"/' .test-dist/index.html
+          # Productiebranding blijft in de bron; alleen de geïsoleerde testbuild krijgt testnaam + testicoon.
+          node .github/scripts/prepare-test-branding.mjs .test-dist/index.html
           grep -q 'Gepuzzellig%20Test' .test-dist/index.html
           grep -q 'apple-mobile-web-app-title" content="Gepuzzellig Test"' .test-dist/index.html
+          grep -q '%2327220f' .test-dist/index.html
           ! grep -q 'Gepuzzellig%20Test' index.html
+          ! grep -q '%2327220f' index.html
 
       - name: Authenticate to test Firebase project
         uses: google-github-actions/auth@v3
@@ -130,7 +140,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v3
 
       - name: Seed Fase 8 testgroepen
-        if: contains(github.event.head_commit.message, '[seed-test-groups]')
+        if: contains(github.event.head_commit.message, '[seed-test-groups]') || (github.event_name == 'workflow_dispatch' && inputs.seed_test_groups)
         env:
           GOOGLE_CLOUD_PROJECT: gepuzzellig-test
         run: node scripts/seed-test-groups.mjs

@@ -733,7 +733,7 @@ function hintGo(){if(S.hint){clearHint();return}if(S.done||!S.p||!HINTT.includes
    (het vakje van de stap telt het zwaarst, dan de lichte kruisjes, dan de blauw/paars omrande vakjes).
    We proberen 9 plekken (boven/midden/onder x links/midden/rechts) en meten de echte hoogte van de kaart. */
 function placeHint(){const b=$("#hint"),h=S.hint;if(!h||b.style.display==="none"||b.classList.contains("side"))return;
- if(PHONE){const pb=$("#pbot").getBoundingClientRect();b.style.top=Math.round(pb.top-b.offsetHeight-6)+"px";return}
+ if(PHONE){const pb=$("#pbot").getBoundingClientRect(),gap=6,off=Math.max(gap,innerHeight-pb.top+gap);Object.assign(b.style,{top:"auto",bottom:Math.round(off)+"px",left:"50%",right:"auto",transform:"translateX(-50%)",width:Math.min(560,innerWidth*.92)+"px"});return}
  const el=i=>S.type==="mur"?S.mcells&&S.mcells[i]:S.type==="hex"?$("#hexsvg").querySelector(`g[data-i="${i}"]`):((S.cells&&S.cells[i])||$("#grid").children[i]);
  const rs=(a,w)=>(a||[]).map(el).filter(Boolean).map(e=>{const r=e.getBoundingClientRect();return{l:r.left-4,t:r.top-4,r:r.right+4,b:r.bottom+4,w}}).filter(r=>r.r>r.l);
  const F=[...rs(h.cells,1000),...rs(h.ghost,30),...rs(h.why,10)];

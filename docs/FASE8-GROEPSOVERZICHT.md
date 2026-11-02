@@ -15,7 +15,9 @@ Firestore Rules staan het maken van beide sociale projecties alleen toe wanneer:
 - die speler approved lid is van de groep;
 - `completedAt` respectievelijk de sociale delingstijd `sharedAt` niet vóór de canonical membership-`joinedAt` ligt. Het persoonlijke dagplan mag al eerder die dag zijn aangemaakt; bij een nieuw membership wordt alleen de huidige dagset vanaf het lidmaatschap gedeeld.
 
-Legacy `results` zijn voor gewone gebruikers vanaf Fase 8 alleen nog voor de eigen speler leesbaar. Sociale lezingen lopen via het nieuwe readmodel. Daardoor kan een nieuw groepslid niet via een oude legacy-query historische resultaten van anderen ophalen.
+Legacy `results` zijn voor gewone gebruikers vanaf Fase 8 alleen nog voor de eigen speler leesbaar. **Uitzondering voor de bestaande groep Rekensukkels:** Peter (`u-peter`) en Aart (`u-aart`) mogen, zolang ze approved groepslid zijn, elkaars oude `results` met `group == peter-aart-jk4hv92t` lezen. Dit is hun al vóór de migratie gedeelde geschiedenis; bij nieuwe leden en andere groepen is er geen uitzondering. De oude collecties blijven read-only.
+
+Nieuwe `groupActivity`- en `groupDailyPlans`-lezingen zijn ook begrensd tot de eigen `joinedAt`: de Firestore-regels toetsen respectievelijk `completedAt >= joinedAt` en `sharedAt >= joinedAt`, en de client gebruikt overeenkomstige queryfilters. Zo ziet een later toegevoegd groepslid geen eerdere activiteit of gedeeld dagplan, ook niet met een aangepaste query.
 
 ## Overzicht
 
@@ -31,7 +33,7 @@ Legacy `results` zijn voor gewone gebruikers vanaf Fase 8 alleen nog voor de eig
 
 `scripts/migrate-phase8.mjs` maakt uit een export deterministisch het sociale readmodel. Records waarvan het tijdstip niet aantoonbaar op of na `joinedAt` ligt worden bewust niet gedeeld. De migratie is dry-run by default, schrijft met `--apply` alleen een nieuw lokaal JSON-bestand en wijzigt geen Firebase-project.
 
-Eigen legacy resultaten blijven via de compatibiliteitsreader beschikbaar. Oude groepshistorie van anderen wordt niet rechtstreeks uit `results` gelezen; die wordt alleen zichtbaar als een veilige Fase-8-projectie bestaat.
+Eigen legacy resultaten blijven via de compatibiliteitsreader beschikbaar. Alleen voor de twee oorspronkelijke Rekensukkels-leden wordt de oorspronkelijke historische groepsquery met `where('group', '==', 'peter-aart-jk4hv92t')` gebruikt. De bestaande deduplicatie op speler, datum en puzzeltype voorkomt dubbele telling naast persoonlijke resultaten en toekomstige `groupActivity`. Er worden geen bestaande resultaten gekopieerd of gemuteerd. Nieuwe resultaten worden bij het oplossen gedeeld via `groupActivity`, voor alle op dat moment approved groepslidmaatschappen, en blijven in Rekensukkels voor Peter en Aart zichtbaar.
 
 ## Functions
 

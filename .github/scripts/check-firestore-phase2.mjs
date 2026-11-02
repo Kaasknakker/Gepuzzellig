@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, query, where, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 const projectId='gepuzzellig-rules-test',rules=fs.readFileSync('firestore.rules','utf8'),fx=JSON.parse(fs.readFileSync('test/fixtures/firestore-phase2.json','utf8'));
 const env=await initializeTestEnvironment({projectId,firestore:{rules,host:'127.0.0.1',port:8080}});
 const playerDoc=p=>({playerId:p.playerId,authUid:p.authUid,displayName:p.displayName,createdAt:1,updatedAt:1});
@@ -22,6 +22,44 @@ try{
  await assertSucceeds(getDoc(doc(db(member),'results',legacyResultId)));await assertFails(updateDoc(doc(db(member),'results',legacyResultId),{secs:91}));await assertFails(deleteDoc(doc(db(member),'results',legacyResultId)));
  await assertSucceeds(getDoc(doc(db(member),'status',legacyStatusId)));await assertFails(updateDoc(doc(db(member),'status',legacyStatusId),{at:101}));await assertFails(deleteDoc(doc(db(member),'status',legacyStatusId)));
  await assertFails(getDoc(doc(db(outsider),'results',legacyResultId)));await assertFails(getDoc(doc(db(outsider),'status',legacyStatusId)));
+ // De voor de migratie gedeelde Rekensukkels-historie blijft uitsluitend toegankelijk
+ // voor beide oorspronkelijke leden, niet voor een later toegevoegd groepslid.
+ const historicGid='peter-aart-jk4hv92t',historicPeter={authUid:'history-peter',playerId:'u-peter'},historicAart={authUid:'history-aart',playerId:'u-aart'},historicNew={authUid:'history-new',playerId:'p_history-new'};
+ await env.withSecurityRulesDisabled(async c=>{
+  const x=c.firestore();
+  await setDoc(doc(x,'groups',historicGid),{name:'Rekensukkels',ownerAuthUid:historicPeter.authUid,inviteCode:'HISTORIC',theme:'shared',accent:'blue',murdokuNames:[],createdAt:1,updatedAt:1});
+  for(const p of [historicPeter,historicAart,historicNew]){
+   await setDoc(doc(x,'profiles',p.authUid),{...profileDoc({...p,displayName:p.authUid}),groupId:historicGid,role:p===historicNew?'admin':'user'});
+   await setDoc(doc(x,'players',p.playerId),playerDoc({...p,displayName:p.authUid}));
+   const m={playerId:p.playerId,displayName:p.authUid,role:'member',status:'approved',requestedAt:1,approvedAt:10,joinedAt:p===historicNew?300:100,approvedByPlayerId:historicPeter.playerId,updatedAt:p===historicNew?300:100};
+   await setDoc(doc(x,'groups',historicGid,'members',p.playerId),m);
+   await setDoc(doc(x,'playerMemberships',p.playerId,'groups',historicGid),indexOf(m,historicGid));
+  }
+  for(const p of [historicPeter,historicAart])await setDoc(doc(x,'results',historicGid+'_2026-10-22_bin.2_'+p.playerId),{uid:p.playerId,group:historicGid,name:p.authUid,date:'2026-10-22',type:'bin.2',secs:75});
+  for(const [suffix,when] of [['old',200],['new',350]]){
+   await setDoc(doc(x,'groupActivity',historicGid,'items',suffix),{groupId:historicGid,playerId:historicPeter.playerId,completedAt:when});
+   await setDoc(doc(x,'groupDailyPlans',historicGid,'items',suffix),{groupId:historicGid,playerId:historicPeter.playerId,sharedAt:when});
+  }
+ });
+ const historicRows=p=>getDocs(query(collection(db(p),'results'),where('group','==',historicGid)));
+ await assertSucceeds(historicRows(historicPeter));
+ await assertSucceeds(historicRows(historicAart));
+ await assertFails(historicRows(historicNew));
+ await assertFails(historicRows(outsider));
+ await assertFails(getDoc(doc(db(historicNew),'results',historicGid+'_2026-10-22_bin.2_u-aart')));
+ await assertFails(getDoc(doc(db(historicAart),'results',legacyResultId)));
+ await assertFails(updateDoc(doc(db(historicAart),'results',historicGid+'_2026-10-22_bin.2_u-peter'),{secs:80}));
+ // Nieuwe groepsleden kunnen geen activiteit/dagplannen van vóór joinedAt lezen,
+ // ook niet door een brede query te proberen.
+ await assertSucceeds(getDocs(query(collection(db(historicAart),'groupActivity',historicGid,'items'),where('completedAt','>=',100))));
+ await assertFails(getDoc(doc(db(historicNew),'groupActivity',historicGid,'items','old')));
+ await assertFails(getDocs(query(collection(db(historicNew),'groupActivity',historicGid,'items'),where('completedAt','>=',100))));
+ const freshActivity=await assertSucceeds(getDocs(query(collection(db(historicNew),'groupActivity',historicGid,'items'),where('completedAt','>=',300))));
+ if(freshActivity.size!==1)throw Error('Nieuw groepslid ziet niet uitsluitend nieuwe activiteit');
+ await assertFails(getDoc(doc(db(historicNew),'groupDailyPlans',historicGid,'items','old')));
+ await assertFails(getDocs(query(collection(db(historicNew),'groupDailyPlans',historicGid,'items'),where('sharedAt','>=',100))));
+ const freshPlans=await assertSucceeds(getDocs(query(collection(db(historicNew),'groupDailyPlans',historicGid,'items'),where('sharedAt','>=',300))));
+ if(freshPlans.size!==1)throw Error('Nieuw groepslid ziet niet uitsluitend nieuwe dagplannen');
  const anonUid='auth-new-anon',anonPlayer='p_'+anonUid,anonDb=env.authenticatedContext(anonUid,{firebase:{sign_in_provider:'anonymous'}}).firestore();
  const anonProfile={authUid:anonUid,playerId:anonPlayer,displayName:'Solo tester',groupId:'',role:'user',accountState:'anonymous',createdAt:300,updatedAt:300,inviteCode:'',invitedByAuthUid:'',groupJoinCode:'',theme:'shared',accent:'blue',preferences:{favoritePuzzleTypes:['bin','star','nono'],dailyDifficulty:{bin:'normal',star:'normal',nono:'normal',hex:'normal',plus:'normal',mur:'normal'}}};
  await assertSucceeds(setDoc(doc(anonDb,'profiles',anonUid),anonProfile));await assertSucceeds(setDoc(doc(anonDb,'players',anonPlayer),{playerId:anonPlayer,authUid:anonUid,displayName:'Solo tester',createdAt:300,updatedAt:300}));
