@@ -126,7 +126,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S9 | Nonogram kleur: foutmarkering die de kleur laat staan (bug) | zichtbaar | – (kan direct na S0) | open | |
 | S10 | Murdoku: aanwijzing markeren als “nog nodig” (vlaggetje, B8 = c) | nieuw (klein) | D3 | open | |
 | S11 | Pencil in profiel- en groepsmenu: tik op Terug genegeerd, scrollen stroef (bug, ook in main) | bug | – (na de livegang) | in review | #25 |
-| S12 | iPhone-hint in de onderbalk te klein: kaart krijgt alleen de hoogte van de knoppenbalk (`js/layout.js`, `tray`), tekst past er nauwelijks in (ook in main) | bug | – (eerste na de livegang) | in review (Murdoku; zie Gevonden) | PR_NR |
+| S12 | iPhone-hint in de onderbalk te klein: kaart krijgt alleen de hoogte van de knoppenbalk (`js/layout.js`, `tray`), tekst past er nauwelijks in (ook in main) | bug | – (eerste na de livegang) | in review (Murdoku; zie Gevonden) | #45 |
 | S13 | iPhone-web-app: bovenrand Home vervaagt (in Safari goed, als web-app niet; main wel goed). #29 (statusbalk-regel weg) loste het in de web-app níet op. Volgende verdachte: `#home` als eigen scrollcontainer van `100dvh` bovenop de veilige marge, waardoor de pagina zelf net te hoog wordt en iOS zijn vervaging toont | bug | – (na de livegang) | open | #29 (deel) |
 | T1 | Woordenlijst doorvoeren, jargon weg | tekst | B1-O, S1–S7 | open | |
 | T2 | Uitleg per puzzel inkorten | tekst | T1 | open | |
