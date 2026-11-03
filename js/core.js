@@ -1619,10 +1619,12 @@ function doCheck(){if(S.done||!S.p||!["bin","star","nono","kak","mur","plus"].in
  const t=bad.length?(bad.length===1?"1 vakje klopt niet":bad.length+" vakjes kloppen niet"):"Alles wat je hebt ingevuld klopt",short=bad.length?bad.length+(bad.length===1?" fout":" fouten"):"Tot nu toe goed";
  m.setAttribute("role","status");m.setAttribute("aria-live","polite");m.setAttribute("aria-label",t);m.classList.remove("good","warn");m.classList.add(bad.length?"warn":"good");m.textContent=(bad.length?"⚠ ":"✓ ")+short;placeCheckMsg(m);const shown=m.textContent;clearTimeout(m._timer);m._timer=setTimeout(()=>{els.forEach(d=>d.classList.remove("bad"));if(m.textContent===shown){m.textContent="";m.classList.remove("good","warn")}},bad.length?4500:2500)}
 /* De uitslag staat in de kop, tussen de Home-knop en de knoppen rechts, zodat hij het bord nooit afdekt. */
-function placeCheckMsg(m){const a=$("#tbHome")?.getBoundingClientRect(),t=$("#tbTitle")?.getBoundingClientRect(),rs=["#saveWarn","#peerLive","#tbMore","#pm"].map(id=>$(id)).filter(e=>e&&!e.hidden&&e.getBoundingClientRect().width>0).map(e=>e.getBoundingClientRect().left);
+function placeCheckMsg(m){const a=$("#tbHome")?.getBoundingClientRect(),t=$("#tbTitle")?.getBoundingClientRect(),tm=$("#time"),tr=tm&&!tm.hidden&&tm.getBoundingClientRect().width>0?tm.getBoundingClientRect():null,rs=["#saveWarn","#peerLive","#tbMore","#pm"].map(id=>$(id)).filter(e=>e&&!e.hidden&&e.getBoundingClientRect().width>0).map(e=>e.getBoundingClientRect().left);
  if(!a||!a.width||!rs.length){m.style.top=m.style.height=m.style.left=m.style.maxWidth=m.style.minWidth="";return}
- /* Op de iPad staat de titel naast Home: de uitslag komt daar even overheen en dekt de tijd nooit af. */
- const from=t&&t.width>80?t.left:a.right+8,to=t&&t.width>80?t.right:Math.min(...rs)-8;m.style.top=Math.round(a.top)+"px";m.style.height=Math.round(a.height)+"px";m.style.left=Math.round((from+to)/2)+"px";m.style.maxWidth=Math.max(80,Math.round(to-from))+"px";m.style.minWidth=t&&t.width>80?Math.round(t.width)+"px":""}
+ m.style.minWidth=m.style.maxWidth="";const w=m.offsetWidth;let from=a.right+8,to=Math.min(...rs)-8,min="";
+ /* iPad: de uitslag komt tussen de titel en de tijd en dekt geen van beide af; is daar geen ruimte, dan komt hij even over de titel. */
+ if(t&&t.width>80){const gf=t.right+8,gt=Math.min(to,tr&&tr.left>t.right?tr.left-8:to);if(gt-gf>=w){from=gf;to=gt}else{from=t.left;to=t.right;min=Math.round(t.width)+"px"}}
+ m.style.top=Math.round(a.top)+"px";m.style.height=Math.round(a.height)+"px";m.style.left=Math.round((from+to)/2)+"px";m.style.maxWidth=Math.max(80,Math.round(to-from))+"px";m.style.minWidth=min}
 $("#chk").onclick=doCheck;$("#chk").title="Dezelfde verkeerde invoer opnieuw controleren telt niet opnieuw als foutmoment.";
 /* ---- Weergave: systeem, licht of donker ---- */
 let THEME_MODE=(()=>{const t=lsGet("pdtheme");return t==="light"||t==="dark"||t==="system"?t:"system"})();const themeMode=()=>THEME_MODE;
