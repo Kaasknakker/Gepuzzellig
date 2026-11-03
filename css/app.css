@@ -984,7 +984,7 @@ body.phone:not(.home):not(.newpick) #prow{
  min-height:58px;
  padding:14px 6px 7px;
 }
-body.phone:not(.home):not(.newpick) #prow>:not(#tbHome):not(#pm):not(#hexstat):not(#peerLive){display:none!important}
+body.phone:not(.home):not(.newpick) #prow>:not(#tbHome):not(#pm):not(#hexstat):not(#peerLive):not(#saveWarn){display:none!important}
 body.phone:not(.home):not(.newpick) #prow #peerLive{display:flex!important;order:8;width:34px;height:34px;flex:0 0 34px;padding:0;justify-content:center;border-radius:50%;margin-left:auto}
 body.phone:not(.home):not(.newpick) #prow #peerLive span{display:none}
 body.phone:not(.home):not(.newpick) #prow #peerLive i{width:10px;height:10px}
