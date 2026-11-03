@@ -21,3 +21,7 @@
 .uxcover:not([hidden]){animation:gpCoverIn var(--motion-ui,210ms) var(--motion-ease,cubic-bezier(.2,.7,.3,1)) both}
 .uxcover:not([hidden])>.uxcard{animation:gpDialogIn var(--motion-ui,210ms) var(--motion-ease,cubic-bezier(.2,.7,.3,1)) both}
 @media(prefers-reduced-motion:reduce){.uxcover:not([hidden]),.uxcover:not([hidden])>.uxcard{animation:none!important}}
+.savewarn{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;min-width:42px;padding:0;margin-right:6px;color:var(--hint-look)}.savewarn[hidden]{display:none}.savewarn svg{width:22px;height:22px}
+.savepop{position:fixed;right:8px;z-index:90;width:min(300px,calc(100vw - 16px));padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 8px 24px var(--sh)}.savepop[hidden]{display:none}.savepop p{margin:0 0 10px;font-size:14px;line-height:1.4}.savepop button{width:100%;min-height:44px}
+.uxsave[hidden]{display:none}
+body.phone:not(.home) .savewarn{margin-left:auto}
