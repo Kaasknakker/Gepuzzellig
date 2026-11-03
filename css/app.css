@@ -1,8 +1,7 @@
-:root{--bg:#f6f4ef;--fg:#1f2430;--card:#fff;--line:#c9c5bb;--acc:#2f6fed;--mut:#6b7080;--ok:#1d8a4b;--fill:#1f2430;--sel:#ffe9a8;--dup:#c9f58f;--one:#7a52d6;color-scheme:light}
+:root{--bg:#f6f4ef;--fg:#1f2430;--card:#fff;--line:#c9c5bb;--acc:#2f6fed;--mut:#6b7080;--ok:#1d8a4b;--fill:#1f2430;--sel:#ffe9a8;--dup:#c9f58f;--one:#7a52d6;color-scheme:light;--safe-top:env(safe-area-inset-top)}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#15171c;--fg:#ecebe6;--card:#20232b;--line:#3a3e4a;--acc:#6f9bff;--mut:#9a9eab;--ok:#4cc380;--fill:#ecebe6;--sel:#5a4a14;--dup:#3d6b1c;--one:#a98bff;color-scheme:dark}}
 :root[data-theme=dark]{--bg:#15171c;--fg:#ecebe6;--card:#20232b;--line:#3a3e4a;--acc:#6f9bff;--mut:#9a9eab;--ok:#4cc380;--fill:#ecebe6;--sel:#5a4a14;--dup:#3d6b1c;--one:#a98bff;color-scheme:dark}
 *{box-sizing:border-box}html,body{margin:0}html{background:var(--bg)}
-:root{--safe-top:env(safe-area-inset-top)}
 /* iOS 26 vervaagt in een app op het beginscherm de bovenste ±95 pt (statusbalk + ±36 pt). Op de telefoon beginnen kop en inhoud daarom 40 px lager; Profiel en de aanmeldpagina's gebruiken env() en liggen al buiten dat bereik. */
 @media(max-width:600px){html[data-standalone]{--safe-top:calc(env(safe-area-inset-top) + 40px)}}
 body{background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;padding:var(--safe-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
