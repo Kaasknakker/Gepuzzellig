@@ -1,8 +1,10 @@
-:root{--bg:#f6f4ef;--fg:#1f2430;--card:#fff;--line:#c9c5bb;--acc:#2f6fed;--mut:#6b7080;--ok:#1d8a4b;--fill:#1f2430;--sel:#ffe9a8;--dup:#c9f58f;--one:#7a52d6;color-scheme:light}
+:root{--bg:#f6f4ef;--fg:#1f2430;--card:#fff;--line:#c9c5bb;--acc:#2f6fed;--mut:#6b7080;--ok:#1d8a4b;--fill:#1f2430;--sel:#ffe9a8;--dup:#c9f58f;--one:#7a52d6;color-scheme:light;--safe-top:env(safe-area-inset-top)}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#15171c;--fg:#ecebe6;--card:#20232b;--line:#3a3e4a;--acc:#6f9bff;--mut:#9a9eab;--ok:#4cc380;--fill:#ecebe6;--sel:#5a4a14;--dup:#3d6b1c;--one:#a98bff;color-scheme:dark}}
 :root[data-theme=dark]{--bg:#15171c;--fg:#ecebe6;--card:#20232b;--line:#3a3e4a;--acc:#6f9bff;--mut:#9a9eab;--ok:#4cc380;--fill:#ecebe6;--sel:#5a4a14;--dup:#3d6b1c;--one:#a98bff;color-scheme:dark}
 *{box-sizing:border-box}html,body{margin:0}html{background:var(--bg)}
-body{background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+/* iOS 26 vervaagt in een app op het beginscherm de bovenste ±95 pt (statusbalk + ±36 pt). Op de telefoon beginnen kop en inhoud daarom 40 px lager; Profiel en de aanmeldpagina's gebruiken env() en liggen al buiten dat bereik. */
+@media(max-width:600px){html[data-standalone]{--safe-top:calc(env(safe-area-inset-top) + 40px)}}
+body{background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;padding:var(--safe-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 html[data-ui-pending],html[data-auth-pending]{overflow:hidden}
 #bootveil{display:none;position:fixed;inset:0;z-index:2147483646;place-items:center;background:var(--bg);color:var(--fg);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 /* iOS 26 tekent in een app op het beginscherm een vervagende rand over de bovenste ±40 pt, tenzij WebKit bovenaan een vast, bijna schermbreed vlak met achtergrondkleur vindt (LocalFrameView::fixedContainerEdges). Dit vlak vult alleen de veilige marge onder de statusbalk. Geen pointer-events:none: dan wordt het vlak niet gevonden. */
@@ -406,7 +408,7 @@ body[data-t=plus].phone #pbot #hintb span,body[data-t=plus].phone #pbot #chk spa
 body[data-t=plus].phone #pbot #hintb,body[data-t=plus].phone #pbot #chk{flex:0 0 50px}
 /* ===== iPhone ===== */
 #prow,#pbot,#pmp,#pm{display:none}
-body.phone{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);overflow:hidden;overscroll-behavior:none}
+body.phone{padding:var(--safe-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);overflow:hidden;overscroll-behavior:none}
 body.phone header{position:relative;display:flex;align-items:center;flex-wrap:nowrap;gap:0;padding:4px 46px 4px 4px;min-height:40px;box-sizing:border-box}
 body.phone header h1{display:none}
 body.phone header nav{order:0;flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;align-items:center;gap:5px;padding:2px 5px 4px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:18px;overscroll-behavior-x:contain}
@@ -435,11 +437,11 @@ body.phone #pbot #undo span,body.phone #pbot #redo span{display:none}
 body.phone #pbot #nmode{display:flex;flex-direction:row;gap:6px;flex:2 1 0;min-width:0}
 body.phone #pbot #mb,body.phone #pbot #mz{flex:1.4 1 0;font-size:16px}
 body.phone #pm{margin-left:2px}
-body.phone #pmp.open{display:flex;position:fixed;top:calc(env(safe-area-inset-top) + 44px);right:6px;width:230px;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;z-index:55;box-shadow:0 14px 40px rgba(0,0,0,.3)}
+body.phone #pmp.open{display:flex;position:fixed;top:calc(var(--safe-top) + 44px);right:6px;width:230px;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;z-index:55;box-shadow:0 14px 40px rgba(0,0,0,.3)}
 body.phone #pmp button,body.phone #pmp #time{width:100%;text-align:left;padding:10px 12px;font-size:15px;border-radius:12px;display:flex;gap:8px;align-items:center}
 body.phone #pmp #streak{padding:4px 12px;font-size:14px}
 body.phone #pmp #reset b{font-size:16px}
-body.phone #side{top:calc(env(safe-area-inset-top) + 44px);left:6px;right:6px;width:auto;max-height:calc(100dvh - 120px)}
+body.phone #side{top:calc(var(--safe-top) + 44px);left:6px;right:6px;width:auto;max-height:calc(100dvh - 120px)}
 body[data-t=nono].phone #pbot #hintb span,body[data-t=nono].phone #pbot #chk span{display:none}
 body[data-t=nono].phone #pbot #hintb,body[data-t=nono].phone #pbot #chk{flex:0 0 50px}
 body.phone #hint{font-size:14px;padding:10px 44px 10px 12px;max-height:45vh}body.phone #hint button:not(.hx){padding:7px 14px}body.phone #hint .mut{font-size:12px}
@@ -987,7 +989,7 @@ body.phone:not(.home):not(.newpick) #prow #peerLive{display:flex!important;order
 body.phone:not(.home):not(.newpick) #prow #peerLive span{display:none}
 body.phone:not(.home):not(.newpick) #prow #peerLive i{width:10px;height:10px}
 body.phone:not(.home):not(.newpick) #prow #peerLive[hidden]{display:none!important}
-.peerlivepop{position:fixed;z-index:80;top:calc(env(safe-area-inset-top) + 60px);right:58px;width:min(280px,calc(100vw - 78px));padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 8px 28px #0002;font-size:12px}
+.peerlivepop{position:fixed;z-index:80;top:calc(var(--safe-top) + 60px);right:58px;width:min(280px,calc(100vw - 78px));padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 8px 28px #0002;font-size:12px}
 .peerlivepop[hidden]{display:none!important}.peerlivepop>b{display:block;margin-bottom:6px}.peerlivepop>div{display:flex;align-items:center;gap:8px;padding:5px 0;line-height:1.3}.peerlivepop i{display:block;width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#28a745}.peerlivepop span{min-width:0}
 /* Hexcells: de teller "nog te vinden" is een echte aanwijzing, dus die blijft ook op de iPhone in beeld. */
 body.phone:not(.home):not(.newpick)[data-t=hex] #prow #hexstat{display:flex!important;order:5;margin:0 8px 0 auto}
@@ -1008,7 +1010,7 @@ body.phone #prow #pm{
  box-shadow:0 2px 0 var(--line);
 }
 body.phone #prow #pm{margin-left:0}
-body.phone #pmp.open{top:calc(env(safe-area-inset-top) + 72px)}
+body.phone #pmp.open{top:calc(var(--safe-top) + 72px)}
 
 body.tablet.home #home .hwrap:not(.sco) .hbrand{font-size:22px}
 body.tablet.home #home .hwrap:not(.sco) h2{font-size:30px;line-height:1.04}
@@ -1091,7 +1093,7 @@ body.hintdock #stage{max-height:var(--hint-board-height);overflow:auto;overscrol
 body.hintdock #playbox{flex-shrink:0}
 body.hintdock #hint.side{border-top-width:1px}
 .ddmetric b{overflow-wrap:anywhere}
-body.phone.hintdock #hint{max-height:min(46dvh,calc(100dvh - env(safe-area-inset-top) - 100px));overflow-y:auto;box-sizing:border-box}
+body.phone.hintdock #hint{max-height:min(46dvh,calc(100dvh - var(--safe-top) - 100px));overflow-y:auto;box-sizing:border-box}
 body.hintdock #stage{min-height:0}
 html.tap body.hintdock #stage{touch-action:pan-x pan-y}
 /* Houd ook een breed bord binnen de vrije ruimte tussen bediening en hint. */
@@ -1200,7 +1202,7 @@ body[data-t=bin] #grid,body[data-t=star] #grid{box-shadow:0 0 0 5px color-mix(in
 .mc.xx .mx,.mc.xm .mx{color:color-mix(in srgb,var(--fg) 55%,transparent);font-weight:500;font-size:calc(var(--ms)*.45)}
 #grid>.nsize{font-size:clamp(14px,calc(var(--cs)*.32),21px);font-weight:800;color:var(--fg);opacity:.85;padding:0 8px 7px 0}
 body.phone #grid>.nsize{font-size:13px;padding:0 4px 5px 0}
-#checkfeedback.good,#checkfeedback.warn{position:fixed;z-index:100;top:max(84px,calc(env(safe-area-inset-top) + 64px));left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);padding:16px 22px;border:2px solid currentColor;border-radius:16px;box-shadow:0 8px 30px #0003;font-size:18px;font-weight:800;line-height:1.4;text-align:center;background:var(--card)}
+#checkfeedback.good,#checkfeedback.warn{position:fixed;z-index:100;top:max(84px,calc(var(--safe-top) + 64px));left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);padding:16px 22px;border:2px solid currentColor;border-radius:16px;box-shadow:0 8px 30px #0003;font-size:18px;font-weight:800;line-height:1.4;text-align:center;background:var(--card)}
 #checkfeedback.good{color:var(--ok)}#checkfeedback.warn{color:color-mix(in srgb,#c05b34 70%,var(--fg))}
 @media(max-width:760px),(max-aspect-ratio:1/1){#inputmode{flex-direction:row}}
 body.phone #pbot #inputmode{flex-direction:row;gap:6px;flex:2 1 0;min-width:0}
@@ -1911,7 +1913,7 @@ body:not(.home) #stage{overscroll-behavior:none}
 
 /* Alle app-/menu-/overzichtspagina's zijn echte verticale scrollers; het puzzelbord blijft vast. */
 body.home{overflow:hidden}
-body.home #home{height:calc(100dvh - env(safe-area-inset-top));min-height:calc(100dvh - env(safe-area-inset-top));overflow-y:scroll!important;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:max(2px,env(safe-area-inset-bottom))}
+body.home #home{height:calc(100dvh - var(--safe-top));min-height:calc(100dvh - var(--safe-top));overflow-y:scroll!important;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:max(2px,env(safe-area-inset-bottom))}
 #authaccount.authpage,#groupaccount.authpage{height:100dvh;overflow-y:scroll!important;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch}
 #authaccount.authpage .authcard,#groupaccount.authpage .authcard{min-height:calc(100dvh + 2px)}
 #side,#more{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:auto}
