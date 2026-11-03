@@ -384,10 +384,10 @@ body.phone #arch{padding:4px 9px;font-size:15px;box-shadow:none}
 @media(max-width:760px),(max-aspect-ratio:1/1){#pmode{flex-direction:row}}
 .c.pl{position:relative;font-size:calc(var(--cs)*.5);font-weight:700}
 .c.pl .pn{position:relative;z-index:1;font-variant-numeric:tabular-nums;transition:opacity .15s}
-.c.pl.po::after{content:"";position:absolute;inset:14%;border:calc(var(--cs)*.055) solid var(--pc);border-radius:50%;pointer-events:none}
+.c.pl.po::before{content:"";position:absolute;inset:14%;border:calc(var(--cs)*.055) solid var(--pc);border-radius:50%;pointer-events:none}
 .c.pl.px .pn{opacity:.2}
 .c.pl.px::before{content:"";position:absolute;left:20%;right:20%;top:50%;height:calc(var(--cs)*.05);min-height:2px;margin-top:-1px;background:var(--fg);opacity:.6;transform:rotate(-45deg);border-radius:2px;pointer-events:none}
-#grid.pdone .c.pl.po::after{display:none}
+#grid.pdone .c.pl.po::before{display:none}
 #grid.pdone .c.pl:not(.px) .pn{color:var(--pc)}
 .prb{position:absolute;left:3px;top:1px;font-style:normal;font-size:calc(var(--cs)*.24);font-weight:800;line-height:1;padding:1px 3px;border-radius:5px;background:color-mix(in srgb,var(--card) 70%,transparent);color:var(--fg);z-index:2;pointer-events:none}
 .prb.ok{opacity:.4}
