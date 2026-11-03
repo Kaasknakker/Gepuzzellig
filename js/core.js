@@ -1613,11 +1613,15 @@ function wrongCells(){const{type,p,cur}=S,o=[];if(!cur)return o;cur.forEach((v,i
  else if(type==="kak"){if(v>0&&v!==p.sol[i])o.push(i)}
  else if(type==="mur"){if(v>=0&&p.sol[v]!==i||v===-2&&p.sol.includes(i))o.push(i)}});return o}
 function doCheck(){if(S.done||!S.p||!["bin","star","nono","kak","mur","plus"].includes(S.type))return;const bad=wrongCells(),m=$("#checkfeedback");
- const board=S.type==="mur"?$("#mgrid"):$("#grid");if(board){board.classList.remove("checkgood","checkbad");void board.offsetWidth;board.classList.add(bad.length?"checkbad":"checkgood");clearTimeout(board._checkTimer);board._checkTimer=setTimeout(()=>board.classList.remove("checkgood","checkbad"),720)}
+ const board=S.type==="mur"?$("#mgrid"):$("#grid");if(board){board.classList.remove("checkgood","checkbad");void board.offsetWidth;board.classList.add(bad.length?"checkbad":"checkgood");clearTimeout(board._checkTimer);board._checkTimer=setTimeout(()=>board.classList.remove("checkgood","checkbad"),bad.length?4500:2500)}
  const els=bad.map(i=>S.type==="kak"?$("#grid").children[i]:S.type==="mur"?S.mcells[i]:S.cells[i]).filter(Boolean);els.forEach(d=>d.classList.add("bad"));
  if(bad.length)registerErrors(bad);persist();
- const t=bad.length?(bad.length===1?"1 vakje klopt niet":bad.length+" vakjes kloppen niet"):"Alles wat je hebt ingevuld klopt";
- m.setAttribute("role","status");m.setAttribute("aria-live","polite");m.classList.remove("good","warn");m.classList.add(bad.length?"warn":"good");m.textContent=(bad.length?"⚠ ":"✓ ")+t;const shown=m.textContent;clearTimeout(m._timer);m._timer=setTimeout(()=>{els.forEach(d=>d.classList.remove("bad"));if(m.textContent===shown){m.textContent="";m.classList.remove("good","warn")}},4500)}
+ const t=bad.length?(bad.length===1?"1 vakje klopt niet":bad.length+" vakjes kloppen niet"):"Alles wat je hebt ingevuld klopt",short=bad.length?bad.length+(bad.length===1?" fout":" fouten"):"Geen fouten";
+ m.setAttribute("role","status");m.setAttribute("aria-live","polite");m.setAttribute("aria-label",t);m.classList.remove("good","warn");m.classList.add(bad.length?"warn":"good");m.textContent=(bad.length?"⚠ ":"✓ ")+short;placeCheckMsg(m);const shown=m.textContent;clearTimeout(m._timer);m._timer=setTimeout(()=>{els.forEach(d=>d.classList.remove("bad"));if(m.textContent===shown){m.textContent="";m.classList.remove("good","warn")}},bad.length?4500:2500)}
+/* De uitslag staat in de kop, tussen de Home-knop en de knoppen rechts, zodat hij het bord nooit afdekt. */
+function placeCheckMsg(m){const a=$("#tbHome")?.getBoundingClientRect(),rs=["#saveWarn","#peerLive","#tbMore","#pm"].map(id=>$(id)).filter(e=>e&&!e.hidden&&e.getBoundingClientRect().width>0).map(e=>e.getBoundingClientRect().left);
+ if(!a||!a.width||!rs.length){m.style.top=m.style.height=m.style.left=m.style.maxWidth="";return}
+ const from=a.right+8,to=Math.min(...rs)-8;m.style.top=Math.round(a.top)+"px";m.style.height=Math.round(a.height)+"px";m.style.left=Math.round((from+to)/2)+"px";m.style.maxWidth=Math.max(80,Math.round(to-from))+"px"}
 $("#chk").onclick=doCheck;$("#chk").title="Dezelfde verkeerde invoer opnieuw controleren telt niet opnieuw als foutmoment.";
 /* ---- Weergave: systeem, licht of donker ---- */
 let THEME_MODE=(()=>{const t=lsGet("pdtheme");return t==="light"||t==="dark"||t==="system"?t:"system"})();const themeMode=()=>THEME_MODE;
