@@ -2069,9 +2069,9 @@ body.tablet.home .hhomehero{padding:12px 14px 14px}
 #helpb .uiicon,#ctrlb .uiicon{color:color-mix(in srgb,var(--pc) 62%,var(--fg))}
 #grid.checkgood{animation:boardCheckGood 2.5s ease-out}#mgrid.checkgood{animation:boardCheckGoodM 2.5s ease-out}
 #grid.checkbad{animation:boardCheckBad 4.5s ease-out}#mgrid.checkbad{animation:boardCheckBadM 4.5s ease-out}
-@keyframes boardCheckGood{0%,60%{outline:6px solid color-mix(in srgb,var(--ok) 92%,transparent);outline-offset:8px;filter:drop-shadow(0 0 14px color-mix(in srgb,var(--ok) 70%,transparent))}100%{outline:6px solid transparent;outline-offset:8px;filter:drop-shadow(0 0 0 transparent)}}
-@keyframes boardCheckBad{0%,70%{outline:6px solid color-mix(in srgb,#d84b4b 92%,transparent);outline-offset:8px;filter:drop-shadow(0 0 14px color-mix(in srgb,#d84b4b 70%,transparent))}100%{outline:6px solid transparent;outline-offset:8px;filter:drop-shadow(0 0 0 transparent)}}
+@keyframes boardCheckGood{0%,60%{outline:4px solid color-mix(in srgb,var(--ok) 92%,transparent);outline-offset:6px;filter:drop-shadow(0 0 10px color-mix(in srgb,var(--ok) 70%,transparent))}100%{outline:4px solid transparent;outline-offset:6px;filter:drop-shadow(0 0 0 transparent)}}
+@keyframes boardCheckBad{0%,70%{outline:4px solid color-mix(in srgb,#d84b4b 92%,transparent);outline-offset:6px;filter:drop-shadow(0 0 10px color-mix(in srgb,#d84b4b 70%,transparent))}100%{outline:4px solid transparent;outline-offset:6px;filter:drop-shadow(0 0 0 transparent)}}
 /* Murdoku: het bord gebruikt zelf een outline (invoermodus, !important); daar tekent de ring met box-shadow. */
-@keyframes boardCheckGoodM{0%,60%{box-shadow:0 0 0 14px color-mix(in srgb,var(--ok) 92%,transparent),0 0 22px 8px color-mix(in srgb,var(--ok) 55%,transparent)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
-@keyframes boardCheckBadM{0%,70%{box-shadow:0 0 0 14px color-mix(in srgb,#d84b4b 92%,transparent),0 0 22px 8px color-mix(in srgb,#d84b4b 55%,transparent)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
+@keyframes boardCheckGoodM{0%,60%{box-shadow:0 0 0 10px color-mix(in srgb,var(--ok) 92%,transparent),0 0 16px 6px color-mix(in srgb,var(--ok) 55%,transparent)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
+@keyframes boardCheckBadM{0%,70%{box-shadow:0 0 0 10px color-mix(in srgb,#d84b4b 92%,transparent),0 0 16px 6px color-mix(in srgb,#d84b4b 55%,transparent)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
 @media(prefers-reduced-motion:reduce){#mgrid.checkgood,#grid.checkgood{outline:3px solid var(--ok)}#mgrid.checkbad,#grid.checkbad{outline:3px solid #d84b4b}}
