@@ -987,7 +987,7 @@ body.phone:not(.home):not(.newpick) #prow{
 }
 body.phone:not(.home):not(.newpick) #prow>:not(#tbHome):not(#pm):not(#hexstat):not(#peerLive):not(#saveWarn){display:none!important}
 body.phone:not(.home):not(.newpick) #prow #peerLive{display:flex!important;order:8;width:34px;height:34px;flex:0 0 34px;padding:0;justify-content:center;border-radius:50%;margin-left:auto}
-body.phone:not(.home):not(.newpick) #prow #peerLive span{display:none}
+body.phone:not(.home):not(.newpick) #prow #peerLive span{max-width:170px;white-space:nowrap}
 body.phone:not(.home):not(.newpick) #prow #peerLive i{width:10px;height:10px}
 body.phone:not(.home):not(.newpick) #prow #peerLive[hidden]{display:none!important}
 .peerlivepop{position:fixed;z-index:80;top:calc(var(--safe-top) + 60px);right:58px;width:min(280px,calc(100vw - 78px));padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 8px 28px #0002;font-size:12px}
@@ -1240,7 +1240,7 @@ body[data-input-mode=fill] #mgrid.pmode{outline:5px solid color-mix(in srgb,var(
 body[data-input-mode] #hexsvg{background:var(--card)!important;box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-tint) 82%,var(--line)),0 8px 24px var(--sh)!important}
 
 .peerlive>span{display:inline;min-width:0;overflow:hidden;text-overflow:ellipsis}
-body.phone #prow #peerLive{max-width:38vw}
+body.phone #prow #peerLive{max-width:44vw}
 
 @media(max-width:359px){
  body.phone #pbot:has(#notewipe:not([style*="none"])) #undo,body.phone #pbot:has(#notewipe:not([style*="none"])) #redo,body.phone #pbot:has(#notewipe:not([style*="none"])) #potb,body.phone #pbot:has(#notewipe:not([style*="none"])) #notewipe,body.phone #pbot:has(#notewipe:not([style*="none"])) #hintb,body.phone #pbot:has(#notewipe:not([style*="none"])) #chk{flex-basis:30px}
@@ -2002,7 +2002,7 @@ body.home #home .hwrap:has(.hpuzzletabs) .puzzlecard{height:auto;align-self:star
 @media(max-width:560px){
  body.phone .peerlive{min-height:30px;padding:4px 8px;gap:5px;font-size:11px}
  body.phone .peerlive>i{width:7px;height:7px;box-shadow:0 0 0 2px color-mix(in srgb,var(--ok) 15%,transparent)}
- body.phone #prow #peerLive{min-height:30px;max-width:31vw;padding:4px 7px;gap:5px}
+ body.phone #prow #peerLive{min-height:30px;max-width:44vw;padding:4px 7px;gap:5px}
  body.phone #prow #peerLive span{font-size:11px}
  body.phone.home .hlivebadge.liveactivity{padding:6px 9px}
  body.phone.home .hlivebadge.liveactivity b{font-size:12px}
