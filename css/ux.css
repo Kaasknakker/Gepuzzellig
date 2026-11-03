@@ -26,3 +26,5 @@
 .uxsave[hidden]{display:none}
 body.phone:not(.home) .savewarn{margin-left:auto}
 .savewarn.idle{visibility:hidden;pointer-events:none}
+#authaccount .proonline{display:flex;align-items:flex-start;gap:10px;margin:12px 0;font-size:15px;font-weight:700;line-height:1.35;color:var(--fg)}#authaccount .proonline input{width:22px;height:22px;margin:1px 0 0;flex:none}#authaccount .proonline small{display:block;margin-top:2px;font-size:12.5px;font-weight:400}
+@media(max-width:360px){body.phone .savewarn.idle{display:none}body.phone #prow #peerLive{max-width:32vw}}

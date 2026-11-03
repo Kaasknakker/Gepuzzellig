@@ -70,6 +70,7 @@ const UX={
  init(){
   const menu=document.getElementById('more');if(menu)menu.insertAdjacentHTML('beforeend',this.storageMarkup()+'<p class="uxexplain">Telefoonpuzzels blijven op dit apparaat. Groot-schermpuzzels worden tussen grote schermen gedeeld zodra je online bent. Opgeloste resultaten worden wel gedeeld.</p>');
   const pmp=document.getElementById('pmp');if(pmp)pmp.insertAdjacentHTML('beforeend',this.storageMarkup());
+  const so=document.getElementById('pshowonline');if(so){so.checked=showOnlineOn();so.onchange=()=>{lsSet('pdshowonline',so.checked?'1':'0');if(so.checked)pingOnline(true);else clearOnline(true)}}
   const sb=document.createElement('button');sb.type='button';sb.id='saveWarn';sb.className='savewarn';sb.hidden=true;sb.title='Opslag';sb.setAttribute('aria-label','Opslag: aandacht nodig');sb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.2v.3"/></svg>';sb.onclick=e=>{e.stopPropagation();this.savePop()};this.saveBtn=sb;
   document.addEventListener('pointerup',e=>{if(!e.target.closest('#grid,#hexsvg,#mgrid,#mpal,#mclues'))return;requestAnimationFrame(()=>{if(!document.body.classList.contains('home'))this.board()})});
   window.addEventListener('online',()=>{persist(true);pullCloudProgress(true)});
