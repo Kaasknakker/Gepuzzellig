@@ -131,7 +131,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S14 | Binair slepen: een sleep over een rij met groene (afgeronde) vakjes selecteert nu alleen de open vakjes; de hele rij moet geselecteerd worden en groen worden | bug/aanpassing | – | in review | #47 |
 | S15 | Opslagstatus (“Op dit apparaat bewaard”, “nog niet gedeeld”, “Opnieuw proberen”): niet meer als vaste regel in de kop; knop veroorzaakt een te hoge kop die over de puzzel valt. Besluit B9 | ux (besluit Peter) | B9 | in review (B9 = b) | #62 |
 | S16 | Profiel: vreemde balk over de volle breedte bovenaan (ook op iPad) | bug | – | open | |
-| S17 | Online-status tijdens het puzzelen: bij 1 persoon online de naam en de puzzelsoort, vanaf 2 personen “2 online” | nieuw (klein) | Q2 | in review | PR_NR |
+| S17 | Online-status tijdens het puzzelen: bij 1 persoon online de naam en de puzzelsoort, vanaf 2 personen “2 online” | nieuw (klein) | Q2 | in review | #68 |
 | S19 | Controleer: oordeel niet meer als banner over het bord; duidelijke groene of rode rand om het bord (±1,5 s), kleine melding met aantal (“Geen fouten tot nu toe ✓” / “3 fouten”), foute vakjes herkenbaar (S9) | ux | S9 | in review | #64 |
 | S18 | Binair: tekens schuiven een halve punt bij elke handeling in Safari (opgemeten in opname 2 nov); pop nu alleen op het teken (#49). Bevestigen op iPad; zo niet: kleur-overgang op alle vakjes | bug | – | in review (hypothese) | #49 |
 | T1 | Woordenlijst doorvoeren, jargon weg | tekst | B1-O, S1–S7 | open | |
@@ -148,7 +148,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | G5 | Workflows bijwerken (Node 24-acties, vaste Ubuntu-versie) | GitHub | F1 | open | |
 | G6 | Versienummer en cache automatisch ophogen | GitHub | O3 | open | |
 | Q1 | Privacyverklaring | tekst | – | open | |
-| Q2 | Online-status uit te zetten | zichtbaar | D4 | in review (per apparaat bewaard) | PR_NR |
+| Q2 | Online-status uit te zetten | zichtbaar | D4 | in review (per apparaat bewaard) | #68 |
 | Q3 | Namen en merken op een rij | besluit | – | open | |
 | R1 | Rekenraadsels: kilometerteller gevarieerder (nu bijna altijd 100 km; vaker een 9 in het midden of zes cijfers) | rekenraadsels | – (na de livegang, los van Bezemwagen: alleen `raadsels.html`) | open | |
 | R2 | Rekenraadsels: meer variatie in soorten sommen (Peters bronlijsten opnieuw aanleveren in `docs/rekenraadsels-bron/`) | rekenraadsels | R1 | open | |
