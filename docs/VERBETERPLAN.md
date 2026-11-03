@@ -132,7 +132,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S15 | Opslagstatus (“Op dit apparaat bewaard”, “nog niet gedeeld”, “Opnieuw proberen”): niet meer als vaste regel in de kop; knop veroorzaakt een te hoge kop die over de puzzel valt. Besluit B9 | ux (besluit Peter) | B9 | in review (B9 = b) | #62 |
 | S16 | Profiel: vreemde balk over de volle breedte bovenaan (ook op iPad) | bug | – | open | |
 | S17 | Online-status tijdens het puzzelen: bij 1 persoon online de naam en de puzzelsoort, vanaf 2 personen “2 online” | nieuw (klein) | Q2 | open | |
-| S19 | Controleer: oordeel niet meer als banner over het bord; duidelijke groene of rode rand om het bord (±1,5 s), kleine melding met aantal (“Geen fouten tot nu toe ✓” / “3 fouten”), foute vakjes herkenbaar (S9) | ux | S9 | open | |
+| S19 | Controleer: oordeel niet meer als banner over het bord; duidelijke groene of rode rand om het bord (±1,5 s), kleine melding met aantal (“Geen fouten tot nu toe ✓” / “3 fouten”), foute vakjes herkenbaar (S9) | ux | S9 | in review | #64 |
 | S18 | Binair: tekens schuiven een halve punt bij elke handeling in Safari (opgemeten in opname 2 nov); pop nu alleen op het teken (#49). Bevestigen op iPad; zo niet: kleur-overgang op alle vakjes | bug | – | in review (hypothese) | #49 |
 | T1 | Woordenlijst doorvoeren, jargon weg | tekst | B1-O, S1–S7 | open | |
 | T2 | Uitleg per puzzel inkorten | tekst | T1 | open | |
