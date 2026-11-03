@@ -5,6 +5,9 @@
 body{background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 html[data-ui-pending],html[data-auth-pending]{overflow:hidden}
 #bootveil{display:none;position:fixed;inset:0;z-index:2147483646;place-items:center;background:var(--bg);color:var(--fg);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+/* iOS 26 tekent in een app op het beginscherm een vervagende rand over de bovenste ±40 pt, tenzij WebKit bovenaan een vast, bijna schermbreed vlak met achtergrondkleur vindt (LocalFrameView::fixedContainerEdges). Dit vlak vult alleen de veilige marge onder de statusbalk. Geen pointer-events:none: dan wordt het vlak niet gevonden. */
+#statusfill{display:none}
+html[data-standalone] #statusfill{display:block;position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:var(--page-tone,var(--bg));z-index:1}
 html[data-ui-pending] #bootveil,html[data-auth-pending] #bootveil{display:grid}
 #bootveil .bootinner{display:flex;align-items:center;gap:5px}
 #bootveil .bootinner i{width:6px;height:6px;border-radius:50%;background:var(--mut);opacity:.28;animation:bootPulse 1s ease-in-out infinite}
