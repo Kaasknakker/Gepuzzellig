@@ -1911,7 +1911,7 @@ body:not(.home) #stage{overscroll-behavior:none}
 
 /* Alle app-/menu-/overzichtspagina's zijn echte verticale scrollers; het puzzelbord blijft vast. */
 body.home{overflow:hidden}
-body.home #home{height:100dvh;min-height:100dvh;overflow-y:scroll!important;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:max(2px,env(safe-area-inset-bottom))}
+body.home #home{height:calc(100dvh - env(safe-area-inset-top));min-height:calc(100dvh - env(safe-area-inset-top));overflow-y:scroll!important;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:max(2px,env(safe-area-inset-bottom))}
 #authaccount.authpage,#groupaccount.authpage{height:100dvh;overflow-y:scroll!important;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch}
 #authaccount.authpage .authcard,#groupaccount.authpage .authcard{min-height:calc(100dvh + 2px)}
 #side,#more{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:auto}
