@@ -123,7 +123,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S6 | Hexcells-bediening en tellers | zichtbaar | D4 | open | |
 | S7 | Puzzelmenu en hintpaneel | zichtbaar | D4 | open | |
 | S8 | iPhone-navigatie onderaan (B2) ★ | zichtbaar | S1 | open | |
-| S9 | Nonogram kleur: foutmarkering die de kleur laat staan (bug) | zichtbaar | – (kan direct na S0) | open | |
+| S9 | Foutmarkering: de rode vulling van een fout vakje lijkt op de rode kleur in het kleurennonogram en overschrijft wat je had ingevuld. Nu: de eigen kleur blijft, met arcering, rode rand en “!” (Peter 3 nov: eerder een ontwerpprobleem dan een bug) | ux | – | in review | PR_NR |
 | S10 | Murdoku: aanwijzing markeren als “nog nodig” (vlaggetje, B8 = c) | nieuw (klein) | D3 | open | |
 | S11 | Pencil in profiel- en groepsmenu: tik op Terug genegeerd, scrollen stroef (bug, ook in main) | bug | – (na de livegang) | in review | #25 |
 | S12 | iPhone-hint in de onderbalk te klein: kaart krijgt alleen de hoogte van de knoppenbalk (`js/layout.js`, `tray`), tekst past er nauwelijks in (ook in main) | bug | – (eerste na de livegang) | in review (Murdoku #45; iPhone alle puzzels #50; knoppen en kruisje #51; iPad #52) | #45, #50, #51, #52 |
