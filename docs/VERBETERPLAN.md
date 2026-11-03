@@ -563,6 +563,20 @@ Bekende problemen (uit 8 opeenvolgende hints):
 
 ---
 
+## 13b. Bekende schuld (pleisters die later echt opgelost moeten worden)
+
+Dit zijn oplossingen die werken en gemeten zijn, maar de oorzaak niet helemaal wegnemen. Ze mogen niet vergeten worden. **Regel:** komt er bij een fix een pleister bij, dan komt hij hier met de stap waarin hij echt opgelost wordt (Peter 3 nov).
+
+| Wat | Waar | Waarom een pleister | Echt oplossen bij |
+| --- | --- | --- | --- |
+| Tijdvenster bij Undo/Opnieuw met Pencil (`clickAt`/`fastAt`, S21, #71) | `bindFastHistoryButton`, `fastPenUI` in `js/core.js` | Twee mechanismen voeren dezelfde tik uit; de fix houdt ze uit elkaar met een tijdvenster. | D4: één mechanisme voor snelle Pencil-bediening van vaste knoppen |
+| Extra 40 px bovenmarge op iPhone-web-app (`--safe-top`, S13, #56/#59) | `css/app.css`, `html[data-standalone]` | Gemeten tegen het iOS-gedrag (vervaging ±95 pt), geen vaste regel. 28 pt-proef staat open. | S1/S5 (kop en schermen), met meting op echt toestel |
+| Plek van de Controleer-melding uitrekenen met JavaScript (`placeCheckMsg`, S19c, #69) | `js/core.js` | Meet de balk en valt op smalle iPad terug op over de titel; eigenlijk een ontwerpkwestie. | S5 en D4 (puzzelkop met vaste plek voor meldingen) |
+| Ring en foutmarkering omzeilen `!important` (outline i.p.v. box-shadow; hatch met `!important`) | `css/app.css` (`.c.bad`, ring-keyframes) | Bestaande `!important`-regels vergen een omweg. | D5 (`!important` afbouwen) |
+| Open vraag, geen pleister: hele Star Battle-puzzel verdwijnt in één keer na undo (opname 3 nov) | – | Niet nagebootst; mogelijk dezelfde oorzaak als S21, niet bewezen. | Opname + meting op een toestel, daarna beslissen |
+
+---
+
 ## Bijlage — Herkomst van de bevindingen
 
 | Bron | Datum |
