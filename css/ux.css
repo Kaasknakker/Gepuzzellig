@@ -25,3 +25,4 @@
 .savepop{position:fixed;right:8px;z-index:90;width:min(300px,calc(100vw - 16px));padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 8px 24px var(--sh)}.savepop[hidden]{display:none}.savepop p{margin:0 0 10px;font-size:14px;line-height:1.4}.savepop button{width:100%;min-height:44px}
 .uxsave[hidden]{display:none}
 body.phone:not(.home) .savewarn{margin-left:auto}
+.savewarn.idle{visibility:hidden;pointer-events:none}

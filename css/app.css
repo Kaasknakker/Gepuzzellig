@@ -1204,8 +1204,8 @@ body[data-t=bin] #grid,body[data-t=star] #grid{box-shadow:0 0 0 5px color-mix(in
 #grid>.nsize{font-size:clamp(14px,calc(var(--cs)*.32),21px);font-weight:800;color:var(--fg);opacity:.85;padding:0 8px 7px 0}
 body.phone #grid>.nsize{font-size:13px;padding:0 4px 5px 0}
 /* S19: de melding staat in de kop tussen de knoppen (positie door doCheck), nooit over het bord. */
-#checkfeedback.good,#checkfeedback.warn{position:fixed;z-index:100;top:max(84px,calc(var(--safe-top) + 64px));left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:6px 14px;border:2px solid currentColor;border-radius:14px;box-shadow:0 4px 16px #0003;font-size:16px;font-weight:800;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--card)}
-#checkfeedback.good{color:var(--ok)}#checkfeedback.warn{color:color-mix(in srgb,#c05b34 70%,var(--fg))}
+#checkfeedback.good,#checkfeedback.warn{position:fixed;z-index:100;top:max(84px,calc(var(--safe-top) + 64px));left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:6px 14px;border:2px solid currentColor;border-radius:14px;box-shadow:0 4px 16px #0003;font-size:17px;font-weight:900;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--card)}
+#checkfeedback.good{color:var(--bg);background:var(--ok)}#checkfeedback.warn{color:#fff;background:#d84b4b}
 @media(max-width:760px),(max-aspect-ratio:1/1){#inputmode{flex-direction:row}}
 body.phone #pbot #inputmode{flex-direction:row;gap:6px;flex:2 1 0;min-width:0}
 body.phone #pbot #inputmode button{flex:1 1 0;min-width:0;padding:10px 4px;font-size:14px}
@@ -2070,6 +2070,6 @@ body.tablet.home .hhomehero{padding:12px 14px 14px}
 #helpb .uiicon,#ctrlb .uiicon{color:color-mix(in srgb,var(--pc) 62%,var(--fg))}
 #mgrid.checkgood,#grid.checkgood{animation:boardCheckGood 2.5s ease-out}
 #mgrid.checkbad,#grid.checkbad{animation:boardCheckBad 4.5s ease-out}
-@keyframes boardCheckGood{0%,60%{box-shadow:0 0 0 6px color-mix(in srgb,var(--ok) 90%,transparent),0 0 22px 2px color-mix(in srgb,var(--ok) 55%,transparent),0 8px 24px var(--sh)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent,0 8px 24px var(--sh)}}
-@keyframes boardCheckBad{0%,70%{box-shadow:0 0 0 6px color-mix(in srgb,#d84b4b 90%,transparent),0 0 22px 2px color-mix(in srgb,#d84b4b 55%,transparent),0 8px 24px var(--sh)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent,0 8px 24px var(--sh)}}
+@keyframes boardCheckGood{0%,60%{outline:6px solid color-mix(in srgb,var(--ok) 92%,transparent);outline-offset:8px;filter:drop-shadow(0 0 14px color-mix(in srgb,var(--ok) 70%,transparent))}100%{outline:6px solid transparent;outline-offset:8px;filter:drop-shadow(0 0 0 transparent)}}
+@keyframes boardCheckBad{0%,70%{outline:6px solid color-mix(in srgb,#d84b4b 92%,transparent);outline-offset:8px;filter:drop-shadow(0 0 14px color-mix(in srgb,#d84b4b 70%,transparent))}100%{outline:6px solid transparent;outline-offset:8px;filter:drop-shadow(0 0 0 transparent)}}
 @media(prefers-reduced-motion:reduce){#mgrid.checkgood,#grid.checkgood{outline:3px solid var(--ok)}#mgrid.checkbad,#grid.checkbad{outline:3px solid #d84b4b}}
