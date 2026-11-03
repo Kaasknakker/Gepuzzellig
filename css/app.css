@@ -159,8 +159,9 @@ svg .shake{animation:shake .35s}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 #hexbtns.mz .st,#hexstat.mz .st{background:#35363b}
 #chk{padding:14px 10px;font-weight:700}
-.c.bad{background:#e5484d!important;color:#fff}
-.c.bad svg path{stroke:#fff}
+/* Fout: de ingevulde kleur blijft zichtbaar; arcering, dikke rand en een "!" dragen de betekenis (ook voor kleurenblinden). */
+.c.bad{background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--fg) 40%,transparent) 0 3px,transparent 3px 8px)!important;box-shadow:inset 0 0 0 3px #e5484d}
+.c.bad::after{content:"!";position:absolute;top:1px;right:1px;width:calc(var(--cs)*.36);height:calc(var(--cs)*.36);border-radius:50%;background:#e5484d;color:#fff;font:900 calc(var(--cs)*.26)/calc(var(--cs)*.36) system-ui;text-align:center;pointer-events:none}
 #theme{padding:6px 14px;font-weight:700}
 .mut.lv{font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin:6px 0 0}
 #streak{text-align:center;font-weight:700;font-size:14px;color:var(--mut)}
