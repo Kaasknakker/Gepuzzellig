@@ -129,6 +129,13 @@ jobs:
           grep -q '%2327220f' .test-dist/index.html
           ! grep -q 'Gepuzzellig%20Test' index.html
           ! grep -q '%2327220f' index.html
+          # De testbuild krijgt een eigen versienummer (vN-bBOUW), zodat de testsite bij elke deploy verse bestanden haalt;
+          # het bronnummer wordt alleen bij een release verhoogd (scripts/bump-version.mjs).
+          node .github/scripts/stamp-test-version.mjs .test-dist "${{ github.run_number }}"
+          grep -q '?v=[0-9]*-b${{ github.run_number }}' .test-dist/index.html
+          grep -q 'const C=PREFIX+"v[0-9]*-b${{ github.run_number }}"' .test-dist/sw.js
+          ! grep -q -- '-b[0-9]' index.html
+          ! grep -q -- '-b[0-9]' sw.js
 
       - name: Authenticate to test Firebase project
         uses: google-github-actions/auth@v3

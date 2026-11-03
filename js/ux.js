@@ -14,10 +14,34 @@ const UX={
   });
  },
  storage(k,patch){const old=this.saves.get(k)||{};if(patch.at&&old.at&&patch.at<old.at)return;this.saves.set(k,{...old,...patch});this.paintStorage()},
+ saveInfo(){
+  const k=S&&S.p?progKey(S.type,S.practice,S.date,S.sf):'',state=this.saves.get(k)||(k?undefined:[...this.saves.values()].find(v=>v.local===false||v.remote==='failed')),exists=k&&progAll()[k];
+  const text=!exists&&!state?'Je voortgang wordt tijdens het puzzelen automatisch bewaard.':state&&state.local===false?'Bewaren op dit apparaat lukt niet. Houd deze pagina open en probeer opnieuw.':state&&state.remote==='saving'?'Op dit apparaat bewaard · synchroniseren…':state&&state.remote==='failed'?'Op dit apparaat bewaard · nog niet gedeeld.':state&&state.remote==='saved'?'Op dit apparaat bewaard en gesynchroniseerd.':PHONE?'Op dit apparaat bewaard · telefoonvoortgang blijft op dit apparaat.':'Op dit apparaat bewaard.';
+  return{text,warning:!!(state&&(state.local===false||state.remote==='failed'))};
+ },
+ /* De opslagstatus staat alleen nog in het menu. Gaat er iets mis, dan verschijnt er een klein icoon naast het menu (of naast het profiel op Home); een tik erop opent een venstertje met uitleg en "Opnieuw proberen". */
  paintStorage(){
-  const k=S&&S.p?progKey(S.type,S.practice,S.date,S.sf):'',state=this.saves.get(k),exists=k&&progAll()[k];
-  let text=!exists&&!state?'Je voortgang wordt tijdens het puzzelen automatisch bewaard.':state&&state.local===false?'Bewaren op dit apparaat lukt niet. Houd deze pagina open en probeer opnieuw.':state&&state.remote==='saving'?'Op dit apparaat bewaard · synchroniseren…':state&&state.remote==='failed'?'Op dit apparaat bewaard · nog niet gedeeld.':state&&state.remote==='saved'?'Op dit apparaat bewaard en gesynchroniseerd.':PHONE?'Op dit apparaat bewaard · telefoonvoortgang blijft op dit apparaat.':'Op dit apparaat bewaard.';
-  document.querySelectorAll('[data-save-status]').forEach(el=>{const warning=!!(state&&(state.local===false||state.remote==='failed')),inPuzzle=!document.body.classList.contains('home');el.hidden=inPuzzle&&!warning;const span=el.querySelector('span');if(span.textContent!==text)span.textContent=text;const retry=el.querySelector('button');retry.hidden=!warning;el.closest('.uxsmallstatus')?.classList.toggle('storage-warning',warning);retry.onclick=()=>{persist(true);pullCloudProgress(true)}});
+  const{text,warning}=this.saveInfo();
+  document.querySelectorAll('[data-save-status]').forEach(el=>{el.hidden=!el.closest('#more,#pmp');const span=el.querySelector('span');if(span.textContent!==text)span.textContent=text;const retry=el.querySelector('button');retry.hidden=!warning;retry.onclick=()=>{persist(true);pullCloudProgress(true)}});
+  this.placeSaveIcon(warning);
+ },
+ placeSaveIcon(warning){
+  const b=this.saveBtn,pop=document.getElementById('savePop');if(!b)return;
+   const home=document.body.classList.contains('home'),anchor=home?document.querySelector('#home .hprofile'):(document.getElementById('tbMore')||document.getElementById('pm'));
+  /* In de puzzelkop houdt het icoon zijn plek ook zonder probleem (onzichtbaar), zodat de tijd en de rest van de balk niet verschuiven. */
+  if(!warning){if(pop)pop.hidden=true;if(home||!anchor){b.hidden=true;return}b.hidden=false;b.classList.add('idle');if(b.nextElementSibling!==anchor)anchor.before(b);return}
+  b.classList.remove('idle');
+  if(anchor&&b.nextElementSibling!==anchor)anchor.before(b);
+  b.hidden=!anchor;if(pop&&!pop.hidden)this.fillSavePop();
+ },
+ fillSavePop(){
+  const pop=document.getElementById('savePop'),b=this.saveBtn;if(!pop||!b)return;
+  pop.querySelector('p').textContent=this.saveInfo().text;const r=b.getBoundingClientRect();pop.style.top=Math.round(r.bottom+6)+'px';
+ },
+ savePop(){
+  let pop=document.getElementById('savePop');if(pop&&!pop.hidden){pop.hidden=true;return}
+  if(!pop){pop=document.createElement('div');pop.id='savePop';pop.className='savepop';pop.setAttribute('role','status');pop.innerHTML='<p></p><button type="button">Opnieuw proberen</button>';document.body.append(pop);pop.querySelector('button').onclick=()=>{persist(true);pullCloudProgress(true);pop.hidden=true};document.addEventListener('pointerdown',e=>{if(!pop.hidden&&!e.target.closest('#savePop,#saveWarn'))pop.hidden=true},true)}
+  pop.hidden=false;this.fillSavePop();
  },
  storageMarkup(){return '<div class="uxsave" data-save-status role="status" aria-live="polite"><span></span><button type="button" hidden>Opnieuw proberen</button></div>'},
  randomSettings(not){
@@ -45,7 +69,9 @@ const UX={
  },
  init(){
   const menu=document.getElementById('more');if(menu)menu.insertAdjacentHTML('beforeend',this.storageMarkup()+'<p class="uxexplain">Telefoonpuzzels blijven op dit apparaat. Groot-schermpuzzels worden tussen grote schermen gedeeld zodra je online bent. Opgeloste resultaten worden wel gedeeld.</p>');
-  const title=document.getElementById('tbTitle')||document.getElementById('prow');if(title){const status=document.createElement('div');status.className='uxsmallstatus';status.innerHTML=this.storageMarkup();title.after(status)}
+  const pmp=document.getElementById('pmp');if(pmp)pmp.insertAdjacentHTML('beforeend',this.storageMarkup());
+  const so=document.getElementById('pshowonline');if(so){so.checked=showOnlineOn();so.onchange=()=>{lsSet('pdshowonline',so.checked?'1':'0');if(so.checked)pingOnline(true);else clearOnline(true)}}
+  const sb=document.createElement('button');sb.type='button';sb.id='saveWarn';sb.className='savewarn';sb.hidden=true;sb.title='Opslag';sb.setAttribute('aria-label','Opslag: aandacht nodig');sb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.2v.3"/></svg>';sb.onclick=e=>{e.stopPropagation();this.savePop()};this.saveBtn=sb;
   document.addEventListener('pointerup',e=>{if(!e.target.closest('#grid,#hexsvg,#mgrid,#mpal,#mclues'))return;requestAnimationFrame(()=>{if(!document.body.classList.contains('home'))this.board()})});
   window.addEventListener('online',()=>{persist(true);pullCloudProgress(true)});
 

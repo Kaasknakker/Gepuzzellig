@@ -24,7 +24,7 @@ Vastgelegd op 27 oktober 2026. Geldt voor iedere AI die aan Gepuzzellig werkt (C
 4. **Werk van een andere AI is een voorstel, geen opdracht.** Bouw voort op samengevoegd werk; doe het niet opnieuw. Review een open PR van een ander met het label `review:`.
 5. **Eén stap per pull request.** Volg de werkwijze per stap in `docs/VERBETERPLAN.md` hoofdstuk 2. Kleine, samenhangende fixes mogen in één PR wanneer dat een extra releaseronde scheelt; zeg dat dan in de PR.
 6. **Visuele controle.** Zodra `test/visual/` en de workflow *Visuele controle* op `develop` staan, mag een wijziging aan CSS of zichtbare JavaScript alleen worden samengevoegd met een groene run waarin alleen de verwachte schermen veranderen (`test/visual/README.md`).
-7. **Eén versienummer per PR-ronde,** aan het einde: `?v=` in `index.html` en de cacheversie in `sw.js` samen; `check-app.mjs` controleert dat.
+7. **Gewone PR's verhogen het versienummer niet** (dat gaf steeds conflicten tussen PR's). De testdeploy stempelt zelf een uniek nummer (`vN-bBOUW`, `.github/scripts/stamp-test-version.mjs`), dus de testsite haalt bij elke merge verse bestanden. Het bronnummer (`?v=` in `index.html` en de cachenaam in `sw.js`, samen; `check-app.mjs` controleert dat) gaat alleen omhoog bij een release, met `node scripts/bump-version.mjs`; zie *Gecontroleerde productierelease*. Een PR die zelf een nummer moet verhogen (bijvoorbeeld omdat een bestand in de service worker-cache daarvan afhangt) zegt dat in de PR.
 8. **Productie alleen op expliciete opdracht.** Maak geen productie-PR of andere productieactie en wijzig niets aan `main`, het Firebase-project `gepuzzelig`, secrets of de migratie zonder dat Peter daar in dezelfde chat uitdrukkelijk om vraagt. Zelfs met toestemming blijven alle branchbeschermingsregels gelden.
 
 ## Branchbeveiliging en releases (vanaf 2 november 2026)
@@ -44,7 +44,7 @@ De actieve GitHub-ruleset **Bescherm main en develop** beschermt beide branches 
 
 ### Gecontroleerde productierelease
 
-**Alleen uitvoeren na uitdrukkelijk releaseakkoord van Peter.** De oude eenmalige migratie-instructies in `docs/FASE11-LIVEGANG.md` zijn geen toestemming om bij latere releases rechtstreeks naar `main` te pushen.
+**Alleen uitvoeren na uitdrukkelijk releaseakkoord van Peter.** Voor de release-PR zelf: open eerst een kleine PR naar `develop` die alleen `node scripts/bump-version.mjs` uitvoert (nieuw versienummer in `index.html` en `sw.js`), laat `check-app` groen worden en laat Peter die samenvoegen; productie moet een nieuw nummer krijgen, anders blijft de service worker oude bestanden serveren. De oude eenmalige migratie-instructies in `docs/FASE11-LIVEGANG.md` zijn geen toestemming om bij latere releases rechtstreeks naar `main` te pushen.
 
 1. Controleer eerst dat de gekozen `develop`-versie en testdeployment groen zijn en dat de bedoelde wijzigingen op de testsite zijn beoordeeld. Inspecteer ook de actuele verschillen tussen `develop` en `main`; behoud eventuele productiegebonden wijzigingen.
 2. Open een pull request met **base `main`** en **compare `develop`**. Controleer de bestandswijzigingen, waaronder het rootbestand `CNAME` met exact `gepuzzellig.nl` (zie `docs/DOMEIN.md`). Los eventuele conflicten via normale commits/PR's op, nooit door een branch te overschrijven.

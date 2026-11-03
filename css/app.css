@@ -1,10 +1,15 @@
-:root{--bg:#f6f4ef;--fg:#1f2430;--card:#fff;--line:#c9c5bb;--acc:#2f6fed;--mut:#6b7080;--ok:#1d8a4b;--fill:#1f2430;--sel:#ffe9a8;--dup:#c9f58f;--one:#7a52d6;color-scheme:light}
+:root{--bg:#f6f4ef;--fg:#1f2430;--card:#fff;--line:#c9c5bb;--acc:#2f6fed;--mut:#6b7080;--ok:#1d8a4b;--fill:#1f2430;--sel:#ffe9a8;--dup:#c9f58f;--one:#7a52d6;color-scheme:light;--safe-top:env(safe-area-inset-top)}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#15171c;--fg:#ecebe6;--card:#20232b;--line:#3a3e4a;--acc:#6f9bff;--mut:#9a9eab;--ok:#4cc380;--fill:#ecebe6;--sel:#5a4a14;--dup:#3d6b1c;--one:#a98bff;color-scheme:dark}}
 :root[data-theme=dark]{--bg:#15171c;--fg:#ecebe6;--card:#20232b;--line:#3a3e4a;--acc:#6f9bff;--mut:#9a9eab;--ok:#4cc380;--fill:#ecebe6;--sel:#5a4a14;--dup:#3d6b1c;--one:#a98bff;color-scheme:dark}
 *{box-sizing:border-box}html,body{margin:0}html{background:var(--bg)}
-body{background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+/* iOS 26 vervaagt in een app op het beginscherm de bovenste ±95 pt (statusbalk + ±36 pt). Op de telefoon beginnen kop en inhoud daarom 40 px lager; Profiel en de aanmeldpagina's gebruiken env() en liggen al buiten dat bereik. */
+@media(max-width:600px){html[data-standalone]{--safe-top:calc(env(safe-area-inset-top) + 40px)}}
+body{background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;padding:var(--safe-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 html[data-ui-pending],html[data-auth-pending]{overflow:hidden}
 #bootveil{display:none;position:fixed;inset:0;z-index:2147483646;place-items:center;background:var(--bg);color:var(--fg);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+/* iOS 26 tekent in een app op het beginscherm een vervagende rand over de bovenste ±40 pt, tenzij WebKit bovenaan een vast, bijna schermbreed vlak met achtergrondkleur vindt (LocalFrameView::fixedContainerEdges). Dit vlak vult alleen de veilige marge onder de statusbalk. Geen pointer-events:none: dan wordt het vlak niet gevonden. */
+#statusfill{display:none}
+html[data-standalone] #statusfill{display:block;position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:var(--page-tone,var(--bg));z-index:1}
 html[data-ui-pending] #bootveil,html[data-auth-pending] #bootveil{display:grid}
 #bootveil .bootinner{display:flex;align-items:center;gap:5px}
 #bootveil .bootinner i{width:6px;height:6px;border-radius:50%;background:var(--mut);opacity:.28;animation:bootPulse 1s ease-in-out infinite}
@@ -63,7 +68,7 @@ body.phone #pbot #potb,body.phone #pbot #notewipe{flex:0 0 46px;font-size:18px;p
 .c.f{background:var(--fill)}
 .c.sel{background:var(--sel)}
 .c.pick{background:color-mix(in srgb,var(--acc) 16%,var(--card))}
-.c.g.pick{background:color-mix(in srgb,var(--acc) 16%,color-mix(in srgb,var(--line) 45%,var(--card)))}
+.c.g.pick:not([class*=dg]){background:color-mix(in srgb,var(--acc) 16%,color-mix(in srgb,var(--line) 45%,var(--card)))}
 .c.dup{background:var(--dup)}
 .c.dg0{background:#c9f58f}.c.dg1{background:#9fd8ff}.c.dg2{background:#ffd08a}.c.dg3{background:#f7b6d8}.c.dg4{background:#d9c2ff}.c.dg5{background:#fff3a3}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]) .c.dg0{background:#3d6b1c}:root:not([data-theme=light]) .c.dg1{background:#1d5a8a}:root:not([data-theme=light]) .c.dg2{background:#8a5a14}:root:not([data-theme=light]) .c.dg3{background:#8a2f5f}:root:not([data-theme=light]) .c.dg4{background:#5a3f9a}:root:not([data-theme=light]) .c.dg5{background:#7a6d12}}
@@ -144,6 +149,9 @@ button:focus-visible{outline:3px solid var(--pc);outline-offset:2px}
 @keyframes pop{0%{transform:scale(.55)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}45%{transform:translateX(5px)}70%{transform:translateX(-3px)}}
 .c.pop{animation:pop .24s ease-out;position:relative;z-index:2}
+/* Binair: alleen het teken poppt, binnen het eigen vakje. Een vakje dat boven zijn buren uit schaalt, laat Safari het hele raster een halve punt verschuiven (opname 2 nov). */
+body[data-t=bin] #grid .c.pop{animation:none;z-index:auto}
+body[data-t=bin] #grid .c.pop svg{animation:pop .24s ease-out}
 svg .pop{transform-box:fill-box;transform-origin:center;animation:pop .32s ease-out}
 svg .shake{animation:shake .35s}
 #hexw svg g{transition:opacity .2s}
@@ -151,8 +159,9 @@ svg .shake{animation:shake .35s}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 #hexbtns.mz .st,#hexstat.mz .st{background:#35363b}
 #chk{padding:14px 10px;font-weight:700}
-.c.bad{background:#e5484d!important;color:#fff}
-.c.bad svg path{stroke:#fff}
+/* Fout: de ingevulde kleur blijft zichtbaar; arcering, dikke rand en een "!" dragen de betekenis (ook voor kleurenblinden). */
+.c.bad{background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--fg) 40%,transparent) 0 3px,transparent 3px 8px)!important;box-shadow:inset 0 0 0 3px #e5484d,inset 0 0 0 5px #fff}
+.c.bad::after{content:"!";position:absolute;top:1px;right:1px;width:calc(var(--cs)*.36);height:calc(var(--cs)*.36);border-radius:50%;background:#fff;color:#e5484d;box-shadow:0 0 0 2px #e5484d;font:900 calc(var(--cs)*.26)/calc(var(--cs)*.36) system-ui;text-align:center;pointer-events:none}
 #theme{padding:6px 14px;font-weight:700}
 .mut.lv{font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin:6px 0 0}
 #streak{text-align:center;font-weight:700;font-size:14px;color:var(--mut)}
@@ -400,7 +409,7 @@ body[data-t=plus].phone #pbot #hintb span,body[data-t=plus].phone #pbot #chk spa
 body[data-t=plus].phone #pbot #hintb,body[data-t=plus].phone #pbot #chk{flex:0 0 50px}
 /* ===== iPhone ===== */
 #prow,#pbot,#pmp,#pm{display:none}
-body.phone{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);overflow:hidden;overscroll-behavior:none}
+body.phone{padding:var(--safe-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);overflow:hidden;overscroll-behavior:none}
 body.phone header{position:relative;display:flex;align-items:center;flex-wrap:nowrap;gap:0;padding:4px 46px 4px 4px;min-height:40px;box-sizing:border-box}
 body.phone header h1{display:none}
 body.phone header nav{order:0;flex:1 1 auto;min-width:0;flex-wrap:nowrap;justify-content:flex-start;align-items:center;gap:5px;padding:2px 5px 4px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding-inline:18px;overscroll-behavior-x:contain}
@@ -429,11 +438,11 @@ body.phone #pbot #undo span,body.phone #pbot #redo span{display:none}
 body.phone #pbot #nmode{display:flex;flex-direction:row;gap:6px;flex:2 1 0;min-width:0}
 body.phone #pbot #mb,body.phone #pbot #mz{flex:1.4 1 0;font-size:16px}
 body.phone #pm{margin-left:2px}
-body.phone #pmp.open{display:flex;position:fixed;top:calc(env(safe-area-inset-top) + 44px);right:6px;width:230px;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;z-index:55;box-shadow:0 14px 40px rgba(0,0,0,.3)}
+body.phone #pmp.open{display:flex;position:fixed;top:calc(var(--safe-top) + 44px);right:6px;width:230px;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;z-index:55;box-shadow:0 14px 40px rgba(0,0,0,.3)}
 body.phone #pmp button,body.phone #pmp #time{width:100%;text-align:left;padding:10px 12px;font-size:15px;border-radius:12px;display:flex;gap:8px;align-items:center}
 body.phone #pmp #streak{padding:4px 12px;font-size:14px}
 body.phone #pmp #reset b{font-size:16px}
-body.phone #side{top:calc(env(safe-area-inset-top) + 44px);left:6px;right:6px;width:auto;max-height:calc(100dvh - 120px)}
+body.phone #side{top:calc(var(--safe-top) + 44px);left:6px;right:6px;width:auto;max-height:calc(100dvh - 120px)}
 body[data-t=nono].phone #pbot #hintb span,body[data-t=nono].phone #pbot #chk span{display:none}
 body[data-t=nono].phone #pbot #hintb,body[data-t=nono].phone #pbot #chk{flex:0 0 50px}
 body.phone #hint{font-size:14px;padding:10px 44px 10px 12px;max-height:45vh}body.phone #hint button:not(.hx){padding:7px 14px}body.phone #hint .mut{font-size:12px}
@@ -976,12 +985,12 @@ body.phone:not(.home):not(.newpick) #prow{
  min-height:58px;
  padding:14px 6px 7px;
 }
-body.phone:not(.home):not(.newpick) #prow>:not(#tbHome):not(#pm):not(#hexstat):not(#peerLive){display:none!important}
+body.phone:not(.home):not(.newpick) #prow>:not(#tbHome):not(#pm):not(#hexstat):not(#peerLive):not(#saveWarn){display:none!important}
 body.phone:not(.home):not(.newpick) #prow #peerLive{display:flex!important;order:8;width:34px;height:34px;flex:0 0 34px;padding:0;justify-content:center;border-radius:50%;margin-left:auto}
-body.phone:not(.home):not(.newpick) #prow #peerLive span{display:none}
+body.phone:not(.home):not(.newpick) #prow #peerLive span{max-width:170px;white-space:nowrap}
 body.phone:not(.home):not(.newpick) #prow #peerLive i{width:10px;height:10px}
 body.phone:not(.home):not(.newpick) #prow #peerLive[hidden]{display:none!important}
-.peerlivepop{position:fixed;z-index:80;top:calc(env(safe-area-inset-top) + 60px);right:58px;width:min(280px,calc(100vw - 78px));padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 8px 28px #0002;font-size:12px}
+.peerlivepop{position:fixed;z-index:80;top:calc(var(--safe-top) + 60px);right:58px;width:min(280px,calc(100vw - 78px));padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 8px 28px #0002;font-size:12px}
 .peerlivepop[hidden]{display:none!important}.peerlivepop>b{display:block;margin-bottom:6px}.peerlivepop>div{display:flex;align-items:center;gap:8px;padding:5px 0;line-height:1.3}.peerlivepop i{display:block;width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#28a745}.peerlivepop span{min-width:0}
 /* Hexcells: de teller "nog te vinden" is een echte aanwijzing, dus die blijft ook op de iPhone in beeld. */
 body.phone:not(.home):not(.newpick)[data-t=hex] #prow #hexstat{display:flex!important;order:5;margin:0 8px 0 auto}
@@ -1002,7 +1011,7 @@ body.phone #prow #pm{
  box-shadow:0 2px 0 var(--line);
 }
 body.phone #prow #pm{margin-left:0}
-body.phone #pmp.open{top:calc(env(safe-area-inset-top) + 72px)}
+body.phone #pmp.open{top:calc(var(--safe-top) + 72px)}
 
 body.tablet.home #home .hwrap:not(.sco) .hbrand{font-size:22px}
 body.tablet.home #home .hwrap:not(.sco) h2{font-size:30px;line-height:1.04}
@@ -1024,9 +1033,9 @@ body.tablet.home #home .hwrap:not(.sco) .hsname{font-size:17px}
 body.tablet.home #home .hwrap:not(.sco) .hscount b{font-size:17px}
 
 /* Google-login is de vaste ingang; speler en groep komen uitsluitend uit het gekoppelde profiel. */
-.authcover{position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;padding:max(20px,env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(20px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.authcover{position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;padding:max(20px,var(--safe-top)) max(20px,env(safe-area-inset-right,0px)) max(20px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .authcover[hidden]{display:none}
-.authcard{width:min(390px,100%);max-height:calc(100dvh - 40px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:26px;border-radius:24px;border:1px solid var(--line);background:var(--card);box-shadow:0 18px 60px color-mix(in srgb,#000 24%,transparent);text-align:center}
+.authcard{width:min(390px,100%);max-height:calc(100dvh - 40px - var(--safe-top) - env(safe-area-inset-bottom,0px));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:26px;border-radius:24px;border:1px solid var(--line);background:var(--card);box-shadow:0 18px 60px color-mix(in srgb,#000 24%,transparent);text-align:center}
 .authlogo{display:inline-grid;grid-template-columns:repeat(2,9px);gap:3px;margin-bottom:12px}.authlogo i{width:9px;height:9px;border-radius:3px;background:var(--pc)}.authlogo i:nth-child(2){opacity:.7}.authlogo i:nth-child(3){opacity:.45}.authlogo i:nth-child(4){opacity:.85}
 .authcard h2{margin:0 0 7px;font-size:25px}.authcard p{margin:0 0 18px;color:var(--mut);font-size:13px;line-height:1.45}
 .authgoogle{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 15px;border-radius:14px;background:#fff;color:#202124;border:1px solid #dadce0;box-shadow:0 1px 2px rgba(0,0,0,.12);font-weight:800}
@@ -1085,7 +1094,7 @@ body.hintdock #stage{max-height:var(--hint-board-height);overflow:auto;overscrol
 body.hintdock #playbox{flex-shrink:0}
 body.hintdock #hint.side{border-top-width:1px}
 .ddmetric b{overflow-wrap:anywhere}
-body.phone.hintdock #hint{max-height:min(46dvh,calc(100dvh - env(safe-area-inset-top) - 100px));overflow-y:auto;box-sizing:border-box}
+body.phone.hintdock #hint{max-height:min(46dvh,calc(100dvh - var(--safe-top) - 100px));overflow-y:auto;box-sizing:border-box}
 body.hintdock #stage{min-height:0}
 html.tap body.hintdock #stage{touch-action:pan-x pan-y}
 /* Houd ook een breed bord binnen de vrije ruimte tussen bediening en hint. */
@@ -1194,8 +1203,9 @@ body[data-t=bin] #grid,body[data-t=star] #grid{box-shadow:0 0 0 5px color-mix(in
 .mc.xx .mx,.mc.xm .mx{color:color-mix(in srgb,var(--fg) 55%,transparent);font-weight:500;font-size:calc(var(--ms)*.45)}
 #grid>.nsize{font-size:clamp(14px,calc(var(--cs)*.32),21px);font-weight:800;color:var(--fg);opacity:.85;padding:0 8px 7px 0}
 body.phone #grid>.nsize{font-size:13px;padding:0 4px 5px 0}
-#checkfeedback.good,#checkfeedback.warn{position:fixed;z-index:100;top:max(84px,calc(env(safe-area-inset-top) + 64px));left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);padding:16px 22px;border:2px solid currentColor;border-radius:16px;box-shadow:0 8px 30px #0003;font-size:18px;font-weight:800;line-height:1.4;text-align:center;background:var(--card)}
-#checkfeedback.good{color:var(--ok)}#checkfeedback.warn{color:color-mix(in srgb,#c05b34 70%,var(--fg))}
+/* S19: de melding staat in de kop tussen de knoppen (positie door doCheck), nooit over het bord. */
+#checkfeedback.good,#checkfeedback.warn{position:fixed;z-index:100;top:max(84px,calc(var(--safe-top) + 64px));left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:6px 14px;border:2px solid currentColor;border-radius:14px;box-shadow:0 4px 16px #0003;font-size:17px;font-weight:900;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--card)}
+#checkfeedback.good{color:var(--bg);background:var(--ok)}#checkfeedback.warn{color:#fff;background:#d84b4b}
 @media(max-width:760px),(max-aspect-ratio:1/1){#inputmode{flex-direction:row}}
 body.phone #pbot #inputmode{flex-direction:row;gap:6px;flex:2 1 0;min-width:0}
 body.phone #pbot #inputmode button{flex:1 1 0;min-width:0;padding:10px 4px;font-size:14px}
@@ -1230,7 +1240,7 @@ body[data-input-mode=fill] #mgrid.pmode{outline:5px solid color-mix(in srgb,var(
 body[data-input-mode] #hexsvg{background:var(--card)!important;box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-tint) 82%,var(--line)),0 8px 24px var(--sh)!important}
 
 .peerlive>span{display:inline;min-width:0;overflow:hidden;text-overflow:ellipsis}
-body.phone #prow #peerLive{max-width:38vw}
+body.phone #prow #peerLive{max-width:44vw}
 
 @media(max-width:359px){
  body.phone #pbot:has(#notewipe:not([style*="none"])) #undo,body.phone #pbot:has(#notewipe:not([style*="none"])) #redo,body.phone #pbot:has(#notewipe:not([style*="none"])) #potb,body.phone #pbot:has(#notewipe:not([style*="none"])) #notewipe,body.phone #pbot:has(#notewipe:not([style*="none"])) #hintb,body.phone #pbot:has(#notewipe:not([style*="none"])) #chk{flex-basis:30px}
@@ -1282,8 +1292,8 @@ body.tablet #topbar #peerLive span{max-width:180px}
 }
 
 /* Vaststaande Binair-vakjes zijn herkenbaar, met een rustiger grijstint. */
-body[data-t=bin] #grid .c.g{background:color-mix(in srgb,var(--line) 22%,var(--card))}
-body[data-t=bin] #grid .c.g.pick{background:color-mix(in srgb,var(--acc) 16%,var(--card))}
+body[data-t=bin] #grid .c.g:not([class*=dg]){background:color-mix(in srgb,var(--line) 22%,var(--card))}
+body[data-t=bin] #grid .c.g.pick:not([class*=dg]){background:color-mix(in srgb,var(--acc) 16%,var(--card))}
 body[data-t=bin] #grid .c.g.dup{background:color-mix(in srgb,var(--dup) 65%,color-mix(in srgb,var(--line) 22%,var(--card)))}
 body[data-input-mode] #nmode .ncb.on i{box-shadow:0 0 0 2px #fff}
 body[data-input-mode] #hexsvg.mb,body[data-input-mode] #hexsvg.mz{box-shadow:0 0 0 7px var(--mode-tint),0 8px 24px var(--sh)}
@@ -1385,7 +1395,7 @@ details.hcontgroup{display:block;border:0;background:transparent;align-self:star
 /* Uitklappers worden in core.js geanimeerd, omdat native details-autohoogte op iPad niet betrouwbaar animeert. */
 
 /* Lange profiel- en groepsvensters scrollen als één iOS-oppervlak; dat voelt soepeler dan een scrollvak ín een vaste overlay. */
-#authaccount.authcover,#groupaccount.authcover{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;touch-action:pan-y;padding-top:max(20px,env(safe-area-inset-top,0px));padding-bottom:max(20px,env(safe-area-inset-bottom,0px))}#authaccount.authcover[hidden],#groupaccount.authcover[hidden]{display:none}#authaccount .authcard,#groupaccount .authcard{max-height:none;overflow:visible;margin:0 auto;touch-action:auto}
+#authaccount.authcover,#groupaccount.authcover{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;touch-action:pan-y;padding-top:max(20px,var(--safe-top));padding-bottom:max(20px,env(safe-area-inset-bottom,0px))}#authaccount.authcover[hidden],#groupaccount.authcover[hidden]{display:none}#authaccount .authcard,#groupaccount .authcard{max-height:none;overflow:visible;margin:0 auto;touch-action:auto}
 
 
 /* Compacte multi-groepenweergave op Home. */
@@ -1693,7 +1703,6 @@ body.nieuw:not(.home)::before{opacity:.58}
 /* Puzzelcatalogus: ontdekken, starten en Home-favorieten zijn aparte acties. */
 .puzzlecatalog{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px;margin-top:10px}.puzzlecard{display:grid;grid-template-columns:54px minmax(0,1fr);gap:13px;align-items:start;padding:15px;border:1px solid color-mix(in srgb,var(--tc) 24%,var(--line));border-radius:17px;background:var(--card);box-shadow:0 4px 14px rgba(0,0,0,.04)}.puzzlecard>.ticon{width:50px;height:50px}.puzzlecardbody{min-width:0}.puzzlecardtitle{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.puzzlecard h4{margin:2px 0 0;font-size:1rem}.puzzlecard p{margin:6px 0 12px;color:var(--mut);font-size:.8rem;line-height:1.42}.puzzlefav{flex:none;display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:6px 9px;border:1px solid var(--line);border-radius:11px;background:transparent;color:var(--mut);font-weight:750}.puzzlefav>span:first-child{font-size:1.2rem;line-height:1}.puzzlefav.on{color:var(--tc);border-color:color-mix(in srgb,var(--tc) 48%,var(--line));background:color-mix(in srgb,var(--tc) 8%,var(--card))}.puzzlefav:focus-visible,.pcardstart:focus-visible,.pcardstarts button:focus-visible{outline:3px solid color-mix(in srgb,var(--tc) 45%,transparent);outline-offset:2px}.puzzlecardfoot{display:flex;align-items:center;justify-content:space-between;gap:10px}.puzzlecardfoot>small{color:var(--mut);font-size:.7rem}.pcardstart,.pcardstarts button{min-height:40px;padding:8px 13px;border:0;border-radius:11px;background:var(--tc);color:#fff;font-weight:850}.pcardstarts{display:flex;gap:6px}.puzzlefavstatus{min-height:1.25em;margin:8px 1px 2px;color:var(--mut);font-size:.76rem}.puzzlefav:disabled{opacity:.55}.profileprefs .prefrow label{min-width:0}.profileprefs .prefrow b{font-size:.86rem}@media(max-width:560px){.puzzlecatalog{grid-template-columns:1fr}.puzzlecard{grid-template-columns:44px minmax(0,1fr);gap:10px;padding:13px}.puzzlecard>.ticon{width:42px;height:42px}.puzzlecardtitle{align-items:center}.puzzlefav{min-height:42px}.puzzlecardfoot{align-items:flex-end}.puzzlefavlabel{font-size:.72rem}}@media(max-width:370px){.puzzlefavlabel{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.puzzlecardfoot{flex-wrap:wrap}.pcardstarts{width:100%}.pcardstarts button{flex:1}}
 
-.hpuzzlestop{display:flex;align-items:center;margin:0 0 10px}.hpuzzlehome{display:inline-flex;align-items:center;gap:7px;width:auto;min-height:38px;padding:7px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg);box-shadow:none;font-weight:800}.hpuzzlehome:hover{background:color-mix(in srgb,var(--line) 16%,var(--card))}.hpuzzlehome span{font-size:18px;line-height:1}
 
 /* Puzzelen: favorieten en volledige catalogus */
 .hpuzzletabs{display:flex;gap:5px;width:max-content;max-width:100%;margin:2px 0 12px;padding:4px;border:1px solid var(--line);border-radius:13px;background:color-mix(in srgb,var(--line) 12%,var(--card))}.hpuzzletabs button{min-height:40px;padding:8px 15px;border:0;border-radius:9px;background:transparent;color:var(--mut);box-shadow:none;font-weight:850;touch-action:manipulation}.hpuzzletabs button.on{background:var(--card);color:var(--fg);box-shadow:0 1px 4px #00000012}.pcarddaily{margin:10px 0 2px;border-top:1px solid color-mix(in srgb,var(--line) 75%,transparent);border-bottom:1px solid color-mix(in srgb,var(--line) 75%,transparent)}.pcarddailyopen{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:44px;padding:9px 2px;border:0;background:transparent;color:var(--fg);box-shadow:none;text-align:left;font-weight:750;touch-action:manipulation}.pcarddailyopen>span:last-child{font-size:20px;color:var(--mut);transition:transform .18s ease}.pcarddailyopen[aria-expanded="true"]>span:last-child{transform:rotate(90deg)}.pcarddailychoices{padding:0 0 11px}.pcarddailychoices>span{display:block;margin:1px 0 7px;color:var(--mut);font-size:.72rem;font-weight:750}.pcarddailychoices>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.pcarddailychoices button{min-height:40px;padding:7px 5px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--fg);box-shadow:none;font-size:.76rem;font-weight:800;touch-action:manipulation}.pcarddailychoices button.on{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 12%,var(--card));color:var(--tc)}.pcarddailychoices small{display:block;margin-top:7px;color:var(--mut);font-size:.68rem;line-height:1.35}@media(max-width:560px){.hpuzzletabs{width:100%}.hpuzzletabs button{flex:1}.pcarddailychoices button{min-height:44px}}
@@ -1823,7 +1832,7 @@ body.newpick #npm{animation:gpPanelIn var(--motion-ui) var(--motion-ease) both}
 /* Pre-live polish v198: neutrale hoofdnavigatie, veilige iPad-randen en ruimere groepschevrons. */
 body.home .hmainnav button::before{background:var(--mut)!important;opacity:.42}
 body.home .hmainnav button.on::before{background:var(--home-accent,#d7aa2b)!important;opacity:1}
-@supports (padding-top:env(safe-area-inset-top)){body{background-color:var(--bg)}#authaccount.authpage,#groupaccount.authpage{padding-top:env(safe-area-inset-top);background:var(--bg)}}
+@supports (padding-top:env(safe-area-inset-top)){body{background-color:var(--bg)}#authaccount.authpage,#groupaccount.authpage{padding-top:var(--safe-top);background:var(--bg)}}
 #authaccount.authpage .authcard,#groupaccount.authpage .authcard{padding-top:0!important}
 .sgroupperson{padding-right:28px;grid-template-columns:38px minmax(120px,1fr) minmax(68px,auto) minmax(92px,auto) 34px}
 .sgopen{justify-self:center;margin-right:2px}
@@ -1856,8 +1865,8 @@ body.using-keyboard .dayitem .dayaction:focus-visible{outline:2px solid var(--pc
 /* v202: laatste samenhangende pre-live UX-polish. */
 #authaccount.authpage,#groupaccount.authpage{background-color:var(--bg);background-image:var(--skin-bg,none);background-attachment:local;background-position:center top}
 #authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{top:0;border-bottom:1px solid color-mix(in srgb,var(--home-accent,var(--pc)) 26%,var(--line));background:color-mix(in srgb,var(--bg) 88%,transparent)}
-#authaccount.authpage .authcard,#groupaccount.authpage .authcard{padding-top:max(8px,env(safe-area-inset-top))!important}
-#authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{padding-top:4px}
+#authaccount.authpage .authcard,#groupaccount.authpage .authcard{padding-top:max(8px,var(--safe-top))!important}
+#authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{padding-top:calc(var(--auth-safe-top) + 4px)}
 @media(min-width:761px){#authaccount .stylepreview,#groupaccount .stylepreview{display:none}}
 @media(max-width:760px){#authaccount .stylepreview,#groupaccount .stylepreview{max-height:118px;overflow:hidden}}
 
@@ -1905,7 +1914,7 @@ body:not(.home) #stage{overscroll-behavior:none}
 
 /* Alle app-/menu-/overzichtspagina's zijn echte verticale scrollers; het puzzelbord blijft vast. */
 body.home{overflow:hidden}
-body.home #home{height:100dvh;min-height:100dvh;overflow-y:scroll!important;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:max(2px,env(safe-area-inset-bottom))}
+body.home #home{height:calc(100dvh - var(--safe-top));min-height:calc(100dvh - var(--safe-top));overflow-y:scroll!important;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:max(2px,env(safe-area-inset-bottom))}
 #authaccount.authpage,#groupaccount.authpage{height:100dvh;overflow-y:scroll!important;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch}
 #authaccount.authpage .authcard,#groupaccount.authpage .authcard{min-height:calc(100dvh + 2px)}
 #side,#more{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:auto}
@@ -1920,9 +1929,9 @@ body:not(.home):not(.newpick) #stage{overscroll-behavior:none}
 @media(prefers-reduced-motion:reduce){.pagein,#authaccount.authpage.ui-reveal,#groupaccount.authpage.ui-reveal{animation:none!important}}
 
 /* v204: full-page instellingen volgen het echte thema en blijven volledig onder de iOS-statuszone. */
-#authaccount.authpage,#groupaccount.authpage{--auth-safe-top:max(env(safe-area-inset-top),12px);--auth-safe-bg:var(--bg);background-color:var(--page-tone,var(--bg))!important;background-image:var(--page-pattern,none)!important;padding-top:var(--auth-safe-top)!important}
+#authaccount.authpage,#groupaccount.authpage{--auth-safe-top:max(var(--safe-top),12px);--auth-safe-bg:var(--bg);background-color:var(--page-tone,var(--bg))!important;background-image:var(--page-pattern,none)!important;padding-top:var(--auth-safe-top)!important}
 :root[data-theme=dark] #authaccount.authpage,:root[data-theme=dark] #groupaccount.authpage{background-image:var(--pp-d,var(--page-pattern,none))!important}
-#authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{top:0!important;margin-top:0!important}
+#authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{top:calc(-1 * var(--auth-safe-top))!important;margin-top:calc(-1 * var(--auth-safe-top))!important}
 #authaccount.authpage .authcard,#groupaccount.authpage .authcard{padding-top:0!important}
 
 /* v205: infoactie terug naar compact uiterlijk; hitbox slechts bescheiden groter. */
@@ -1944,6 +1953,7 @@ body:not(.home):not(.newpick) #stage{overscroll-behavior:none}
 #authaccount.authpage .authdialoghead,#groupaccount.authpage .authdialoghead{
   border-bottom-color:color-mix(in srgb,var(--home-accent,var(--pc)) 52%,var(--line))!important;
   box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--home-accent,var(--pc)) 24%,transparent);
+  margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding-left:calc(50vw - 50%);padding-right:calc(50vw - 50%);
 }
 #authaccount.authpage .authdialoghead h2,#groupaccount.authpage .authdialoghead h2{color:var(--home-accent,var(--pc))}
 #authaccount .stylebox,#groupaccount .stylebox{border-top:3px solid color-mix(in srgb,var(--home-accent,var(--pc)) 72%,var(--line))}
@@ -1972,7 +1982,7 @@ body[data-t=bin] .c .nt{left:7%;top:6%;width:58%;height:58%;opacity:.54}
 
 /* Canonieke safe-area voor Profiel en Groep: één bron voor paginapadding en vaste bovenkap. */
 @media(max-width:760px){
- #authaccount.authpage,#groupaccount.authpage{--auth-safe-top:calc(env(safe-area-inset-top) + 16px);--auth-safe-bg:var(--page-tone,var(--bg))}
+ #authaccount.authpage,#groupaccount.authpage{--auth-safe-top:calc(var(--safe-top) + 4px);--auth-safe-bg:var(--page-tone,var(--bg))}
 }
 #authaccount.authpage::before,#groupaccount.authpage::before{
   content:"";position:fixed;z-index:30;top:0;left:0;right:0;
@@ -1991,7 +2001,7 @@ body.home #home .hwrap:has(.hpuzzletabs) .puzzlecard{height:auto;align-self:star
 @media(max-width:560px){
  body.phone .peerlive{min-height:30px;padding:4px 8px;gap:5px;font-size:11px}
  body.phone .peerlive>i{width:7px;height:7px;box-shadow:0 0 0 2px color-mix(in srgb,var(--ok) 15%,transparent)}
- body.phone #prow #peerLive{min-height:30px;max-width:31vw;padding:4px 7px;gap:5px}
+ body.phone #prow #peerLive{min-height:30px;max-width:44vw;padding:4px 7px;gap:5px}
  body.phone #prow #peerLive span{font-size:11px}
  body.phone.home .hlivebadge.liveactivity{padding:6px 9px}
  body.phone.home .hlivebadge.liveactivity b{font-size:12px}
@@ -2057,8 +2067,11 @@ body.tablet.home .hhomehero{padding:12px 14px 14px}
 #chk{color:color-mix(in srgb,var(--ok) 82%,var(--fg))}
 #tools #undo b,#tools #redo b{color:color-mix(in srgb,var(--pc) 72%,var(--fg))}
 #helpb .uiicon,#ctrlb .uiicon{color:color-mix(in srgb,var(--pc) 62%,var(--fg))}
-#mgrid.checkgood,#grid.checkgood{animation:boardCheckGood .72s ease-out}
-#mgrid.checkbad,#grid.checkbad{animation:boardCheckBad .72s ease-out}
-@keyframes boardCheckGood{0%{box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 88%,transparent),0 8px 24px var(--sh)}100%{box-shadow:0 0 0 0 transparent,0 8px 24px var(--sh)}}
-@keyframes boardCheckBad{0%{box-shadow:0 0 0 4px color-mix(in srgb,#d84b4b 88%,transparent),0 8px 24px var(--sh)}100%{box-shadow:0 0 0 0 transparent,0 8px 24px var(--sh)}}
+#grid.checkgood{animation:boardCheckGood 2.5s ease-out}#mgrid.checkgood{animation:boardCheckGoodM 2.5s ease-out}
+#grid.checkbad{animation:boardCheckBad 4.5s ease-out}#mgrid.checkbad{animation:boardCheckBadM 4.5s ease-out}
+@keyframes boardCheckGood{0%,60%{outline:6px solid color-mix(in srgb,var(--ok) 92%,transparent);outline-offset:8px;filter:drop-shadow(0 0 14px color-mix(in srgb,var(--ok) 70%,transparent))}100%{outline:6px solid transparent;outline-offset:8px;filter:drop-shadow(0 0 0 transparent)}}
+@keyframes boardCheckBad{0%,70%{outline:6px solid color-mix(in srgb,#d84b4b 92%,transparent);outline-offset:8px;filter:drop-shadow(0 0 14px color-mix(in srgb,#d84b4b 70%,transparent))}100%{outline:6px solid transparent;outline-offset:8px;filter:drop-shadow(0 0 0 transparent)}}
+/* Murdoku: het bord gebruikt zelf een outline (invoermodus, !important); daar tekent de ring met box-shadow. */
+@keyframes boardCheckGoodM{0%,60%{box-shadow:0 0 0 14px color-mix(in srgb,var(--ok) 92%,transparent),0 0 22px 8px color-mix(in srgb,var(--ok) 55%,transparent)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
+@keyframes boardCheckBadM{0%,70%{box-shadow:0 0 0 14px color-mix(in srgb,#d84b4b 92%,transparent),0 0 22px 8px color-mix(in srgb,#d84b4b 55%,transparent)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
 @media(prefers-reduced-motion:reduce){#mgrid.checkgood,#grid.checkgood{outline:3px solid var(--ok)}#mgrid.checkbad,#grid.checkbad{outline:3px solid #d84b4b}}

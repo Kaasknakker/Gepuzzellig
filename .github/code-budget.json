@@ -1,12 +1,12 @@
 {
   "note": "Code-budget (Operatie Bezemwagen F0). Mag alleen omlaag. Bijwerken: node .github/scripts/check-code-budget.mjs --update",
-  "updated": "2026-11-02",
+  "updated": "2026-11-03",
   "limits": {
     "important": 376,
     "repeatedSelectors": 318,
     "fontSizes": 77,
     "fontSizesBelow12px": 112,
-    "hexColors": 195,
+    "hexColors": 194,
     "silentCatches": 59,
     "forbiddenWords": 29
   }

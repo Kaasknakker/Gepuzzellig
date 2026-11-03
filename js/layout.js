@@ -151,8 +151,8 @@ function testHintElements(h,all=false){
 }
 const testOverlap=(a,b,gap=8)=>a.left<b.right+gap&&a.right>b.left-gap&&a.top<b.bottom+gap&&a.bottom>b.top-gap;
 function testChooseCard(h){
- const area=testAvailableRect(),needed=testHintElements(h,true),w=Math.min(PHONE?270:330,area.width-12),height=Math.min(PHONE?248:320,area.height-12);
- if(PHONE&&S.type==='mur'){const pb=testRect($('#pbot'));return {left:4,top:pb.top,width:innerWidth-8,height:innerHeight-pb.top,tray:true}}
+ const area=testAvailableRect(),needed=testHintElements(h,true),w=Math.min(PHONE?270:360,area.width-12),height=Math.min(PHONE?248:320,area.height-12);
+ if(PHONE){const pb=testRect($('#pbot'));return {left:4,top:pb.top,width:innerWidth-8,height:innerHeight-pb.top,tray:true}}
  const make=(left,top)=>({left,top,width:w,height,right:left+w,bottom:top+height,tray:false});
  const board=testRect($('#playbox'));
  if(!PHONE)for(const c of [make(board.right+14,board.top+5),make(board.left,board.bottom+14)])if(c.left>=area.left&&c.right<=innerWidth-6&&c.bottom<=innerHeight-10&&!needed.some(r=>testOverlap(c,r)))return c;
@@ -182,19 +182,67 @@ function testPaintShade(h){
  }else for(const r of testHintElements(h))hole(r);
  defs.append(mask);testShade.append(defs);const shade=rect(area,getComputedStyle(document.documentElement).getPropertyValue('--bg').trim());shade.setAttribute('fill-opacity','.78');shade.setAttribute('mask','url(#layoutMask)');testShade.append(shade);
 }
+// iPhone: de hint is een strook onderaan. Laat die met de tekst meegroeien (max. 42 % van het scherm).
+// Murdoku: de aanwijzingenlijst erboven wordt korter. Andere puzzels: het bord schuift omhoog (zie testPhoneBoardY).
+function testPhoneBoardY(trayTop){
+ const play=testRect($('#playbox')),area=testAvailableRect(),y0=parseFloat($('#playbox').style.getPropertyValue('--phone-y'))||0;
+ const base=Math.max(0,(area.height-play.height)/2),top0=play.top-y0;
+ return Math.max(0,Math.min(base,trayTop-8-play.height-top0));
+}
+function testGrowTray(b,c){
+ const copy=b.querySelector('.layout-copy');
+ if(!PHONE||!c.tray||!copy)return c;
+ let max=Math.round(innerHeight*.42);
+ if(S.type!=='mur'){
+  // Het bord moet na het omhoog schuiven nog helemaal boven de strook passen.
+  const play=testRect($('#playbox')),area=testAvailableRect(),y0=parseFloat($('#playbox').style.getPropertyValue('--phone-y'))||0;
+  max=Math.min(max,Math.round(innerHeight-(play.top-y0+play.height+8)));
+ }
+ if(c.height>=max)return c;
+ const missing=copy.scrollHeight-copy.clientHeight;
+ if(missing<=0)return c;
+ const height=Math.min(max,c.height+missing);
+ return {...c,height,top:innerHeight-height};
+}
+// iPad en groot scherm: de zwevende kaart groeit mee met de tekst (max. 62 % van het scherm), zolang hij
+// de gemarkeerde vakjes niet afdekt. Staat de kaart onderaan, dan groeit hij omhoog, anders omlaag.
+function testGrowCard(b,c,h){
+ const copy=b.querySelector('.layout-copy');
+ if(PHONE||c.tray||c.replaceControls||!copy)return c;
+ const missing=copy.scrollHeight-copy.clientHeight;if(missing<=0)return c;
+ const area=testAvailableRect(),height=Math.min(Math.round(innerHeight*.62),c.height+missing);
+ if(height<=c.height)return c;
+ let top=c.top+c.height>innerHeight-24?c.top+c.height-height:c.top;
+ if(top+height>innerHeight-10)top=innerHeight-10-height;
+ if(top<area.top)top=area.top;
+ const g={...c,top,height,bottom:top+height};
+ return testHintElements(h,true).some(r=>testOverlap(g,r))?c:g;
+}
+function testScrollClue(h){
+ if(!PHONE||S.type!=='mur'||!h.cards?.length)return;
+ const cl=$('#mclues'),el=cl.querySelector('[data-c="'+h.cards[0]+'"]');
+ if(el){const c=testRect(cl),r=testRect(el);if(r.top<c.top)cl.scrollTop-=c.top-r.top+6;else if(r.bottom>c.bottom)cl.scrollTop+=r.bottom-c.bottom+6}
+}
 function testHintPosition(h){
  if(!h)return;
- if(PHONE&&S.type==='mur'&&h.cards?.length){const cl=$('#mclues'),el=cl.querySelector('[data-c="'+h.cards[0]+'"]');if(el){const c=testRect(cl),r=testRect(el);if(r.top<c.top)cl.scrollTop-=c.top-r.top+6;else if(r.bottom>c.bottom)cl.scrollTop+=r.bottom-c.bottom+6}}
  const b=$('#hint');b.classList.remove('side');document.body.classList.remove('hintdock','hintside');HINTPAD=0;HINTSIDE=0;
  const key=[innerWidth,innerHeight].join('x');if(!h.testCard||h.testCardKey!==key){h.testCard=testChooseCard(h);h.testCardKey=key}
- const c=h.testCard;b.classList.add('layout-hint');b.classList.toggle('layout-tray',c.tray);document.body.classList.toggle('layout-tray-open',c.tray||!!c.replaceControls);
- for(const [k,v]of Object.entries({left:c.left,top:c.top,width:c.width,height:c.height}))b.style.setProperty('--card-'+k,Math.round(v)+'px');
+ let c=h.testCard;b.classList.add('layout-hint');b.classList.toggle('layout-tray',c.tray);document.body.classList.toggle('layout-tray-open',c.tray||!!c.replaceControls);
+ const setCard=card=>{for(const [k,v]of Object.entries({left:card.left,top:card.top,width:card.width,height:card.height}))b.style.setProperty('--card-'+k,Math.round(v)+'px')};
+ setCard(c);
  b.style.display='block';
  if(!b.querySelector('.layout-copy')){
   const copy=document.createElement('div');copy.className='layout-copy';const actions=document.createElement('div');actions.className='layout-actions';
   for(const e of [...b.children])if(e.matches('.hintnext,.hintback')){if(c.tray&&e.matches('.hintback')){e.setAttribute('aria-label',e.textContent);e.textContent='←'}actions.append(e)}else if(!e.matches('.hx,.hht'))copy.append(e);
   b.append(copy,actions);
  }
+ const grown=testGrowTray(b,c);
+ if(grown!==c){c=grown;setCard(c)}
+ const grownCard=testGrowCard(b,c,h);
+ if(grownCard!==c){c=grownCard;setCard(c)}
+ if(PHONE&&S.type==='mur'&&c.tray){const cl=$('#mclues');if(cl)cl.style.maxHeight=Math.max(60,c.top-6-testRect(cl).top)+'px'}
+ if(PHONE&&S.type!=='mur'&&c.tray)$('#playbox').style.setProperty('--phone-y',testPhoneBoardY(c.top)+'px');
+ testScrollClue(h);
  testClueEmphasis(h);testPaintShade(h);
 }
 function testClueEmphasis(h){
@@ -206,7 +254,7 @@ function testClueEmphasis(h){
 const testBaseLayoutHint=layoutHintCard;
 layoutHintCard=function(h){if(testOriginal)return testBaseLayoutHint(h);repaintHint();testHintPosition(h)};
 const testBaseHide=hideHint;
-hideHint=function(){document.querySelectorAll('.layout-clue-focus').forEach(e=>e.classList.remove('layout-clue-focus'));testShade.setAttribute('hidden','');document.body.classList.remove('layout-tray-open');$('#hint').classList.remove('layout-hint','layout-tray');testBaseHide()};
+hideHint=function(){document.querySelectorAll('.layout-clue-focus').forEach(e=>e.classList.remove('layout-clue-focus'));testShade.setAttribute('hidden','');document.body.classList.remove('layout-tray-open');$('#hint').classList.remove('layout-hint','layout-tray');testBaseHide();if(PHONE&&S.type==='mur')testRefit();else if(PHONE)testArrange()};
 const testBaseInvalidate=invalidateHint;
 invalidateHint=function(){testBaseInvalidate();if(!testOriginal){testClueEmphasis(S.hint);testPaintShade(S.hint)}};
 document.addEventListener('scroll',()=>{if(S.hint&&!testOriginal)testPaintShade(S.hint)},{passive:true,capture:true});
