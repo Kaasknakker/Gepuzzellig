@@ -119,7 +119,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S2 | Groepspagina (iPhone eerst) ★ | zichtbaar | D1–D4, B5 | open | |
 | S3 | Klaar-kaart | zichtbaar | D1–D4 | open | |
 | S4 | Murdoku-bord | zichtbaar | D1–D4 | open | |
-| S5 | Puzzelen-pagina | zichtbaar | D1–D4 | open | |
+| S5 | Puzzelen-pagina | zichtbaar | D1–D4 | deels: eigen “← Home”-knop weg, kop gelijk aan Home | PR_NR |
 | S6 | Hexcells-bediening en tellers | zichtbaar | D4 | open | |
 | S7 | Puzzelmenu en hintpaneel | zichtbaar | D4 | open | |
 | S8 | iPhone-navigatie onderaan (B2) ★ | zichtbaar | S1 | open | |
