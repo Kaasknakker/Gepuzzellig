@@ -1088,7 +1088,7 @@ function reset(){if(S.done||!S.p)return;clearHint();
  if(S.type==="m24"){setRound();rM24();return}
  const z=initCur();if(z.join()===S.cur.join())return;
  S.hist.push(S.cur.slice());S.redo=[];S.cur=z;S.nt={};S.rd=S.cd=S.pick=null;S.sel=-1;render()}
-$("#potb").onclick=()=>setPotlood(!potlood);$("#notewipe").onclick=clearAllNotes;function bindFastHistoryButton(id,fn){const b=$(id);let fastAt=0;b.onpointerdown=e=>{if(e.pointerType!=="touch"&&e.pointerType!=="pen")return;e.preventDefault();fastAt=performance.now();fn()};b.onclick=()=>{if(performance.now()-fastAt<500)return;fn()}}bindFastHistoryButton("#undo",undo);bindFastHistoryButton("#redo",redo);$("#reset").onclick=reset;
+$("#potb").onclick=()=>setPotlood(!potlood);$("#notewipe").onclick=clearAllNotes;function bindFastHistoryButton(id,fn){const b=$(id);let fastAt=0,clickAt=-1e9;b.onpointerdown=e=>{if(e.pointerType!=="touch"&&e.pointerType!=="pen")return;e.preventDefault();const t=performance.now();fastAt=t;if(t-clickAt<100)return;fn()};b.onclick=()=>{const t=performance.now();if(t-fastAt<500)return;clickAt=t;fn()}}bindFastHistoryButton("#undo",undo);bindFastHistoryButton("#redo",redo);$("#reset").onclick=reset;
 /* Reset is op touchscreens makkelijk per ongeluk te raken. Bij echte voortgang moet je daarom twee keer tikken. */
 let resetArm=0;
 function disarmReset(){if(resetArm){clearTimeout(resetArm);resetArm=0}const b=$("#reset");if(!b)return;b.classList.remove("arm");const sp=b.querySelector("span:not(.ic)")||b.querySelector("span");if(sp)sp.textContent="Reset"}
