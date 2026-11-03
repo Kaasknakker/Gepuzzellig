@@ -1508,7 +1508,9 @@ addEventListener("online",()=>{const m=$("#board");if(window.PD_DB&&m&&/niet ber
 addEventListener("pdnodb",e=>{$("#board").textContent=e.detail||"Scorebord nog niet ingesteld (zie stappenplan)."});
 if(window.PD_DB)startBoard();
 /* Vangnet naast de live verbinding: elke 45 seconden (en bij terugkomen in de app) de nieuwste scores en "bezig" rechtstreeks ophalen. */
-function pollNu(){if(ADMIN_READONLY||!window.PD_DB||!window.PD_PROFILE_LINKED||!window.PD_DB.pollRecent||document.hidden)return;window.PD_DB.pollRecent(addDays(dstr(),-1),$("#group").value.trim()).then(o=>{
+/* Leesbudget: elke opgehaalde regel telt als één read. De ronde vraagt daarom alleen wat ná de nieuwste bekende score is binnengekomen (10 minuten marge), niet elke keer opnieuw alles sinds gisteren; de aanwezigheid ("bezig") komt al live binnen en wordt maar om de vier rondes meegenomen. */
+let pollN=0;
+function pollNu(){if(ADMIN_READONLY||!window.PD_DB||!window.PD_PROFILE_LINKED||!window.PD_DB.pollRecent||document.hidden)return;const newest=lastRows.reduce((m,r)=>Math.max(m,Number(r.completedAt)||0),0),sinceMs=newest?newest-10*60000:0;window.PD_DB.pollRecent(addDays(dstr(),-1),$("#group").value.trim(),sinceMs,pollN++%4===0).then(o=>{
  const n0=lastRows.length,j0=JSON.stringify(STAT);lastRows=mergeRows(lastRows,o.rows);if(o.stat)STAT=o.stat;if(lastRows.length!==n0||JSON.stringify(STAT)!==j0){pullMine(lastRows);board(lastRows)}}).catch(()=>{})}
 setInterval(pollNu,45000);addEventListener("pdready",()=>setTimeout(pollNu,3000));
 /* Terug in de app (bijv. na de iPad op slot): verbindingen opnieuw opzetten, zodat "bezig" en scores direct kloppen. */
