@@ -151,7 +151,7 @@ function testHintElements(h,all=false){
 }
 const testOverlap=(a,b,gap=8)=>a.left<b.right+gap&&a.right>b.left-gap&&a.top<b.bottom+gap&&a.bottom>b.top-gap;
 function testChooseCard(h){
- const area=testAvailableRect(),needed=testHintElements(h,true),w=Math.min(PHONE?270:330,area.width-12),height=Math.min(PHONE?248:320,area.height-12);
+ const area=testAvailableRect(),needed=testHintElements(h,true),w=Math.min(PHONE?270:360,area.width-12),height=Math.min(PHONE?248:320,area.height-12);
  if(PHONE){const pb=testRect($('#pbot'));return {left:4,top:pb.top,width:innerWidth-8,height:innerHeight-pb.top,tray:true}}
  const make=(left,top)=>({left,top,width:w,height,right:left+w,bottom:top+height,tray:false});
  const board=testRect($('#playbox'));
@@ -204,6 +204,20 @@ function testGrowTray(b,c){
  const height=Math.min(max,c.height+missing);
  return {...c,height,top:innerHeight-height};
 }
+// iPad en groot scherm: de zwevende kaart groeit mee met de tekst (max. 62 % van het scherm), zolang hij
+// de gemarkeerde vakjes niet afdekt. Staat de kaart onderaan, dan groeit hij omhoog, anders omlaag.
+function testGrowCard(b,c,h){
+ const copy=b.querySelector('.layout-copy');
+ if(PHONE||c.tray||c.replaceControls||!copy)return c;
+ const missing=copy.scrollHeight-copy.clientHeight;if(missing<=0)return c;
+ const area=testAvailableRect(),height=Math.min(Math.round(innerHeight*.62),c.height+missing);
+ if(height<=c.height)return c;
+ let top=c.top+c.height>innerHeight-24?c.top+c.height-height:c.top;
+ if(top+height>innerHeight-10)top=innerHeight-10-height;
+ if(top<area.top)top=area.top;
+ const g={...c,top,height,bottom:top+height};
+ return testHintElements(h,true).some(r=>testOverlap(g,r))?c:g;
+}
 function testScrollClue(h){
  if(!PHONE||S.type!=='mur'||!h.cards?.length)return;
  const cl=$('#mclues'),el=cl.querySelector('[data-c="'+h.cards[0]+'"]');
@@ -224,6 +238,8 @@ function testHintPosition(h){
  }
  const grown=testGrowTray(b,c);
  if(grown!==c){c=grown;setCard(c)}
+ const grownCard=testGrowCard(b,c,h);
+ if(grownCard!==c){c=grownCard;setCard(c)}
  if(PHONE&&S.type==='mur'&&c.tray){const cl=$('#mclues');if(cl)cl.style.maxHeight=Math.max(60,c.top-6-testRect(cl).top)+'px'}
  if(PHONE&&S.type!=='mur'&&c.tray)$('#playbox').style.setProperty('--phone-y',testPhoneBoardY(c.top)+'px');
  testScrollClue(h);
