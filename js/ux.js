@@ -27,8 +27,10 @@ const UX={
  },
  placeSaveIcon(warning){
   const b=this.saveBtn,pop=document.getElementById('savePop');if(!b)return;
-  if(!warning){b.hidden=true;if(pop)pop.hidden=true;return}
-  const anchor=document.body.classList.contains('home')?document.querySelector('#home .hprofile'):(document.getElementById('tbMore')||document.getElementById('pm'));
+   const home=document.body.classList.contains('home'),anchor=home?document.querySelector('#home .hprofile'):(document.getElementById('tbMore')||document.getElementById('pm'));
+  /* In de puzzelkop houdt het icoon zijn plek ook zonder probleem (onzichtbaar), zodat de tijd en de rest van de balk niet verschuiven. */
+  if(!warning){if(pop)pop.hidden=true;if(home||!anchor){b.hidden=true;return}b.hidden=false;b.classList.add('idle');if(b.nextElementSibling!==anchor)anchor.before(b);return}
+  b.classList.remove('idle');
   if(anchor&&b.nextElementSibling!==anchor)anchor.before(b);
   b.hidden=!anchor;if(pop&&!pop.hidden)this.fillSavePop();
  },
