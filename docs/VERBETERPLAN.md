@@ -146,7 +146,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | G3 | `proef-layout.html` niet meer committen | GitHub | F1 | open | |
 | G4 | Documentatie: archief, overzicht en README | GitHub | F1 | open | |
 | G5 | Workflows bijwerken (Node 24-acties, vaste Ubuntu-versie) | GitHub | F1 | open | |
-| G6 | Versienummer niet meer per PR ophogen: testdeploy stempelt `vN-bBOUW`, `scripts/bump-version.mjs` verhoogt het bronnummer bij een release | GitHub | – | in review | PR_NR |
+| G6 | Versienummer niet meer per PR ophogen: testdeploy stempelt `vN-bBOUW`, `scripts/bump-version.mjs` verhoogt het bronnummer bij een release | GitHub | – | in review | #66 |
 | Q1 | Privacyverklaring | tekst | – | open | |
 | Q2 | Online-status uit te zetten | zichtbaar | D4 | open | |
 | Q3 | Namen en merken op een rij | besluit | – | open | |
