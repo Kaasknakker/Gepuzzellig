@@ -54,4 +54,18 @@ const m=vm.createContext({});vm.runInContext(section(core,'function mergeMetaInt
 const loc={at:300,cur:['1'],hintLedger:{a:1},hints:1,mist:0},rem={at:300,hintLedger:{a:2,b:1},hints:2,mist:3,seenErrors:{'1:1':true}};
 assert.equal(m.mergeMetaInto(loc,rem),true);assert.equal(JSON.stringify(loc.hintLedger),'{"a":2,"b":1}');assert.equal(loc.hints,2);assert.equal(loc.mist,3);assert.equal(JSON.stringify(loc.seenErrors),'{"1:1":true}');assert.equal(loc.at,300);assert.equal(JSON.stringify(loc.cur),'["1"]');
 assert.equal(m.mergeMetaInto(loc,rem),false,'tweede keer: niets te winnen');
+
+// 9. Een nieuwere bordopslag behoudt eerder samengevoegde hints van een ander apparaat.
+docs.clear();await save({at:300,pc:60,cur:['1','1'],hintLedger:{a:1},hints:1});await save({at:100,pc:20,cur:['1'],hintLedger:{a:1,x:2},hints:2,seenErrors:{'9:1':true}});
+await save({at:400,pc:70,cur:['1','1','1'],hintLedger:{a:1},hints:1});
+d=docs.get(doc).state;assert.equal(d.at,400,'nieuwer bord wordt opgeslagen');assert.equal(d.cur.length,3);assert.equal(JSON.stringify(d.hintLedger),'{"a":1,"x":2}','hint van A blijft na nieuwere bordopslag van B');assert.equal(JSON.stringify(d.seenErrors),'{"9:1":true}');assert.equal(d.hints,2);
+// 10. Een metadata-update met gelijke at vervangt het bord niet.
+docs.clear();await save({at:500,pc:60,cur:['1','1','1','1'],hintLedger:{},hints:0});
+await save({at:500,pc:20,cur:['9'],hintLedger:{q:1},hints:1,seenErrors:{'5:5':true}});
+d=docs.get(doc).state;assert.equal(d.cur.length,4,'bord blijft staan bij metadata-update met gelijke at');assert.equal(d.pc,60);assert.equal(d.hints,1);assert.equal(JSON.stringify(d.hintLedger),'{"q":1}');
+// 11. Alleen de numerieke hintteller verandert (bijvoorbeeld uit een oude opslag): ook dat wordt samengevoegd, lokaal en in de cloud.
+await save({at:100,pc:20,cur:['1'],hints:5});assert.equal(docs.get(doc).state.hints,5,'teller alleen wordt in de cloud samengevoegd');assert.equal(docs.get(doc).state.cur.length,4);
+const l2={at:1,hints:1,hintLedger:{}},r2={at:1,hints:4};assert.equal(m.mergeMetaInto(l2,r2),true);assert.equal(l2.hints,4,'teller alleen wordt lokaal samengevoegd');
+// 12. Groepswissel (group) maakt het bord niet nieuwer, maar wordt wel gepusht.
+reset('0101');x.persist();const g0=store[key].at;pushes=[];now+=1000;x.$=()=>({value:'andere-groep'});x.persist();assert.equal(store[key].at,g0,'groepswissel verandert at niet');assert.equal(store[key].group,'andere-groep');assert.equal(pushes.length,1);assert.equal(pushes[0].at,g0);
 console.log('OK: speeltijd, hints en fouten maken een oud bord niet nieuwer; de cloud voegt hints samen zonder een nieuwer bord te overschrijven.');
