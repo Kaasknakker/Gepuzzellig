@@ -35,6 +35,11 @@ x.progDel(key);assert.equal(source[key],undefined);assert.equal(x.progressDelete
 source={[key]:{at:100,pc:50}};x.mergeCloudProgress({[ck]:{k:key,at:200,deleted:true}});assert.equal(source[key],undefined);
 source={[key]:{at:300,pc:20,seed:'new-board'}};x.mergeCloudProgress({[ck]:{k:key,at:200,deleted:true}});assert.equal(source[key].seed,'new-board');
 source={};x.mergeCloudProgress({[ck]:{k:key,at:300,pc:20,seed:'new-board'}});assert.equal(source[key].seed,'new-board');
+// Nieuwere cloudstand terwijl lokaal nog een niet-bevestigde hint staat: nieuwer bord én hint blijven behouden.
+source={[key]:{at:100,pc:20,seed:'new-board',cur:['1'],hintLedger:{h:1},hints:1,seenErrors:{'2:2':true},mist:1}};x.S={};x.mergeCloudProgress({[ck]:{k:key,at:300,pc:60,seed:'new-board',cur:['1','1','1'],hints:0}});
+assert.equal(source[key].at,300,'nieuwer bord uit de cloud wordt overgenomen');assert.equal(source[key].cur.length,3);assert.equal(source[key].hints,1,'niet-bevestigde hint blijft lokaal behouden');assert.equal(JSON.stringify(source[key].hintLedger),'{"h":1}');assert.equal(JSON.stringify(source[key].seenErrors),'{"2:2":true}');assert.equal(source[key].mist,1);
+assert.equal(pending.some(p=>p[0]===key&&p[1].at===300&&p[1].hints===1&&p[2]===true),true,'samengevoegde hint wordt alsnog naar de cloud gepusht');
+
 x.uid='another-player';assert.equal(x.progressDeletedAt(key),0,'deletion bookkeeping belongs to player');x.uid='me';
 // Deleting on another session cannot be undone by the active board's autosave.
 source={[key]:{at:100,pc:50}};x.S={p:{},start:1,done:false,_saveAt:100};x.mergeCloudProgress({[ck]:{k:key,at:200,deleted:true}});assert.equal(x.S.discarded,true);
