@@ -384,10 +384,10 @@ body.phone #arch{padding:4px 9px;font-size:15px;box-shadow:none}
 @media(max-width:760px),(max-aspect-ratio:1/1){#pmode{flex-direction:row}}
 .c.pl{position:relative;font-size:calc(var(--cs)*.5);font-weight:700}
 .c.pl .pn{position:relative;z-index:1;font-variant-numeric:tabular-nums;transition:opacity .15s}
-.c.pl.po::after{content:"";position:absolute;inset:14%;border:calc(var(--cs)*.055) solid var(--pc);border-radius:50%;pointer-events:none}
+.c.pl.po::before{content:"";position:absolute;inset:14%;border:calc(var(--cs)*.055) solid var(--pc);border-radius:50%;pointer-events:none}
 .c.pl.px .pn{opacity:.2}
 .c.pl.px::before{content:"";position:absolute;left:20%;right:20%;top:50%;height:calc(var(--cs)*.05);min-height:2px;margin-top:-1px;background:var(--fg);opacity:.6;transform:rotate(-45deg);border-radius:2px;pointer-events:none}
-#grid.pdone .c.pl.po::after{display:none}
+#grid.pdone .c.pl.po::before{display:none}
 #grid.pdone .c.pl:not(.px) .pn{color:var(--pc)}
 .prb{position:absolute;left:3px;top:1px;font-style:normal;font-size:calc(var(--cs)*.24);font-weight:800;line-height:1;padding:1px 3px;border-radius:5px;background:color-mix(in srgb,var(--card) 70%,transparent);color:var(--fg);z-index:2;pointer-events:none}
 .prb.ok{opacity:.4}
@@ -2069,9 +2069,9 @@ body.tablet.home .hhomehero{padding:12px 14px 14px}
 #helpb .uiicon,#ctrlb .uiicon{color:color-mix(in srgb,var(--pc) 62%,var(--fg))}
 #grid.checkgood{animation:boardCheckGood 2.5s ease-out}#mgrid.checkgood{animation:boardCheckGoodM 2.5s ease-out}
 #grid.checkbad{animation:boardCheckBad 4.5s ease-out}#mgrid.checkbad{animation:boardCheckBadM 4.5s ease-out}
-@keyframes boardCheckGood{0%,60%{outline:6px solid color-mix(in srgb,var(--ok) 92%,transparent);outline-offset:8px;filter:drop-shadow(0 0 14px color-mix(in srgb,var(--ok) 70%,transparent))}100%{outline:6px solid transparent;outline-offset:8px;filter:drop-shadow(0 0 0 transparent)}}
-@keyframes boardCheckBad{0%,70%{outline:6px solid color-mix(in srgb,#d84b4b 92%,transparent);outline-offset:8px;filter:drop-shadow(0 0 14px color-mix(in srgb,#d84b4b 70%,transparent))}100%{outline:6px solid transparent;outline-offset:8px;filter:drop-shadow(0 0 0 transparent)}}
+@keyframes boardCheckGood{0%,60%{outline:4px solid color-mix(in srgb,var(--ok) 92%,transparent);outline-offset:6px;filter:drop-shadow(0 0 10px color-mix(in srgb,var(--ok) 70%,transparent))}100%{outline:4px solid transparent;outline-offset:6px;filter:drop-shadow(0 0 0 transparent)}}
+@keyframes boardCheckBad{0%,70%{outline:4px solid color-mix(in srgb,#d84b4b 92%,transparent);outline-offset:6px;filter:drop-shadow(0 0 10px color-mix(in srgb,#d84b4b 70%,transparent))}100%{outline:4px solid transparent;outline-offset:6px;filter:drop-shadow(0 0 0 transparent)}}
 /* Murdoku: het bord gebruikt zelf een outline (invoermodus, !important); daar tekent de ring met box-shadow. */
-@keyframes boardCheckGoodM{0%,60%{box-shadow:0 0 0 14px color-mix(in srgb,var(--ok) 92%,transparent),0 0 22px 8px color-mix(in srgb,var(--ok) 55%,transparent)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
-@keyframes boardCheckBadM{0%,70%{box-shadow:0 0 0 14px color-mix(in srgb,#d84b4b 92%,transparent),0 0 22px 8px color-mix(in srgb,#d84b4b 55%,transparent)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
+@keyframes boardCheckGoodM{0%,60%{box-shadow:0 0 0 10px color-mix(in srgb,var(--ok) 92%,transparent),0 0 16px 6px color-mix(in srgb,var(--ok) 55%,transparent)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
+@keyframes boardCheckBadM{0%,70%{box-shadow:0 0 0 10px color-mix(in srgb,#d84b4b 92%,transparent),0 0 16px 6px color-mix(in srgb,#d84b4b 55%,transparent)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
 @media(prefers-reduced-motion:reduce){#mgrid.checkgood,#grid.checkgood{outline:3px solid var(--ok)}#mgrid.checkbad,#grid.checkbad{outline:3px solid #d84b4b}}

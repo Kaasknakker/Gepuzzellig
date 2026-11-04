@@ -115,6 +115,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | D3 | Eén icoonset, emoji vervangen | zichtbaar | D2, B3 | open | |
 | D4 | Knoppen en bediening gelijktrekken | zichtbaar | D1, D2 | open | |
 | D5 | `!important` afbouwen | onzichtbaar | D4 | open | |
+| D6 | Sneltoetsen kleurennonogram: cijfers 1 t/m 4 kiezen de kleur (volgorde van de knoppen), zichtbaar op de knoppen; eerst nakijken welke toetsen al in gebruik zijn (Spatie wisselt stand, Kakuro 0–9). Vooral voor toetsenbord/muis; laag in de rij | nieuw (klein) | D4 | open (Peter 3 nov) | |
 | S1 | Home | zichtbaar | D1–D4 | open | |
 | S2 | Groepspagina (iPhone eerst) ★ | zichtbaar | D1–D4, B5 | open | |
 | S3 | Klaar-kaart | zichtbaar | D1–D4 | open | |
@@ -135,6 +136,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S19 | Controleer: oordeel niet meer als banner over het bord; duidelijke groene of rode rand om het bord (±1,5 s), kleine melding met aantal (“Geen fouten tot nu toe ✓” / “3 fouten”), foute vakjes herkenbaar (S9) | ux | S9 | in review | #64 |
 | S18 | Binair: tekens schuiven een halve punt bij elke handeling in Safari (opgemeten in opname 2 nov); pop nu alleen op het teken (#49). Bevestigen op iPad; zo niet: kleur-overgang op alle vakjes | bug | – | in review (hypothese) | #49 |
 | S20 | Terug-swipe vanaf de linkerrand: elk hoofdscherm een eigen geschiedenisstap (History API); in een puzzel is terug = naar Home met opslaan; eerst open dialoog of hintkaart sluiten; wisselen tussen hoofdschermen vervangt de stap, alleen een puzzel openen voegt er een toe; herladen en openen vanaf het beginscherm netjes afhandelen. Eerst meten hoe schermwissel nu werkt. Alleen testbaar op iPhone en iPad van Peter (hier geen WebKit) | nieuw | – (na de livegang) | open | |
+| S21 | Undo/Opnieuw met Pencil maakte twee stappen tegelijk (snelle-Pencil-bediening en eigen knop voerden beide uit). Opname 3 nov; nagebootst: Pencil-tik 5→3 stappen, vinger 5→4; Star Battle en Binair gemeten. Open: de opname toont ook een hele puzzel die in één keer verdwijnt, nog niet verklaard | bug | – | klaar (v257) | #71 |
 | T1 | Woordenlijst doorvoeren, jargon weg | tekst | B1-O, S1–S7 | open | |
 | T2 | Uitleg per puzzel inkorten | tekst | T1 | open | |
 | T3 | Hints Murdoku herschrijven ★ | tekst | T1 | open | |
@@ -171,6 +173,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | 2 nov | Peter | Groepspagina's anders indelen en ontwerpen. | Staat al in S2 (en B5). Peter geeft aan wat hij precies anders wil zodra S2 aan de beurt is. |
 | 3 nov | Peter | Controleer: de banner met “goed” of “fouten” staat over het bord heen. Nu is er al een korte rand (`checkgood`/`checkbad` in `app.css`, 0,72 s, 4 pt), te kort en te subtiel. Peter wil ook het aantal fouten zien en een korte groene of rode rand om het bord. | S19. Rand ±6 pt plus lichte gloed, ±1,5 s (bij rood langer, tot de volgende aanraking); melding klein onderaan, nooit over het bord; met Beweging verminderen een rand zonder animatie. Vereist S9 (foutmarkering die de kleur laat staan). |
 | 3 nov | Peter | Murdoku: kaartjes kunnen markeren (kaartje nog nodig voor een andere persoon, of al gebruikt), alleen eigen apparaat, per persoon. Daarnaast: terug swipen vanaf de linkerrand zoals in andere apps. | S10 samen met T3; nieuw punt S20 (browsergeschiedenis). Beide na de livegang; S20 heeft nadelen (terug kan de app verlaten, stapels geschiedenis, samenspel met dialogen) en wordt eerst gemeten. |
+| 3 nov | Peter | Sneltoetsen voor het kleurennonogram (idee b/g/r voor blauw/geel/rood). | D6: cijfers 1 t/m 4, zichtbaar op de knoppen, omdat de kleuren per puzzel verschillen. |
 | 1 nov | Peter/Claude | In `js/puzzles/nonogram.js` staat een plaatjesgenerator (`nonoPic`, 20 plaatjes) die nergens wordt aangeroepen. Peter heeft plaatjes geprobeerd en bewust uitgezet: de puzzels werden te simpel (grote, symmetrische vlakken lossen zich bijna vanzelf op). | Dode code: bij het opruimen weghalen. Mocht het idee ooit terugkomen, dan staat het in de geschiedenis van git. Plaatjes als beloning passen beter bij de ColorSweeper-variant van Minesweeper. |
 | 1 nov | Peter | Nieuwe puzzel (later): **Schaakpuzzel van de dag** (bijv. “wit geeft mat in twee”, “win een stuk”). Geen volledig schaakspel in de app; leren en samen spelen kan via Lichess. | Puzzels uit de vrij beschikbare Lichess-puzzelverzameling, niveau per dag zoals bij de andere puzzels; zelfde puzzel voor iedereen, met foutloos/zonder hint. Hints in mensentaal (“welk stuk staat onbeschermd?”). Pas later beslissen of samen spelen in de app nog nodig is. |
 | 1 nov | Peter | Nieuwe puzzel (later): **Nurikabe** (eilanden met getallen in een zee die één geheel moet zijn, zonder 2×2-blokken water). | Goed te genereren met unieke oplossing; hints in mensentaal (“dit eiland is al vol”, “deze zee raakt anders afgesloten”). Rustige, eigen stijl naast Binair/Star Battle. |
@@ -196,6 +199,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | **B7** | Welke grotere-tekstinstelling moet minimaal werken? | iOS-tekstgrootte tot “groot” / tot de grootste toegankelijkheidsmaat | **Tot één stap boven standaard zonder enig probleem**, en de grootste toegankelijkheidsmaat zonder overlap (scrollen mag). |
 | **B8** | Hoe markeer je een Murdoku-aanwijzing als “nog nodig”? (S10) | a) tik wisselt drie standen: open → nog nodig → afgehandeld · b) tik = afstrepen zoals nu, lang indrukken = nog nodig · c) tik = afstrepen zoals nu, plus een klein vlagknopje rechts op elk kaartje | **c)** zichtbaar en zonder nieuw gebaar; bestaande gewoonte (tikken = afstrepen) blijft. |
 | **B9** | Hoe zichtbaar is de opslagstatus? (S15) | a) zoals nu, vaste regel in de kop · b) alleen bij een probleem, als compact icoon, uitleg en “Opnieuw proberen” in het menu · c) helemaal geen status | **b)**: rustiger kop, en je ziet het wanneer het ertoe doet. Peter beslist. |
+| **B10** | Moet er een penalty of puntensysteem komen voor het aantal gebruikte controles (Controleer)? (Peter 3 nov) | a) zoals nu: onbeperkt en vrij controleren, niets bijhouden · b) vrij controleren, maar het aantal controles stil bijhouden en tonen op de Klaar-kaart (“2 keer gecontroleerd”), eventueel een eigen badge “Zonder controle opgelost”, zonder straf · c) penalty (tijd of punten) | **Nu a), voorstel b) later.** Jullie spelen samen; een straf werkt controleren tegen en vraagt nieuwe regels (per puzzel of per dag, in de tijd of reeks). Een teller op het eigen apparaat kan zonder aanpassing in productie; opslaan in de resultaten kan de Firestore-regels raken (dan eerst Peters akkoord). Opnieuw beoordelen na een paar weken spelen met Aart. **Status: nog niet besloten.** |
 
 **Voorstel woordenlijst (B6)**
 
@@ -557,6 +561,20 @@ Bekende problemen (uit 8 opeenvolgende hints):
 
 - **Nieuwe puzzels:** na het ontwerpsysteem kost een nieuwe puzzel minder werk, omdat bediening, kleuren, hints en uitleg vastliggen. Aansluiten op de puzzelregistry; interne code los van de zichtbare naam.
 - **App Store:** vereist onder meer privacyverklaring (Q1), opgeloste namen (Q3), een stabiele app, en een besluit over een eigen app versus de huidige webapp. Eigen plan, op dat moment.
+
+---
+
+## 13b. Bekende schuld (pleisters die later echt opgelost moeten worden)
+
+Dit zijn oplossingen die werken en gemeten zijn, maar de oorzaak niet helemaal wegnemen. Ze mogen niet vergeten worden. **Regel:** komt er bij een fix een pleister bij, dan komt hij hier met de stap waarin hij echt opgelost wordt (Peter 3 nov).
+
+| Wat | Waar | Waarom een pleister | Echt oplossen bij |
+| --- | --- | --- | --- |
+| Tijdvenster bij Undo/Opnieuw met Pencil (`clickAt`/`fastAt`, S21, #71) | `bindFastHistoryButton`, `fastPenUI` in `js/core.js` | Twee mechanismen voeren dezelfde tik uit; de fix houdt ze uit elkaar met een tijdvenster. | D4: één mechanisme voor snelle Pencil-bediening van vaste knoppen |
+| Extra 40 px bovenmarge op iPhone-web-app (`--safe-top`, S13, #56/#59) | `css/app.css`, `html[data-standalone]` | Gemeten tegen het iOS-gedrag (vervaging ±95 pt), geen vaste regel. 28 pt-proef staat open. | S1/S5 (kop en schermen), met meting op echt toestel |
+| Plek van de Controleer-melding uitrekenen met JavaScript (`placeCheckMsg`, S19c, #69) | `js/core.js` | Meet de balk en valt op smalle iPad terug op over de titel; eigenlijk een ontwerpkwestie. | S5 en D4 (puzzelkop met vaste plek voor meldingen) |
+| Ring en foutmarkering omzeilen `!important` (outline i.p.v. box-shadow; hatch met `!important`) | `css/app.css` (`.c.bad`, ring-keyframes) | Bestaande `!important`-regels vergen een omweg. | D5 (`!important` afbouwen) |
+| Open vraag, geen pleister: hele Star Battle-puzzel verdwijnt in één keer na undo (opname 3 nov) | – | Niet nagebootst; mogelijk dezelfde oorzaak als S21, niet bewezen. | Opname + meting op een toestel, daarna beslissen |
 
 ---
 
