@@ -1588,7 +1588,8 @@ function persist(forceCloud){if(S.discarded||!S.p||S.done||!S.start||!S.seed)ret
  /* Hervatten moet ook echt hervatten: bewaar een begrensde undo/redo-geschiedenis.
     Maak 24 heeft een eigen ronde-state en laten we hier bewust buiten. */
  if(S.type!=="m24"){if(S.hist&&S.hist.length)e.hist=S.hist.slice(-60);if(S.redo&&S.redo.length)e.redo=S.redo.slice(-30)}
- const prev=a[k],plain=x=>{if(!x)return"";const q=Object.assign({},x);delete q.at;return JSON.stringify(q)},changed=!prev||plain(prev)!==plain(e);
+ /* Alleen een echte wijziging (zet, notitie, undo/redo, reset) geeft een nieuwe at. Verstreken speeltijd (el) niet: anders wint een oud bord op een stil apparaat van nieuwere zetten van een ander apparaat. */
+ const prev=a[k],plain=x=>{if(!x)return"";const q=Object.assign({},x);delete q.at;delete q.el;return JSON.stringify(q)},changed=!prev||plain(prev)!==plain(e);
  e.at=changed?Math.max(Date.now(),progressDeletedAt(k)+1):(prev.at||Date.now());a[k]=e;S._saveAt=e.at;const local=lsSet(PKEY,JSON.stringify(a));UX.storage(k,{at:e.at,local,remote:changed?"local":(UX.saves.get(k)||{}).remote});if(changed||forceCloud)cloudPushProgress(k,e,!!forceCloud)}
 setInterval(persist,3000);
 /* Desktop: de klik waarmee een inactief Gepuzzellig-venster weer focus krijgt mag geen puzzelactie zijn.

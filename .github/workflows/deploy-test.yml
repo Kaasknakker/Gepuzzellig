@@ -63,6 +63,8 @@ jobs:
         run: node .github/scripts/check-daily-resume.mjs
       - name: Persoonlijke voortgang en wissen controleren
         run: node .github/scripts/check-personal-progress.mjs
+      - name: Synchronisatie - speeltijd maakt een bord niet nieuwer
+        run: node .github/scripts/check-sync-at.mjs
       - name: Intrekken groepsrechten en uitnodigingen controleren
         run: node .github/scripts/check-security-app.mjs
       - name: Automatische kruisjes controleren
