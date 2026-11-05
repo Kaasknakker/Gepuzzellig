@@ -141,6 +141,7 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | S23 | Murdoku-herstelhint wees de verkeerde persoon aan (eerste foute plek in rasterrichting, ook als diens kaartje klopte). Nu: eerst wie zijn eigen kaartje schendt, dan de slachtofferregel (precies één andere persoon in de ruimte), anders neutrale tekst. Melding Peter 5 nov | bug | – | gebouwd (PR 5 nov), praktijkcontrole open | – |
 | S25 | Murdoku-hint: kaart was te smal naast het bord (viel terug op de smalle knoppenkolom) en de stappen van een herstelhint waren algemeen. Nu: kaart krijgt een iets kleinere maar leesbare plek naast het bord, en de stappen noemen de concrete reden (slachtofferregel met namen, of dat het kaartje wel klopt maar de rest niet). | Klaar, te testen op iPad |
 | S18b | Binair-iconen bewegen nog op iPad na #87. Isolatietest 2: alleen de SVG-afmeting op hele pixels (`round(74%,1px)`); bord en cellen ongewijzigd. Volgorde bij uitblijven effect: bord op fysieke pixels (devicePixelRatio), dan opacity-animatie en tellergewicht. Eerst schermopname gevraagd. | Open, iPad-test |
+| S18c | Iconen bewegen nog op iPad na #91 (hele-pixel SVG), niet op iPhone. Isolatietest 3: kleurovergang (`background-color .12s`) van Binair-cellen uit. Volgende bij uitblijven effect: bord op fysieke pixels, opacity-animatie, tellergewicht, `pick`-markering zelf. | Open, iPad-test |
 | T1 | Woordenlijst doorvoeren, jargon weg | tekst | B1-O, S1–S7 | open | |
 | T2 | Uitleg per puzzel inkorten | tekst | T1 | open | |
 | T3 | Hints Murdoku herschrijven ★ | tekst | T1 | open | |
