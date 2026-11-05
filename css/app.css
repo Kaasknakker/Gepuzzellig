@@ -149,9 +149,10 @@ button:focus-visible{outline:3px solid var(--pc);outline-offset:2px}
 @keyframes pop{0%{transform:scale(.55)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}45%{transform:translateX(5px)}70%{transform:translateX(-3px)}}
 .c.pop{animation:pop .24s ease-out;position:relative;z-index:2}
-/* Binair: alleen het teken poppt, binnen het eigen vakje. Een vakje dat boven zijn buren uit schaalt, laat Safari het hele raster een halve punt verschuiven (opname 2 nov). */
+/* Binair: geen schaal-animatie. Elke transform op een teken liet in Safari/iPad de tekens bewegen (opname 2 nov, melding 5 nov); alleen doorzichtigheid verandert, niets verschuift of schaalt. */
+@keyframes binIn{from{opacity:.25}to{opacity:1}}
 body[data-t=bin] #grid .c.pop{animation:none;z-index:auto}
-body[data-t=bin] #grid .c.pop svg{animation:pop .24s ease-out}
+body[data-t=bin] #grid .c.pop svg{animation:binIn .16s ease-out}
 svg .pop{transform-box:fill-box;transform-origin:center;animation:pop .32s ease-out}
 svg .shake{animation:shake .35s}
 #hexw svg g{transition:opacity .2s}
