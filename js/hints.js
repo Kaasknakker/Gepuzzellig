@@ -42,7 +42,7 @@ function murGuidance(move){
   const victim=nm(p.V),at=S.cur.indexOf(p.V),room=at>=0?p.arts[p.reg[at]]:"in één ruimte";
   return {direction:"Bekijk de ruimte waar "+victim+" lag. Wie stond daar nog meer?",reason:victim+" lag "+room+". Het slachtoffer was alleen met de moordenaar. Vergelijk daarom de personen in die ruimte met de personen in de andere ruimtes; alleen iemand die bij het slachtoffer stond kan de moordenaar zijn.",lookCards:[p.V],reasonCards:[p.V]};
  }
- if(move.kind==="fix")return {direction:"Vergelijk de ingevulde keuzes met de kaartjes over hun ruimte en onderlinge positie.",reason:"Een ingevulde keuze past niet bij de aanwijzingen. Controleer eerst de genoemde ruimte, voorwerpen en relaties met andere personen. Daarna kun je gericht een keuze wissen en opnieuw redeneren.",lookCards:[],reasonCards:[]};
+ if(move.kind==="fix")return {direction:"Vergelijk de ingevulde keuzes met de kaartjes over hun ruimte en onderlinge positie.",reason:move.explain?move.explain+" Wis die keuze en redeneer opnieuw vanaf de kaartjes.":"Een ingevulde keuze past niet bij de aanwijzingen. Controleer eerst de genoemde ruimte, voorwerpen en relaties met andere personen. Daarna kun je gericht een keuze wissen en opnieuw redeneren.",lookCards:[],reasonCards:[]};
  const clues=new Set(),events=[],seen=new Set();
  function visit(s){
   if(seen.has(s)||s==null)return;seen.add(s);
