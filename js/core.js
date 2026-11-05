@@ -1550,7 +1550,7 @@ function progAll(){try{return JSON.parse(lsGet(PKEY)||"{}")}catch(e){return{}}}
 function progKey(t,pr,d,sf){const nv=t==="nono"&&S&&S.type==="nono"&&S.nv==="color"?"c":"";return pr?"p:"+t+sf+nv:"d:"+d+":"+t+sf}
 const cloudProgKey=k=>encodeURIComponent(k).replace(/\./g,"%2E");
 const cloudProgOk=()=>!PHONE&&uid&&uid!=="x"&&window.PD_DB&&window.PD_DB.saveProgress;
-let cloudProgLast={},cloudProgPullAt=0,cloudProgPulling=false;
+let cloudProgPromise=null,cloudProgLast={},cloudProgPullAt=0,cloudProgPulling=false;
 function progressDeletions(){try{return JSON.parse(lsGet("pdprogdeleted:"+uid)||"{}")}catch(e){return{}}}
 function progressDeletedAt(k){return Number(progressDeletions()[k])||0}
 function rememberProgressDeletion(k,at){const marks=progressDeletions();marks[k]=Math.max(Number(marks[k])||0,at);lsSet("pdprogdeleted:"+uid,JSON.stringify(marks));return marks[k]}
@@ -1579,8 +1579,8 @@ function mergeCloudProgress(mp){if(PHONE||!mp)return false;const a=progAll(),rem
  for(const[k,at]of Object.entries(progressDeletions()))if(!a[k]||(Number(a[k].at)||0)<=at){if(a[k]){delete a[k];ch=true}if(!remote[k]?.deleted||(Number(remote[k].at)||0)<at)cloudClearProgress(k)}
  const now=Date.now();for(const[k,e0]of Object.entries(a)){if(!progressRelevant(k)||progressSolved(k,e0))continue;let e=e0;if(!e.at&&!remote[k]){e=Object.assign({},e,{at:now});a[k]=e;ch=true}const r=remote[k];if(!r||(e.at||0)>(r.at||0))cloudPushProgress(k,e,true)}
  if(ch&&!lsSet(PKEY,JSON.stringify(a))&&curk)UX.storage(curk,{local:false,remote:"saved"});if(reload&&S&&S.p&&!S.done){const t=S.type,pr=S.practice,d=S.date;S.start=0;if(pr)load(t,pr,false,d);else load(t,false,false,d,false,curk)}else if(document.body.classList.contains("home"))try{renderHome()}catch(e){}return ch}
-function pullCloudProgress(force){if(PHONE||!uid||uid==="x"||!window.PD_DB||!window.PD_DB.getProgress||cloudProgPulling)return Promise.resolve(false);const now=Date.now();if(!force&&now-cloudProgPullAt<15000)return Promise.resolve(false);cloudProgPullAt=now;cloudProgPulling=true;
- return window.PD_DB.getProgress($("#group").value.trim(),uid).then(mergeCloudProgress).catch(()=>{if(S&&S.p)UX.storage(progKey(S.type,S.practice,S.date,S.sf),{remote:"failed"});return false}).finally(()=>{cloudProgPulling=false})}
+function pullCloudProgress(force){if(PHONE||!uid||uid==="x"||!window.PD_DB||!window.PD_DB.getProgress)return Promise.resolve(false);if(cloudProgPulling)return cloudProgPromise||Promise.resolve(false);const now=Date.now();if(!force&&now-cloudProgPullAt<15000)return Promise.resolve(false);cloudProgPullAt=now;cloudProgPulling=true;
+ return cloudProgPromise=window.PD_DB.getProgress($("#group").value.trim(),uid).then(mergeCloudProgress).catch(()=>{if(S&&S.p)UX.storage(progKey(S.type,S.practice,S.date,S.sf),{remote:"failed"});return false}).finally(()=>{cloudProgPulling=false})}
 function persist(forceCloud){if(S.discarded||!S.p||S.done||!S.start||!S.seed)return;const a=progAll();let pruned=false;
  const k=progKey(S.type,S.practice,S.date,S.sf),pc=progressPct();
  /* Alleen bordinvoer of eigen aantekeningen maken dit een lopende puzzel; hints bekijken en controleren niet. */
@@ -1783,7 +1783,12 @@ $("#npmx").onclick=showHome;
 
 /* Puzzelsoort openen: hervat eerst de meest recente onafgemaakte sessie van dit type. Een bewust nieuwe vrije puzzel loopt via showNewFree(). */
 function latestProgressForType(t){const f=latestFreeProgress(t),d=progressList({practice:false,type:t})[0]||null;return !d?f:!f?d:(f.e.at||0)>(d.e.at||0)?f:d}
-function withFreshProgress(fn){if(!cloudProgOk()||navigator.onLine===false)return fn();return Promise.race([pullCloudProgress(true),new Promise(r=>setTimeout(r,700))]).then(fn,fn)}
+let pdWaited=false,pdNoUser=false;addEventListener("pdauthout",()=>{pdNoUser=true});addEventListener("pdprofile",()=>{pdNoUser=false});
+/* Online openen gebruikt de nieuwste voortgang: wacht (max. 2,5 s) tot het profiel geladen is en op de lopende of nieuwe ophaalronde. Offline of bij een trage verbinding opent de lokale stand; een latere, nieuwere cloudstand wordt door mergeCloudProgress alsnog overgenomen zolang er nog niet gespeeld is. */
+function withFreshProgress(fn){if(PHONE||navigator.onLine===false||!window.PD_DB)return fn();
+ const ready=uid!=="x"||pdWaited||pdNoUser?Promise.resolve():new Promise(r=>{addEventListener("pdprofile",r,{once:true});addEventListener("pdauthout",r,{once:true})}),
+  fresh=ready.then(()=>cloudProgOk()?pullCloudProgress(true):0),limit=new Promise(r=>setTimeout(()=>{if(uid==="x")pdWaited=true;r()},2500));
+ return Promise.race([fresh,limit]).then(fn,fn)}
 function openType(t){return withFreshProgress(()=>{const m=latestProgressForType(t);if(m)return resumeProgress(m.k);return myDone(dstr(),t)?(HOMEREADY?showNewFree(t,false):load(t,true,true)):load(t,false)})}
 const DAYGROUP_OPEN=new Set();
 let HVIEW="",PUZZLETAB="favorites",SWK=0,SCOREWHO="all",HDOPEN="",ADMIN_READONLY=false;
@@ -1917,7 +1922,7 @@ function renderHome(){const h=$("#home");if(!h)return;if(HVIEW==="score")return 
  ${activeGroups.length?`<section class="hsection hresume" data-home-section><div class="hsecthead"><div><h3>Verder puzzelen</h3><span class="mut">${active.length} ${active.length===1?"puzzel":"puzzels"} bezig · ${activeGroups.length} ${activeGroups.length===1?"soort":"soorten"}</span></div></div><div class="hcontlist hcontgroups">${activeGroups.map(resumeGroupCard).join("")}</div></section>`:""}
 
  <section class="hsection hhomefree" data-home-section><div class="hsecthead"><div><h3>Vrij puzzelen</h3><span class="mut">Jouw geselecteerde puzzels</span></div><button class="hmorepuzzles" data-open-puzzles>Meer puzzels <span>›</span></button></div><div class="tiles freegrid homefreegrid">${homeFreeTiles.map(freeTile).join("")}</div></section>\n\n <section class="hsection htogether" data-home-section><div class="hsecthead"><div><h3>Samen puzzelen</h3><span class="mut">Jouw groepen van vandaag</span></div></div><div class="hgroupstack">${groupCards}</div></section></div>`;
- h.querySelectorAll(".daygroup").forEach(d=>{const summary=d.querySelector("summary"),t=d.dataset.dayGroup;summary.addEventListener("click",e=>{e.preventDefault();const b=d.closest(".dayitem")?.querySelector(".dayaction"),pk=b?.dataset.pk;if(pk)resumeProgress(pk);else if(myDone(td,t))load(t,false,false,td);else load(t,false)});d.addEventListener("toggle",()=>{if(!d.isConnected)return;if(d.open)h.querySelectorAll(".daygroup").forEach(other=>{if(other!==d)other.open=false});DAYGROUP_OPEN.clear();h.querySelectorAll(".daygroup[open]").forEach(open=>DAYGROUP_OPEN.add(open.dataset.dayGroup));fitHomePage()})});
+ h.querySelectorAll(".daygroup").forEach(d=>{const summary=d.querySelector("summary"),t=d.dataset.dayGroup;summary.addEventListener("click",e=>{e.preventDefault();withFreshProgress(()=>{const m=progressList({practice:false,type:t,date:td})[0];if(m)resumeProgress(m.k);else if(myDone(td,t))load(t,false,false,td);else load(t,false)})});d.addEventListener("toggle",()=>{if(!d.isConnected)return;if(d.open)h.querySelectorAll(".daygroup").forEach(other=>{if(other!==d)other.open=false});DAYGROUP_OPEN.clear();h.querySelectorAll(".daygroup[open]").forEach(open=>DAYGROUP_OPEN.add(open.dataset.dayGroup));fitHomePage()})});
  h.querySelectorAll(".hdrow[data-day-t]").forEach(b=>b.onclick=e=>{e.stopPropagation();const d=b.closest(".dayitem").querySelector(".daygroup"),willOpen=!d.open;if(willOpen){h.querySelectorAll(".daygroup").forEach(other=>{if(other!==d&&other.open)setDetailsOpen(other,false)});DAYGROUP_OPEN.clear();DAYGROUP_OPEN.add(d.dataset.dayGroup)}else DAYGROUP_OPEN.delete(d.dataset.dayGroup);b.blur();setDetailsOpen(d,willOpen);requestAnimationFrame(()=>{b.blur();if(document.activeElement===b)document.activeElement.blur()});setTimeout(fitHomePage,400)});
  h.querySelectorAll("[data-delete-pk]").forEach(b=>b.onclick=()=>withFreshProgress(()=>discardProgress(b.dataset.deletePk)));
  h.querySelectorAll(".hcont[data-pk]").forEach(b=>b.onclick=()=>withFreshProgress(()=>resumeProgress(b.dataset.pk)));
