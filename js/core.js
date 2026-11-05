@@ -349,7 +349,7 @@ let penAct=null,penActTimer=0;
 const refreshPenAct=e=>{if(e.pointerType!=="pen")return;clearTimeout(penActTimer);penAct={id:e.pointerId,t:performance.now()};penActTimer=setTimeout(()=>{if(penAct&&penAct.id===e.pointerId)penAct=null},900)};
 addEventListener("pointerdown",refreshPenAct,true);
 addEventListener("pointermove",e=>{if(e.pointerType==="pen"&&penAct&&penAct.id===e.pointerId)refreshPenAct(e)},true);
-addEventListener("pointerdown",e=>{if(e.pointerType==="pen")return;if(penAct&&performance.now()-penAct.t<900&&e.target.closest&&e.target.closest("#grid,#hexsvg,#mgrid")){e.stopPropagation();e.preventDefault()}},true);
+addEventListener("pointerdown",e=>{if(e.pointerType==="pen")return;if(penAct&&performance.now()-penAct.t<900&&e.target.closest&&e.target.closest("#grid,#hexsvg,#mgrid")){if(window.PDPERF)PDPERF.note("TIK GENEGEERD door Pencil-onderdrukking",e.pointerType+", pen "+Math.round(performance.now()-penAct.t)+" ms geleden");e.stopPropagation();e.preventDefault()}},true);
 const penUp=e=>{if(e.pointerType==="pen"&&penAct&&penAct.id===e.pointerId){penAct=null;clearTimeout(penActTimer);penActTimer=0}};addEventListener("pointerup",penUp,true);addEventListener("pointercancel",penUp,true);
 /* Gedeelde vakjes-geometrie: rekent met offsetLeft/offsetTop, dus een vakje dat net 'popt' (vergroot) verschuift de raakzone niet. */
 function gridGeo(W){const g=$("#grid"),gr=g.getBoundingClientRect(),a=S.cells[0],b=S.cells[1]||a,d=S.cells[W]||a,relative=a.offsetParent===g;

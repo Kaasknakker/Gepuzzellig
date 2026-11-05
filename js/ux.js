@@ -84,3 +84,45 @@ const UX={
   this.home();this.board();
  }
 };
+
+/* Opt-in meetlogger voor haperingen (iPad). Alleen actief met ?perf=1 (uit met ?perf=0). Registreert uitsluitend tijdstippen, duur en soort invoer;
+   geen namen, puzzelinhoud of Firebase-gegevens. Paneel "perf" linksonder: Kopieer / Wis. */
+(function(){
+ let on=false;
+ try{const q=location.search;if(/[?&]perf=1/.test(q))localStorage.setItem("pdperf","1");if(/[?&]perf=0/.test(q))localStorage.removeItem("pdperf");on=localStorage.getItem("pdperf")==="1"}catch(e){on=false}
+ window.PDPERF=null;if(!on)return;
+ const log=[],T0=performance.now(),MAX=500,t=()=>Math.round((performance.now()-T0)/100)/10;
+ let saveT=0,penLast=-1e9,down=null;
+ const store=()=>{clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem("pdperflog",JSON.stringify(log.slice(-200)))}catch(e){log.push([t(),"opslag-logboek mislukt",""])}},4000)};
+ const note=(kind,detail)=>{log.push([t(),kind,detail==null?"":String(detail)]);if(log.length>MAX)log.splice(0,log.length-MAX);store()};
+ const dump=()=>"perf-log ("+navigator.userAgent.replace(/\s+/g," ").slice(0,90)+")\n"+log.map(l=>l[0]+"s  "+l[1]+(l[2]?"  "+l[2]:"")).join("\n");
+ window.PDPERF={note,dump,log};
+ /* Hoofdthread: vertraging van de eventloop en van beeldvernieuwing (Safari kent geen longtask). */
+ let last=performance.now();setInterval(()=>{const n=performance.now(),d=n-last-100;last=n;if(d>120)note("eventloop-vertraging",Math.round(d)+" ms")},100);
+ let raf=performance.now();const rl=()=>{const n=performance.now();if(n-raf>150&&!document.hidden)note("beeld-hapering",Math.round(n-raf)+" ms");raf=n;requestAnimationFrame(rl)};requestAnimationFrame(rl);
+ /* Invoer: soort aanwijzer, doel en of een tik tijdens het bord vervangen werd. */
+ const cont=e=>e.target&&e.target.closest?e.target.closest("#grid,#hexsvg,#mgrid"):null,tgt=e=>cont(e)?"speelvlak":(e.target&&e.target.closest&&e.target.closest("button,.btn,[role=button]")?"knop":"anders");
+ addEventListener("pointerdown",e=>{if(e.pointerType==="pen")penLast=performance.now();down={c:cont(e),t:performance.now(),ty:e.pointerType};note("pointerdown",e.pointerType+" "+tgt(e)+(e.pointerType!=="pen"&&performance.now()-penLast<1500?" (pen "+Math.round(performance.now()-penLast)+" ms eerder)":""))},true);
+ addEventListener("pointerup",e=>{const d=down;down=null;note("pointerup",e.pointerType+(d?" "+Math.round(performance.now()-d.t)+" ms na down":" zonder down")+(d&&d.c&&!document.contains(d.c)?" BORD VERVANGEN tijdens tik":""))},true);
+ addEventListener("pointercancel",e=>note("pointercancel",e.pointerType),true);
+ for(const ev of["visibilitychange","online","offline","pageshow","focus","blur"])addEventListener(ev,()=>note("gebeurtenis",ev+(ev==="visibilitychange"?" "+document.visibilityState:"")),true);
+ /* Duur van opslaan, synchronisatie en opbouw (na het laden van core.js). */
+ addEventListener("load",()=>{
+  for(const f of["persist","board","mergeCloudProgress","renderHome","load","pollNu","resync","pullMine"]){const o=window[f];if(typeof o!=="function")continue;
+   window[f]=function(){const s=performance.now(),r=o.apply(this,arguments),d=performance.now()-s;if(d>20||f==="load")note("duur "+f,Math.round(d)+" ms");return r}}
+  const pc=window.pullCloudProgress;if(typeof pc==="function")window.pullCloudProgress=function(){const s=performance.now(),r=pc.apply(this,arguments);if(r&&r.then)r.then(v=>{if(performance.now()-s>300)note("ophalen voortgang traag",Math.round(performance.now()-s)+" ms (incl. netwerk)")},()=>note("ophalen voortgang mislukt",Math.round(performance.now()-s)+" ms"));return r};
+  const lc=window.localStorage&&Storage.prototype.setItem;if(lc&&!Storage.prototype.__pdperf){Storage.prototype.__pdperf=1;Storage.prototype.setItem=function(k,v){const s=performance.now();lc.apply(this,arguments);const d=performance.now()-s;if(d>8&&k!=="pdperflog")note("localStorage schrijven",(String(k).startsWith("pd")?k:"sleutel")+" "+Math.round(String(v).length/1024)+" KB, "+Math.round(d)+" ms")}}
+ });
+ /* Paneel */
+ addEventListener("DOMContentLoaded",()=>{
+  const b=document.createElement("button"),p=document.createElement("div"),pre=document.createElement("pre"),row=document.createElement("div");
+  b.textContent="perf";b.setAttribute("aria-label","Meetlogboek");Object.assign(b.style,{position:"fixed",left:"6px",bottom:"6px",zIndex:99999,opacity:.55,padding:"4px 8px",borderRadius:"8px"});
+  Object.assign(p.style,{position:"fixed",left:"6px",bottom:"40px",right:"6px",maxHeight:"55vh",overflow:"auto",zIndex:99999,display:"none",padding:"8px",borderRadius:"10px",background:"var(--card,#222)",color:"var(--ink,#eee)",border:"1px solid var(--line,#555)"});
+  pre.style.cssText="white-space:pre-wrap;margin:6px 0 0;font:12px/1.35 ui-monospace,monospace";
+  const mk=(txt,fn)=>{const x=document.createElement("button");x.textContent=txt;x.onclick=fn;x.style.marginRight="8px";row.append(x)};
+  mk("Kopieer",()=>{const s=dump();(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>note("gekopieerd",""),()=>{pre.textContent=s;const r=document.createRange();r.selectNodeContents(pre);getSelection().removeAllRanges();getSelection().addRange(r)})});
+  mk("Vernieuw",()=>{pre.textContent=dump()});mk("Wis",()=>{log.length=0;pre.textContent=""});mk("Uit",()=>{try{localStorage.removeItem("pdperf");localStorage.removeItem("pdperflog")}catch(e){note("uitzetten mislukt","")}location.search="?perf=0"});
+  p.append(row,pre);b.onclick=()=>{p.style.display=p.style.display==="none"?"block":"none";pre.textContent=dump()};
+  document.body.append(b,p);
+ });
+})();
