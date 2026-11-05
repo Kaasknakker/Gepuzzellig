@@ -108,8 +108,9 @@ vm.runInContext(`
  const sol=p.sol.slice(),alt=sol.map((i,q)=>q===0?17:q===3?4:i);
  // Iris in de Garage + Lisa op een andere plek: alle persoonskaartjes kloppen, de slachtofferregel niet (twee anderen in zijn ruimte).
  put(alt.map((i,q)=>[q,i]));let m=murHint();assert.equal(m.kind,'fix');assert.equal(m.cells[0],17,'Iris wordt aangewezen, niet Lisa');assert.deepEqual(m.cards,[V]);assert.ok(m.text.includes('slachtoffer')&&m.text.includes('meer mensen'),m.text);
+ assert.ok(m.short.includes('Wie staat er bij')&&m.explain.includes('alleen met de moordenaar')&&m.explain.includes('Nu staan daar'),m.explain);
  // Zonder Iris: Lisa staat fout terwijl haar eigen kaartje klopt; de tekst zegt dat niet langer dat haar kaartje niet klopt.
- put(alt.map((i,q)=>[q,i]).filter(([q])=>q!==0));m=murHint();assert.equal(m.kind,'fix');assert.equal(m.cells[0],4);assert.ok(m.text.includes('klopt op deze plek wel'),m.text);
+ put(alt.map((i,q)=>[q,i]).filter(([q])=>q!==0));m=murHint();assert.equal(m.kind,'fix');assert.equal(m.cells[0],4);assert.ok(m.text.includes('klopt op deze plek wel'),m.text);assert.ok(m.explain.includes('voldoet hier aan het eigen kaartje'),m.explain);
  // Iemand wiens eigen kaartje niet klopt wordt nog steeds gewoon aangewezen.
  const bad=sol.slice(),spots=[...Array(N*N).keys()].filter(i=>!sol.includes(i)&&murFree(i,murM(p)));
  let found=false;for(const i of spots){const t=sol.map((x,q)=>[q,q===1?i:x]);put(t);const mm=murHint();if(mm.kind==='fix'&&mm.cells[0]===i&&mm.text.includes('kaartje van')&&!mm.text.includes('klopt op deze plek')){found=true;break}}

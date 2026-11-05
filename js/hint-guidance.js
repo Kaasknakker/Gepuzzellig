@@ -153,7 +153,7 @@ function compactGuidance(move,guide){
  const p=S.p,q=move.proof||{},rule=q.rule;
  const result=(direction,...steps)=>({shortDirection:direction,reasonSteps:steps.filter(Boolean)});
  const fallback=()=>result('Kijk nog eens naar de gemarkeerde aanwijzingen.','Voor deze stap kan ik nog geen korte uitleg geven. Je kunt de volledige hint openen om te zien welke zet mogelijk is.');
- if(move.kind==='fix')return result('Kijk nog eens naar wat je hier hebt ingevuld.','Een van je keuzes past niet bij de aanwijzingen van de puzzel.','Open de volledige hint als je wilt zien welk vakje je kunt herstellen.');
+ if(move.kind==='fix')return result(move.short||'Kijk nog eens naar wat je hier hebt ingevuld.',move.explain||'Een van je keuzes past niet bij de aanwijzingen van de puzzel.','Open de volledige hint als je wilt zien welk vakje je kunt herstellen.');
  if(S.type==='mur'){
   if(move.kind==='kill')return result('Wie was er bij het slachtoffer?','Het slachtoffer was alleen met de moordenaar in een ruimte.','Kijk wie er in diezelfde ruimte staat. Die persoon is dus de moordenaar.');
   if(!move.proof)return fallback();
