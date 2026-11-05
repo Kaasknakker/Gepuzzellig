@@ -88,7 +88,7 @@ const UX={
 /* Opt-in meetlogger voor haperingen (iPad). Alleen actief met ?perf=1 (uit met ?perf=0). Registreert uitsluitend tijdstippen, duur en soort invoer;
    geen namen, puzzelinhoud of Firebase-gegevens. Paneel "perf" linksonder: Kopieer / Wis. */
 (function(){
- let on=false;
+ let on=false;if(typeof window==="undefined")return;
  try{const q=location.search;if(/[?&]perf=1/.test(q))localStorage.setItem("pdperf","1");if(/[?&]perf=0/.test(q))localStorage.removeItem("pdperf");on=localStorage.getItem("pdperf")==="1"}catch(e){on=false}
  window.PDPERF=null;if(!on)return;
  const log=[],T0=performance.now(),MAX=500,t=()=>Math.round((performance.now()-T0)/100)/10;
