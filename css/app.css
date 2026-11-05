@@ -153,6 +153,8 @@ button:focus-visible{outline:3px solid var(--pc);outline-offset:2px}
 @keyframes binIn{from{opacity:.25}to{opacity:1}}
 body[data-t=bin] #grid .c.pop{animation:none;z-index:auto}
 body[data-t=bin] #grid .c.pop svg{animation:binIn .16s ease-out}
+/* Isolatietest S18: alleen de SVG-afmeting op hele pixels (bord en cellen ongewijzigd). */
+body[data-t=bin] #grid .c>svg{width:74%;height:74%;width:round(74%,1px);height:round(74%,1px)}
 svg .pop{transform-box:fill-box;transform-origin:center;animation:pop .32s ease-out}
 svg .shake{animation:shake .35s}
 #hexw svg g{transition:opacity .2s}
