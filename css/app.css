@@ -149,10 +149,9 @@ button:focus-visible{outline:3px solid var(--pc);outline-offset:2px}
 @keyframes pop{0%{transform:scale(.55)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}45%{transform:translateX(5px)}70%{transform:translateX(-3px)}}
 .c.pop{animation:pop .24s ease-out;position:relative;z-index:2}
-/* Binair: geen schaal-animatie. Elke transform op een teken liet in Safari/iPad de tekens bewegen (opname 2 nov, melding 5 nov); alleen doorzichtigheid verandert, niets verschuift of schaalt. */
-@keyframes binIn{from{opacity:.25}to{opacity:1}}
+/* S18d (opname 5 nov 21:23): bij elke geplaatste teken schoof het hele bord 1 px op het moment dat de animatie startte en 150 ms later terug; daarom ook geen doorzichtigheids-animatie meer. Binair: geen schaal-animatie. Elke transform op een teken liet in Safari/iPad de tekens bewegen (opname 2 nov, melding 5 nov); alleen doorzichtigheid verandert, niets verschuift of schaalt. */
 body[data-t=bin] #grid .c.pop{animation:none;z-index:auto}
-body[data-t=bin] #grid .c.pop svg{animation:binIn .16s ease-out}
+body[data-t=bin] #grid .c.pop svg{animation:none}
 /* Isolatietest S18: alleen de SVG-afmeting op hele pixels (bord en cellen ongewijzigd). */
 body[data-t=bin] #grid .c>svg{width:74%;height:74%;width:round(74%,1px);height:round(74%,1px)}
 /* Isolatietest S18c: geen kleurovergang op Binair-cellen (rij/kolom-markering kleurt per tik veel cellen om; Safari tekent de iconen dan mogelijk opnieuw). */
