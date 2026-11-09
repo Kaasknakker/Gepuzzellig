@@ -89,6 +89,10 @@ jobs:
         run: node .github/scripts/check-score-back.mjs
       - name: Favoriet-afhandeling
         run: node .github/scripts/check-fav-handler.mjs
+      - name: Linter voor niet-gedefinieerde variabelen installeren
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund eslint@9 globals
+      - name: Geen verwijzingen naar niet-gedefinieerde variabelen
+        run: node .github/scripts/check-undef.mjs
       - name: Uitslag Controleren past in de bovenbalk
         run: node .github/scripts/check-checkmsg.mjs
       - name: Scorebord herstart alleen bij wijziging
