@@ -158,6 +158,10 @@ function testChooseCard(h){
  if(!PHONE)for(const c of [make(board.right+14,board.top+5),make(board.left,board.bottom+14)])if(c.left>=area.left&&c.right<=innerWidth-6&&c.bottom<=innerHeight-10&&!needed.some(r=>testOverlap(c,r)))return c;
  const xs=[area.right-w-5,area.left+5,area.left+(area.width-w)/2],ys=[area.bottom-height-5,area.top+5,area.top+(area.height-height)/2];
  for(const top of ys)for(const left of xs){const c=make(left,top);if(height>=200&&!needed.some(r=>testOverlap(c,r)))return c}
+ /* Past de kaart op volle grootte nergens zonder de gemarkeerde vakjes of kaartjes te bedekken (bijvoorbeeld Murdoku met alle kaartjes in beeld), zoek dan de grootste iets kleinere kaart die wel vrij past, rechtsonder eerst; de tekst scrolt in de kaart. Pas daarna wordt het smalle bedieningsvak overgenomen. */
+ if(!PHONE)for(const [W,H] of [[330,290],[320,280],[310,280],[300,270],[300,250],[280,230],[280,210]].map(([a,b])=>[Math.min(a,w),Math.min(b,height)])){
+  if(H<200||(W===w&&H===height))continue;
+  for(let top=area.bottom-H-5;top>=area.top+5;top-=8)for(let left=innerWidth-W-6;left>=area.left+5;left-=8){const c={left,top,width:W,height:H,right:left+W,bottom:top+H,tray:false};if(!needed.some(r=>testOverlap(c,r)))return c}}
  if(PHONE){const pb=testRect($('#pbot'));return {left:4,top:pb.top,width:innerWidth-8,height:innerHeight-pb.top,tray:true}}
  for(const c of [make(board.right+14,area.top+5),make(area.left+5,board.bottom+14)])if(c.right<=innerWidth-6&&c.bottom<=innerHeight-10&&!needed.some(r=>testOverlap(c,r)))return c;
  const pb=testRect($('#pbot'));

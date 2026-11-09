@@ -2,14 +2,15 @@
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#15171c;--fg:#ecebe6;--card:#20232b;--line:#3a3e4a;--acc:#6f9bff;--mut:#9a9eab;--ok:#4cc380;--fill:#ecebe6;--sel:#5a4a14;--dup:#3d6b1c;--one:#a98bff;color-scheme:dark}}
 :root[data-theme=dark]{--bg:#15171c;--fg:#ecebe6;--card:#20232b;--line:#3a3e4a;--acc:#6f9bff;--mut:#9a9eab;--ok:#4cc380;--fill:#ecebe6;--sel:#5a4a14;--dup:#3d6b1c;--one:#a98bff;color-scheme:dark}
 *{box-sizing:border-box}html,body{margin:0}html{background:var(--bg)}
-/* iOS 26 vervaagt in een app op het beginscherm de bovenste ±95 pt (statusbalk + ±36 pt). Op de telefoon beginnen kop en inhoud daarom 40 px lager; Profiel en de aanmeldpagina's gebruiken env() en liggen al buiten dat bereik. */
-@media(max-width:600px){html[data-standalone]{--safe-top:calc(env(safe-area-inset-top) + 40px)}}
+/* iOS 26 vervaagt in een app op het beginscherm de bovenste ±95 pt (statusbalk + ±36 pt). Op de telefoon beginnen kop en inhoud daarom lager (gemeten 9 nov op iOS 27: 6 px is genoeg, gelijk aan de hoogte van #statusfill; eerder 40 px); Profiel en de aanmeldpagina's gebruiken env() en liggen al buiten dat bereik. */
+@media(max-width:600px){html[data-standalone]{--safe-top:calc(env(safe-area-inset-top) + 6px)}}
 body{background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;padding:var(--safe-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 html[data-ui-pending],html[data-auth-pending]{overflow:hidden}
 #bootveil{display:none;position:fixed;inset:0;z-index:2147483646;place-items:center;background:var(--bg);color:var(--fg);padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 /* iOS 26 tekent in een app op het beginscherm een vervagende rand over de bovenste ±40 pt, tenzij WebKit bovenaan een vast, bijna schermbreed vlak met achtergrondkleur vindt (LocalFrameView::fixedContainerEdges). Dit vlak vult alleen de veilige marge onder de statusbalk. Geen pointer-events:none: dan wordt het vlak niet gevonden. */
 #statusfill{display:none}
-html[data-standalone] #statusfill{display:block;position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:var(--page-tone,var(--bg));z-index:1}
+/* S27: op iPad (vensterstand) is de veilige zone 0 px, het element had dan hoogte 0 en iOS blurde de bovenrand. iOS leest alleen een vast element van minstens 6 px hoog. */
+html[data-standalone] #statusfill{display:block;position:fixed;top:0;left:0;right:0;height:max(env(safe-area-inset-top),6px);background:var(--page-tone,var(--bg));z-index:1;pointer-events:none}
 html[data-ui-pending] #bootveil,html[data-auth-pending] #bootveil{display:grid}
 #bootveil .bootinner{display:flex;align-items:center;gap:5px}
 #bootveil .bootinner i{width:6px;height:6px;border-radius:50%;background:var(--mut);opacity:.28;animation:bootPulse 1s ease-in-out infinite}
@@ -149,9 +150,13 @@ button:focus-visible{outline:3px solid var(--pc);outline-offset:2px}
 @keyframes pop{0%{transform:scale(.55)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}45%{transform:translateX(5px)}70%{transform:translateX(-3px)}}
 .c.pop{animation:pop .24s ease-out;position:relative;z-index:2}
-/* Binair: alleen het teken poppt, binnen het eigen vakje. Een vakje dat boven zijn buren uit schaalt, laat Safari het hele raster een halve punt verschuiven (opname 2 nov). */
+/* S18d (opname 5 nov 21:23): bij elke geplaatste teken schoof het hele bord 1 px op het moment dat de animatie startte en 150 ms later terug; daarom ook geen doorzichtigheids-animatie meer. Binair: geen schaal-animatie. Elke transform op een teken liet in Safari/iPad de tekens bewegen (opname 2 nov, melding 5 nov); alleen doorzichtigheid verandert, niets verschuift of schaalt. */
 body[data-t=bin] #grid .c.pop{animation:none;z-index:auto}
-body[data-t=bin] #grid .c.pop svg{animation:pop .24s ease-out}
+body[data-t=bin] #grid .c.pop svg{animation:none}
+/* Isolatietest S18: alleen de SVG-afmeting op hele pixels (bord en cellen ongewijzigd). */
+body[data-t=bin] #grid .c>svg{width:74%;height:74%;width:round(74%,1px);height:round(74%,1px)}
+/* Isolatietest S18c: geen kleurovergang op Binair-cellen (rij/kolom-markering kleurt per tik veel cellen om; Safari tekent de iconen dan mogelijk opnieuw). */
+body[data-t=bin] #grid .c,body[data-t=bin] #grid .pt{transition:none}
 svg .pop{transform-box:fill-box;transform-origin:center;animation:pop .32s ease-out}
 svg .shake{animation:shake .35s}
 #hexw svg g{transition:opacity .2s}

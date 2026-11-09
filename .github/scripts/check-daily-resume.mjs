@@ -41,6 +41,7 @@ for(const phone of [false,true])for(const type of types)for(const level of [1,2,
  // A saved key from a different date/type cannot override this request.
  assert.equal(c.dailyResumeMeta(type,'2026-10-26',key),null);
  if(!phone){c.progressRelevant=()=>true;c.progressSolved=()=>false;c.cloudProgressHistory=e=>e;
+ vm.runInContext(section('function mergeMetaInto(','function mergeCloudProgress('),c);
  vm.runInContext(section('function mergeCloudProgress(','function pullCloudProgress('),c);
  const remote={...saved[key],k:key,at:Date.now()+1000,cur:[0,1,0,1],rev:[2]};
  c.mergeCloudProgress({item:remote});
