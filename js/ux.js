@@ -126,3 +126,10 @@ const UX={
   document.body.append(b,p);
  });
 })();
+/* Opt-in meting (?statusdebug=1) voor de wazige bovenrand in iOS: toont wat #statusfill en de veilige zone echt doen. */
+(()=>{if(typeof window==="undefined"||!/[?&]statusdebug=1/.test(location.search))return;
+ addEventListener("load",()=>{const p=document.createElement("pre");p.style.cssText="position:fixed;left:6px;right:6px;bottom:6px;z-index:2147483647;margin:0;padding:8px;font:11px/1.35 monospace;background:#000c;color:#fff;border-radius:8px;white-space:pre-wrap;pointer-events:none";
+  const probe=document.createElement("div");probe.style.cssText="position:fixed;top:0;left:0;height:env(safe-area-inset-top);width:1px;visibility:hidden";document.body.append(probe);
+  const show=()=>{const s=document.getElementById("statusfill"),r=s&&s.getBoundingClientRect(),c=s&&getComputedStyle(s),v=window.visualViewport;
+   p.textContent=["standalone attr: "+("standalone" in document.documentElement.dataset),"navigator.standalone: "+navigator.standalone,"display-mode standalone: "+matchMedia("(display-mode: standalone)").matches,"safe-area-top (px): "+probe.getBoundingClientRect().height,"statusfill: "+(r?[r.top,r.left,r.width,r.height].map(x=>Math.round(x*10)/10).join(" / ")+" (boven/links/breed/hoog)":"ontbreekt"),"display/position/z: "+(c?[c.display,c.position,c.zIndex].join(" / "):"-"),"achtergrond: "+(c?c.backgroundColor:"-"),"viewport: "+innerWidth+"x"+innerHeight+(v?" vv "+Math.round(v.width)+"x"+Math.round(v.height)+" offTop "+v.offsetTop:""),"scrollY: "+Math.round(scrollY),"dpr: "+devicePixelRatio,"UA: "+navigator.userAgent.replace(/^Mozilla\/5.0 /,"").slice(0,70)].join("\n")};
+  show();setInterval(show,1000);document.body.append(p)})})();
