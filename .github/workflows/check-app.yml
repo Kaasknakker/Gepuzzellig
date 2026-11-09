@@ -87,6 +87,8 @@ jobs:
         run: node .github/scripts/check-delta-start.mjs
       - name: Terugknop persoonlijke pagina
         run: node .github/scripts/check-score-back.mjs
+      - name: Uitslag Controleren past in de bovenbalk
+        run: node .github/scripts/check-checkmsg.mjs
       - name: Scorebord herstart alleen bij wijziging
         run: node .github/scripts/check-board-restart.mjs
       - name: Groepsinfo herstelt na offline start
