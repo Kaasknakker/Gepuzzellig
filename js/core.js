@@ -1801,7 +1801,7 @@ function withFreshProgress(fn){if(PHONE||navigator.onLine===false||!window.PD_DB
  return Promise.race([fresh,limit]).then(fn,fn)}
 function openType(t){return withFreshProgress(()=>{const m=latestProgressForType(t);if(m)return resumeProgress(m.k);return myDone(dstr(),t)?(HOMEREADY?showNewFree(t,false):load(t,true,true)):load(t,false)})}
 const DAYGROUP_OPEN=new Set();
-let HVIEW="",PUZZLETAB="favorites",SWK=0,SCOREWHO="all",HDOPEN="",ADMIN_READONLY=false;
+let SCOREORIGIN="home",HVIEW="",PUZZLETAB="favorites",SWK=0,SCOREWHO="all",HDOPEN="",ADMIN_READONLY=false;
 const STYLE_THEMES=["shared","peter","aart","stars","nature","retro","animals","sea","travel","music","party","coffee","season","minimal"],STYLE_ACCENTS={blue:"#2f6fed",purple:"#7a52d6",teal:"#0f9d8c",green:"#2f9e44",orange:"#d98200",pink:"#d84b73",red:"#b5483a"};
 let PROFILE_STYLE={theme:"shared",accent:"blue"},GROUP_STYLE={theme:"shared",accent:"orange"};
 const cleanStyle=(x,fbTheme="shared",fbAccent="blue")=>({theme:STYLE_THEMES.includes(x&&x.theme)?x.theme:fbTheme,accent:STYLE_ACCENTS[x&&x.accent]?x.accent:fbAccent});
@@ -1825,7 +1825,7 @@ function fitHomePage(){document.documentElement.classList.remove("pagefit");docu
 for(const type of ["gesturestart","gesturechange","touchstart","touchmove"])document.addEventListener(type,e=>{if(!document.body.classList.contains("home")||e.target.closest?.('.authcover,.uxcover'))return;if(type.startsWith('gesture')||(e.touches&&e.touches.length>1))e.preventDefault()},{passive:false});
 /* Alleen voor de groep Rekensukkels (Peter en Aart): het verhaal achter de app. */
 const isRekensukkels=()=>($("#group").value||"").trim().toLowerCase()==="peter-aart-jk4hv92t"||String(GROUP_NAME||"").trim().toLowerCase()==="rekensukkels";
-function showScore(who="all"){HVIEW="score";SCOREWHO=who||"all";SWK=0;renderHome();pageIn($("#home"));window.PD_MENU_PAGE_TOP?.();pingOnline(true)}
+function showScore(who="all"){SCOREORIGIN="home";HVIEW="score";SCOREWHO=who||"all";SWK=0;renderHome();pageIn($("#home"));window.PD_MENU_PAGE_TOP?.();pingOnline(true)}
 function renderScore(h){const raw=allRows(),all=statsRows(raw),rows=all.filter(r=>!isFree(r)),today=dstr(),dow=(new Date().getDay()+6)%7,mon0=addDays(today,-dow),TS=Object.keys(TYPES);
  const pl=new Map();groupPlayers().forEach(p=>pl.set(uidOf(p),playerName(p)));rows.forEach(r=>{if(!pl.has(r.uid))pl.set(r.uid,r.name)});const us=[...pl.keys()];
  if(SCOREWHO!=="all"&&!pl.has(SCOREWHO))SCOREWHO="all";
