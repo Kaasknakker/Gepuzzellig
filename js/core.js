@@ -1478,8 +1478,10 @@ setInterval(()=>{try{updatePeerLive()}catch(e){}},15000);
 setInterval(()=>pingOnline(false),30000);
 document.addEventListener("visibilitychange",()=>{if(document.hidden)clearOnline();else setTimeout(()=>pingOnline(true),300)});
 addEventListener("pagehide",clearOnline);
-function startBoard(){if(ADMIN_READONLY||!window.PD_DB||!window.PD_PROFILE_LINKED)return;if(unsub)unsub();listenDate=dstr();startStatus();
- unsub=window.PD_DB.listenFrom(addDays(listenDate,-800),rows=>{lastRows=mergeRows(lastRows,rows);pullMine(lastRows);board(lastRows);resync(rows)},()=>{$("#board").textContent="Scorebord niet bereikbaar";clearTimeout(startBoard.t);startBoard.t=setTimeout(startBoard,30000)})}
+/* S28: elke profielmelding (lidmaatschap, leden, groep) startte het scorebord opnieuw op en las de hele geschiedenis opnieuw (7x per koude start gemeten). Alleen opnieuw opstarten als speler/groep/lidmaatschapsdatum of de dag verandert, of als er expliciet om gevraagd wordt (startBoard(true)). */
+let boardKeyNow="";
+function startBoard(force){if(ADMIN_READONLY||!window.PD_DB||!window.PD_PROFILE_LINKED)return;const key=window.PD_DB.boardKey?window.PD_DB.boardKey():"";if(force!==true&&unsub&&key&&key===boardKeyNow&&listenDate===dstr())return;boardKeyNow=key;if(unsub)unsub();listenDate=dstr();startStatus();
+ unsub=window.PD_DB.listenFrom(addDays(listenDate,-800),rows=>{lastRows=mergeRows(lastRows,rows);pullMine(lastRows);board(lastRows);resync(rows)},()=>{$("#board").textContent="Scorebord niet bereikbaar";clearTimeout(startBoard.t);startBoard.t=setTimeout(()=>startBoard(true),30000)})}
 /* Scores worden nooit weggehaald: een (gedeeltelijke) momentopname uit de cache mag dus nooit regels laten verdwijnen. */
 function mergeRows(oud,nieuw){const m=new Map();const k=r=>(r.group||"")+"|"+r.uid+"|"+r.date+"|"+r.type;oud.forEach(r=>m.set(k(r),r));nieuw.forEach(r=>m.set(k(r),r));return[...m.values()]}
 /* Andersom: dagpuzzels die volgens het scorebord al af zijn, maar die dit apparaat niet (meer) kent
@@ -1512,7 +1514,7 @@ if("serviceWorker"in navigator&&(location.protocol==="https:"||location.hostname
  addEventListener("pageshow",swCheck);
  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")swCheck()});
 }
-addEventListener("online",()=>{const m=$("#board");if(window.PD_DB&&m&&/niet bereikbaar/.test(m.textContent))startBoard();pullCloudProgress(true)});
+addEventListener("online",()=>{const m=$("#board");if(window.PD_DB&&m&&/niet bereikbaar/.test(m.textContent))startBoard(true);pullCloudProgress(true)});
 addEventListener("pdnodb",e=>{$("#board").textContent=e.detail||"Scorebord nog niet ingesteld (zie stappenplan)."});
 if(window.PD_DB)startBoard();
 /* Vangnet naast de live verbinding: elke 45 seconden (en bij terugkomen in de app) de nieuwste scores en "bezig" rechtstreeks ophalen. */
@@ -1522,7 +1524,7 @@ function pollNu(){if(ADMIN_READONLY||!window.PD_DB||!window.PD_PROFILE_LINKED||!
  const n0=lastRows.length,j0=JSON.stringify(STAT);lastRows=mergeRows(lastRows,o.rows);if(o.stat)STAT=o.stat;if(lastRows.length!==n0||JSON.stringify(STAT)!==j0){pullMine(lastRows);board(lastRows)}}).catch(()=>{})}
 setInterval(pollNu,45000);addEventListener("pdready",()=>setTimeout(pollNu,3000));
 /* Terug in de app (bijv. na de iPad op slot): verbindingen opnieuw opzetten, zodat "bezig" en scores direct kloppen. */
-let lastVis=Date.now();document.addEventListener("visibilitychange",()=>{if(document.hidden||!window.PD_DB)return;setTimeout(pollNu,800);/* Volledig opnieuw verbinden leest de hele geschiedenis opnieuw (telt als reads); de listeners herstellen zich zelf. Alleen bij een nieuwe dag of na lang wegzijn. */if(listenDate!==dstr()||Date.now()-lastVis>30*60000){lastVis=Date.now();startBoard()}});addEventListener("pageshow",e=>{if(e.persisted&&window.PD_DB)startBoard()});
+let lastVis=Date.now();document.addEventListener("visibilitychange",()=>{if(document.hidden||!window.PD_DB)return;setTimeout(pollNu,800);/* Volledig opnieuw verbinden leest de hele geschiedenis opnieuw (telt als reads); de listeners herstellen zich zelf. Alleen bij een nieuwe dag of na lang wegzijn. */if(listenDate!==dstr()||Date.now()-lastVis>30*60000){lastVis=Date.now();startBoard(true)}});addEventListener("pageshow",e=>{if(e.persisted&&window.PD_DB)startBoard(true)});
 
 const SET=window.PD_SETUP||{players:["Speler"],group:"lokaal",groupName:"Groep"};$("#group").value=SET.group;
 function setMe(p,displayName){uid=uidOf(p);const nm=(displayName||playerName(p)||p).trim()||p;$("#name").value=nm;board(lastRows);setTimeout(()=>pullCloudProgress(true),0)}
