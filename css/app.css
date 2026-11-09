@@ -2080,3 +2080,5 @@ body.tablet.home .hhomehero{padding:12px 14px 14px}
 @keyframes boardCheckGoodM{0%,60%{box-shadow:0 0 0 10px color-mix(in srgb,var(--ok) 92%,transparent),0 0 16px 6px color-mix(in srgb,var(--ok) 55%,transparent)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
 @keyframes boardCheckBadM{0%,70%{box-shadow:0 0 0 10px color-mix(in srgb,#d84b4b 92%,transparent),0 0 16px 6px color-mix(in srgb,#d84b4b 55%,transparent)}100%{box-shadow:0 0 0 0 transparent,0 0 0 0 transparent}}
 @media(prefers-reduced-motion:reduce){#mgrid.checkgood,#grid.checkgood{outline:3px solid var(--ok)}#mgrid.checkbad,#grid.checkbad{outline:3px solid #d84b4b}}
+/* S30: iOS zoomt in zodra een invoerveld met tekst kleiner dan 16 px focus krijgt (bijv. naam of e-mail bij de eerste keer openen) en zoomt niet vanzelf terug. Op aanraakschermen daarom altijd minimaal 16 px. */
+@media(pointer:coarse){input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=button]):not([type=submit]),select,textarea{font-size:16px!important}}
