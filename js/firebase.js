@@ -13,6 +13,12 @@ else{try{
  const LEGACY_CACHE_KEY="pdlegacy1:",LEGACY_CACHE_DAYS=14,LEGACY_CACHE_MAX=2e6;
  const legacyCacheRead=k=>{try{const c=JSON.parse(localStorage.getItem(LEGACY_CACHE_KEY+k)||"null");return c&&Array.isArray(c.rows)&&Date.now()-Number(c.t)<LEGACY_CACHE_DAYS*864e5?c.rows:null}catch(e){return null}};
  const legacyCacheWrite=(k,rows)=>{try{const s=JSON.stringify({t:Date.now(),rows});if(s.length<LEGACY_CACHE_MAX)localStorage.setItem(LEGACY_CACHE_KEY+k,s)}catch(e){console.warn("Lokale opslag voor oude resultaten niet beschikbaar")}};
+/* S28b delta-start: bewaar de laatst gelezen resultaten per speler+groep+lidmaatschap (+ dataversie), zodat een herstart alleen de laatste dagen opnieuw leest.
+   Cursor = tijdstip van de laatste geslaagde sync; overlap dekt achterlopende klokken en later gesynchroniseerde offline-resultaten; na SYNC_FULL_MS altijd een volledige lezing (veiligheidsnet).
+   Let op: lokaal gemerged wordt nooit iets verwijderd; verwijderde resultaten verdwijnen pas bij de volgende volledige lezing. */
+const SYNC_KEY="pdsync1|",SYNC_VERSION=1,SYNC_OVERLAP_MS=7*864e5,SYNC_FULL_MS=7*864e5,SYNC_MAX=2500000;
+const syncCacheRead=k=>{try{const c=JSON.parse(localStorage.getItem(SYNC_KEY+k)||"null"),n=Date.now();if(!c||c.v!==SYNC_VERSION||c.k!==k||!Array.isArray(c.P)||!Array.isArray(c.G))return null;if(!(c.syncedAt<=n&&c.fullAt<=n&&n-c.fullAt<SYNC_FULL_MS&&c.syncedAt>=c.fullAt))return null;const ok=e=>Array.isArray(e)&&typeof e[0]==="string"&&e[1]&&typeof e[1]==="object"&&e[1].uid&&e[1].type&&(e[1].puzzleDate||e[1].date);return c.P.every(ok)&&c.G.every(ok)?c:null}catch(e){return null}};
+const syncCacheWrite=(k,c)=>{try{const s=JSON.stringify(Object.assign({v:SYNC_VERSION,k},c));if(s.length<SYNC_MAX)localStorage.setItem(SYNC_KEY+k,s);else localStorage.removeItem(SYNC_KEY+k)}catch(e){console.warn("Lokale opslag voor resultaten niet beschikbaar")}};
  const legacyCacheDrop=()=>{try{Object.keys(localStorage).filter(k=>k.startsWith(LEGACY_CACHE_KEY)).forEach(k=>localStorage.removeItem(k))}catch(e){console.warn("Lokale opslag opruimen mislukt")}};
  const PROFILE_CACHE_KEY="pdprofilecache2",OWNER_PLAYER=(window.PD_SETUP&&window.PD_SETUP.ownerPlayerId)||"u-peter";
  const baseGroupName=()=>window.PD_SETUP&&window.PD_SETUP.groupName||"Puzzelsukkels";
@@ -138,14 +144,18 @@ window.PD_DB={
   personalRows:(since)=>{if(!currentProfile)return Promise.resolve([]);const c=f.collection(db,"playerResults",currentProfile.playerId,"items"),q=since?f.query(c,f.where("completedAt",">=",since)):c;return f.getDocsFromServer(q).then(s=>s.docs.map(d=>window.PD_DB.personalRow(d.data())))},
   groupRows:(since)=>{const g=activeGroupId(),m=approvedGroup(g);if(!currentProfile||!g||!m)return Promise.resolve([]);const q=since?joinedQuery("groupActivity",g,"completedAt",Math.max(Number(m.joinedAt)||0,Number(since)||0)):joinedQuery("groupActivity",g,"completedAt",m.joinedAt);return f.getDocsFromServer(q).then(s=>s.docs.map(d=>window.PD_DB.groupRow(d.data(),g)))},
   legacyRows:()=>{if(!currentProfile)return Promise.resolve([]);const gid=activeGroupId(),founder=gid==="peter-aart-jk4hv92t"&&["u-peter","u-aart"].includes(currentProfile.playerId)&&currentMemberships.some(m=>m.groupId===gid&&m.status==="approved");const key=currentProfile.playerId+"|"+(founder?gid:"eigen"),hit=legacyCacheRead(key);if(hit)return Promise.resolve(hit);const q=founder?f.query(f.collection(db,"results"),f.where("group","==",gid)):f.query(f.collection(db,"results"),f.where("uid","==",currentProfile.playerId));return f.getDocsFromServer(q).then(s=>{const rows=s.docs.map(d=>d.data());if(rows.length)legacyCacheWrite(key,rows);return rows})},
-  listenFrom:(from,cb,err)=>{if(!currentProfile){err&&err(new Error("Profiel niet gereed"));return()=>{}}let dead=false,P=null,G=null,L=null;const gid=activeGroupId(),m=approvedGroup(gid),withGroup=!!(gid&&m);
+  listenFrom:(from,cb,err)=>{if(!currentProfile){err&&err(new Error("Profiel niet gereed"));return()=>{}}let dead=false,P=null,G=null,L=null,pOk=false,gOk=false,wt=0;const gid=activeGroupId(),m=approvedGroup(gid),withGroup=!!(gid&&m);
    const merge=(p,g,l)=>{const seen=new Set(),out=[];for(const x of [...g,...p,...l]){const k=x.uid+"|"+(x.puzzleDate||x.date)+"|"+x.type;if(seen.has(k))continue;seen.add(k);out.push(x)}return out.filter(x=>(x.completedOn||x.date)>=from)};
    /* Pas doorgeven als alle bronnen er één keer zijn; daarna bij elke wijziging uit de listeners, zonder opnieuw te lezen. */
    const emit=()=>{if(dead||!P||(withGroup&&!G)||!L)return;cb(merge(P,G||[],L))};
    window.PD_DB.legacyRows().then(l=>{L=l;emit()}).catch(e=>{if(!dead&&err)err(e)});
-   const us=[f.onSnapshot(f.collection(db,"playerResults",currentProfile.playerId,"items"),s=>{P=s.docs.map(d=>window.PD_DB.personalRow(d.data()));emit()},err)];
-   if(withGroup)us.push(f.onSnapshot(joinedQuery("groupActivity",gid,"completedAt",m.joinedAt),s=>{G=s.docs.map(d=>window.PD_DB.groupRow(d.data(),gid));emit()},err));
-   return()=>{dead=true;us.forEach(u=>u())}},
+   const joined=withGroup?Number(m.joinedAt)||0:0,ckey=currentProfile.playerId+"|"+(withGroup?gid+"|"+joined:"eigen"),t0=Date.now(),c=syncCacheRead(ckey),delta=!!c,pm=new Map(delta?c.P:[]),gm=new Map(delta&&withGroup?c.G:[]),fullAt=delta?c.fullAt:t0,since=delta?c.syncedAt-SYNC_OVERLAP_MS:0;
+   window.PD_DB.syncMode=delta?"delta":"volledig";
+   const save=()=>{if(dead||!pOk||(withGroup&&!gOk))return;clearTimeout(wt);wt=setTimeout(()=>syncCacheWrite(ckey,{syncedAt:t0,fullAt,P:[...pm],G:[...gm]}),1500)};
+   if(delta){P=[...pm.values()];G=withGroup?[...gm.values()]:null;emit()}
+   const pc=f.collection(db,"playerResults",currentProfile.playerId,"items"),us=[f.onSnapshot(delta?f.query(pc,f.where("completedAt",">=",since)):pc,s=>{if(!delta)pm.clear();s.docs.forEach(d=>pm.set(d.id,window.PD_DB.personalRow(d.data())));P=[...pm.values()];pOk=true;emit();save()},err)];
+   if(withGroup)us.push(f.onSnapshot(joinedQuery("groupActivity",gid,"completedAt",delta?Math.max(joined,since):joined),s=>{if(!delta)gm.clear();s.docs.forEach(d=>gm.set(d.id,window.PD_DB.groupRow(d.data(),gid)));G=[...gm.values()];gOk=true;emit();save()},err));
+   return()=>{dead=true;clearTimeout(wt);us.forEach(u=>u())}},
   listen:(date,cb,err)=>window.PD_DB.listenFrom(date,r=>cb(r.filter(x=>x.date===date)),err),
   setStatus:st=>currentProfile&&activeGroupId()&&st&&st.uid===currentProfile.playerId&&st.group===activeGroupId()?f.setDoc(f.doc(db,"presence",st.group+"_"+st.uid),st,{merge:true}):Promise.resolve(),
   listenStatus:(g,cb,err)=>currentProfile&&g&&g===activeGroupId()?f.onSnapshot(f.query(f.collection(db,"presence"),f.where("group","==",g)),s=>cb(s.docs.map(d=>d.data())),err):(()=>{}),
