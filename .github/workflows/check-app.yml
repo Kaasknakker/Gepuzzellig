@@ -87,6 +87,8 @@ jobs:
         run: node .github/scripts/check-delta-start.mjs
       - name: Terugknop persoonlijke pagina
         run: node .github/scripts/check-score-back.mjs
+      - name: Favoriet-afhandeling
+        run: node .github/scripts/check-fav-handler.mjs
       - name: Uitslag Controleren past in de bovenbalk
         run: node .github/scripts/check-checkmsg.mjs
       - name: Scorebord herstart alleen bij wijziging
