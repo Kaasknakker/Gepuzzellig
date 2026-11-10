@@ -89,6 +89,8 @@ jobs:
         run: node .github/scripts/check-score-back.mjs
       - name: Favoriet-afhandeling
         run: node .github/scripts/check-fav-handler.mjs
+      - name: Aanwezigheid en poll zuinig
+        run: node .github/scripts/check-presence-beat.mjs
       - name: Linter voor niet-gedefinieerde variabelen installeren
         run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund eslint@9 globals
       - name: Geen verwijzingen naar niet-gedefinieerde variabelen
