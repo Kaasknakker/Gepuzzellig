@@ -1101,6 +1101,94 @@ const RAAD4=[
  return{tekst:`Op een kaart met schaal 1 : 100.000 is een afstand 10 cm.`,vraag:`In het echt is dat ….. km.`,eenheid:"km",ans:10,hints:[`1 cm op de kaart is 100.000 cm in het echt.`,`100.000 cm = 1 km.`],uitwerking:[[`1 cm op de kaart is 100.000 cm = 1 km.`,`10 cm is 10 × 1 = 10 km.`,`Controle: 10 km is 1.000.000 cm, en 1.000.000 : 100.000 = 10 cm.`],[`1 cm hoort bij 1 km, dus 10 cm bij 10 km.`]]}}}
 ];
 RAAD.push(...RAAD4);
+/* ===== Nieuwe soorten, ronde 2 (R2): Hectare en are, Kortingen na elkaar, Twee geheimzinnige getallen. Elk met meerdere manieren van oplossen. ===== */
+function svgLand({L,B,w=360,h=176}){
+ const mx=14,my=30,aw=w-2*mx,ah=h-my-34,sc=Math.min(aw/L,ah/B),pw=L*sc,ph=B*sc,x0=(w-pw)/2,y0=my;
+ let s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Rechthoekig stuk land met stippellijnen om de 100 meter"><rect x="${x0.toFixed(1)}" y="${y0}" width="${pw.toFixed(1)}" height="${ph.toFixed(1)}" style="fill:var(--blauw);fill-opacity:.35;stroke:currentColor;stroke-width:1.5"/>`;
+ for(let k=100;k<L;k+=100)s+=`<line x1="${(x0+k*sc).toFixed(1)}" y1="${y0}" x2="${(x0+k*sc).toFixed(1)}" y2="${(y0+ph).toFixed(1)}" stroke="currentColor" stroke-opacity=".55" stroke-dasharray="4 3"/>`;
+ for(let k=100;k<B;k+=100)s+=`<line x1="${x0.toFixed(1)}" y1="${(y0+k*sc).toFixed(1)}" x2="${(x0+pw).toFixed(1)}" y2="${(y0+k*sc).toFixed(1)}" stroke="currentColor" stroke-opacity=".55" stroke-dasharray="4 3"/>`;
+ s+=svgT((x0+pw/2).toFixed(1),y0-9,nl(L)+" m",{fs:11.5})+svgT((x0+7).toFixed(1),(y0+ph/2+4).toFixed(1),nl(B)+" m",{a:"start",fs:11.5});
+ s+=svgT(w/2,h-10,"De stippellijnen liggen om de 100 m. Een vakje van 100 m bij 100 m is 1 hectare.",{fs:9.5,fw:600,op:.85});
+ return s+`</svg>`}
+const RAAD5=[
+{id:"hectare",naam:"Hectare en are",vanaf:"2026-11-26",gen(R){
+ const v=rint(R,0,3),wie=nm(R),OBJ=["een cranberryveld op Terschelling","een tulpenveld","een kampeerweide","een weiland","een maisveld"],obj=rpick(R,OBJ);
+ if(v===0){for(let g=0;g<2000;g++){const L=rpick(R,[100,120,150,160,200,250,300,400,500]),B=rpick(R,[100,120,150,160,200,250,300]),A=L*B,ha=A/10000;if(A%1000||ha<1.5||ha>15)continue;
+  return{tekst:`${wie} heeft ${obj}. Het is een rechthoek van ${nl(L)} m lang en ${nl(B)} m breed.`,
+   vraag:`De oppervlakte is ….. hectare.`,eenheid:"hectare",ans:ha,dec:Number.isInteger(ha)?0:1,
+   hints:[`Hoeveel vierkante meter is het stuk? En hoeveel vierkante meter is één hectare?`,`${nl(L)} × ${nl(B)} = ${nl(A)} m². Een hectare is een vierkant van 100 m bij 100 m.`],
+   uitwerking:[[`Eerst de oppervlakte in vierkante meter: ${nl(L)} × ${nl(B)} = ${nl(A)} m².`,`Een hectare is 100 m × 100 m = 10.000 m².`,`${nl(A)} : 10.000 = ${nl(ha)} hectare.`,`Controle: ${nl(ha)} × 10.000 = ${nl(A)} m².`],
+    [`Een hectare is een vierkant van 100 m bij 100 m. Reken de zijden om naar zulke vakken: ${nl(L)} : 100 = ${nl(L/100)} en ${nl(B)} : 100 = ${nl(B/100)}.`,{t:`Zo ziet dat eruit.`,svg:svgLand({L,B})},`Het aantal vakken is ${nl(L/100)} × ${nl(B/100)} = ${nl(ha)}. Elk vak is 1 hectare.`,`Het stuk is ${nl(ha)} hectare.`]]}}}
+ if(v===1){for(let g=0;g<2000;g++){const X=rpick(R,[1.2,1.5,2,2.4,3,3.6,4.5,6]),Y=rpick(R,[3,4,5,6,8,10,12,15,20]),n=X*100/Y;if(!Number.isInteger(n)||n<12||n>300)continue;
+  return{tekst:`Een kampeerterrein op Terschelling is ${nl(X)} hectare groot. ${wie} verdeelt het in gelijke staanplaatsen van ${Y} are.`,
+   vraag:`Er passen ….. staanplaatsen op het terrein.`,eenheid:"staanplaatsen",ans:n,
+   hints:[`Reken hectare en are om naar dezelfde eenheid. Een are is 10 m bij 10 m. Hoeveel are is één hectare?`,`Een hectare is 100 are, of 10.000 m². Een are is 100 m².`],
+   uitwerking:[[`Een hectare is 100 are.`,`Het terrein is ${nl(X)} × 100 = ${nl(X*100)} are.`,`Elke staanplaats is ${Y} are: ${nl(X*100)} : ${Y} = ${n}.`,`Controle: ${n} × ${Y} = ${nl(n*Y)} are, en dat is ${nl(X)} hectare.`],
+    [`Een are is 10 m × 10 m = 100 m². Een hectare is 100 m × 100 m = 10.000 m².`,`Het terrein is ${nl(X)} × 10.000 = ${nl(X*10000)} m².`,`Een staanplaats is ${Y} × 100 = ${nl(Y*100)} m².`,`${nl(X*10000)} : ${nl(Y*100)} = ${n} staanplaatsen.`],
+    [ts(`Zet hectare en are in een verhoudingstabel.`,["Hectare","Are"],[["1","100"],[nl(X),nl(X*100)]]),`${nl(X*100)} are : ${Y} are per plaats = ${n} staanplaatsen.`]]}}}
+ if(v===2){const X=rpick(R,[1,2.25,4,6.25,9,12.25,16,25]),s=Math.round(Math.sqrt(X)*100),h=s/100;
+  return{tekst:`${wie} heeft ${obj}. Het is een vierkant van ${nl(X)} hectare.`,
+   vraag:`Elke zijde is ….. meter lang.`,eenheid:"meter",ans:s,
+   hints:[`Een vierkant van 1 hectare is 100 m bij 100 m. Hoe zit dat bij ${nl(X)} hectare?`,`${nl(X)} hectare is ${nl(X*10000)} m². Welk getal keer zichzelf is dat?`],
+   uitwerking:[[`Een hectare is 10.000 m², dus ${nl(X)} hectare is ${nl(X)} × 10.000 = ${nl(X*10000)} m².`,`Bij een vierkant is de oppervlakte de zijde keer de zijde. Welk getal keer zichzelf is ${nl(X*10000)}?`,`Dat is ${nl(s)}, want ${nl(s)} × ${nl(s)} = ${nl(s*s)}.`,`De zijde is ${nl(s)} meter.`,`Controle: ${nl(s)} × ${nl(s)} = ${nl(s*s)} m², en ${nl(s*s)} : 10.000 = ${nl(X)} hectare.`],
+    [`Een vierkant van 1 hectare is 100 m bij 100 m.`,`${nl(X)} hectare is ${nl(X)} keer zoveel. Zoek een getal dat keer zichzelf ${nl(X)} is: ${nl(h)} × ${nl(h)} = ${nl(X)}.`,{t:`Zo ziet dat eruit.`,svg:svgLand({L:s,B:s})},`De zijde is ${nl(h)} vakken van 100 m: ${nl(h)} × 100 = ${nl(s)} meter.`],
+    [ts(`Probeer een paar zijden en reken de oppervlakte uit.`,["Zijde","Oppervlakte",""],[s-50,s,s+50].map(z=>[nl(z)+" m",nl(z*z/10000)+" hectare",z*z/10000<X?"te klein":z*z/10000>X?"te groot":"klopt"])),`Bij ${nl(s)} meter is de oppervlakte precies ${nl(X)} hectare.`]]}}
+ const h=rint(R,1,6),a=rint(R,2,19)*5,A=h*10000+a*100;
+ return{tekst:`${wie} koopt een perceel van ${h} hectare en ${a} are.`,
+  vraag:`Het perceel is ….. m².`,eenheid:"m²",ans:A,
+  hints:[`Hoeveel m² is een hectare, en hoeveel m² is een are?`,`Een hectare is 100 m × 100 m = 10.000 m². Een are is 10 m × 10 m = 100 m².`],
+  uitwerking:[[`Een hectare is 10.000 m²: ${h} × 10.000 = ${nl(h*10000)} m².`,`Een are is 100 m²: ${a} × 100 = ${nl(a*100)} m².`,`Samen: ${nl(h*10000)} + ${nl(a*100)} = ${nl(A)} m².`,`Controle: ${nl(A)} : 100 = ${nl(A/100)} are, en dat is ${h} hectare (${nl(h*100)} are) en ${a} are.`],
+   [`Een hectare is 100 are. Reken alles om naar are: ${h} × 100 = ${nl(h*100)} are.`,`Samen met de ${a} are: ${nl(h*100)} + ${a} = ${nl(h*100+a)} are.`,`Een are is 100 m²: ${nl(h*100+a)} × 100 = ${nl(A)} m².`]]}}},
+{id:"kortingen",naam:"Kortingen na elkaar",vanaf:"2026-11-26",gen(R){
+ const IT=[["een cameralens",200,600,50],["een fietstas",60,160,10],["een rugzak voor op reis",40,120,10],["een jas",80,240,20],["een grote doos Lindt",20,40,5]],P=[10,20,25,30,40,50],v=rint(R,0,2),wie=nm(R);
+ for(let g=0;g<3000;g++){const it=rpick(R,IT),X=it[1]+rint(R,0,(it[2]-it[1])/it[3])*it[3],a=rpick(R,P),b=rpick(R,P);if(a===b)continue;
+  const X1=X*(100-a)/100,X2=X1*(100-b)/100,Tt=(100-a)*(100-b)/100;if(!Number.isInteger(X1)||!Number.isInteger(X2)||(v===1&&!Number.isInteger(Tt)))continue;
+  const f1=nl((100-a)/100),f2=nl((100-b)/100),ft=nl((100-a)*(100-b)/10000),item=it[0],sv=(lbl)=>svgStaven({bars:[{v:v===1?100:X,l:v===1?"begin":"eerst",t:v===1?"€ 100":undefined},{v:v===1?100-a:X1,l:"na "+a+"%",t:v===1?"€ "+(100-a):undefined},{v:v===1?Tt:X2,c:"x",l:"na "+b+"% erbij",t:v===1?"€ "+Tt:undefined}],min:0,max:(v===1?100:X)*1.08});
+  const tekstKort=`In de uitverkoop is er ${a}% korting op ${item}. Bij de kassa gaat daar nog ${b}% extra korting vanaf.`;
+  if(v===0)return{tekst:`${wie} wil ${item} kopen. De prijs is ${eur(X)}. ${tekstKort}`,
+   vraag:`${wie} betaalt ….. euro.`,eenheid:"euro",ans:X2,dec:2,
+   hints:[`De tweede korting gaat over de prijs na de eerste korting, niet over de prijs van ${eur(X)}. Reken dus in twee stappen.`,`Eerst ${a}% korting op ${eur(X)}: dat is ${eur(X*a/100)}. Dan heb je een nieuwe prijs.`],
+   uitwerking:[[`Eerste korting: ${a}% van ${eur(X)} is ${eur(X*a/100)}.`,`De prijs wordt ${eur(X)} − ${eur(X*a/100)} = ${eur(X1)}.`,`Tweede korting: ${b}% van ${eur(X1)} (niet van ${eur(X)}) is ${eur(X1*b/100)}.`,`${eur(X1)} − ${eur(X1*b/100)} = ${eur(X2)}.`,{t:`Zo ziet dat eruit.`,svg:sv()},`Controle: ${eur(X)} × ${ft} = ${eur(X2)}.`],
+    [`Bij ${a}% korting betaal je nog ${100-a}% van de prijs. Dat is vermenigvuldigen met ${f1}.`,`Bij ${b}% extra korting betaal je nog ${100-b}% van die prijs: vermenigvuldigen met ${f2}.`,`Samen: ${f1} × ${f2} = ${ft}.`,`${eur(X)} × ${ft} = ${eur(X2)}.`]]};
+  if(v===1)return{tekst:`In de winkel hangt ${item} met ${a}% korting. Bij de kassa krijg je daar nog ${b}% extra korting van af.`,
+   vraag:`In totaal heb je ….. % korting gekregen.`,eenheid:"%",ans:100-Tt,
+   hints:[`Het is niet ${a}% + ${b}%. De tweede korting gaat over een prijs die al lager is. Neem als voorbeeld een prijs van € 100.`,`Na ${a}% korting op € 100 houd je € ${100-a} over. Reken nu de tweede korting uit over die € ${100-a}.`],
+   uitwerking:[[`Neem een prijs van € 100. Dat rekent makkelijk.`,`Eerste korting: ${a}% van € 100 is € ${a}. De prijs wordt € ${100-a}.`,`Tweede korting: ${b}% van € ${100-a} is € ${(100-a)*b/100}. De prijs wordt € ${100-a} − € ${(100-a)*b/100} = € ${Tt}.`,{t:`Zo ziet dat eruit.`,svg:sv()},`Je betaalt € ${Tt} van € 100. De korting is € 100 − € ${Tt} = € ${100-Tt}, dus ${100-Tt}%.`,`Controle: ${a}% + ${b}% = ${a+b}%. Dat is meer dan ${100-Tt}%, en dat klopt: de tweede korting gaat over een lagere prijs.`],
+    [`Bij ${a}% korting betaal je nog ${100-a}% van de prijs: vermenigvuldigen met ${f1}.`,`Bij ${b}% extra korting betaal je nog ${100-b}% van die prijs: vermenigvuldigen met ${f2}.`,`Samen: ${f1} × ${f2} = ${ft}.`,`Je betaalt dus ${Tt}% van de prijs. De korting is 100% − ${Tt}% = ${100-Tt}%.`]]};
+  return{tekst:`${wie} koopt ${item}. In de uitverkoop is er ${a}% korting. Bij de kassa gaat daar nog ${b}% extra korting vanaf. ${wie} betaalt uiteindelijk ${eur(X2)}.`,
+   vraag:`De prijs vóór de kortingen was € …..`,eenheid:"euro",ans:X,dec:2,
+   hints:[`Werk terug. Na de tweede korting betaalde ${wie} nog ${100-b}% van de prijs daarvoor. Welke prijs hoort daarbij?`,`${eur(X2)} is ${100-b}% van de prijs na de eerste korting. Die prijs is ${100-a}% van de beginprijs.`],
+   uitwerking:[[`Na de tweede korting betaal je ${100-b}% (${f2}) van de prijs daarvoor.`,`Die prijs was ${eur(X2)} : ${f2} = ${eur(X1)}.`,`Die ${eur(X1)} is de prijs na de eerste korting: ${100-a}% (${f1}) van de beginprijs.`,`De beginprijs was ${eur(X1)} : ${f1} = ${eur(X)}.`,{t:`Zo ziet dat eruit.`,svg:sv()},`Controle: ${eur(X)} × ${f1} = ${eur(X1)}, en ${eur(X1)} × ${f2} = ${eur(X2)}.`],
+    [`Je betaalt ${f1} × ${f2} = ${ft} van de beginprijs.`,`${eur(X2)} is dus ${ft} van de beginprijs.`,`De beginprijs was ${eur(X2)} : ${ft} = ${eur(X)}.`]]}}
+ return{tekst:`Een jas kost € 100. Er is 20% korting en daarna nog 10% extra korting.`,vraag:`De jas kost nu € …..`,eenheid:"euro",ans:72,hints:[`Reken in twee stappen.`,`€ 100 − 20% = € 80.`],uitwerking:[[`20% van € 100 is € 20: € 80.`,`10% van € 80 is € 8: € 72.`,`Controle: € 100 × 0,72 = € 72.`],[`0,8 × 0,9 = 0,72. € 100 × 0,72 = € 72.`]]}}},
+{id:"tweegetallen",naam:"Twee geheimzinnige getallen",vanaf:"2026-11-26",gen(R){
+ const v=rint(R,0,2),wie=nm(R),groot=R()<.5,w=groot?"grootste":"kleinste";
+ if(v===0){for(let g=0;g<2000;g++){const b=rint(R,5,45),V=rint(R,2,30),a=b+V,S=a+b;if(a>90)continue;const ans=groot?a:b;
+  const rows=[b-4,b-2,b].map(z=>[nl(z),nl(z+V),nl(2*z+V),2*z+V<S?"te weinig":"klopt"]);
+  return{tekst:`${wie} denkt aan twee getallen. Samen zijn ze ${nl(S)}. Het verschil tussen de twee getallen is ${V}.`,
+   vraag:`Het ${w} getal is …..`,eenheid:"",ans,
+   hints:[`Het grootste getal is ${V} groter dan het kleinste. Wat gebeurt er als je die ${V} bij het grootste weghaalt?`,`Dan zijn de twee getallen even groot en samen ${nl(S)} − ${V} = ${nl(S-V)}.`],
+   uitwerking:[[`Het grootste getal is ${V} groter dan het kleinste.`,`Haal die ${V} bij het grootste weg. Dan zijn de twee getallen even groot, en samen nog ${nl(S)} − ${V} = ${nl(S-V)}.`,`Het kleinste getal is ${nl(S-V)} : 2 = ${b}.`,{t:`Zo ziet dat eruit. Het grootste getal is het kleinste plus ${V}.`,svg:svgStaven({bars:[{v:b,l:"kleinste"},{v:a,c:"x",l:"grootste"}],over:[{i:1,van:b,tot:a,t:String(V)}],min:0,max:a*1.1})},`Het grootste getal is ${b} + ${V} = ${a}.`,`Controle: ${b} + ${a} = ${nl(S)} en ${a} − ${b} = ${V}.`],
+    [ts(`Probeer een getal als kleinste. Het grootste is dan ${V} meer.`,["Kleinste","Grootste","Samen",""],rows),`Bij ${b} als kleinste getal zijn ze samen ${nl(S)}. Het grootste is ${b} + ${V} = ${a}.`],
+    ...(S%2===0?[[`Het midden van de twee getallen is ${nl(S)} : 2 = ${nl(S/2)}.`,`Het verschil is ${V}. Elk getal ligt dus ${V} : 2 = ${nl(V/2)} van het midden af.`,`${nl(S/2)} − ${nl(V/2)} = ${b} en ${nl(S/2)} + ${nl(V/2)} = ${a}.`]]:[])]}}}
+ if(v===1){for(let g=0;g<2000;g++){const a=rint(R,3,19),b=rint(R,a+2,21);if((b-a)%2||a*b>400)continue;const S=a+b,P=a*b,m=S/2,d=(b-a)/2,ans=groot?b:a;
+  const rows=[];for(let k=1;k<=a;k++)if(P%k===0)rows.push([`${k} × ${nl(P/k)}`,nl(P),nl(k+P/k),k===a?"klopt":(k+P/k>S?"te groot":"te klein")]);if(rows.length<2)continue;
+  return{tekst:`${wie} denkt aan twee hele getallen. Samen zijn ze ${S}. Keer elkaar zijn ze ${P}.`,
+   vraag:`Het ${w} getal is …..`,eenheid:"",ans,
+   hints:[`Welke twee hele getallen hebben product ${P}? Maak een lijstje en kijk bij elk paar naar de som.`,`Bijvoorbeeld 1 × ${P}: de som is ${1+P}. Dat is te groot. Probeer ook 2, 3, ... als eerste getal.`],
+   uitwerking:[[`Zoek twee hele getallen die keer elkaar ${P} zijn, en kijk naar hun som.`,ts(`Alle paren die vanaf 1 mogelijk zijn:`,["Paar","Product","Som",""],rows),`Bij ${a} × ${b} is de som ${S}. Dat zijn de getallen.`,`Het ${w} getal is ${ans}.`,`Controle: ${a} + ${b} = ${S} en ${a} × ${b} = ${P}.`],
+    [`Het midden van de twee getallen is ${S} : 2 = ${m}.`,`Allebei liggen ze evenveel van het midden af. Noem dat stukje d. Dan zijn de getallen ${m} − d en ${m} + d.`,`Hun product is ${m} × ${m} − d × d = ${m*m} − d × d. Dat moet ${P} zijn.`,`Dus d × d = ${m*m} − ${P} = ${m*m-P}, en dat is ${d} × ${d}. Het stukje is ${d}.`,`De getallen zijn ${m} − ${d} = ${a} en ${m} + ${d} = ${b}.`]]}}}
+ for(let g=0;g<2000;g++){const k=rpick(R,[2,3,4,5]),sm=rint(R,5,30),S=(k+1)*sm,big=k*sm,ans=groot?big:sm;if(big>150)continue;
+  const rows=[sm-2,sm,sm+2].map(z=>[nl(z),nl(k*z),nl(z+k*z),(z+k*z)<S?"te weinig":(z+k*z)>S?"te veel":"klopt"]);
+  return{tekst:`${wie} denkt aan twee getallen. Samen zijn ze ${nl(S)}. Het grootste getal is ${k} keer zo groot als het kleinste.`,
+   vraag:`Het ${w} getal is …..`,eenheid:"",ans,
+   hints:[`Zie het kleinste getal als 1 deel. Hoeveel delen is het grootste getal dan?`,`Het grootste getal is ${k} delen. Samen zijn dat ${k+1} gelijke delen. Wat is één deel?`],
+   uitwerking:[[`Het kleinste getal is 1 deel. Het grootste getal is ${k} keer zoveel: ${k} delen.`,`Samen zijn dat 1 + ${k} = ${k+1} gelijke delen, en dat is ${nl(S)}.`,{t:`Zo ziet dat eruit.`,svg:svgStaven({bars:[{v:1,t:"1 deel",l:"kleinste"},{v:k,c:"x",t:k+" delen",l:"grootste"}],min:0,max:k*1.12})},`Eén deel is ${nl(S)} : ${k+1} = ${sm}. Dat is het kleinste getal.`,`Het grootste getal is ${k} × ${sm} = ${big}.`,`Controle: ${sm} + ${big} = ${nl(S)} en ${big} : ${sm} = ${k}.`],
+    [`Noem het kleinste getal x. Het grootste getal is dan ${k}x.`,`Samen: x + ${k}x = ${k+1}x = ${nl(S)}.`,`x = ${nl(S)} : ${k+1} = ${sm}.`,`Het grootste getal is ${k} × ${sm} = ${big}.`],
+    [ts(`Probeer een getal als kleinste. Het grootste is dan ${k} keer zoveel.`,["Kleinste","Grootste","Samen",""],rows),`Bij ${sm} als kleinste getal zijn ze samen ${nl(S)}. Het grootste is ${k} × ${sm} = ${big}.`]]}}
+ return{tekst:`Twee getallen zijn samen 24. Het ene is 3 keer zo groot als het andere.`,vraag:`Het kleinste getal is …..`,eenheid:"",ans:6,hints:[`Het kleinste is 1 deel.`,`Samen 4 delen.`],uitwerking:[[`1 + 3 = 4 delen, 24 : 4 = 6.`,`Controle: 6 + 18 = 24.`],[`x + 3x = 24, x = 6.`]]}}}
+];
+RAAD.push(...RAAD5);
 const $=s=>document.querySelector(s);
 /* Gewone UI-knoppen reageren bij Apple Pencil direct op pointerevents.
    Rekenmachine en kladcanvas hebben hun eigen Pencil-logica en vallen hier buiten. */
@@ -1165,7 +1253,9 @@ const FAM={treinen:"beweging",inhalen:"beweging",tegenliggers:"beweging",hond:"b
  huisnummers:"getallen",verjaardag:"getallen",cijfersprong:"getallen",machten:"getallen",cijferplaatjes:"getallen",dobbel:"getallen",
  kubusdozen:"ruimte",voegen:"ruimte",steen:"ruimte",ribben:"ruimte",sleuven:"ruimte",klokwijzers:"tijd",picknick:"beweging",
  /* nieuw (R2): doen mee als raadsel van de dag vanaf hun datum "vanaf" */
- gemiddeld:"getallen",schaal:"ruimte"};
+ gemiddeld:"getallen",schaal:"ruimte",
+ /* nieuw (R2, ronde 2) */
+ hectare:"ruimte",kortingen:"geld",tweegetallen:"getallen"};
 const DAGPOOL=RAAD.filter(t=>FAM[t.id]);
 const dstr2=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 function dagReeks(tot){const out=[];const d=new Date(2026,9,1);for(;;){const ds=dstr2(d),R=RR(hashS("dagsoort|"+ds)),last=out.slice(-10).map(x=>x.t.id),fam=out.length?FAM[out[out.length-1].t.id]:"";
