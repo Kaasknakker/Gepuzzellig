@@ -42,6 +42,10 @@ Eén tot drie manieren per som, alleen waar het echt iets toevoegt.
 - Het antwoord klopt bij elke seed, de getallen zijn mooi, en de zoeklus heeft een einde (maximaal aantal pogingen met een vaste terugvaloptie).
 - Testen over veel seeds, zoals bij R1 (zie de PR-beschrijving).
 
+## Gerichte reactie op een veelgemaakte fout
+
+Een som mag naast `ans` een veld `fout:[[waarde,"tekst"],…]` meegeven. Typt de speler zo'n waarde, dan staat de tekst in de melding "Nog niet goed" (zonder het antwoord te verklappen). Alleen waarden die een echte, veelgemaakte denkfout voorstellen, zoals het gemiddelde van twee snelheden of procenten optellen. Waarden die toevallig het goede antwoord zijn, worden automatisch weggelaten (`raadMaak`).
+
 ## Hoe een som meerdere manieren krijgt (R3, techniek en stijl)
 
 In `raadsels.html` is `uitwerking` van een sjabloon:
