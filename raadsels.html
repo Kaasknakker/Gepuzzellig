@@ -327,7 +327,7 @@ ts(`Controleer de tweede zin en pas je getal aan.`,["Dochter nu","Moeder nu",`Mo
  const LIJN=[[ST,"Bus 2 → Ziekenhuis","Bus 7 → Centrum",[10,12,15,18,20,24,30],[12,15,18,20,24,36,40,45]],
   [["Zwolle"],"Sprinter → Kampen","Sprinter → Emmen",TR,TR],[["Zwolle"],"Sprinter → Kampen","Intercity → Utrecht",TR,TR],[["Zwolle"],"Intercity → Groningen","Intercity → Utrecht",TR,TR],
   [["Groningen"],"Intercity → Zwolle","Sprinter → Leeuwarden",TR,TR],[["Leeuwarden"],"Sprinter → Groningen","Intercity → Zwolle",TR,TR],[["Amersfoort"],"Intercity → Zwolle","Sprinter → Utrecht",TR,TR]];
- for(;;){const[SS,X,Y,PP,QQ]=rpick(R,LIJN),p=rpick(R,PP),q=rpick(R,QQ);if(p===q)continue;const a=rint(R,0,p-1),b=rint(R,0,q-1);let t=-1;for(let x=Math.max(a,b);x<16*60;x++)if((x-a)%p===0&&(x-b)%q===0){t=x;break}if(t<(PP===TR?45:75)||t>9*60)continue;
+ for(;;){const[SS,X,Y,PP,QQ]=rpick(R,LIJN),p=rpick(R,PP),q=rpick(R,QQ);if(p===q||(PP===TR&&(p%q===0||q%p===0)))continue;const a=rint(R,0,p-1),b=rint(R,0,q-1);let t=-1;for(let x=Math.max(a,b);x<16*60;x++)if((x-a)%p===0&&(x-b)%q===0){t=x;break}if(t<(PP===TR?45:75)||t>9*60)continue;
   const s=rpick(R,SS),rij=(o,k)=>Array.from({length:4},(_,i)=>tijd(360+o+i*k));
   return{tekst:`Op station ${s} hangt dit vertrekbord. Beide lijnen rijden de hele dag in hetzelfde ritme door.`,
    tabel:{kop:["Lijn","Eerste vertrektijden","…"],rijen:[[X,rij(a,p).join("  "),"…"],[Y,rij(b,q).join("  "),"…"]]},
