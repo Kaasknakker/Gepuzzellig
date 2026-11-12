@@ -354,14 +354,14 @@ ts(`Controleer de tweede zin en pas je getal aan.`,["Dochter nu","Moeder nu",`Mo
    hints:[`Hoeveel tijd zit er tussen de eerste en de laatste foto, in seconden? En let op: hoeveel foto's zijn het precies, als zowel het begin als het eind een foto is?`,`Tussen ${tS(t1)} en ${tS(t1+D)} zit ${nl(D)} seconden. Dat zijn ${nl(D)} : ${k} = ${nl(D/k)} tussenpozen, dus ${nl(D/k+1)} foto's.`],
    uitwerking:[`Tijdsduur: ${nl(D)} seconden.`,`${nl(D)} : ${k} = ${nl(D/k)} tussenpozen, dus ${nl(foto)} foto's (de eerste telt ook mee).`,`${nl(foto)} : ${fps} = ${S} seconden.`]}}}},
 {id:"lpg",naam:"Dacia op LPG",gen(R){
- for(;;){const b=rpick(R,[5,6,7]),l=rpick(R,[7,8,9]),pb=rpick(R,[190,200,210]),pl=rpick(R,[80,90,100]),extra=rpick(R,[500,600,750,800,1000,1200,1500]);
-  const kb=b*pb,kl=l*pl,diff=kb-kl;if(diff<=150)continue;const kmx=extra*100*100/diff,km=Math.round(kmx);if(km<5000||km>80000)continue;
-  const auto=rpick(R,["Dacia Sandero","Dacia Jogger","Dacia Duster"]),e=c=>"€ "+nl(c/100,2);
-  return{tekst:`Bij de dealer twijfelen ze tussen twee uitvoeringen van een ${auto}. De Bi-Fuel versie rijdt op LPG en is € ${nl(extra)} duurder. Andere kosten laten we buiten beschouwing.`,
-   tabel:{kop:["","Benzine","Bi-Fuel (LPG)"],rijen:[["Verbruik per 100 km",b+" liter",l+" liter"],["Prijs per liter",e(pb),e(pl)],["Aanschaf","","+ € "+nl(extra)]]},
-   vraag:`Na ….. km heb je de meerprijs van de Bi-Fuel versie terugverdiend (rond af op hele km).`,eenheid:"km",ans:km,tol:1,
-   hints:[`Reken voor beide auto's uit wat 100 km aan brandstof kost.`,`Benzine: ${b} × ${e(pb)} = ${e(kb)}. LPG: ${l} × ${e(pl)} = ${e(kl)}. Per 100 km bespaar je dus ${e(diff)}.`],
-   uitwerking:[`Benzine per 100 km: ${e(kb)}. LPG per 100 km: ${e(kl)}.`,`Besparing per 100 km: ${e(diff)}.`,`€ ${nl(extra)} : ${e(diff)} = ${nl(kmx/100)} keer 100 km = ${nl(kmx)} km${kmx===km?"":` ≈ ${nl(km)} km`}.`]}}}},
+ for(;;){const b=rpick(R,[5,6,7]),l=rpick(R,[7,8,9]),pb=rpick(R,[190,200,210]),pl=rpick(R,[80,90,100]),J=rpick(R,[10000,12000,15000,20000]),W=rpick(R,[250,300,350,400]),n=rpick(R,[3,4,5,6,8,10]);
+  const kb=b*pb,kl=l*pl,diff=kb-kl;if(diff<=150)continue;const jb=J/100*diff/100;if(!Number.isInteger(jb))continue;const netto=jb-W;if(netto<=0)continue;const extra=n*netto;if(extra%50||extra<750||extra>3000)continue;
+  const auto=rpick(R,["Dacia Sandero","Dacia Jogger","Dacia Duster"]),e=c=>"€ "+nl(c/100,2),E=x=>"€ "+nl(x);
+  return{tekst:`Bij de dealer twijfelen ze tussen twee uitvoeringen van een ${auto}. De Bi-Fuel versie rijdt op LPG en is ${E(extra)} duurder. LPG-auto's betalen ook ${E(W)} per jaar méér wegenbelasting. Je rijdt ${nl(J)} km per jaar. Andere kosten laten we buiten beschouwing.`,
+   tabel:{kop:["","Benzine","Bi-Fuel (LPG)"],rijen:[["Verbruik per 100 km",b+" liter",l+" liter"],["Prijs per liter",e(pb),e(pl)],["Wegenbelasting","","+ "+E(W)+" per jaar"],["Aanschaf","","+ "+E(extra)]]},
+   vraag:`Na ….. jaar heb je de meerprijs van de Bi-Fuel versie terugverdiend.`,eenheid:"jaar",ans:n,
+   hints:[`Reken eerst uit wat je per jaar bespaart op brandstof. Houd daarna rekening met de extra wegenbelasting.`,`Per 100 km: benzine ${b} × ${e(pb)} = ${e(kb)}, LPG ${l} × ${e(pl)} = ${e(kl)}. Je bespaart ${e(diff)} per 100 km, dus ${nl(J/100)} × ${e(diff)} = ${E(jb)} per jaar. Daar gaat ${E(W)} wegenbelasting vanaf.`],
+   uitwerking:[`Benzine per 100 km: ${b} × ${e(pb)} = ${e(kb)}. LPG per 100 km: ${l} × ${e(pl)} = ${e(kl)}.`,`Besparing per 100 km: ${e(diff)}.`,`Je rijdt ${nl(J)} km, dat is ${nl(J/100)} keer 100 km. Besparing per jaar: ${nl(J/100)} × ${e(diff)} = ${E(jb)}.`,`De extra wegenbelasting gaat eraf: ${E(jb)} − ${E(W)} = ${E(netto)} per jaar.`,`${E(extra)} : ${E(netto)} = ${n} jaar.`,`Controle: ${n} × ${E(netto)} = ${E(extra)}.`]}}}},
 {id:"lindor",naam:"Een zak Lindor verdelen",gen(R){
  for(;;){const a=rpick(R,[2,3,4]),x=rint(R,1,4),b=rpick(R,[2,3]),y=rint(R,1,4),rest=rint(R,3,12);
   /* terugrekenen: na stap 2 blijft rest over: r1 - (r1/b + y) = rest -> r1 = (rest + y) * b/(b-1) */const r1=(rest+y)*b/(b-1);if(!Number.isInteger(r1)||r1%b)continue;const N=(r1+x)*a/(a-1);if(!Number.isInteger(N)||N%a||N<20||N>80)continue;
