@@ -14,10 +14,34 @@ const UX={
   });
  },
  storage(k,patch){const old=this.saves.get(k)||{};if(patch.at&&old.at&&patch.at<old.at)return;this.saves.set(k,{...old,...patch});this.paintStorage()},
+ saveInfo(){
+  const k=S&&S.p?progKey(S.type,S.practice,S.date,S.sf):'',state=this.saves.get(k)||(k?undefined:[...this.saves.values()].find(v=>v.local===false||v.remote==='failed')),exists=k&&progAll()[k];
+  const text=!exists&&!state?'Je voortgang wordt tijdens het puzzelen automatisch bewaard.':state&&state.local===false?'Bewaren op dit apparaat lukt niet. Houd deze pagina open en probeer opnieuw.':state&&state.remote==='saving'?'Op dit apparaat bewaard · synchroniseren…':state&&state.remote==='failed'?'Op dit apparaat bewaard · nog niet gedeeld.':state&&state.remote==='saved'?'Op dit apparaat bewaard en gesynchroniseerd.':PHONE?'Op dit apparaat bewaard · telefoonvoortgang blijft op dit apparaat.':'Op dit apparaat bewaard.';
+  return{text,warning:!!(state&&(state.local===false||state.remote==='failed'))};
+ },
+ /* De opslagstatus staat alleen nog in het menu. Gaat er iets mis, dan verschijnt er een klein icoon naast het menu (of naast het profiel op Home); een tik erop opent een venstertje met uitleg en "Opnieuw proberen". */
  paintStorage(){
-  const k=S&&S.p?progKey(S.type,S.practice,S.date,S.sf):'',state=this.saves.get(k),exists=k&&progAll()[k];
-  let text=!exists&&!state?'Je voortgang wordt tijdens het puzzelen automatisch bewaard.':state&&state.local===false?'Bewaren op dit apparaat lukt niet. Houd deze pagina open en probeer opnieuw.':state&&state.remote==='saving'?'Op dit apparaat bewaard · synchroniseren…':state&&state.remote==='failed'?'Op dit apparaat bewaard · nog niet gedeeld.':state&&state.remote==='saved'?'Op dit apparaat bewaard en gesynchroniseerd.':PHONE?'Op dit apparaat bewaard · telefoonvoortgang blijft op dit apparaat.':'Op dit apparaat bewaard.';
-  document.querySelectorAll('[data-save-status]').forEach(el=>{const warning=!!(state&&(state.local===false||state.remote==='failed')),inPuzzle=!document.body.classList.contains('home');el.hidden=inPuzzle&&!warning;const span=el.querySelector('span');if(span.textContent!==text)span.textContent=text;const retry=el.querySelector('button');retry.hidden=!warning;el.closest('.uxsmallstatus')?.classList.toggle('storage-warning',warning);retry.onclick=()=>{persist(true);pullCloudProgress(true)}});
+  const{text,warning}=this.saveInfo();
+  document.querySelectorAll('[data-save-status]').forEach(el=>{el.hidden=!el.closest('#more,#pmp');const span=el.querySelector('span');if(span.textContent!==text)span.textContent=text;const retry=el.querySelector('button');retry.hidden=!warning;retry.onclick=()=>{persist(true);pullCloudProgress(true)}});
+  this.placeSaveIcon(warning);
+ },
+ placeSaveIcon(warning){
+  const b=this.saveBtn,pop=document.getElementById('savePop');if(!b)return;
+   const home=document.body.classList.contains('home'),anchor=home?document.querySelector('#home .hprofile'):(document.getElementById('tbMore')||document.getElementById('pm'));
+  /* In de puzzelkop houdt het icoon zijn plek ook zonder probleem (onzichtbaar), zodat de tijd en de rest van de balk niet verschuiven. */
+  if(!warning){if(pop)pop.hidden=true;if(home||!anchor){b.hidden=true;return}b.hidden=false;b.classList.add('idle');if(b.nextElementSibling!==anchor)anchor.before(b);return}
+  b.classList.remove('idle');
+  if(anchor&&b.nextElementSibling!==anchor)anchor.before(b);
+  b.hidden=!anchor;if(pop&&!pop.hidden)this.fillSavePop();
+ },
+ fillSavePop(){
+  const pop=document.getElementById('savePop'),b=this.saveBtn;if(!pop||!b)return;
+  pop.querySelector('p').textContent=this.saveInfo().text;const r=b.getBoundingClientRect();pop.style.top=Math.round(r.bottom+6)+'px';
+ },
+ savePop(){
+  let pop=document.getElementById('savePop');if(pop&&!pop.hidden){pop.hidden=true;return}
+  if(!pop){pop=document.createElement('div');pop.id='savePop';pop.className='savepop';pop.setAttribute('role','status');pop.innerHTML='<p></p><button type="button">Opnieuw proberen</button>';document.body.append(pop);pop.querySelector('button').onclick=()=>{persist(true);pullCloudProgress(true);pop.hidden=true};document.addEventListener('pointerdown',e=>{if(!pop.hidden&&!e.target.closest('#savePop,#saveWarn'))pop.hidden=true},true)}
+  pop.hidden=false;this.fillSavePop();
  },
  storageMarkup(){return '<div class="uxsave" data-save-status role="status" aria-live="polite"><span></span><button type="button" hidden>Opnieuw proberen</button></div>'},
  randomSettings(not){
@@ -45,7 +69,9 @@ const UX={
  },
  init(){
   const menu=document.getElementById('more');if(menu)menu.insertAdjacentHTML('beforeend',this.storageMarkup()+'<p class="uxexplain">Telefoonpuzzels blijven op dit apparaat. Groot-schermpuzzels worden tussen grote schermen gedeeld zodra je online bent. Opgeloste resultaten worden wel gedeeld.</p>');
-  const title=document.getElementById('tbTitle')||document.getElementById('prow');if(title){const status=document.createElement('div');status.className='uxsmallstatus';status.innerHTML=this.storageMarkup();title.after(status)}
+  const pmp=document.getElementById('pmp');if(pmp)pmp.insertAdjacentHTML('beforeend',this.storageMarkup());
+  const so=document.getElementById('pshowonline');if(so){so.checked=showOnlineOn();so.onchange=()=>{lsSet('pdshowonline',so.checked?'1':'0');if(so.checked)pingOnline(true);else clearOnline(true)}}
+  const sb=document.createElement('button');sb.type='button';sb.id='saveWarn';sb.className='savewarn';sb.hidden=true;sb.title='Opslag';sb.setAttribute('aria-label','Opslag: aandacht nodig');sb.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.2v.3"/></svg>';sb.onclick=e=>{e.stopPropagation();this.savePop()};this.saveBtn=sb;
   document.addEventListener('pointerup',e=>{if(!e.target.closest('#grid,#hexsvg,#mgrid,#mpal,#mclues'))return;requestAnimationFrame(()=>{if(!document.body.classList.contains('home'))this.board()})});
   window.addEventListener('online',()=>{persist(true);pullCloudProgress(true)});
 
@@ -58,3 +84,45 @@ const UX={
   this.home();this.board();
  }
 };
+
+/* Opt-in meetlogger voor haperingen (iPad). Alleen actief met ?perf=1 (uit met ?perf=0). Registreert uitsluitend tijdstippen, duur en soort invoer;
+   geen namen, puzzelinhoud of Firebase-gegevens. Paneel "perf" linksonder: Kopieer / Wis. */
+(function(){
+ let on=false;if(typeof window==="undefined")return;
+ try{const q=location.search;if(/[?&]perf=1/.test(q))localStorage.setItem("pdperf","1");if(/[?&]perf=0/.test(q))localStorage.removeItem("pdperf");on=localStorage.getItem("pdperf")==="1"}catch(e){on=false}
+ window.PDPERF=null;if(!on)return;
+ const log=[],T0=performance.now(),MAX=500,t=()=>Math.round((performance.now()-T0)/100)/10;
+ let saveT=0,penLast=-1e9,down=null;
+ const store=()=>{clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem("pdperflog",JSON.stringify(log.slice(-200)))}catch(e){log.push([t(),"opslag-logboek mislukt",""])}},4000)};
+ const note=(kind,detail)=>{log.push([t(),kind,detail==null?"":String(detail)]);if(log.length>MAX)log.splice(0,log.length-MAX);store()};
+ const dump=()=>"perf-log ("+navigator.userAgent.replace(/\s+/g," ").slice(0,90)+")\n"+log.map(l=>l[0]+"s  "+l[1]+(l[2]?"  "+l[2]:"")).join("\n");
+ window.PDPERF={note,dump,log};
+ /* Hoofdthread: vertraging van de eventloop en van beeldvernieuwing (Safari kent geen longtask). */
+ let last=performance.now();setInterval(()=>{const n=performance.now(),d=n-last-100;last=n;if(d>120)note("eventloop-vertraging",Math.round(d)+" ms")},100);
+ let raf=performance.now();const rl=()=>{const n=performance.now();if(n-raf>150&&!document.hidden)note("beeld-hapering",Math.round(n-raf)+" ms");raf=n;requestAnimationFrame(rl)};requestAnimationFrame(rl);
+ /* Invoer: soort aanwijzer, doel en of een tik tijdens het bord vervangen werd. */
+ const cont=e=>e.target&&e.target.closest?e.target.closest("#grid,#hexsvg,#mgrid"):null,tgt=e=>cont(e)?"speelvlak":(e.target&&e.target.closest&&e.target.closest("button,.btn,[role=button]")?"knop":"anders");
+ addEventListener("pointerdown",e=>{if(e.pointerType==="pen")penLast=performance.now();down={c:cont(e),t:performance.now(),ty:e.pointerType};note("pointerdown",e.pointerType+" "+tgt(e)+(e.pointerType!=="pen"&&performance.now()-penLast<1500?" (pen "+Math.round(performance.now()-penLast)+" ms eerder)":""))},true);
+ addEventListener("pointerup",e=>{const d=down;down=null;note("pointerup",e.pointerType+(d?" "+Math.round(performance.now()-d.t)+" ms na down":" zonder down")+(d&&d.c&&!document.contains(d.c)?" BORD VERVANGEN tijdens tik":""))},true);
+ addEventListener("pointercancel",e=>note("pointercancel",e.pointerType),true);
+ for(const ev of["visibilitychange","online","offline","pageshow","focus","blur"])addEventListener(ev,()=>note("gebeurtenis",ev+(ev==="visibilitychange"?" "+document.visibilityState:"")),true);
+ /* Duur van opslaan, synchronisatie en opbouw (na het laden van core.js). */
+ addEventListener("load",()=>{
+  for(const f of["persist","board","mergeCloudProgress","renderHome","load","pollNu","resync","pullMine"]){const o=window[f];if(typeof o!=="function")continue;
+   window[f]=function(){const s=performance.now(),r=o.apply(this,arguments),d=performance.now()-s;if(d>20||f==="load")note("duur "+f,Math.round(d)+" ms");return r}}
+  const pc=window.pullCloudProgress;if(typeof pc==="function")window.pullCloudProgress=function(){const s=performance.now(),r=pc.apply(this,arguments);if(r&&r.then)r.then(v=>{if(performance.now()-s>300)note("ophalen voortgang traag",Math.round(performance.now()-s)+" ms (incl. netwerk)")},()=>note("ophalen voortgang mislukt",Math.round(performance.now()-s)+" ms"));return r};
+  const lc=window.localStorage&&Storage.prototype.setItem;if(lc&&!Storage.prototype.__pdperf){Storage.prototype.__pdperf=1;Storage.prototype.setItem=function(k,v){const s=performance.now();lc.apply(this,arguments);const d=performance.now()-s;if(d>8&&k!=="pdperflog")note("localStorage schrijven",(String(k).startsWith("pd")?k:"sleutel")+" "+Math.round(String(v).length/1024)+" KB, "+Math.round(d)+" ms")}}
+ });
+ /* Paneel */
+ addEventListener("DOMContentLoaded",()=>{
+  const b=document.createElement("button"),p=document.createElement("div"),pre=document.createElement("pre"),row=document.createElement("div");
+  b.textContent="perf";b.setAttribute("aria-label","Meetlogboek");Object.assign(b.style,{position:"fixed",left:"6px",bottom:"6px",zIndex:99999,opacity:.55,padding:"4px 8px",borderRadius:"8px"});
+  Object.assign(p.style,{position:"fixed",left:"6px",bottom:"40px",right:"6px",maxHeight:"55vh",overflow:"auto",zIndex:99999,display:"none",padding:"8px",borderRadius:"10px",background:"var(--card,#222)",color:"var(--ink,#eee)",border:"1px solid var(--line,#555)"});
+  pre.style.cssText="white-space:pre-wrap;margin:6px 0 0;font:12px/1.35 ui-monospace,monospace";
+  const mk=(txt,fn)=>{const x=document.createElement("button");x.textContent=txt;x.onclick=fn;x.style.marginRight="8px";row.append(x)};
+  mk("Kopieer",()=>{const s=dump();(navigator.clipboard?navigator.clipboard.writeText(s):Promise.reject()).then(()=>note("gekopieerd",""),()=>{pre.textContent=s;const r=document.createRange();r.selectNodeContents(pre);getSelection().removeAllRanges();getSelection().addRange(r)})});
+  mk("Vernieuw",()=>{pre.textContent=dump()});mk("Wis",()=>{log.length=0;pre.textContent=""});mk("Uit",()=>{try{localStorage.removeItem("pdperf");localStorage.removeItem("pdperflog")}catch(e){note("uitzetten mislukt","")}location.search="?perf=0"});
+  p.append(row,pre);b.onclick=()=>{p.style.display=p.style.display==="none"?"block":"none";pre.textContent=dump()};
+  document.body.append(b,p);
+ });
+})();

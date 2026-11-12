@@ -41,6 +41,7 @@ for(const phone of [false,true])for(const type of types)for(const level of [1,2,
  // A saved key from a different date/type cannot override this request.
  assert.equal(c.dailyResumeMeta(type,'2026-10-26',key),null);
  if(!phone){c.progressRelevant=()=>true;c.progressSolved=()=>false;c.cloudProgressHistory=e=>e;
+ vm.runInContext(section('function mergeMetaInto(','function mergeCloudProgress('),c);
  vm.runInContext(section('function mergeCloudProgress(','function pullCloudProgress('),c);
  const remote={...saved[key],k:key,at:Date.now()+1000,cur:[0,1,0,1],rev:[2]};
  c.mergeCloudProgress({item:remote});
@@ -49,7 +50,7 @@ for(const phone of [false,true])for(const type of types)for(const level of [1,2,
  if(type==='nono')assert.equal(c.S.nv,'classic');}
  count++;
 }
-const prod=fs.readFileSync('js/config.js','utf8'),test=fs.readFileSync('js/config.test.js','utf8');assert(!prod.includes('dailyPreferencesFrom'));assert(test.includes('dailyPreferencesFrom:"2026-10-25"'));
+const prod=fs.readFileSync('js/config.js','utf8'),test=fs.readFileSync('js/config.test.js','utf8');assert(prod.includes('dailyPreferencesFrom:"2026-11-03"'),'De livegangconfig moet de eerste volledige puzzeldag 2026-11-03 gebruiken');assert(test.includes('dailyPreferencesFrom:"2026-10-25"'));
 console.log(`OK: legacy kalender, expliciete cutover, immutable dagplan en ${count} echte hervat-/opslagpaden met oude niveaus, apparaatvarianten, borden, notities en generatorversies.`);
 
 

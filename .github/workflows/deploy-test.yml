@@ -63,6 +63,28 @@ jobs:
         run: node .github/scripts/check-daily-resume.mjs
       - name: Persoonlijke voortgang en wissen controleren
         run: node .github/scripts/check-personal-progress.mjs
+      - name: Synchronisatie - speeltijd maakt een bord niet nieuwer
+        run: node .github/scripts/check-sync-at.mjs
+      - name: Synchronisatie - openen gebruikt de nieuwste voortgang
+        run: node .github/scripts/check-open-fresh.mjs
+      - name: Groepslidmaatschappen in de profielcache
+        run: node .github/scripts/check-group-cache.mjs
+      - name: Delta-start gebruikt alleen een kloppende cache
+        run: node .github/scripts/check-delta-start.mjs
+      - name: Terugknop persoonlijke pagina
+        run: node .github/scripts/check-score-back.mjs
+      - name: Favoriet-afhandeling
+        run: node .github/scripts/check-fav-handler.mjs
+      - name: Linter voor niet-gedefinieerde variabelen installeren
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund eslint@9 globals
+      - name: Geen verwijzingen naar niet-gedefinieerde variabelen
+        run: node .github/scripts/check-undef.mjs
+      - name: Uitslag Controleren past in de bovenbalk
+        run: node .github/scripts/check-checkmsg.mjs
+      - name: Scorebord herstart alleen bij wijziging
+        run: node .github/scripts/check-board-restart.mjs
+      - name: Groepsinfo herstelt na offline start
+        run: node .github/scripts/check-group-online.mjs
       - name: Intrekken groepsrechten en uitnodigingen controleren
         run: node .github/scripts/check-security-app.mjs
       - name: Automatische kruisjes controleren
@@ -113,10 +135,13 @@ jobs:
             --exclude 'firebase.test.json' \
             --exclude '.firebaserc' \
             --exclude 'firestore.rules' \
+            --exclude '/CNAME' \
             --exclude 'FIREBASE_DEPLOY.md' \
             --exclude 'FUNCTIONS_SETUP.md'
           cp js/config.test.js .test-dist/js/config.js
           rm -f .test-dist/js/config.test.js
+          # De productie-domeinkoppeling hoort niet in Firebase Test Hosting.
+          test ! -e .test-dist/CNAME
           grep -q 'projectId:"gepuzzellig-test"' .test-dist/js/config.js
           ! grep -q 'projectId:"gepuzzelig"' .test-dist/js/config.js
           # Productiebranding blijft in de bron; alleen de geïsoleerde testbuild krijgt testnaam + testicoon.
@@ -126,6 +151,13 @@ jobs:
           grep -q '%2327220f' .test-dist/index.html
           ! grep -q 'Gepuzzellig%20Test' index.html
           ! grep -q '%2327220f' index.html
+          # De testbuild krijgt een eigen versienummer (vN-bBOUW), zodat de testsite bij elke deploy verse bestanden haalt;
+          # het bronnummer wordt alleen bij een release verhoogd (scripts/bump-version.mjs).
+          node .github/scripts/stamp-test-version.mjs .test-dist "${{ github.run_number }}"
+          grep -q '?v=[0-9]*-b${{ github.run_number }}' .test-dist/index.html
+          grep -q 'const C=PREFIX+"v[0-9]*-b${{ github.run_number }}"' .test-dist/sw.js
+          ! grep -q -- '-b[0-9]' index.html
+          ! grep -q -- '-b[0-9]' sw.js
 
       - name: Authenticate to test Firebase project
         uses: google-github-actions/auth@v3

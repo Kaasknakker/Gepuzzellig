@@ -61,6 +61,8 @@ jobs:
           node --check js/firebase.js
       - name: App controleren
         run: node .github/scripts/check-app.mjs
+      - name: Code-budget (ratchet) controleren
+        run: node .github/scripts/check-code-budget.mjs
       - name: Puzzelregistratie controleren
         run: node .github/scripts/check-puzzle-registry.mjs
       - name: Opslag en UX-regressies controleren
@@ -75,6 +77,28 @@ jobs:
         run: node .github/scripts/check-daily-resume.mjs
       - name: Persoonlijke voortgang en wissen controleren
         run: node .github/scripts/check-personal-progress.mjs
+      - name: Synchronisatie - speeltijd maakt een bord niet nieuwer
+        run: node .github/scripts/check-sync-at.mjs
+      - name: Synchronisatie - openen gebruikt de nieuwste voortgang
+        run: node .github/scripts/check-open-fresh.mjs
+      - name: Groepslidmaatschappen in de profielcache
+        run: node .github/scripts/check-group-cache.mjs
+      - name: Delta-start gebruikt alleen een kloppende cache
+        run: node .github/scripts/check-delta-start.mjs
+      - name: Terugknop persoonlijke pagina
+        run: node .github/scripts/check-score-back.mjs
+      - name: Favoriet-afhandeling
+        run: node .github/scripts/check-fav-handler.mjs
+      - name: Linter voor niet-gedefinieerde variabelen installeren
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund eslint@9 globals
+      - name: Geen verwijzingen naar niet-gedefinieerde variabelen
+        run: node .github/scripts/check-undef.mjs
+      - name: Uitslag Controleren past in de bovenbalk
+        run: node .github/scripts/check-checkmsg.mjs
+      - name: Scorebord herstart alleen bij wijziging
+        run: node .github/scripts/check-board-restart.mjs
+      - name: Groepsinfo herstelt na offline start
+        run: node .github/scripts/check-group-online.mjs
       - name: Intrekken groepsrechten en uitnodigingen controleren
         run: node .github/scripts/check-security-app.mjs
       - name: Automatische kruisjes controleren

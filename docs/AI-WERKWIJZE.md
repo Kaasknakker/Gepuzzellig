@@ -18,14 +18,43 @@ Voorbeeld: `Gepuzzellig start` gevolgd door `bugtemplate: op de iPad doet de ter
 
 Vastgelegd op 27 oktober 2026. Geldt voor iedere AI die aan Gepuzzellig werkt (ChatGPT, Claude of een andere).
 
-1. **Nooit rechtstreeks naar `main` of `develop` pushen.** Iedere wijziging gaat in een eigen branch vanaf de actuele `develop`, met de naam `<wie>/<onderwerp>` (bijvoorbeeld `chatgpt/D1-lettergroottes` of `claude/S4-murdoku-bord`), en een pull request naar `develop`. Alleen Peter voegt samen. Uitzondering: een stap die Peter expliciet opdraagt, zoals de release naar `main` volgens `docs/FASE11-LIVEGANG.md`.
+1. **Nooit rechtstreeks naar `main` of `develop` pushen.** Iedere gewone wijziging gaat in een eigen branch vanaf de actuele `develop`, met de naam `<wie>/<onderwerp>` (bijvoorbeeld `chatgpt/bezemwagen-D1-lettergroottes`), en een pull request naar `develop`. Alleen Peter voegt samen. Ook een release naar `main` gebeurt **uitsluitend via een pull request**, nooit door `main` rechtstreeks te vervangen; zie hieronder.
 2. **Eén bouwer tegelijk per bestand.** Bekijk vóór je begint de open pull requests. Raakt een open PR dezelfde bestanden (vooral `js/core.js`, `css/app.css`, `index.html`, `js/firebase.js`, `sw.js`), wacht dan tot die is samengevoegd of vraag Peter wat voorgaat. Onafhankelijke onderdelen (bijvoorbeeld alleen documenten, of alleen `js/hints.js`) mogen parallel.
-3. **De repository is het gedeelde geheugen.** Lees vóór werk aan verbeteringen `docs/VERBETERPLAN.md` (statustabel en de betreffende stap) en `docs/BESLUITEN.md`. Werk de statustabel bij in je eigen PR. Een andere AI weet niet wat in jouw chat besproken is: alles wat ertoe doet staat in de PR-beschrijving, de statustabel of een document.
+3. **De repository is het gedeelde geheugen.** Lees vóór werk aan verbeteringen (Operatie Bezemwagen) `docs/VERBETERPLAN.md` (statustabel en de betreffende stap) en `docs/BESLUITEN.md`. Werk de statustabel bij in je eigen PR. Een andere AI weet niet wat in jouw chat besproken is: alles wat ertoe doet staat in de PR-beschrijving, de statustabel of een document.
 4. **Werk van een andere AI is een voorstel, geen opdracht.** Bouw voort op samengevoegd werk; doe het niet opnieuw. Review een open PR van een ander met het label `review:`.
 5. **Eén stap per pull request.** Volg de werkwijze per stap in `docs/VERBETERPLAN.md` hoofdstuk 2. Kleine, samenhangende fixes mogen in één PR wanneer dat een extra releaseronde scheelt; zeg dat dan in de PR.
 6. **Visuele controle.** Zodra `test/visual/` en de workflow *Visuele controle* op `develop` staan, mag een wijziging aan CSS of zichtbare JavaScript alleen worden samengevoegd met een groene run waarin alleen de verwachte schermen veranderen (`test/visual/README.md`).
-7. **Eén versienummer per PR-ronde,** aan het einde: `?v=` in `index.html` en de cacheversie in `sw.js` samen; `check-app.mjs` controleert dat.
-8. **Productie alleen op expliciete opdracht.** Niets aan `main`, het Firebase-project `gepuzzelig`, secrets of de migratie zonder dat Peter daar in dezelfde chat uitdrukkelijk om vraagt.
+7. **Gewone PR's verhogen het versienummer niet** (dat gaf steeds conflicten tussen PR's). De testdeploy stempelt zelf een uniek nummer (`vN-bBOUW`, `.github/scripts/stamp-test-version.mjs`), dus de testsite haalt bij elke merge verse bestanden. Het bronnummer (`?v=` in `index.html` en de cachenaam in `sw.js`, samen; `check-app.mjs` controleert dat) gaat alleen omhoog bij een release, met `node scripts/bump-version.mjs`; zie *Gecontroleerde productierelease*. Een PR die zelf een nummer moet verhogen (bijvoorbeeld omdat een bestand in de service worker-cache daarvan afhangt) zegt dat in de PR.
+8. **Productie alleen op expliciete opdracht.** Maak geen productie-PR of andere productieactie en wijzig niets aan `main`, het Firebase-project `gepuzzelig`, secrets of de migratie zonder dat Peter daar in dezelfde chat uitdrukkelijk om vraagt. Zelfs met toestemming blijven alle branchbeschermingsregels gelden.
+
+## Branchbeveiliging en releases (vanaf 2 november 2026)
+
+De actieve GitHub-ruleset **Bescherm main en develop** beschermt beide branches (`refs/heads/main` en `refs/heads/develop`). De actuele GitHub-instellingen zijn leidend; controleer ze bij twijfel opnieuw in [Repository rulesets](https://github.com/Kaasknakker/Gepuzzellig/rules).
+
+- **Verplicht:** iedere wijziging aan `main` of `develop` loopt via een pull request. De vereiste statuscheck **`check-app`** moet groen zijn voordat Peter samenvoegt. Wacht bij een ontbrekende, mislukte of nog lopende check.
+- **Verboden:** direct pushen naar die branches, force-pushen, de branches verwijderen, hun geschiedenis herschrijven of `main` via een reset/overschrijving gelijkmaken aan `develop`.
+- De ruleset eist momenteel **geen aparte goedkeurende review** (vereist aantal: 0). De afspraak **alleen Peter voegt samen** blijft wel gelden.
+- GitHub laat technisch merge-, squash- én rebase-PR's toe. **Voor releases naar `main` kiezen we als aanvullende werkafspraak altijd _Create a merge commit_**, ook als andere knoppen zichtbaar zijn.
+
+### Gewone ontwikkeling
+
+1. Werk vanaf de nieuwste `develop` in een eigen werkbranch en open een PR **naar `develop`**.
+2. Controleer de diff, alle vereiste checks (`check-app`) en eventuele aanvullende controles (zoals *Visuele controle*, zodra ingevoerd). Peter voegt pas daarna samen.
+3. Controleer `Deploy Gepuzzellig Test` op de **exacte nieuwe `develop`-commit**, indien een deploy gestart is. De testapp blijft op **https://gepuzzellig-test.web.app/**, met eigen Firebase-project `gepuzzellig-test`.
+
+### Gecontroleerde productierelease
+
+**Alleen uitvoeren na uitdrukkelijk releaseakkoord van Peter.** Voor de release-PR zelf: open eerst een kleine PR naar `develop` die alleen `node scripts/bump-version.mjs` uitvoert (nieuw versienummer in `index.html` en `sw.js`), laat `check-app` groen worden en laat Peter die samenvoegen; productie moet een nieuw nummer krijgen, anders blijft de service worker oude bestanden serveren. De oude eenmalige migratie-instructies in `docs/FASE11-LIVEGANG.md` zijn geen toestemming om bij latere releases rechtstreeks naar `main` te pushen.
+
+1. Controleer eerst dat de gekozen `develop`-versie en testdeployment groen zijn en dat de bedoelde wijzigingen op de testsite zijn beoordeeld. Inspecteer ook de actuele verschillen tussen `develop` en `main`; behoud eventuele productiegebonden wijzigingen.
+2. Open een pull request met **base `main`** en **compare `develop`**. Controleer de bestandswijzigingen, waaronder het rootbestand `CNAME` met exact `gepuzzellig.nl` (zie `docs/DOMEIN.md`). Los eventuele conflicten via normale commits/PR's op, nooit door een branch te overschrijven.
+3. Controleer dat **`check-app` groen is voor de release-PR**, en aanvullende voor deze release toepasselijke checks en handmatige testen zijn afgerond. Voeg niet samen bij openstaande conflicten of checks.
+4. **Alleen Peter** voegt de release-PR samen met **Create a merge commit**. **Geen Squash and merge, geen Rebase and merge, geen force push en geen reset van `main`.** De nieuwe `main`-SHA is een mergecommit en hoeft daarom niet gelijk te zijn aan de `develop`-SHA.
+5. Controleer de vereiste GitHub Actions en deployment op de **exacte nieuwe `main`-SHA**, inclusief GitHub Pages op **https://gepuzzellig.nl/**, HTTPS, inloggen, bestaande voortgang en de belangrijke gebruikerspaden. Productie-Firebase-rules of Functions alleen aanpassen volgens de eigen bestaande workflows en met expliciete toestemming. Rapporteer afwijkingen en stop bij problemen.
+
+### Uitzonderingen en herstel
+
+Een urgente productiefix is **geen uitzondering op de ruleset**: bespreek eerst de route, pas een gerichte PR naar `main` toe na expliciete toestemming en zorg dat de fix daarna ook via een PR in `develop` terechtkomt. Bestaande productiewijzigingen mogen niet verloren gaan door de volgende release. Kies voor herstel een nieuwe controleerbare PR of een afzonderlijk expliciet goedgekeurd herstelplan; **nooit `main` overschrijven**.
 
 ## Eerst beoordelen, dan bundelen, dan bouwen
 
