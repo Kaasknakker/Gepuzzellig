@@ -14,15 +14,15 @@ De app heeft nu ongeveer 89 sjablonen in `raadsels.html`. Die dekken al: reizen 
 | --- | --- | --- |
 | 1 | Op schaal | kaart of plattegrond, werkelijke afstand en omgekeerd (**gebouwd**, 29 oktober 2026) |
 | 2 | Hectare en are | oppervlakte omrekenen, ontbrekende zijde zoeken (**gebouwd**, 12 november 2026, in de dagrotatie vanaf 26 november) |
-| 3 | Rechthoek en diagonaal | verhouding 3 : 4, diagonaal, grootste cirkel in een rechthoek |
+| 3 | Rechthoek en diagonaal | verhouding 3 : 4, diagonaal, grootste cirkel in een rechthoek (zijde, omweg en oppervlakte uit omtrek en diagonaal **gebouwd**, 12 november 2026, vanaf 3 december) |
 | 4 | Gemiddelde verandert | iemand komt erbij, samenvoegen, welk cijfer heb je nog nodig (**gebouwd**, 29 oktober 2026) |
 | 5 | Kortingen na elkaar | korting op korting, btw als percentage, klok die te snel loopt (korting op korting **gebouwd**, 12 november 2026, vanaf 26 november) |
 | 6 | Twee geheimzinnige getallen | som, verschil en product gegeven; oppervlakte gelijk aan omtrek (som met verschil, product of verhouding **gebouwd**, 12 november 2026, vanaf 26 november) |
-| 7 | Zakken en medailles | meerdere soorten met een totaal en een verband tussen de soorten |
-| 8 | Zeker weten | minimaal pakken om zeker twee dezelfde te hebben |
-| 9 | Kans | eenvoudige kansen in een verhaal |
-| 10 | Dagen en weekdagen | dagen tussen twee data, een weekdag later |
-| 11 | Vlucht met tijdsverschil | heen en terug even lang, klokken lopen anders |
+| 7 | Zakken en medailles | meerdere soorten met een totaal en een verband tussen de soorten (**gebouwd**, 12 november 2026, vanaf 31 december; daarnaast "Gelijke zakken vullen" met de grootste gemeenschappelijke deler) |
+| 8 | Zeker weten | minimaal pakken om zeker twee dezelfde te hebben (**gebouwd**, 12 november 2026, vanaf 10 december) |
+| 9 | Kans | eenvoudige kansen in een verhaal (**gebouwd**, 12 november 2026, vanaf 7 januari 2027) |
+| 10 | Dagen en weekdagen | dagen tussen twee data, een weekdag later (**gebouwd**, 12 november 2026, vanaf 17 december) |
+| 11 | Vlucht met tijdsverschil | heen en terug even lang, klokken lopen anders (**gebouwd**, 12 november 2026, vanaf 24 december) |
 
 Niet gekozen: wip en tandwielen, oude maten en eenheden, binair en Romeinse cijfers.
 
