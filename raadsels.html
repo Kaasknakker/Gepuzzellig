@@ -1189,6 +1189,161 @@ const RAAD5=[
  return{tekst:`Twee getallen zijn samen 24. Het ene is 3 keer zo groot als het andere.`,vraag:`Het kleinste getal is …..`,eenheid:"",ans:6,hints:[`Het kleinste is 1 deel.`,`Samen 4 delen.`],uitwerking:[[`1 + 3 = 4 delen, 24 : 4 = 6.`,`Controle: 6 + 18 = 24.`],[`x + 3x = 24, x = 6.`]]}}}
 ];
 RAAD.push(...RAAD5);
+/* ===== Nieuwe soorten, ronde 3 (R2, deel 2): Rechthoek en diagonaal, Zakken en medailles, Zeker weten, Kans, Dagen en weekdagen, Vlucht met tijdsverschil. Elk met meerdere manieren van oplossen. ===== */
+const MND=["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+const dagVan=(y,m,d)=>(new Date(Date.UTC(y,m-1,d)).getUTCDay()+6)%7;
+const dagenIn=(y,m)=>new Date(Date.UTC(y,m,0)).getUTCDate();
+const datNL=(y,m,d)=>{const t=new Date(Date.UTC(y,m-1,d));return t.getUTCDate()+" "+MND[t.getUTCMonth()]};
+const factNL=n=>{const f=[];for(let p=2;n>1;p++)while(n%p===0){f.push(p);n/=p}return f};
+const delersNL=n=>{const o=[];for(let i=1;i<=n;i++)if(n%i===0)o.push(i);return o};
+const duurNL=m=>{const h=Math.floor(m/60),r=m%60;return h+" uur"+(r?" en "+r+" minuten":"")};
+const RAAD6=[
+{id:"rechthoek",naam:"Rechthoek en diagonaal",vanaf:"2026-12-03",gen(R){
+ const TR=[[3,4,5],[5,12,13],[8,15,17],[7,24,25],[20,21,29]],v=rint(R,0,2),wie=nm(R),obj=rpick(R,["een rechthoekig weiland","een rechthoekig tulpenveld","een rechthoekig speelveld","een rechthoekige tuin"]);
+ for(let g=0;g<3000;g++){const[p,q,r]=rpick(R,TR),k=rint(R,2,14),a=p*k,b=q*k,d=r*k;if(d<20||d>300)continue;
+  const stapTr=`De getallen ${p}, ${q} en ${r} horen bij een bekende rechthoekige driehoek: ${p}² + ${q}² = ${p*p} + ${q*q} = ${r*r} = ${r}².`;
+  if(v===0){const kort=R()<.5,gek=kort?b:a,gev=kort?a:b,pp=kort?q:p,pv=kort?p:q;
+   return{tekst:`${wie} heeft ${obj}. ${kort?"De lange":"De korte"} kant is ${nl(gek)} m en de diagonaal (schuin van hoek naar hoek) is ${nl(d)} m.`,
+    vraag:`${kort?"De korte":"De lange"} kant is ….. meter.`,eenheid:"meter",ans:gev,
+    hints:[`Een kant, de andere kant en de diagonaal vormen samen een rechthoekige driehoek. Welke stelling hoort daarbij?`,`Pythagoras: kant² + kant² = diagonaal². Je kent ${nl(gek)}² en ${nl(d)}².`],
+    uitwerking:[[`Twee kanten en de diagonaal vormen een rechthoekige driehoek, dus kant² + kant² = diagonaal².`,`${nl(gek)}² = ${nl(gek*gek)} en ${nl(d)}² = ${nl(d*d)}.`,`De andere kant² is ${nl(d*d)} − ${nl(gek*gek)} = ${nl(gev*gev)}.`,`Welk getal keer zichzelf is ${nl(gev*gev)}? Dat is ${nl(gev)}.`,`Controle: ${nl(gek)}² + ${nl(gev)}² = ${nl(gek*gek)} + ${nl(gev*gev)} = ${nl(d*d)} = ${nl(d)}².`],
+     [`Zoek een getal waar ${nl(gek)} en ${nl(d)} allebei een veelvoud van zijn: ${nl(gek)} : ${k} = ${pp} en ${nl(d)} : ${k} = ${r}.`,stapTr,`Dan hoort ${pv} bij de ontbrekende kant. Alles is ${k} keer zo groot: ${pv} × ${k} = ${nl(gev)} meter.`]]}}
+  if(v===1){
+   return{tekst:`${wie} wil van de ene hoek van ${obj} naar de hoek aan de overkant. De kanten zijn ${nl(a)} m en ${nl(b)} m. ${HZ()} kan langs de rand lopen, of in een rechte lijn over de diagonaal.`,
+    vraag:`Over de diagonaal is het ….. meter korter dan langs de rand.`,eenheid:"meter",ans:a+b-d,
+    hints:[`Langs de rand loop je ${nl(a)} + ${nl(b)} meter. Hoe lang is de diagonaal? Gebruik de stelling van Pythagoras.`,`De diagonaal d is zo dat d² = ${nl(a)}² + ${nl(b)}² = ${nl(a*a)} + ${nl(b*b)}.`],
+    uitwerking:[[`Langs de rand: ${nl(a)} + ${nl(b)} = ${nl(a+b)} meter.`,`Over de diagonaal geldt Pythagoras: d² = ${nl(a)}² + ${nl(b)}² = ${nl(a*a)} + ${nl(b*b)} = ${nl(d*d)}.`,`Welk getal keer zichzelf is ${nl(d*d)}? Dat is ${nl(d)}.`,`Het scheelt ${nl(a+b)} − ${nl(d)} = ${nl(a+b-d)} meter.`,`Controle: ${nl(d)}² = ${nl(d*d)}, en ${nl(a)}² + ${nl(b)}² = ${nl(d*d)}.`],
+     [`${nl(a)} en ${nl(b)} zijn allebei een veelvoud van ${k}: ${nl(a)} : ${k} = ${p} en ${nl(b)} : ${k} = ${q}.`,stapTr,`De diagonaal is ${k} keer zo lang als ${r}: ${r} × ${k} = ${nl(d)} meter.`,`Langs de rand ${nl(a+b)} meter, over de diagonaal ${nl(d)} meter: ${nl(a+b-d)} meter korter.`]]}}
+  const s=a+b,P=2*s,A=a*b;
+  return{tekst:`De omtrek van ${obj} is ${nl(P)} m. De diagonaal is ${nl(d)} m.`,
+   vraag:`De oppervlakte is ….. m².`,eenheid:"m²",ans:A,
+   hints:[`Noem de kanten a en b. De omtrek geeft a + b, en de diagonaal geeft a² + b². Hoe kom je dan op a × b?`,`Kwadrateer a + b: (a + b)² = a² + 2 × a × b + b².`],
+   uitwerking:[[`De omtrek is 2 × (a + b), dus a + b = ${nl(P)} : 2 = ${nl(s)}.`,`Pythagoras: a² + b² = ${nl(d)}² = ${nl(d*d)}.`,`Kwadrateer a + b: (a + b)² = ${nl(s)}² = ${nl(s*s)}. Dat is a² + 2 × a × b + b², dus ${nl(s*s)} = ${nl(d*d)} + 2 × a × b.`,`2 × a × b = ${nl(s*s)} − ${nl(d*d)} = ${nl(s*s-d*d)}, dus a × b = ${nl(A)}.`,`Controle: de kanten zijn ${nl(a)} en ${nl(b)}: ${nl(a)} + ${nl(b)} = ${nl(s)}, ${nl(a)}² + ${nl(b)}² = ${nl(d*d)} en ${nl(a)} × ${nl(b)} = ${nl(A)}.`],
+    [`De omtrek is 2 × (a + b), dus a + b = ${nl(s)}. De diagonaal geeft a² + b² = ${nl(d)}² = ${nl(d*d)}.`,ts(`Probeer een paar waarden voor a en kijk of a² + b² klopt.`,["a","b","a² + b²",""],(a+k===b?[a-2*k,a-k,a]:[a-k,a,a+k]).map(x=>{const y=s-x,t=x*x+y*y;return[nl(x),nl(y),nl(t),t<d*d?"te klein":t>d*d?"te groot":"klopt"]})),`Bij a = ${nl(a)} en b = ${nl(b)} klopt het. De oppervlakte is ${nl(a)} × ${nl(b)} = ${nl(A)} m².`]]}}}},
+{id:"zakken",naam:"Zakken en medailles",vanaf:"2026-12-31",gen(R){
+ const wie=nm(R),v=rint(R,0,1),KN=["gouden","zilveren","bronzen"],ask=rint(R,0,2);
+ for(let g=0;g<3000;g++){
+  if(v===0){const a=rint(R,3,20),k=rint(R,2,4),e=rint(R,3,12),T=a*(1+2*k)+e;if(T>200)continue;const n=[a,k*a,k*a+e];
+   const rij=x=>[x,k*x,k*x+e],lab=`${a}`;
+   return{tekst:`${wie} heeft ${T} medailles voor een prijsuitreiking: gouden, zilveren en bronzen. Er zijn ${k} keer zoveel zilveren als gouden medailles, en ${e} bronzen meer dan zilveren.`,
+    vraag:`Er zijn ….. ${KN[ask]} medailles.`,eenheid:"medailles",ans:n[ask],
+    hints:[`Neem het aantal gouden medailles als 1 deel. Hoeveel delen zijn de zilveren? En de bronzen?`,`Gouden: 1 deel. Zilveren: ${k} delen. Bronzen: ${k} delen en nog ${e} erbij.`],
+    uitwerking:[[`Neem de gouden medailles als 1 deel. Dan zijn de zilveren ${k} delen, en de bronzen ${k} delen plus ${e}.`,`Samen: 1 + ${k} + ${k} = ${1+2*k} delen, plus ${e} medailles.`,`Zonder die ${e}: ${T} − ${e} = ${T-e} medailles zijn ${1+2*k} delen. Eén deel is ${T-e} : ${1+2*k} = ${a}.`,`Dus ${a} gouden, ${k} × ${a} = ${k*a} zilveren en ${k*a} + ${e} = ${k*a+e} bronzen.`,`Controle: ${a} + ${k*a} + ${k*a+e} = ${T}.`],
+     [ts(`Probeer een paar aantallen gouden medailles.`,["Gouden","Zilveren","Bronzen","Samen",""],[a-1,a,a+1].map(x=>{const r=rij(x),s=r[0]+r[1]+r[2];return[String(r[0]),String(r[1]),String(r[2]),String(s),s<T?"te weinig":s>T?"te veel":"klopt"]})),`Bij ${a} gouden klopt het: ${n[0]} gouden, ${n[1]} zilveren en ${n[2]} bronzen. Gevraagd: ${n[ask]} ${KN[ask]}.`]]}}
+  const hh=rint(R,3,16),a=rint(R,2,8);if(2*hh-a<2)continue;const T=5*hh-a,n=[2*hh-a,2*hh,hh];
+  return{tekst:`${wie} heeft ${T} medailles voor een prijsuitreiking: gouden, zilveren en bronzen. Het aantal bronzen is de helft van het aantal zilveren, en er zijn ${a} gouden minder dan zilveren.`,
+   vraag:`Er zijn ….. ${KN[ask]} medailles.`,eenheid:"medailles",ans:n[ask],
+   hints:[`Neem de bronzen medailles als 1 deel. Hoeveel delen zijn de zilveren? En de gouden?`,`Bronzen: 1 deel. Zilveren: 2 delen. Gouden: 2 delen min ${a}.`],
+   uitwerking:[[`Neem de bronzen medailles als 1 deel. Dan zijn de zilveren 2 delen, en de gouden 2 delen min ${a}.`,`Samen: 1 + 2 + 2 = 5 delen, min ${a} medailles.`,`Dus ${T} + ${a} = ${T+a} medailles zijn 5 delen. Eén deel is ${T+a} : 5 = ${hh}.`,`Dus ${hh} bronzen, 2 × ${hh} = ${2*hh} zilveren en ${2*hh} − ${a} = ${2*hh-a} gouden.`,`Controle: ${hh} + ${2*hh} + ${2*hh-a} = ${T}.`],
+    [ts(`Probeer een paar aantallen zilveren medailles.`,["Zilveren","Bronzen","Gouden","Samen",""],[2*hh-2,2*hh,2*hh+2].map(z=>{const s=z+z/2+z-a;return[String(z),String(z/2),String(z-a),String(s),s<T?"te weinig":s>T?"te veel":"klopt"]})),`Bij ${2*hh} zilveren klopt het: ${n[0]} gouden, ${n[1]} zilveren en ${n[2]} bronzen. Gevraagd: ${n[ask]} ${KN[ask]}.`]]}}}},
+{id:"gelijkezakken",naam:"Gelijke zakken vullen",vanaf:"2027-01-14",gen(R){
+ const wie=nm(R),v=rint(R,0,2);
+ for(let g=0;g<3000;g++){const d=rpick(R,[4,5,6,7,8,9,10,12,15]),a=rint(R,2,9),b=rint(R,2,9),c=rint(R,2,9);if(gcd(gcd(a,b),c)!==1||a===b||b===c||a===c)continue;const G=d*a,S=d*b,B=d*c;if(G+S+B>330)continue;
+  const kl=rint(R,0,2),KN=["gouden","zilveren","bronzen"],cnt=[a,b,c][kl],f=[G,S,B];
+  const stap1=`Het aantal zakken moet in ${G}, ${S} en ${B} passen. Zoek de grootste gemeenschappelijke deler.`;
+  const tail=v===0?`Er kunnen dus ${d} zakken worden gemaakt.`:v===1?`Per zak zitten er ${G} : ${d} = ${a} gouden, ${S} : ${d} = ${b} zilveren en ${B} : ${d} = ${c} bronzen medailles. Samen ${a+b+c}.`:`Per zak zitten er ${f[kl]} : ${d} = ${cnt} ${KN[kl]} medailles.`;
+  const contr=`Controle: ${d} zakken × ${a} gouden = ${G}, × ${b} zilveren = ${S} en × ${c} bronzen = ${B}.`;
+  const fa=factNL(G),fb=factNL(S),fc=factNL(B);const gem=[];const bb=fb.slice(),cc=fc.slice();fa.forEach(x=>{const i=bb.indexOf(x),j=cc.indexOf(x);if(i>=0&&j>=0){gem.push(x);bb.splice(i,1);cc.splice(j,1)}});
+  return{tekst:`${wie} heeft ${G} gouden, ${S} zilveren en ${B} bronzen medailles voor een prijsuitreiking. Alle medailles moeten in zakken, en elke zak moet precies dezelfde inhoud hebben (van elke soort evenveel). Er mag niets overblijven.`,
+   vraag:v===0?`Er kunnen maximaal ….. zakken worden gevuld.`:v===1?`Als er zo veel mogelijk zakken zijn, zitten er in elke zak ….. medailles.`:`Als er zo veel mogelijk zakken zijn, zitten er in elke zak ….. ${KN[kl]} medailles.`,eenheid:v===0?"zakken":"medailles",ans:v===0?d:v===1?a+b+c:cnt,
+   hints:[`Het aantal zakken moet een deler zijn van ${G}, van ${S} en van ${B}. Welke getallen delen alle drie?`,`Zoek de grootste deler die ze alle drie gemeen hebben. Begin bij ${Math.min(G,S,B)}: welke getallen delen dat?`],
+   uitwerking:[[stap1,`Delers van ${G}: ${delersNL(G).join(", ")}.`,`Delers van ${S}: ${delersNL(S).join(", ")}.`,`Delers van ${B}: ${delersNL(B).join(", ")}.`,`De grootste deler die in alle drie het rijtje staat is ${d}.`,tail,contr],
+    [stap1,`Schrijf alles als vermenigvuldiging van priemgetallen: ${G} = ${fa.join(" × ")}, ${S} = ${fb.join(" × ")}, ${B} = ${fc.join(" × ")}.`,`Dit hebben ze alle drie: ${gem.length>1?gem.join(" × ")+" = ":""}${d}. Dat is de grootste gemeenschappelijke deler.`,tail]]}}}},
+{id:"zekerweten",naam:"Zeker weten",vanaf:"2026-12-10",gen(R){
+ const wie=nm(R),v=rint(R,0,2),TH=[["sokken","sok","de"],["knikkers","knikker","de"],["pepermuntjes","pepermuntje","het"]],th=rpick(R,TH),KL=["rode","blauwe","witte","zwarte","gele"],KN=["rood","blauw","wit","zwart","geel"];
+ for(let g=0;g<3000;g++){const k=v===2?3:rint(R,3,4),kl=KL.slice(0,k),c=kl.map(()=>rint(R,1,9)),m=v===0?rint(R,2,3):v===1?rint(R,2,3):1,T=c.reduce((x,y)=>x+y,0);
+  let rows,ans,vraagT,tekstQ,hint1,hint2,verhaal;
+  if(v===0){if(!c.some(x=>x>=m))continue;if(m===3&&c.every(x=>x<=2))continue;
+   rows=c.map(x=>Math.min(x,m-1));ans=rows.reduce((x,y)=>x+y,0)+1;
+   tekstQ=`${wie} pakt blind ${th[0]} uit een zak, zonder te kijken.`;vraagT=`${wie} moet minstens ….. ${th[0]} pakken om zeker ${m} van dezelfde kleur te hebben.`;
+   hint1=`Denk aan het slechtste geval. Hoeveel ${th[0]} kun je pakken zonder dat je ${m} van dezelfde kleur hebt?`;hint2=`Van elke kleur kun je er ${m-1} pakken zonder dat het lukt (of minder als er minder in de zak zitten). Eén ${th[1]} meer en het is zeker gelukt.`;
+   verhaal=[`Denk aan het slechtste geval: je pakt zoveel mogelijk zonder ${m} van dezelfde kleur te hebben.`,...kl.map((kk,i)=>`Van de ${kk} kun je er ${rows[i]} pakken${c[i]<m-1?` (meer zijn er niet)`:``}.`),`Dat zijn er ${rows.join(" + ")} = ${ans-1}. ${th[2][0].toUpperCase()+th[2].slice(1)} volgende ${th[1]} maakt het zeker: ${ans}.`]}
+  else if(v===1){const x=rint(R,0,k-1);if(c[x]<m)continue;rows=c.map((y,i)=>i===x?m-1:y);ans=rows.reduce((a,b)=>a+b,0)+1;
+   tekstQ=`${wie} pakt blind ${th[0]} uit een zak, zonder te kijken.`;vraagT=`${wie} moet minstens ….. ${th[0]} pakken om zeker ${m} ${kl[x]} ${th[0]} te hebben.`;
+   hint1=`Denk aan het slechtste geval. Je pakt eerst alles wat niet ${KN[x]} is. Hoeveel is dat?`;hint2=`Dat zijn ${T-c[x]} ${th[0]}. Daarna pak je nog ${m-1} ${kl[x]}, en dan is ${th[2]} volgende ${th[1]} zeker ${KN[x]}.`;
+   verhaal=[`Denk aan het slechtste geval: je pakt eerst alles wat niet ${KN[x]} is.`,`Dat zijn er ${kl.map((_,i)=>i===x?null:c[i]).filter(y=>y!==null).join(" + ")} = ${T-c[x]}.`,`Daarna pak je ${m-1} ${kl[x]} ${m-1===1?th[1]:th[0]}. Dat is nog steeds niet genoeg.`,`${th[2][0].toUpperCase()+th[2].slice(1)} volgende ${th[1]} is dan zeker ${KN[x]}: ${T-c[x]} + ${m-1} + 1 = ${ans}.`]}
+  else{const mi=c.indexOf(Math.min(...c));rows=c.map((y,i)=>i===mi?0:y);ans=rows.reduce((a,b)=>a+b,0)+1;
+   tekstQ=`${wie} pakt blind ${th[0]} uit een zak, zonder te kijken.`;vraagT=`${wie} moet minstens ….. ${th[0]} pakken om zeker van elke kleur minstens één te hebben.`;
+   hint1=`Denk aan het slechtste geval. Welke kleur komt het minst voor? Je pakt eerst alle andere.`;hint2=`Je pakt eerst alle ${th[0]} van de twee andere kleuren. Daarna is ${th[2]} volgende ${th[1]} zeker van de laatste kleur.`;
+   verhaal=[`Denk aan het slechtste geval: één kleur is er nog niet bij. Dat is het ergst als je de kleur met de minste ${th[0]} (de ${kl[mi]}, ${c[mi]} stuks) als laatste overhoudt.`,`Je pakt alle andere ${th[0]}: ${T} − ${c[mi]} = ${T-c[mi]}.`,`${th[2][0].toUpperCase()+th[2].slice(1)} volgende ${th[1]} is dan zeker ${KN[mi]}: ${T-c[mi]} + 1 = ${ans}.`]}
+  const tab=ts(`Zet het slechtste geval per kleur in een tabel.`,["Kleur","In de zak","Slechtste geval"],kl.map((kk,i)=>[kk,String(c[i]),String(rows[i])]));
+  return{tekst:`In een zak zitten ${c.map((y,i)=>y+" "+kl[i]).join(", ").replace(/, ([^,]*)$/," en $1")} ${th[0]}. ${tekstQ}`,
+   vraag:vraagT,eenheid:th[0],ans,hints:[hint1,hint2],
+   uitwerking:[[...verhaal,`Controle: met ${ans-1} ${th[0]} kan het nog misgaan (het slechtste geval), met ${ans} niet.`],
+    [tab,`Samen is dat ${rows.join(" + ")} = ${ans-1} ${th[0]} zonder dat het zeker is gelukt.`,`Nog één ${th[1]} erbij: ${ans}.`]]}}}},
+{id:"kans",naam:"Kans",vanaf:"2027-01-07",gen(R){
+ const wie=nm(R),v=rint(R,0,2);
+ for(let g=0;g<4000;g++){const r=rint(R,2,9),b=rint(R,2,9),n=r+b;if(n<6||n>14)continue;let num,den,pc;
+  if(v===0){num=r*(r-1)+b*(b-1);den=n*(n-1)}else if(v===1){num=n*n-b*b;den=n*n}else{num=n*(n-1)-b*(b-1);den=n*(n-1)}
+  if((100*num)%den)continue;pc=100*num/den;if(pc<10||pc>95)continue;
+  const tekst0=`In een zak zitten ${r} rode en ${b} blauwe knikkers. ${wie} pakt er blind twee uit${v===1?": eerst één, die "+hz()+" meteen terugstopt in de zak, en dan nog één":", zonder de eerste terug te leggen"}.`;
+  const vraag=v===0?`De kans dat ${wie} twee knikkers van dezelfde kleur pakt, is ….. %.`:`De kans dat ${wie} minstens één rode knikker pakt, is ….. %.`;
+  let uw;
+  if(v===0)uw=[[`Eerst de kans per kleur. Bij de eerste knikker zijn er ${n}, bij de tweede nog ${n-1}.`,`Twee rode: ${r}/${n} × ${r-1}/${n-1} = ${r*(r-1)}/${n*(n-1)}.`,`Twee blauwe: ${b}/${n} × ${b-1}/${n-1} = ${b*(b-1)}/${n*(n-1)}.`,`Samen: ${r*(r-1)}/${n*(n-1)} + ${b*(b-1)}/${n*(n-1)} = ${num}/${den} = ${nl(pc)}%.`,`Controle: ${nl(pc)}% van ${den} is ${num}.`],
+   [`Tel de paren. Er zijn ${n} × ${n-1} : 2 = ${n*(n-1)/2} verschillende paren knikkers.`,`Paren rood-rood: ${r} × ${r-1} : 2 = ${r*(r-1)/2}. Paren blauw-blauw: ${b} × ${b-1} : 2 = ${b*(b-1)/2}.`,`Gunstig: ${r*(r-1)/2} + ${b*(b-1)/2} = ${num/2} van de ${den/2} paren.`,`Kans: ${num/2} : ${den/2} = ${nl(pc)}%.`]];
+  else if(v===1)uw=[[`Soms is het makkelijker om het tegenovergestelde te nemen: geen enkele rode, dus twee blauwe.`,`Kans op blauw bij één keer pakken: ${b}/${n}. Omdat de knikker terugging, is dat de tweede keer weer ${b}/${n}.`,`Twee blauwe: ${b}/${n} × ${b}/${n} = ${b*b}/${n*n}.`,`Minstens één rode: 1 − ${b*b}/${n*n} = ${n*n-b*b}/${n*n} = ${nl(pc)}%.`,`Controle: ${nl(pc)}% van ${n*n} is ${n*n-b*b}.`],
+   [{t:`Zet alle mogelijkheden in een rooster van ${n} bij ${n}: elke rij is een eerste knikker, elke kolom een tweede. Dat zijn ${n} × ${n} = ${n*n} vakjes.`,svg:svgRooster({n,b})},`Zonder rode: ${b} × ${b} = ${b*b} vakjes (de blauwe hoek).`,`Met minstens één rode: ${n*n} − ${b*b} = ${n*n-b*b} vakjes.`,`Kans: ${n*n-b*b} : ${n*n} = ${nl(pc)}%.`]];
+  else uw=[[`Ook hier is het tegenovergestelde makkelijker: geen enkele rode, dus twee blauwe.`,`Eerste knikker blauw: ${b}/${n}. Dan zijn er nog ${n-1} knikkers en ${b-1} blauwe: ${b-1}/${n-1}.`,`Twee blauwe: ${b}/${n} × ${b-1}/${n-1} = ${b*(b-1)}/${n*(n-1)}.`,`Minstens één rode: 1 − ${b*(b-1)}/${n*(n-1)} = ${num}/${den} = ${nl(pc)}%.`,`Controle: ${nl(pc)}% van ${den} is ${num}.`],
+   [`Tel de paren. Er zijn ${n} × ${n-1} : 2 = ${n*(n-1)/2} verschillende paren.`,`Paren zonder rode: ${b} × ${b-1} : 2 = ${b*(b-1)/2}.`,`Paren met minstens één rode: ${n*(n-1)/2} − ${b*(b-1)/2} = ${num/2}.`,`Kans: ${num/2} : ${n*(n-1)/2} = ${nl(pc)}%.`]];
+  return{tekst:tekst0,vraag,eenheid:"%",ans:pc,
+   hints:[v===0?`Bij twee dezelfde kleuren zijn er twee mogelijkheden: twee rode of twee blauwe. Reken ze apart uit. Pas op: bij de tweede knikker is er één minder in de zak.`:`Het is vaak makkelijker om te rekenen met het tegenovergestelde: de kans dat er geen enkele rode bij zit.`,v===0?`Kans op twee rode: ${r}/${n} × ${r-1}/${n-1}. Reken ook twee blauwe uit.`:v===1?`Kans op blauw bij één keer pakken: ${b}/${n}. Omdat de knikker terugging, is het de tweede keer weer ${b}/${n}.`:`Kans op blauw bij de eerste knikker: ${b}/${n}. Bij de tweede zijn er nog ${n-1} knikkers over, dus ${b-1}/${n-1}.`],
+   uitwerking:uw}}}},
+{id:"dagen",naam:"Dagen en weekdagen",vanaf:"2026-12-17",gen(R){
+ const wie=nm(R),v=rint(R,0,2),y=rint(R,2027,2029);
+ for(let g=0;g<3000;g++){const m=rint(R,1,12);
+  if(v===0){const d1=rint(R,1,28),len=rint(R,24,50),t0=Date.UTC(y,m-1,d1),t1=new Date(t0+(len-1)*864e5),m2=t1.getUTCMonth()+1,d2=t1.getUTCDate(),y2=t1.getUTCFullYear();let ans=0,wk=0;const dagenL=[];for(let i=0;i<len;i++){const dd=new Date(t0+i*864e5),wd=(dd.getUTCDay()+6)%7;dagenL.push(wd);if(wd<5)ans++;else wk++}
+   if(len%7===0)continue;const s0=dagVan(y,m,d1);if(s0>4||(t1.getUTCDay()+6)%7>4)continue;const _s0=s0,w=Math.floor(len/7),rest=len%7;const restD=dagenL.slice(w*7);const restW=restD.filter(x=>x<5).length;
+   const rijen=[];for(let i=0;i<len;i+=7){const dg=dagenL.slice(i,i+7);const a=new Date(t0+i*864e5),z=new Date(t0+(i+dg.length-1)*864e5);rijen.push([`${a.getUTCDate()} ${MND[a.getUTCMonth()]} t/m ${z.getUTCDate()} ${MND[z.getUTCMonth()]}`,String(dg.filter(x=>x<5).length)])}
+   if(rijen.length>9)continue;
+   return{tekst:`${wie} volgt een cursus van ${DAGEN[s0]} ${d1} ${MND[m-1]} ${y} t/m ${datNL(y2,m2,d2)} ${y2}. Er is elke werkdag (maandag t/m vrijdag) les. In het weekend is er geen les.`,
+    vraag:`De cursus heeft ….. lesdagen.`,eenheid:"lesdagen",ans,
+    hints:[`Tel eerst hoeveel dagen de cursus duurt, van de eerste dag tot en met de laatste. Hoeveel hele weken is dat?`,`Het zijn ${len} dagen: ${w} weken en ${rest} dagen. In elke week zijn 5 lesdagen.`],
+    uitwerking:[[`De cursus duurt ${len} dagen (de eerste en de laatste dag tellen allebei mee).`,`${len} = ${w} × 7 + ${rest}: ${w} hele weken en ${rest} dagen extra.`,`Elke hele week heeft 5 lesdagen: ${w} × 5 = ${w*5}.`,`De ${rest} extra dagen zijn ${restD.map(x=>DAGEN[x]).join(", ")}: daarvan zijn er ${restW} werkdagen.`,`In totaal ${w*5} + ${restW} = ${ans} lesdagen.`,`Controle: ${len} dagen min ${wk} weekenddagen = ${ans}.`],
+     [ts(`Neem de cursus week voor week.`,["Periode","Lesdagen"],rijen),`Samen: ${rijen.map(r=>r[1]).join(" + ")} = ${ans} lesdagen.`]]}}
+  if(v===1){const N=rint(R,12,29),W=[];for(let d=1;d<=dagenIn(y,m)-3;d++)if(dagVan(y,m,d)===0)W.push(d);if(!W.length)continue;const d1=rpick(R,W),w=Math.floor((N-1)/5),e=(N-1)%5;
+   const t0=Date.UTC(y,m-1,d1),end=new Date(t0+(7*w+e)*864e5),mid=new Date(t0+7*w*864e5),dE=end.getUTCDate(),mE=end.getUTCMonth()+1;if(e===0)continue;
+   const rijen=[];for(let i=0;i<=w;i++){const a=new Date(t0+i*7*864e5),z=new Date(t0+(i*7+(i<w?4:e))*864e5);rijen.push([`${a.getUTCDate()} ${MND[a.getUTCMonth()]} t/m ${z.getUTCDate()} ${MND[z.getUTCMonth()]}`,`les ${i*5+1} t/m ${i<w?i*5+5:N}`])}
+   return{tekst:`${wie} begint op maandag ${d1} ${MND[m-1]} ${y} aan een cursus met ${N} lessen. Er is elke werkdag (maandag t/m vrijdag) één les, en in het weekend is er geen les. Er zijn geen vrije dagen.`,
+    vraag:`De laatste les is op ….. ${MND[mE-1]}.`,eenheid:"",ans:dE,
+    hints:[`Elke week heeft 5 lessen, van maandag t/m vrijdag. Na 5 lessen ben je weer op een maandag. Hoeveel hele weken zijn ${N} lessen?`,`Les 1 is op een maandag. ${N-1} lessen verder: ${N-1} = ${w} × 5 + ${e}. Dat zijn ${w} weken en ${e} ${e===1?"dag":"dagen"}.`],
+    uitwerking:[[`Les 1 is op maandag ${d1} ${MND[m-1]}. Na elke 5 lessen begint een nieuwe week, dus elke week schuift het 7 dagen op.`,`${N} − 1 = ${N-1} lessen na de eerste: ${N-1} = ${w} × 5 + ${e}. Dat is ${w} weken en ${e} ${e===1?"dag":"dagen"}.`,`${w} weken verder is ${w} × 7 = ${7*w} dagen: maandag ${datNL(mid.getUTCFullYear(),mid.getUTCMonth()+1,mid.getUTCDate())}.`,`Nog ${e} ${e===1?"dag":"dagen"} verder: ${DAGEN[e]} ${datNL(end.getUTCFullYear(),mE,dE)}.`,`Controle: ${DAGEN[e]} is de ${e+1}e dag van de week, en ${w} × 5 + ${e+1} = ${N}.`],
+     [ts(`Neem de lessen week voor week.`,["Periode","Lessen"],rijen),`De laatste les, les ${N}, is op ${DAGEN[e]} ${datNL(end.getUTCFullYear(),mE,dE)}.`]]}}
+  const s0=dagVan(y,m,1),dag=rint(R,0,6),dl=dagenIn(y,m),first=1+((dag-s0+7)%7),L=[];for(let d=first;d<=dl;d+=7)L.push(d);const som=L.reduce((a,b)=>a+b,0);
+  return{tekst:`De 1e ${MND[m-1]} ${y} is een ${DAGEN[s0]}. ${MND[m-1][0].toUpperCase()+MND[m-1].slice(1)} heeft ${dl} dagen. ${wie} telt de datums van alle ${DAGEN[dag]}en in die maand bij elkaar op.`,
+   vraag:`De som van die datums is …..`,eenheid:"",ans:som,
+   hints:[`Zoek eerst de eerste ${DAGEN[dag]} van de maand. Daarna komt er elke 7 dagen weer een.`,`De eerste ${DAGEN[dag]} is op de ${first}e. Dan de ${first+7}e, enzovoort, tot de maand voorbij is.`],
+   uitwerking:[[`De 1e is een ${DAGEN[s0]}, dus de eerste ${DAGEN[dag]} is op de ${first}e.`,`Daarna steeds 7 dagen verder: ${L.join(", ")}.`,`Een volgende zou op de ${L[L.length-1]+7}e zijn, maar de maand heeft maar ${dl} dagen.`,`Optellen: ${L.join(" + ")} = ${som}.`,`Controle: ${L.length} datums, gemiddeld ${nl(som/L.length)}. ${L.length} × ${nl(som/L.length)} = ${som}.`],
+    [`De eerste ${DAGEN[dag]} is op de ${first}e en de laatste op de ${L[L.length-1]}e. Er zijn ${L.length} ${DAGEN[dag]}en: ${first}, ${first+7}, … ${L[L.length-1]}.`,`De datums liggen netjes verspreid, dus het gemiddelde is het midden tussen de eerste en de laatste: (${first} + ${L[L.length-1]}) : 2 = ${nl((first+L[L.length-1])/2)}.`,`Som = aantal × gemiddelde = ${L.length} × ${nl((first+L[L.length-1])/2)} = ${som}.`]]}}}},
+{id:"vlucht",naam:"Vlucht met tijdsverschil",vanaf:"2026-12-24",gen(R){
+ const BM=[["New York",-6,[495,505,510,525]],["Los Angeles",-9,[650,660,670]],["Dubai",3,[385,395,400]],["Tokyo",8,[745,760,775]],["Singapore",7,[770,780,790]],["Bangkok",6,[690,700,710]],["Kaapstad",1,[700,705,710]],["Istanbul",2,[200,205,210]]],v=rint(R,0,2),wie=nm(R);
+ const hm=m=>tijd(((m%1440)+1440)%1440);
+ for(let g=0;g<3000;g++){const[pl,x,ds]=rpick(R,BM),dur=rpick(R,ds),dep=rint(R,6*12,22*12)*5,voor=x>0;const ax=Math.abs(x),richt=voor?"later":"vroeger";
+  const wh=`Amsterdam en ${pl} hebben in december ${ax} uur ${voor?"verschil, het is in "+pl+" later":"verschil, het is in "+pl+" vroeger"}.`;
+  if(v===0){const arrNL=dep+dur,arrL=arrNL+x*60;
+   return{tekst:`${wie} vliegt in december van Amsterdam naar ${pl}. Het vliegtuig vertrekt om ${hm(dep)} (Nederlandse tijd) en de vlucht duurt ${duurNL(dur)}. ${wh}`,
+    vraag:`Bij aankomst is het in ${pl} ….. (uu:mm).`,soort:"tijd",ans:hm(arrL),
+    hints:[`Reken in twee stappen: eerst de aankomsttijd uitrekenen zoals de klok in Amsterdam zou staan, dan het tijdsverschil verwerken.`,`In ${pl} is het ${ax} uur ${richt} dan in Amsterdam. ${hm(dep)} + ${duurNL(dur)} is de aankomst in Nederlandse tijd.`],
+    uitwerking:[[`Vertrek ${hm(dep)} + ${duurNL(dur)} = ${hm(arrNL)} Nederlandse tijd.`,`In ${pl} is het ${ax} uur ${richt}: ${hm(arrNL)} ${voor?"+":"−"} ${ax} uur = ${hm(arrL)}.`,`Controle: de vlucht duurt ${duurNL(dur)}, en ${hm(arrL)} ${voor?"−":"+"} ${ax} uur − ${duurNL(dur)} = ${hm(dep)}.`],
+     [`Reken het vertrek om naar de tijd in ${pl}: ${hm(dep)} ${voor?"+":"−"} ${ax} uur = ${hm(dep+x*60)}.`,`Tel de vluchtduur erbij: ${hm(dep+x*60)} + ${duurNL(dur)} = ${hm(arrL)}.`,`Zo is het bij aankomst ${hm(arrL)} in ${pl}.`]]}}
+  if(v===1){const arrNL=dep+dur,arrL=arrNL+x*60;
+   return{tekst:`${wie} vliegt in december van Amsterdam naar ${pl}. Het vliegtuig vertrekt om ${hm(dep)} (Nederlandse tijd) en landt om ${hm(arrL)} (tijd in ${pl}). De vlucht duurt korter dan 24 uur, en de aankomst is op dezelfde dag of de dag erna. ${wh}`,
+    vraag:`De vlucht duurt ….. (uu:mm).`,soort:"tijd",ans:hm(dur),
+    hints:[`Reken de aankomsttijd om naar Nederlandse tijd, of het vertrek naar de tijd in ${pl}, zodat beide tijden op dezelfde klok staan.`,`In ${pl} is het ${ax} uur ${richt} dan in Amsterdam. Zet de tijden op dezelfde klok en kijk hoeveel tijd ertussen zit.`],
+    uitwerking:[[`Zet de aankomst om naar Nederlandse tijd: ${hm(arrL)} ${voor?"−":"+"} ${ax} uur = ${hm(arrNL)}.`,`Van ${hm(dep)} tot ${hm(arrNL)}${arrNL%1440<dep%1440?" (de volgende dag, dus tel er 24 uur bij)":""} duurt ${duurNL(dur)}.`,`Controle: ${hm(dep)} + ${duurNL(dur)} = ${hm(arrNL)}.`],
+     [`Zet het vertrek om naar de tijd in ${pl}: ${hm(dep)} ${voor?"+":"−"} ${ax} uur = ${hm(dep+x*60)}.`,`Van ${hm(dep+x*60)} tot ${hm(arrL)}${(((arrL%1440)+1440)%1440)<(((dep+x*60)%1440+1440)%1440)?" (de volgende dag, dus tel er 24 uur bij)":""}: ${duurNL(dur)}.`]]}}
+  /* v===2: tijdsverschil uit heen- en terugvlucht */
+  const t2=rint(R,7*12,21*12)*5,A=dur+x*60,B=dur-x*60;if(A<=0||B<=0||A>=1440||B>=1440||ax<2)continue;const a1=dep+A,a2=t2+B;
+  return{tekst:`${wie} vliegt in december van Amsterdam naar ${pl} en weer terug. De heenvlucht vertrekt om ${hm(dep)} (Nederlandse tijd) en landt om ${hm(a1)} (tijd in ${pl}). De terugvlucht vertrekt om ${hm(t2)} (tijd in ${pl}) en landt om ${hm(a2)} (Nederlandse tijd). De vlucht duurt heen en terug even lang.`,
+   vraag:`Het tijdsverschil tussen Amsterdam en ${pl} is ….. uur.`,eenheid:"uur",ans:ax,
+   hints:[`Kijk heen en terug naar het verschil tussen de klokken bij vertrek en aankomst. Wat zit daar allemaal in?`,`Heen lijkt de vlucht ${duurNL(A)} te duren en terug ${duurNL(B)}. In één richting zit het tijdsverschil er bij, in de andere richting gaat het eraf.`],
+   uitwerking:[[`Op de klok duurt de heenvlucht ${duurNL(A)} (van ${hm(dep)} tot ${hm(a1)}). De terugvlucht duurt ${duurNL(B)} (van ${hm(t2)} tot ${hm(a2)}).`,`Het ene verschil bevat de echte vluchtduur plus het tijdsverschil, het andere de vluchtduur min het tijdsverschil.`,`Het verschil tussen die twee is ${duurNL(Math.abs(A-B))}. Dat is twee keer het tijdsverschil.`,`Het tijdsverschil is ${duurNL(Math.abs(A-B))} : 2 = ${ax} uur.`,`Controle: de echte vluchtduur is (${duurNL(A)} + ${duurNL(B)}) : 2 = ${duurNL(dur)}, en ${duurNL(dur)} ${voor?"+":"−"} ${ax} uur = ${duurNL(A)}.`],
+    [`Heenvlucht op de klok: ${duurNL(A)}. Terugvlucht op de klok: ${duurNL(B)}.`,`Samen is dat precies twee keer de echte vluchtduur, want het tijdsverschil valt er dan uit. De echte vluchtduur is (${duurNL(A)} + ${duurNL(B)}) : 2 = ${duurNL(dur)}.`,`De heenvlucht lijkt ${duurNL(Math.abs(A-dur))} ${A>dur?"langer":"korter"} dan hij is. Dat is het tijdsverschil: ${ax} uur.`]]}}}}
+];
+function svgRooster({n,b,w=360,h=190}){
+ const my=24,mx=26,sz=Math.min((w-mx-14)/n,(h-my-14)/n),x0=(w-sz*n+mx-14)/2;let s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Rooster met alle mogelijke uitkomsten van twee keer pakken">`;
+ for(let i=0;i<n;i++)for(let j=0;j<n;j++){const blauw=i>=n-b&&j>=n-b;s+=`<rect x="${(x0+j*sz).toFixed(1)}" y="${(my+i*sz).toFixed(1)}" width="${(sz-1.5).toFixed(1)}" height="${(sz-1.5).toFixed(1)}" style="fill:${blauw?"var(--blauw)":"var(--rood,#c0392b)"};fill-opacity:${blauw?.45:.28};stroke:currentColor;stroke-opacity:.4"/>`}
+ s+=svgT(w/2,13,"Elk vakje is één mogelijkheid. De blauwe hoek: beide knikkers blauw.",{fs:9.5,fw:600,op:.85});return s+`</svg>`}
+RAAD.push(...RAAD6);
 const $=s=>document.querySelector(s);
 /* Gewone UI-knoppen reageren bij Apple Pencil direct op pointerevents.
    Rekenmachine en kladcanvas hebben hun eigen Pencil-logica en vallen hier buiten. */
@@ -1255,7 +1410,9 @@ const FAM={treinen:"beweging",inhalen:"beweging",tegenliggers:"beweging",hond:"b
  /* nieuw (R2): doen mee als raadsel van de dag vanaf hun datum "vanaf" */
  gemiddeld:"getallen",schaal:"ruimte",
  /* nieuw (R2, ronde 2) */
- hectare:"ruimte",kortingen:"geld",tweegetallen:"getallen"};
+ hectare:"ruimte",kortingen:"geld",tweegetallen:"getallen",
+ /* nieuw (R2, ronde 3) */
+ rechthoek:"ruimte",zakken:"getallen",gelijkezakken:"getallen",zekerweten:"logica",kans:"kans",dagen:"tijd",vlucht:"tijd"};
 const DAGPOOL=RAAD.filter(t=>FAM[t.id]);
 const dstr2=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 function dagReeks(tot){const out=[];const d=new Date(2026,9,1);for(;;){const ds=dstr2(d),R=RR(hashS("dagsoort|"+ds)),last=out.slice(-10).map(x=>x.t.id),fam=out.length?FAM[out[out.length-1].t.id]:"";
