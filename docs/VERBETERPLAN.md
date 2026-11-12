@@ -170,9 +170,9 @@ Status: *open* · *bezig* · *in review* · *klaar* · *geschrapt (reden)*
 | Q1 | Privacyverklaring | tekst | – | open | |
 | Q2 | Online-status uit te zetten | zichtbaar | D4 | gebouwd, live in v257, praktijkcontrole open (per apparaat bewaard) | #68 |
 | Q3 | Namen en merken op een rij | besluit | – | open | |
-| R1 | Rekenraadsels: kilometerteller gevarieerder (nu bijna altijd 100 km; vaker een 9 in het midden of zes cijfers) | rekenraadsels | – (na de livegang, los van Bezemwagen: alleen `raadsels.html`) | open | |
-| R2 | Rekenraadsels: meer variatie in soorten sommen (Peters bronlijsten opnieuw aanleveren in `docs/rekenraadsels-bron/`) | rekenraadsels | R1 | open | |
-| R3 | Rekenraadsels: uitwerking op 1–3 manieren (proberen · formule · slim redeneren), eerst proef met 10 sommen | rekenraadsels | R1 | open | |
+| R1 | Rekenraadsels: kilometerteller gevarieerder (nu bijna altijd 100 km; vaker een 9 in het midden of zes cijfers) | rekenraadsels | – (na de livegang, los van Bezemwagen: alleen `raadsels.html`) | gebouwd, wacht op Peters merge en test op iPad/iPhone | |
+| R2 | Rekenraadsels: meer variatie in soorten sommen (bronlijsten staan in Peters bezit; eigen overzicht in `docs/rekenraadsels-bron/`) | rekenraadsels | R1 | gebouwd: alle elf gekozen soorten (Gemiddelde verandert, Op schaal, Hectare en are, Kortingen na elkaar, Twee geheimzinnige getallen, Rechthoek en diagonaal, Zakken en medailles, Zeker weten, Kans, Dagen en weekdagen, Vlucht met tijdsverschil), elk met meerdere manieren van uitleg; Dacia op LPG kreeg wegenbelasting | |
+| R3 | Rekenraadsels: uitwerking op 1–3 manieren (proberen · formule · slim redeneren), eerst proef met 10 sommen | rekenraadsels | R1 | proef met 10 sommen + 2 nieuwe soorten gebouwd (12 van 91 sjablonen); de rest volgt in delen | |
 | E1 | Eindcontrole en twee weken spelen | proces | alles | open | |
 
 **Gevonden tijdens het werk** (nieuwe punten hier toevoegen, met datum en wie):
