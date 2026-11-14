@@ -1435,8 +1435,11 @@ function board(rows){try{localStorage.setItem("pdrows",JSON.stringify(lastRows))
  updTabs();renderStats()}
 let unsub=null,listenDate="";
 /* "Bezig": als iemand een dagpuzzel heeft aangeraakt, ziet de ander dat (alleen de soort, geen zetten). */
+/* S34 (reads): elk schrijven van een aanwezigheidsdocument kost een read bij elk ander apparaat van de groep (k apparaten => ~k² reads per hartslag). Daarom hartslag per 60 s i.p.v. 30 s,
+   en een apparaat dat 5 min niet is aangeraakt (iPad die open blijft liggen) meldt zich af en schrijft niet meer tot er weer gebruikt wordt. "Online" geldt tot 150 s na de laatste hartslag. */
+const ONLINE_BEAT_MS=60000,ONLINE_STALE_MS=150000,ONLINE_IDLE_MS=300000;let lastActive=Date.now();
 let STAT=[],unsubS=null,lastPing={k:"",t:0},lastOnline=0;
-function liveOf(u){const g=($("#group").value||"").trim().toLowerCase(),st=STAT.find(x=>x.uid===u&&(x.group||"").toLowerCase()===g);if(!st||!st.onlineAt||Date.now()-st.onlineAt>=75000)return null;
+function liveOf(u){const g=($("#group").value||"").trim().toLowerCase(),st=STAT.find(x=>x.uid===u&&(x.group||"").toLowerCase()===g);if(!st||!st.onlineAt||Date.now()-st.onlineAt>=ONLINE_STALE_MS)return null;
  /* Een afgeronde dagpuzzel wint alleen van een eventueel nog geldige laatste puzzel-ping. Home-presence blijft zichtbaar. */
  if(st.onlineView!=="home"&&!st.onlinePractice&&st.onlineType&&lastRows.some(r=>{if(r.uid!==u||r.date!==dstr()||(r.group||"").toLowerCase()!==g||!(r.secs>0)||String(r.type).startsWith("v~"))return false;return st.onlineLvl?r.type===st.onlineType+sfx(st.onlineLvl):String(r.type).split(".")[0]===st.onlineType}))return null;
  return st}
@@ -1468,14 +1471,15 @@ function togglePeerLivePop(el=$("#peerLive")){
 }
 /* Q2: wie "Laat zien wanneer ik online ben" uitzet (Profiel), stuurt geen online- of bezig-status. Per apparaat bewaard: de Firestore-regels laten geen extra voorkeur in het profiel toe. */
 const showOnlineOn=()=>lsGet("pdshowonline")!=="0";
-function pingOnline(force){try{if(ADMIN_READONLY||!showOnlineOn())return;if(!window.PD_DB||!window.PD_DB.setStatus||!uid||uid==="x"||document.hidden)return;const home=document.body.classList.contains("home");if(!home&&(!S.p||S.done))return;const now=Date.now();if(!force&&now-lastOnline<30000)return;lastOnline=now;const p={uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",onlineAt:now,onlineView:home?"home":"puzzle"};if(!home)Object.assign(p,{onlineType:S.type,onlinePractice:!!S.practice,onlineLvl:S.lvl||0,onlineNono:S.type==="nono"?S.nv:""});else Object.assign(p,{onlineType:"",onlinePractice:false,onlineLvl:0,onlineNono:""});window.PD_DB.setStatus(p).catch(()=>{})}catch(e){}}
+["pointerdown","keydown","touchstart","wheel"].forEach(ev=>addEventListener(ev,()=>{const was=Date.now()-lastActive>ONLINE_IDLE_MS;lastActive=Date.now();if(was)setTimeout(()=>pingOnline(true),0)},{passive:true,capture:true}));
+function pingOnline(force){try{if(ADMIN_READONLY||!showOnlineOn())return;if(!window.PD_DB||!window.PD_DB.setStatus||!uid||uid==="x"||document.hidden)return;const home=document.body.classList.contains("home");if(!home&&(!S.p||S.done))return;const now=Date.now();if(!force&&now-lastOnline<ONLINE_BEAT_MS)return;if(!force&&now-lastActive>ONLINE_IDLE_MS){if(lastOnline)clearOnline();return}lastOnline=now;const p={uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",onlineAt:now,onlineView:home?"home":"puzzle"};if(!home)Object.assign(p,{onlineType:S.type,onlinePractice:!!S.practice,onlineLvl:S.lvl||0,onlineNono:S.type==="nono"?S.nv:""});else Object.assign(p,{onlineType:"",onlinePractice:false,onlineLvl:0,onlineNono:""});window.PD_DB.setStatus(p).catch(()=>{})}catch(e){}}
 function clearOnline(solved){try{if(ADMIN_READONLY)return;lastOnline=0;const p={uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",onlineAt:0};if(solved){lastPing={k:"",t:0};p.date="";p.type="";p.at=0}if(window.PD_DB&&window.PD_DB.setStatus&&uid&&uid!=="x")window.PD_DB.setStatus(p).catch(()=>{})}catch(e){}}
 function pingBusy(){if(ADMIN_READONLY||!showOnlineOn())return;pingOnline();try{if(!window.PD_DB||!window.PD_DB.setStatus||!S.p||S.practice||S.done||S.date!==dstr())return;const k=S.date+S.type+S.sf,now=Date.now();if(lastPing.k===k&&now-lastPing.t<90000)return;lastPing={k,t:now};
  window.PD_DB.setStatus({uid,group:$("#group").value.trim(),name:$("#name").value.trim()||"Speler",date:S.date,type:S.type+S.sf,at:now}).catch(()=>{})}catch(e){}}
 function busyOf(u,date,ty){const g=($("#group").value||"").trim().toLowerCase(),st=STAT.find(x=>x.uid===u&&(x.group||"").toLowerCase()===g);if(!st||st.date!==date||st.type!==ty)return 0;return Date.now()-st.at<10*60000?2:1}
 function startStatus(){if(!window.PD_DB||!window.PD_PROFILE_LINKED||!window.PD_DB.listenStatus)return;if(unsubS)unsubS();try{unsubS=window.PD_DB.listenStatus($("#group").value.trim(),r=>{STAT=r;try{updatePeerLive();board(lastRows);if(document.body.classList.contains("home")&&typeof renderHome==="function"&&HVIEW==="")renderHome()}catch(e){}},()=>{clearTimeout(startStatus.t);startStatus.t=setTimeout(startStatus,30000)})}catch(e){}}
 setInterval(()=>{try{updatePeerLive()}catch(e){}},15000);
-setInterval(()=>pingOnline(false),30000);
+setInterval(()=>pingOnline(false),ONLINE_BEAT_MS);
 document.addEventListener("visibilitychange",()=>{if(document.hidden)clearOnline();else setTimeout(()=>pingOnline(true),300)});
 addEventListener("pagehide",clearOnline);
 /* S28: elke profielmelding (lidmaatschap, leden, groep) startte het scorebord opnieuw op en las de hele geschiedenis opnieuw (7x per koude start gemeten). Alleen opnieuw opstarten als speler/groep/lidmaatschapsdatum of de dag verandert, of als er expliciet om gevraagd wordt (startBoard(true)). */
@@ -1522,7 +1526,7 @@ if(window.PD_DB)startBoard();
 let pollN=0;
 function pollNu(){if(ADMIN_READONLY||!window.PD_DB||!window.PD_PROFILE_LINKED||!window.PD_DB.pollRecent||document.hidden)return;const newest=lastRows.reduce((m,r)=>Math.max(m,Number(r.completedAt)||0),0),sinceMs=newest?newest-10*60000:0;window.PD_DB.pollRecent(addDays(dstr(),-1),$("#group").value.trim(),sinceMs,pollN++%4===0).then(o=>{
  const n0=lastRows.length,j0=JSON.stringify(STAT);lastRows=mergeRows(lastRows,o.rows);if(o.stat)STAT=o.stat;if(lastRows.length!==n0||JSON.stringify(STAT)!==j0){pullMine(lastRows);board(lastRows)}}).catch(()=>{})}
-setInterval(pollNu,45000);addEventListener("pdready",()=>setTimeout(pollNu,3000));
+setInterval(pollNu,90000);addEventListener("pdready",()=>setTimeout(pollNu,3000));
 /* Terug in de app (bijv. na de iPad op slot): verbindingen opnieuw opzetten, zodat "bezig" en scores direct kloppen. */
 let lastVis=Date.now();document.addEventListener("visibilitychange",()=>{if(document.hidden||!window.PD_DB)return;setTimeout(pollNu,800);/* Volledig opnieuw verbinden leest de hele geschiedenis opnieuw (telt als reads); de listeners herstellen zich zelf. Alleen bij een nieuwe dag of na lang wegzijn. */if(listenDate!==dstr()||Date.now()-lastVis>30*60000){lastVis=Date.now();startBoard(true)}});addEventListener("pageshow",e=>{if(e.persisted&&window.PD_DB)startBoard(true)});
 
